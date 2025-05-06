@@ -1,0 +1,1 @@
+import './sendToIoTHub.tests.ts';
