@@ -32,7 +32,7 @@ export const EaCReferenceSchemaDetailsSchema: z.ZodType<EaCReferenceSchemaDetail
     ),
   }).describe(
     'Schema for Reference-type schema used for contextual enrichment.',
-  );
+  ) as unknown as z.ZodType<EaCReferenceSchemaDetails>;
 
 export function isEaCReferenceSchemaDetails(
   details: unknown,

@@ -19,7 +19,7 @@ export type EaCSchemaDetails<TType extends string | undefined = string> = {
 /**
  * Schema for validating a base EaCSchemaDetails object.
  */
-export const EaCSchemaDetailsSchema: z.ZodObject<
+export type EaCSchemaDetailsSchema = z.ZodObject<
   z.objectUtil.extendShape<
     {
       Description: z.ZodOptional<z.ZodString>;
@@ -35,11 +35,18 @@ export const EaCSchemaDetailsSchema: z.ZodObject<
   z.ZodTypeAny,
   EaCSchemaDetails,
   EaCSchemaDetails
-> = EaCVertexDetailsSchema.extend({
+>;
+
+export const EaCSchemaDetailsSchema: EaCSchemaDetailsSchema = EaCVertexDetailsSchema.extend({
   Type: z.string().describe('Type identifier for the schema.'),
-  Version: z.string().optional().describe('Version tag for schema evolution.'),
+  Version: z
+    .string()
+    .optional()
+    .describe('Version tag for schema evolution.'),
   Schema: z.record(z.unknown()).describe('The JSON schema definition.'),
-}).describe('Schema for a typed schema definition in EaC.');
+}).describe(
+  'Schema for a typed schema definition in EaC.',
+) as unknown as EaCSchemaDetailsSchema;
 
 /**
  * Type guard for EaCSchemaDetails.

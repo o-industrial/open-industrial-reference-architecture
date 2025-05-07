@@ -34,7 +34,9 @@ export const EaCRootSchemaDetailsSchema: z.ZodType<EaCRootSchemaDetails> = EaCSc
       .catchall(z.unknown())
       .optional()
       .describe('Configuration for mapping incoming data into this schema.'),
-  }).describe('Schema for Root-type schema used for raw data ingestion.');
+  }).describe(
+    'Schema for Root-type schema used for raw data ingestion.',
+  ) as unknown as z.ZodType<EaCRootSchemaDetails>;
 
 export function isEaCRootSchemaDetails(
   details: unknown,

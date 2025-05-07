@@ -24,13 +24,15 @@ export type EaCCompositeSchemaDetails = EaCSchemaDetails<'Composite'> & {
 export const EaCCompositeSchemaDetailsSchema: z.ZodType<EaCCompositeSchemaDetails> =
   EaCSchemaDetailsSchema.extend({
     Type: z.literal('Composite'),
-    SchemaJoins: z.record(z.string()).describe(
-      'Map of field prefix aliases to schema lookup keys.',
-    ),
+    SchemaJoins: z
+      .record(z.string())
+      .describe('Map of field prefix aliases to schema lookup keys.'),
     CompositeSchemaMap: JSONSchemaMapSchema.optional().describe(
       'Mapping rules from joined schemas into composite fields.',
     ),
-  }).describe('Schema for Composite-type schema used to join multiple schema sources.');
+  }).describe(
+    'Schema for Composite-type schema used to join multiple schema sources.',
+  ) as unknown as z.ZodType<EaCCompositeSchemaDetails>;
 
 export function isEaCCompositeSchemaDetails(
   details: unknown,
