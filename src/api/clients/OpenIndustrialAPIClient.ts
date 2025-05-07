@@ -49,6 +49,22 @@ export class OpenIndustrialAPIClient extends EaCBaseClient {
    */
   public Workspaces = {
     /**
+     * Archive the currently scoped workspace for this JWT.
+     */
+    Archive: async (): Promise<OpenIndustrialEaC> => {
+      const res = await fetch(this.loadClientUrl('/api/workspaces/archive'), {
+        method: 'DELETE',
+        headers: this.loadHeaders(),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to archive current workspace: ${res.status}`);
+      }
+
+      return await this.json(res);
+    },
+
+    /**
      * Commit a runtime memory snapshot to the current workspace.
      */
     Commit: async (historySnapshot: EaCHistorySnapshot): Promise<EaCStatus> => {
