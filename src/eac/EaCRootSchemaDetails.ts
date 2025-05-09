@@ -1,19 +1,13 @@
 import { z } from './.deps.ts';
 import { EaCSchemaDetails, EaCSchemaDetailsSchema } from './EaCSchemaDetails.ts';
-import { JSONSchemaMap, JSONSchemaMapSchema } from './types/JSONSchemaMap.ts';
+import { JSONSchemaMapSchema } from './types/JSONSchemaMap.ts';
 
 /**
  * Represents a Root schema definition — raw telemetry or signal-bearing structure.
  *
  * These are the schemas directly populated from external DataConnections.
  */
-export type EaCRootSchemaDetails = EaCSchemaDetails<'Root'> & {
-  /** Lookup key to the bound data connection providing impulse data. */
-  DataConnectionLookup?: string;
-
-  /** Settings for mapping data connection input into schema fields. */
-  DataConnectionSchemaMap?: JSONSchemaMap;
-};
+export type EaCRootSchemaDetails = EaCSchemaDetails<'Root'>;
 
 /**
  * Schema for EaCRootSchemaDetails.

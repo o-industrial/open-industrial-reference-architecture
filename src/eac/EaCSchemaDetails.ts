@@ -1,4 +1,5 @@
 import { EaCVertexDetails, EaCVertexDetailsSchema, JSONSchema7, z } from './.deps.ts';
+import { JSONSchemaMap } from './types/JSONSchemaMap.ts';
 
 /**
  * Represents the base details structure for a Schema in Everything as Code (EaC).
@@ -14,6 +15,9 @@ export type EaCSchemaDetails<TType extends string | undefined = string> = {
 
   /** The full JSON Schema structure. */
   Schema: JSONSchema7;
+
+  /** Settings for mapping data connection input into schema fields. */
+  DataConnectionSchemaMap?: JSONSchemaMap;
 } & EaCVertexDetails;
 
 /**

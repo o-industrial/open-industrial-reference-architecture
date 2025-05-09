@@ -3,23 +3,39 @@ import { EaCAgentDetails, EaCAgentDetailsSchema } from './EaCAgentDetails.ts';
 import { EaCFlowNodeMetadata, EaCFlowNodeMetadataSchema } from './EaCFlowNodeMetadata.ts';
 
 /**
- * Represents an Agent in Everything as Code (EaC).
- *
- * Agents contain decision logic, and operate over schemas via reflex-style evaluations.
+ * Schema targeting configuration for an Agent.
  */
-export type EaCAgentAsCode = EaCDetails<EaCAgentDetails> & {
-  /** Flow canvas metadata (enabled state and layout position). */
-  Metadata?: EaCFlowNodeMetadata;
+export type AgentSchemaSettings = {
+  /** The lookup key for the schema this agent operates over. */
+  SchemaLookup: string;
 };
 
 /**
- * Schema for EaCAgentAsCode — includes canvas-level metadata and configuration.
+ * Represents an Agent in Everything as Code (EaC).
+ *
+ * Agents contain decision logic and operate over schemas via reflex-style evaluations.
+ */
+export type EaCAgentAsCode = EaCDetails<EaCAgentDetails> & {
+  /** Flow canvas metadata (position and enabled state). */
+  Metadata?: EaCFlowNodeMetadata;
+
+  /** Target schema that this agent evaluates. */
+  Schema: AgentSchemaSettings;
+};
+
+/**
+ * Schema for EaCAgentAsCode — includes metadata and schema targeting configuration.
  */
 export const EaCAgentAsCodeSchema: z.ZodType<EaCAgentAsCode> = EaCDetailsSchema.extend({
   Details: EaCAgentDetailsSchema.optional(),
+
   Metadata: EaCFlowNodeMetadataSchema.optional(),
+
+  Schema: z.object({
+    SchemaLookup: z.string(),
+  }).describe('Required lookup key for the schema this agent evaluates.'),
 }).describe(
-  'Schema for an agent node with reflex logic and layout metadata.',
+  'Schema for an agent node with reflex logic, targeting configuration, and canvas layout.',
 );
 
 /**
