@@ -20,7 +20,7 @@ export type EaCAgentAsCode = EaCDetails<EaCAgentDetails> & {
   Metadata?: EaCFlowNodeMetadata;
 
   /** Target schema that this agent evaluates. */
-  Schema: AgentSchemaSettings;
+  Schema?: AgentSchemaSettings;
 };
 
 /**
