@@ -7,6 +7,7 @@ import {
 import { EaCSchemaAsCode, EaCSchemaAsCodeSchema } from './EaCSchemaAsCode.ts';
 import { EaCSurfaceAsCode, EaCSurfaceAsCodeSchema } from './EaCSurfaceAsCode.ts';
 import { EaCSimulatorAsCode, EaCSimulatorAsCodeSchema } from './EaCSimulatorAsCode.ts';
+import { EaCProposalConfigAsCode } from './EaCProposalConfigAsCode.ts';
 
 // Optional config types
 export type ImpulseOptions = {
@@ -35,6 +36,9 @@ export type EverythingAsCodeOIWorkspace = {
 
   /** External or streaming connections */
   DataConnections?: Record<string, EaCDataConnectionAsCode>;
+
+  /** Proposal configurations */
+  ProposalConfigs?: Record<string, EaCProposalConfigAsCode>;
 
   /** Stream or file-backed input schemas */
   Schemas?: Record<string, EaCSchemaAsCode>;

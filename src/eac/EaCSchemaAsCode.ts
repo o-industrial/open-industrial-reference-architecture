@@ -1,6 +1,5 @@
 import { EaCDetails, EaCDetailsSchema, z } from './.deps.ts';
 import { EaCSchemaDetails, EaCSchemaDetailsSchema } from './EaCSchemaDetails.ts';
-import { EaCFlowNodeMetadata, EaCFlowNodeMetadataSchema } from './EaCFlowNodeMetadata.ts';
 
 /**
  * Configuration for associating this schema with a data connection.
@@ -26,9 +25,6 @@ export type EaCSchemaAsCode = EaCDetails<EaCSchemaDetails> & {
   /** Lookup key to a bound data connection. */
   DataConnection?: SchemaDataConnectionSettings;
 
-  /** Canvas metadata for schema node layout and activation. */
-  Metadata?: EaCFlowNodeMetadata;
-
   /** Mapping of referenced schemas used in this schema (composite, reference). */
   SchemaLookups?: Record<string, SchemaSchemaSettings>;
 };
@@ -38,8 +34,6 @@ export type EaCSchemaAsCode = EaCDetails<EaCSchemaDetails> & {
  */
 export const EaCSchemaAsCodeSchema: z.ZodType<EaCSchemaAsCode> = EaCDetailsSchema.extend({
   Details: EaCSchemaDetailsSchema.optional(),
-
-  Metadata: EaCFlowNodeMetadataSchema.optional(),
 
   DataConnection: z
     .object({
