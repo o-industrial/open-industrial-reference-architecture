@@ -14,7 +14,7 @@ export type EaCSchemaDetails<TType extends string | undefined = string> = {
   Version?: string;
 
   /** The full JSON Schema structure. */
-  Schema: JSONSchema7;
+  Schema?: JSONSchema7;
 
   /** Settings for mapping data connection input into schema fields. */
   DataConnectionSchemaMap?: JSONSchemaMap;
@@ -32,7 +32,7 @@ export type EaCSchemaDetailsSchema = z.ZodObject<
     {
       Type: z.ZodString;
       Version: z.ZodOptional<z.ZodString>;
-      Schema: z.ZodRecord<z.ZodString, z.ZodUnknown>;
+      Schema: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
     }
   >,
   'strip',
@@ -47,7 +47,10 @@ export const EaCSchemaDetailsSchema: EaCSchemaDetailsSchema = EaCVertexDetailsSc
     .string()
     .optional()
     .describe('Version tag for schema evolution.'),
-  Schema: z.record(z.unknown()).describe('The JSON schema definition.'),
+  Schema: z
+    .record(z.unknown())
+    .optional()
+    .describe('The JSON schema definition.'),
 }).describe(
   'Schema for a typed schema definition in EaC.',
 ) as unknown as EaCSchemaDetailsSchema;
