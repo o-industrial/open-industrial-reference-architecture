@@ -64,7 +64,7 @@ export class OpenIndustrialProposalAPI {
    * List all proposals for the current workspace.
    */
   public async List(): Promise<Proposal<RecordKind>[]> {
-    const res = await fetch(this.bridge.url('/api/proposals'), {
+    const res = await fetch(this.bridge.url('/api/proposals/list'), {
       method: 'GET',
       headers: this.bridge.headers(),
     });
