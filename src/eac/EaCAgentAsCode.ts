@@ -31,9 +31,12 @@ export const EaCAgentAsCodeSchema: z.ZodType<EaCAgentAsCode> = EaCDetailsSchema.
 
   Metadata: EaCFlowNodeMetadataSchema.optional(),
 
-  Schema: z.object({
-    SchemaLookup: z.string(),
-  }).describe('Required lookup key for the schema this agent evaluates.'),
+  Schema: z
+    .object({
+      SchemaLookup: z.string(),
+    })
+    .optional()
+    .describe('Required lookup key for the schema this agent evaluates.'),
 }).describe(
   'Schema for an agent node with reflex logic, targeting configuration, and canvas layout.',
 );
