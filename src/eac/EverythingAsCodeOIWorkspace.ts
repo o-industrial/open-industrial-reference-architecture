@@ -1,4 +1,4 @@
-import { z, EaCVertexDetails } from './.deps.ts';
+import { z } from './.deps.ts';
 import { EaCAgentAsCode, EaCAgentAsCodeSchema } from './EaCAgentAsCode.ts';
 import {
   EaCDataConnectionAsCode,
