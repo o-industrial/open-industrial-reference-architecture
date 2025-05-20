@@ -1,4 +1,4 @@
-import { z } from './.deps.ts';
+import { z, EaCVertexDetails } from './.deps.ts';
 import { EaCAgentAsCode, EaCAgentAsCodeSchema } from './EaCAgentAsCode.ts';
 import {
   EaCDataConnectionAsCode,
@@ -8,6 +8,7 @@ import { EaCSchemaAsCode, EaCSchemaAsCodeSchema } from './EaCSchemaAsCode.ts';
 import { EaCSurfaceAsCode, EaCSurfaceAsCodeSchema } from './EaCSurfaceAsCode.ts';
 import { EaCSimulatorAsCode, EaCSimulatorAsCodeSchema } from './EaCSimulatorAsCode.ts';
 import { EaCProposalConfigAsCode } from './EaCProposalConfigAsCode.ts';
+import { EaCWarmQueryAsCode, EaCWarmQueryAsCodeSchema } from './EaCWarmQueryAsCode.ts';
 
 // Optional config types
 export type ImpulseOptions = {
@@ -48,6 +49,8 @@ export type EverythingAsCodeOIWorkspace = {
 
   /** Panels, simulators, dashboards */
   Surfaces?: Record<string, EaCSurfaceAsCode>;
+
+  WarmQueries?: Record<string, EaCWarmQueryAsCode>;
 };
 
 export type EverythingAsCodeOIWorkspaceSchema = z.ZodObject<
@@ -90,6 +93,9 @@ export type EverythingAsCodeOIWorkspaceSchema = z.ZodObject<
     Surfaces: z.ZodOptional<
       z.ZodRecord<z.ZodString, typeof EaCSurfaceAsCodeSchema>
     >;
+    WarmQueries: z.ZodOptional<
+      z.ZodRecord<z.ZodString, typeof EaCWarmQueryAsCodeSchema>
+    >;
   },
   'strip',
   z.ZodTypeAny,
@@ -97,7 +103,7 @@ export type EverythingAsCodeOIWorkspaceSchema = z.ZodObject<
   EverythingAsCodeOIWorkspace
 >;
 
-export const EverythingAsCodeOIWorkspaceSchema: EverythingAsCodeOIWorkspaceSchema = z.object({
+export const EverythingAsCodeOIWorkspaceSchema: EverythingAsCodeOIWorkspaceSchema =  z.object({
   $GlobalOptions: z
     .object({
       Impulses: z
@@ -126,6 +132,7 @@ export const EverythingAsCodeOIWorkspaceSchema: EverythingAsCodeOIWorkspaceSchem
   Schemas: z.record(EaCSchemaAsCodeSchema).optional(),
   Simulators: z.record(EaCSimulatorAsCodeSchema).optional(),
   Surfaces: z.record(EaCSurfaceAsCodeSchema).optional(),
+  WarmQueries: z.record(EaCWarmQueryAsCodeSchema).optional(),
 });
 
 export function isEverythingAsCodeOIWorkspace(
