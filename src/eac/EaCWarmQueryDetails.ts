@@ -1,15 +1,16 @@
-import { EaCVertexDetails, EaCVertexDetailsSchema, z } from "./.deps.ts";
+import { EaCVertexDetails, EaCVertexDetailsSchema, z } from './.deps.ts';
+import { EaCFlowNodeMetadata, EaCFlowNodeMetadataSchema } from './EaCFlowNodeMetadata.ts';
 
 export type EaCWarmQueryDetails = {
   Version: number;
   Query: string;
 } & EaCVertexDetails;
 
-export const EaCWarmQueryDetailsSchema: z.ZodType<EaCWarmQueryDetails> =
-  EaCVertexDetailsSchema.extend({
+export const EaCWarmQueryDetailsSchema: z.ZodType<EaCWarmQueryDetails> = EaCVertexDetailsSchema
+  .extend({
     Version: z.number(),
     Query: z.string(),
-  }).describe("Schema for warm query-level metadata and attributes.");
+  }).describe('Schema for warm query-level metadata and attributes.');
 
 export function isEaCWarmQueryDetails(
   details: unknown,
