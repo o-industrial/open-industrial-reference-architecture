@@ -1,5 +1,4 @@
 import { EaCVertexDetails, EaCVertexDetailsSchema, z } from './.deps.ts';
-import { EaCFlowNodeMetadata, EaCFlowNodeMetadataSchema } from './EaCFlowNodeMetadata.ts';
 
 export type EaCWarmQueryDetails = {
   Version: number;
