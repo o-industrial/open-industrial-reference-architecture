@@ -19,4 +19,6 @@ export * from './EaCSimulatorAsCode.ts';
 export * from './EaCSimulatorDetails.ts';
 export * from './EaCSurfaceAsCode.ts';
 export * from './EaCSurfaceDetails.ts';
+export * from './EaCWarmQueryAsCode.ts';
+export * from './EaCWarmQueryDetails.ts';
 export * from './EverythingAsCodeOIWorkspace.ts';
