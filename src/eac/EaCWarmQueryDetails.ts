@@ -1,8 +1,8 @@
 import { EaCVertexDetails, EaCVertexDetailsSchema, z } from './.deps.ts';
 
-export type EaCWarmQueryDetails = {
-  Version: number;
-  Query: string;
+export type EaCWarmQueryDetails<TType extends string | undefined = string> = {
+  Version?: number;
+  Query?: string;
 } & EaCVertexDetails;
 
 export const EaCWarmQueryDetailsSchema: z.ZodType<EaCWarmQueryDetails> = EaCVertexDetailsSchema
