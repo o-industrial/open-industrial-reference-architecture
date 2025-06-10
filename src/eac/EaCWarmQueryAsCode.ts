@@ -1,5 +1,5 @@
-import { EaCDetails, EaCDetailsSchema, z } from "./.deps.ts";
-import { EaCWarmQueryDetails, EaCWarmQueryDetailsSchema } from "./EaCWarmQueryDetails.ts";
+import { EaCDetails, EaCDetailsSchema, z } from './.deps.ts';
+import { EaCWarmQueryDetails, EaCWarmQueryDetailsSchema } from './EaCWarmQueryDetails.ts';
 import { EaCFlowNodeMetadata, EaCFlowNodeMetadataSchema } from './EaCFlowNodeMetadata.ts';
 import { EaCFlowSettings } from './EaCFlowSettings.ts';
 
@@ -33,8 +33,6 @@ export const EaCWarmQueryAsCodeSchema: z.ZodType<EaCWarmQueryAsCode> = EaCDetail
     })
     .optional()
     .describe('Optional binding to a specific data connection.'),
-
-  
 }).describe(
   'Schema for a warm query node in the flow.',
 );

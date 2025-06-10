@@ -91,7 +91,7 @@ export const EaCSurfaceAsCodeSchema: z.ZodType<EaCSurfaceAsCode> = EaCDetailsSch
     )
     .optional(),
 
-    WarmQueries: z
+  WarmQueries: z
     .record(
       EaCFlowSettingsSchema.extend({
         DisplayMode: z.enum(['raw', 'graph', 'table']).optional(),

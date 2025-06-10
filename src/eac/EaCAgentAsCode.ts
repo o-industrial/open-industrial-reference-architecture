@@ -12,7 +12,7 @@ export type AgentSchemaSettings = {
 
 export type AgentWarmQuerySettings = {
   WarmQueryLookup: string;
-}
+};
 
 /**
  * Represents an Agent in Everything as Code (EaC).
@@ -43,7 +43,7 @@ export const EaCAgentAsCodeSchema: z.ZodType<EaCAgentAsCode> = EaCDetailsSchema.
     })
     .optional()
     .describe('Required lookup key for the schema this agent evaluates.'),
-    WarmQuery: z
+  WarmQuery: z
     .object({
       SchemaLookup: z.string(),
     })
