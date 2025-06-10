@@ -5,6 +5,6 @@ export {
   EaCDetailsSchema,
   type EaCVertexDetails,
   EaCVertexDetailsSchema,
-} from 'jsr:@fathym/eac@0.2.109';
+} from 'jsr:@fathym/eac@0.2.110';
 
 export type { JSONSchema7 } from 'npm:jsonschema7@0.8.0';
