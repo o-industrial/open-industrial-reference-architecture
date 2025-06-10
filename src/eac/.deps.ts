@@ -7,4 +7,10 @@ export {
   EaCVertexDetailsSchema,
 } from 'jsr:@fathym/eac@0.2.106';
 
+// export type {
+//   EaCWarmQueryAsCode,
+//   EaCWarmQueryAsCodeSchema,
+//   EaCWarmQueryDetails,
+// } from 'jsr:@fathym/eac-azure@0.0.62-warm-queries-plugin';
+
 export type { JSONSchema7 } from 'npm:jsonschema7@0.8.0';

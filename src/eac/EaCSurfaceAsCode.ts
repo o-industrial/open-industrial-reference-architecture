@@ -2,7 +2,11 @@ import { EaCDetails, EaCDetailsSchema, z } from './.deps.ts';
 import { EaCSurfaceDetails, EaCSurfaceDetailsSchema } from './EaCSurfaceDetails.ts';
 import { EaCFlowSettings, EaCFlowSettingsSchema } from './EaCFlowSettings.ts';
 import { EaCFlowNodeMetadata, EaCFlowNodeMetadataSchema } from './EaCFlowNodeMetadata.ts';
-import { SurfaceWarmQuerySettings } from './EaCWarmQueryAsCode.ts';
+
+export type SurfaceWarmQuerySettings = {
+  SchemaLookups: string[];
+  DataConnectionLookups: string[];
+} & EaCFlowSettings;
 
 /**
  * Connection-specific runtime configuration used by a surface.
@@ -91,10 +95,11 @@ export const EaCSurfaceAsCodeSchema: z.ZodType<EaCSurfaceAsCode> = EaCDetailsSch
     )
     .optional(),
 
-    WarmQueries: z
+  WarmQueries: z
     .record(
       EaCFlowSettingsSchema.extend({
-        DisplayMode: z.enum(['raw', 'graph', 'table']).optional(),
+        SchemaLookups: z.array(z.string()).optional(),
+        DataConnectionLookups: z.array(z.string()).optional(),
       }).catchall(z.unknown()),
     )
     .optional(),

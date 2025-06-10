@@ -103,7 +103,7 @@ export type EverythingAsCodeOIWorkspaceSchema = z.ZodObject<
   EverythingAsCodeOIWorkspace
 >;
 
-export const EverythingAsCodeOIWorkspaceSchema: EverythingAsCodeOIWorkspaceSchema =  z.object({
+export const EverythingAsCodeOIWorkspaceSchema: EverythingAsCodeOIWorkspaceSchema = z.object({
   $GlobalOptions: z
     .object({
       Impulses: z

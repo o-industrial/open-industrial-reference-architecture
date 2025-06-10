@@ -1,6 +1,6 @@
 import { EaCVertexDetails, EaCVertexDetailsSchema, z } from './.deps.ts';
 
-export type EaCWarmQueryDetails<TType extends string | undefined = string> = {
+export type EaCWarmQueryDetails = {
   Version?: number;
   Query?: string;
 } & EaCVertexDetails;
