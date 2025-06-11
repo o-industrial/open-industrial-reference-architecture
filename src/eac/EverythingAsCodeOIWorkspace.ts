@@ -1,4 +1,5 @@
 import {
+  EaCWarmQueryAsCodeSchema,
   EverythingAsCodeClouds,
   EverythingAsCodeCloudsSchema,
   z,
@@ -9,19 +10,9 @@ import {
   EaCDataConnectionAsCodeSchema,
 } from './EaCDataConnectionAsCode.ts';
 import { EaCSchemaAsCode, EaCSchemaAsCodeSchema } from './EaCSchemaAsCode.ts';
-import {
-  EaCSurfaceAsCode,
-  EaCSurfaceAsCodeSchema,
-} from './EaCSurfaceAsCode.ts';
-import {
-  EaCSimulatorAsCode,
-  EaCSimulatorAsCodeSchema,
-} from './EaCSimulatorAsCode.ts';
+import { EaCSurfaceAsCode, EaCSurfaceAsCodeSchema } from './EaCSurfaceAsCode.ts';
+import { EaCSimulatorAsCode, EaCSimulatorAsCodeSchema } from './EaCSimulatorAsCode.ts';
 import { EaCProposalConfigAsCode } from './EaCProposalConfigAsCode.ts';
-import {
-  EaCWarmQueryAsCode,
-  EaCWarmQueryAsCodeSchema,
-} from './EaCWarmQueryAsCode.ts';
 
 /**
  * Options controlling impulse memory behavior at the workspace level.
@@ -219,14 +210,14 @@ export const EverythingAsCodeOIWorkspaceSchema: EverythingAsCodeOIWorkspaceSchem
   })
     .strip()
     .describe(
-      'Everything-as-Code configuration for an Open Industrial workspace.'
+      'Everything-as-Code configuration for an Open Industrial workspace.',
     );
 
 /**
  * Type guard for `EverythingAsCodeOIWorkspace`.
  */
 export function isEverythingAsCodeOIWorkspace(
-  value: unknown
+  value: unknown,
 ): value is EverythingAsCodeOIWorkspace {
   return EverythingAsCodeOIWorkspaceSchema.safeParse(value).success;
 }
@@ -235,7 +226,7 @@ export function isEverythingAsCodeOIWorkspace(
  * Validates and parses an object as `EverythingAsCodeOIWorkspace`.
  */
 export function parseEverythingAsCodeOIWorkspace(
-  value: unknown
+  value: unknown,
 ): EverythingAsCodeOIWorkspace {
   return EverythingAsCodeOIWorkspaceSchema.parse(value);
 }
