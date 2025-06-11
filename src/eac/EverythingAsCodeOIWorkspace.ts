@@ -1,4 +1,4 @@
-import { z } from './.deps.ts';
+import { EverythingAsCodeClouds, EverythingAsCodeCloudsSchema, z } from './.deps.ts';
 import { EaCAgentAsCode, EaCAgentAsCodeSchema } from './EaCAgentAsCode.ts';
 import {
   EaCDataConnectionAsCode,
@@ -9,46 +9,70 @@ import { EaCSurfaceAsCode, EaCSurfaceAsCodeSchema } from './EaCSurfaceAsCode.ts'
 import { EaCSimulatorAsCode, EaCSimulatorAsCodeSchema } from './EaCSimulatorAsCode.ts';
 import { EaCProposalConfigAsCode } from './EaCProposalConfigAsCode.ts';
 
-// Optional config types
+/**
+ * Options controlling impulse memory behavior at the workspace level.
+ */
 export type ImpulseOptions = {
+  /** Optional seconds to retain impulse window for queries. */
   RetainWindowSeconds?: number;
+
+  /** Optional DFS path for storing impulse logs. */
   StorePath?: string;
+
+  /** Whether to auto-archive impulse history. */
   AutoArchive?: boolean;
+
+  /** Whether impulse replay is allowed. */
   AllowReplay?: boolean;
 };
 
+/**
+ * Options governing how signals behave at runtime.
+ */
 export type SignalOptions = {
+  /** Defines where signals are stored (Memory, DFS, External). */
   Store?: 'Memory' | 'DFS' | 'External';
+
+  /** Retention duration for signal memory (in seconds). */
   RetentionSeconds?: number;
+
+  /** Whether to persist signals even if only triggered. */
   PersistOnTrigger?: boolean;
+
+  /** Default shape emitted by this workspace's signals. */
   DefaultSignalShape?: 'event' | 'proposal' | 'patch';
 };
 
+/**
+ * Represents the full Everything-as-Code (EaC) definition for an Open Industrial Workspace.
+ *
+ * Combines runtime memory, reflex agents, schema pipelines, and cloud/simulator bindings.
+ */
 export type EverythingAsCodeOIWorkspace = {
-  /** Optional global runtime policies */
+  /** Optional global runtime policies. */
   $GlobalOptions?: {
     Impulses?: ImpulseOptions;
     Signals?: SignalOptions;
   };
 
-  /** Executable reflex agents */
+  /** Executable reflex agents mapped by ID. */
   Agents?: Record<string, EaCAgentAsCode>;
 
-  /** External or streaming connections */
+  /** External or streaming connections (MQTT, HTTP, etc.). */
   DataConnections?: Record<string, EaCDataConnectionAsCode>;
 
-  /** Proposal configurations */
+  /** Proposal configurations scoped for dynamic changes. */
   ProposalConfigs?: Record<string, EaCProposalConfigAsCode>;
 
-  /** Stream or file-backed input schemas */
+  /** Stream or signal-backed schemas for memory. */
   Schemas?: Record<string, EaCSchemaAsCode>;
 
-  /** Simulators that drive impulse flows */
+  /** Simulators used to inject or test impulses. */
   Simulators?: Record<string, EaCSimulatorAsCode>;
 
-  /** Panels, simulators, dashboards */
+  /** Surfaces such as dashboards, panels, and visual UIs. */
   Surfaces?: Record<string, EaCSurfaceAsCode>;
-};
+} & EverythingAsCodeClouds;
 
 export type EverythingAsCodeOIWorkspaceSchema = z.ZodObject<
   {
@@ -97,45 +121,104 @@ export type EverythingAsCodeOIWorkspaceSchema = z.ZodObject<
   EverythingAsCodeOIWorkspace
 >;
 
-export const EverythingAsCodeOIWorkspaceSchema: EverythingAsCodeOIWorkspaceSchema = z.object({
-  $GlobalOptions: z
-    .object({
-      Impulses: z
-        .object({
-          RetainWindowSeconds: z.number().optional(),
-          StorePath: z.string().optional(),
-          AutoArchive: z.boolean().optional(),
-          AllowReplay: z.boolean().optional(),
-        })
-        .optional(),
-      Signals: z
-        .object({
-          Store: z.enum(['Memory', 'DFS', 'External']).optional(),
-          RetentionSeconds: z.number().optional(),
-          PersistOnTrigger: z.boolean().optional(),
-          DefaultSignalShape: z
-            .enum(['event', 'proposal', 'patch'])
-            .optional(),
-        })
-        .optional(),
-    })
-    .optional(),
+/**
+ * Zod schema for `EverythingAsCodeOIWorkspace`.
+ * Extends cloud resources with agent, schema, and surface integration.
+ */
+export const EverythingAsCodeOIWorkspaceSchema: EverythingAsCodeOIWorkspaceSchema =
+  EverythingAsCodeCloudsSchema.extend({
+    $GlobalOptions: z
+      .object({
+        Impulses: z
+          .object({
+            RetainWindowSeconds: z
+              .number()
+              .optional()
+              .describe('How long impulse history is retained (seconds).'),
+            StorePath: z
+              .string()
+              .optional()
+              .describe('Filesystem or DFS path for impulse storage.'),
+            AutoArchive: z
+              .boolean()
+              .optional()
+              .describe('Whether to auto-archive impulse logs.'),
+            AllowReplay: z
+              .boolean()
+              .optional()
+              .describe('Whether impulse replay is allowed.'),
+          })
+          .optional()
+          .describe('Options controlling impulse retention and behavior.'),
+        Signals: z
+          .object({
+            Store: z
+              .enum(['Memory', 'DFS', 'External'])
+              .optional()
+              .describe('Signal storage backend type.'),
+            RetentionSeconds: z
+              .number()
+              .optional()
+              .describe('How long signals are retained in memory.'),
+            PersistOnTrigger: z
+              .boolean()
+              .optional()
+              .describe('Whether to persist signals on trigger.'),
+            DefaultSignalShape: z
+              .enum(['event', 'proposal', 'patch'])
+              .optional()
+              .describe('Default shape emitted by signal definitions.'),
+          })
+          .optional()
+          .describe('Options governing runtime signal behavior.'),
+      })
+      .optional()
+      .describe('Global workspace-level options for memory behavior.'),
 
-  Agents: z.record(EaCAgentAsCodeSchema).optional(),
-  DataConnections: z.record(EaCDataConnectionAsCodeSchema).optional(),
-  Schemas: z.record(EaCSchemaAsCodeSchema).optional(),
-  Simulators: z.record(EaCSimulatorAsCodeSchema).optional(),
-  Surfaces: z.record(EaCSurfaceAsCodeSchema).optional(),
-});
+    Agents: z
+      .record(EaCAgentAsCodeSchema)
+      .optional()
+      .describe('Reflex agents available to process impulses.'),
 
+    DataConnections: z
+      .record(EaCDataConnectionAsCodeSchema)
+      .optional()
+      .describe('Data sources (MQTT, HTTP, file) used to power schema memory.'),
+
+    Schemas: z
+      .record(EaCSchemaAsCodeSchema)
+      .optional()
+      .describe('Declarative schemas for mapping and storing data.'),
+
+    Simulators: z
+      .record(EaCSimulatorAsCodeSchema)
+      .optional()
+      .describe('Synthetic data sources or test signal emitters.'),
+
+    Surfaces: z
+      .record(EaCSurfaceAsCodeSchema)
+      .optional()
+      .describe('User-facing dashboards, panels, or apps.'),
+  })
+    .strip()
+    .describe(
+      'Everything-as-Code configuration for an Open Industrial workspace.',
+    );
+
+/**
+ * Type guard for `EverythingAsCodeOIWorkspace`.
+ */
 export function isEverythingAsCodeOIWorkspace(
-  eac: unknown,
-): eac is EverythingAsCodeOIWorkspace {
-  return EverythingAsCodeOIWorkspaceSchema.safeParse(eac).success;
+  value: unknown,
+): value is EverythingAsCodeOIWorkspace {
+  return EverythingAsCodeOIWorkspaceSchema.safeParse(value).success;
 }
 
+/**
+ * Validates and parses an object as `EverythingAsCodeOIWorkspace`.
+ */
 export function parseEverythingAsCodeOIWorkspace(
-  eac: unknown,
+  value: unknown,
 ): EverythingAsCodeOIWorkspace {
-  return EverythingAsCodeOIWorkspaceSchema.parse(eac);
+  return EverythingAsCodeOIWorkspaceSchema.parse(value);
 }
