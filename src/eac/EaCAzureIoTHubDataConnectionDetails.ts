@@ -15,6 +15,9 @@ export type EaCAzureIoTHubDataConnectionDetails = {
 
   /** The name of the device to route messages for. */
   DeviceID: string;
+
+  /** Whether the device is setup as an Azure IoT Edge device or not. */
+  IsIoTEdge: boolean;
 } & EaCDataConnectionDetails<'AzureIoTHub'>;
 
 /**
@@ -32,6 +35,7 @@ export const EaCAzureIoTHubDataConnectionDetailsSchema: z.ZodObject<
       Type: z.ZodLiteral<'AzureIoTHub'>;
       ConnectionString: z.ZodString;
       DeviceID: z.ZodString;
+      IsIoTEdge: z.ZodBoolean;
     }
   >,
   z.UnknownKeysParam,
@@ -42,6 +46,9 @@ export const EaCAzureIoTHubDataConnectionDetailsSchema: z.ZodObject<
   Type: z.literal('AzureIoTHub'),
   ConnectionString: z.string().describe('Azure IoT Hub connection string.'),
   DeviceID: z.string().describe('Target device identifier in IoT Hub.'),
+  IsIoTEdge: z.boolean().describe(
+    'Whether the device is setup as an Azure IoT Edge device or not.',
+  ),
 }).describe('Schema for Azure IoT Hub-based Data Connection Details');
 
 /**

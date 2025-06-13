@@ -9,7 +9,9 @@ import { EaCFlowNodeMetadata, EaCFlowNodeMetadataSchema } from './EaCFlowNodeMet
  * configure and persist simulator runtime context, which may be referenced by
  * DataConnections via `SimulatorLookup`.
  */
-export type EaCSimulatorAsCode = EaCDetails<EaCSimulatorDetails> & {
+export type EaCSimulatorAsCode<
+  TDetails extends EaCSimulatorDetails = EaCSimulatorDetails,
+> = EaCDetails<TDetails> & {
   /** Canvas metadata for simulator layout and activation state. */
   Metadata?: EaCFlowNodeMetadata;
 };

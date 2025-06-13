@@ -21,7 +21,9 @@ export type SchemaSchemaSettings = {
  * Everything as Code (EaC) schema container.
  * Includes structural metadata and details that vary by schema type.
  */
-export type EaCSchemaAsCode = EaCDetails<EaCSchemaDetails> & {
+export type EaCSchemaAsCode<
+  TDetails extends EaCSchemaDetails = EaCSchemaDetails,
+> = EaCDetails<TDetails> & {
   /** Lookup key to a bound data connection. */
   DataConnection?: SchemaDataConnectionSettings;
 
@@ -46,7 +48,9 @@ export const EaCSchemaAsCodeSchema: z.ZodType<EaCSchemaAsCode> = EaCDetailsSchem
     .record(z.object({}).catchall(z.unknown()))
     .optional()
     .describe('Optional map of related schemas joined or composed.'),
-}).describe('Schema for a workspace-level schema node with metadata and external bindings.');
+}).describe(
+  'Schema for a workspace-level schema node with metadata and external bindings.',
+);
 
 /**
  * Type guard for EaCSchemaAsCode.
