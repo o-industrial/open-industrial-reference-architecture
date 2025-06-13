@@ -27,9 +27,6 @@ export type EaCAzureIoTHubDataConnectionDetails = {
 
   /** IoT Hub name override. */
   IoTHubName: string;
-
-  /** Optional flag to skip infrastructure provisioning for this device. */
-  SkipProvisioning?: boolean;
 } & EaCDataConnectionDetails<'AzureIoTHub'>;
 
 /**
@@ -45,7 +42,6 @@ export const EaCAzureIoTHubDataConnectionDetailsSchema: z.ZodObject<
       IsIoTEdge: z.ZodBoolean;
       IoTHubName: z.ZodString;
       ResourceGroupName: z.ZodString;
-      SkipProvisioning: z.ZodOptional<z.ZodBoolean>;
       SubscriptionID: z.ZodString;
     }
   >
@@ -58,10 +54,6 @@ export const EaCAzureIoTHubDataConnectionDetailsSchema: z.ZodObject<
   SubscriptionID: z.string().describe('Azure Subscription ID.'),
   ResourceGroupName: z.string().describe('Azure Resource Group name.'),
   IoTHubName: z.string().describe('Optional IoT Hub name override.'),
-  SkipProvisioning: z
-    .boolean()
-    .optional()
-    .describe('Skip provisioning if true.'),
 }).describe('Schema for Azure IoT Hub-based Data Connection Details');
 
 /**
