@@ -11,6 +11,14 @@ export type AgentSchemaSettings = {
 };
 
 /**
+ * Warm Query targeting configuration for an Agent.
+ */
+export type AgentWarmQuerySettings = {
+  /** The lookup key for the warm query this agent operates over. */
+  WarmQueryLookup: string;
+};
+
+/**
  * Represents an Agent in Everything as Code (EaC).
  *
  * Agents contain decision logic and operate over schemas via reflex-style evaluations.
@@ -21,6 +29,9 @@ export type EaCAgentAsCode = EaCDetails<EaCAgentDetails> & {
 
   /** Target schema that this agent evaluates. */
   Schema?: AgentSchemaSettings;
+
+  /** Target warm query that this agent evaluates. */
+  WarmQuery?: AgentWarmQuerySettings;
 };
 
 /**
@@ -37,6 +48,13 @@ export const EaCAgentAsCodeSchema: z.ZodType<EaCAgentAsCode> = EaCDetailsSchema.
     })
     .optional()
     .describe('Required lookup key for the schema this agent evaluates.'),
+
+    WarmQuery: z
+    .object({
+      WarmQueryLookup: z.string(),
+    })
+    .optional()
+    .describe('Required lookup key for the warm query this agent evaluates.'),
 }).describe(
   'Schema for an agent node with reflex logic, targeting configuration, and canvas layout.',
 );
