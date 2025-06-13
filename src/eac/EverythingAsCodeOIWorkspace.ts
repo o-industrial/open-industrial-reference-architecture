@@ -1,4 +1,9 @@
-import { EverythingAsCodeClouds, EverythingAsCodeCloudsSchema, z } from './.deps.ts';
+import {
+  EaCWarmQueryAsCodeSchema,
+  EverythingAsCodeClouds,
+  EverythingAsCodeCloudsSchema,
+  z,
+} from './.deps.ts';
 import { EaCAgentAsCode, EaCAgentAsCodeSchema } from './EaCAgentAsCode.ts';
 import {
   EaCDataConnectionAsCode,
@@ -113,6 +118,9 @@ export type EverythingAsCodeOIWorkspaceSchema = z.ZodObject<
     >;
     Surfaces: z.ZodOptional<
       z.ZodRecord<z.ZodString, typeof EaCSurfaceAsCodeSchema>
+    >;
+    WarmQueries: z.ZodOptional<
+      z.ZodRecord<z.ZodString, typeof EaCWarmQueryAsCodeSchema>
     >;
   },
   'strip',

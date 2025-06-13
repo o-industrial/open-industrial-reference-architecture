@@ -8,6 +8,8 @@ export {
 } from 'jsr:@fathym/eac@0.2.110';
 
 export {
+  type EaCWarmQueryAsCode,
+  EaCWarmQueryAsCodeSchema,
   type EverythingAsCodeClouds,
   EverythingAsCodeCloudsSchema,
 } from 'jsr:@fathym/eac-azure@0.0.66';
