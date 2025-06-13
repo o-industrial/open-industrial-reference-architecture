@@ -10,14 +10,26 @@ import {
 export type EaCAzureIoTHubDataConnectionDetails = {
   Type: 'AzureIoTHub';
 
-  /** The full connection string used to access the Azure IoT Hub. */
-  ConnectionString: string;
+  // /** The full connection string used to access the Azure IoT Hub. */
+  // ConnectionString: string;
 
   /** The name of the device to route messages for. */
   DeviceID: string;
 
   /** Whether the device is setup as an Azure IoT Edge device or not. */
   IsIoTEdge: boolean;
+
+  /** Azure subscription ID for resource provisioning. */
+  SubscriptionID: string;
+
+  /** Azure resource group where the IoT Hub is located. */
+  ResourceGroupName: string;
+
+  /** IoT Hub name override. */
+  IoTHubName: string;
+
+  /** Optional flag to skip infrastructure provisioning for this device. */
+  SkipProvisioning?: boolean;
 } & EaCDataConnectionDetails<'AzureIoTHub'>;
 
 /**
@@ -25,30 +37,31 @@ export type EaCAzureIoTHubDataConnectionDetails = {
  */
 export const EaCAzureIoTHubDataConnectionDetailsSchema: z.ZodObject<
   z.objectUtil.extendShape<
-    {
-      Type: z.ZodString;
-      MultiProtocolIngest: z.ZodOptional<
-        z.ZodArray<z.ZodEnum<['Default', 'HTTP', 'MQTT', 'WebSocket']>>
-      >;
-    },
+    typeof EaCDataConnectionDetailsSchema.shape,
     {
       Type: z.ZodLiteral<'AzureIoTHub'>;
-      ConnectionString: z.ZodString;
+      // ConnectionString: z.ZodString;
       DeviceID: z.ZodString;
       IsIoTEdge: z.ZodBoolean;
+      IoTHubName: z.ZodString;
+      ResourceGroupName: z.ZodString;
+      SkipProvisioning: z.ZodOptional<z.ZodBoolean>;
+      SubscriptionID: z.ZodString;
     }
-  >,
-  z.UnknownKeysParam,
-  z.ZodTypeAny,
-  EaCAzureIoTHubDataConnectionDetails,
-  EaCAzureIoTHubDataConnectionDetails
+  >
 > = EaCDataConnectionDetailsSchema.extend({
   Type: z.literal('AzureIoTHub'),
-  ConnectionString: z.string().describe('Azure IoT Hub connection string.'),
+  // ConnectionString: z.string().describe('Azure IoT Hub connection string.'),
   DeviceID: z.string().describe('Target device identifier in IoT Hub.'),
-  IsIoTEdge: z.boolean().describe(
-    'Whether the device is setup as an Azure IoT Edge device or not.',
-  ),
+  IsIoTEdge: z.boolean().describe('Whether the device is an IoT Edge device.'),
+
+  SubscriptionID: z.string().describe('Azure Subscription ID.'),
+  ResourceGroupName: z.string().describe('Azure Resource Group name.'),
+  IoTHubName: z.string().describe('Optional IoT Hub name override.'),
+  SkipProvisioning: z
+    .boolean()
+    .optional()
+    .describe('Skip provisioning if true.'),
 }).describe('Schema for Azure IoT Hub-based Data Connection Details');
 
 /**
