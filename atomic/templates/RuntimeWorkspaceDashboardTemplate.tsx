@@ -17,7 +17,7 @@ export type RuntimeWorkspaceDashboardTemplateProps = {
   timeline?: preact.ComponentChildren;
 } & JSX.HTMLAttributes<HTMLDivElement>;
 
-export default function RuntimeWorkspaceDashboardTemplate({
+export function RuntimeWorkspaceDashboardTemplate({
   azi,
   children,
   inspector,

@@ -13,7 +13,7 @@ export type BreadcrumbBarProps = {
   settingsIntentType?: IntentTypes;
 };
 
-export default function BreadcrumbBar({
+export function BreadcrumbBar({
   pathParts,
   onSettingsClick,
   settingsTitle = 'Workspace Settings',

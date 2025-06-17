@@ -1,6 +1,6 @@
 import { IntentTypes, JSX } from '../.deps.ts';
 import { AziToolResponseCard } from '../molecules/AziToolResponseCard.tsx';
-import AziRespondsPanelTemplate from '../templates/AziRespondsPanelTemplate.tsx';
+import { AziRespondsPanelTemplate } from '../templates/AziRespondsPanelTemplate.tsx';
 
 type AziRespondsPanelProps = {
   onClose?: () => void;

@@ -1,5 +1,5 @@
 import { WorkspaceManager, IntentTypes, JSX } from '../.deps.ts';
-import AziPanelTemplate from '../templates/AziPanelTemplate.tsx';
+import { AziPanelTemplate } from '../templates/AziPanelTemplate.tsx';
 import { AziChatInput } from '../molecules/azi/AziChatInput.tsx';
 import { AziChatMessage } from '../molecules/azi/AziChatMessage.tsx';
 
@@ -11,7 +11,7 @@ type AziPanelProps = {
   intentTypes?: Partial<Record<Role, IntentTypes>>;
 };
 
-export default function AziPanel({
+export function AziPanel({
   workspaceMgr,
   onClose,
   intentTypes = {

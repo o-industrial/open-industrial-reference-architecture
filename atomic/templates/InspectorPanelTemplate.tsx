@@ -1,6 +1,6 @@
 import { ComponentChildren, JSX } from '../.deps.ts';
 
-export default function InspectorPanelTemplate({
+export function InspectorPanelTemplate({
   children,
   onClose: _onClose,
 }: {

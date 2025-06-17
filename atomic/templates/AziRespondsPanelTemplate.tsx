@@ -1,7 +1,7 @@
 import { ComponentChildren, JSX } from '../.deps.ts';
 import { Action, ActionStyleTypes } from '../atoms/Action.tsx';
 
-export default function AziRespondsPanelTemplate({
+export function AziRespondsPanelTemplate({
   children,
   onClose,
 }: {

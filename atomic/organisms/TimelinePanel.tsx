@@ -1,8 +1,8 @@
 import { JSX } from '../.deps.ts';
 import { Action } from '../atoms/Action.tsx';
-import TimelinePanelTemplate from '../templates/TimelinePanelTemplate.tsx';
+import { TimelinePanelTemplate } from '../templates/TimelinePanelTemplate.tsx';
 
-export default function TimelinePanel(): JSX.Element {
+export function TimelinePanel(): JSX.Element {
   return (
     <TimelinePanelTemplate>
       <div class="flex flex-col gap-4 text-xs text-white font-mono">

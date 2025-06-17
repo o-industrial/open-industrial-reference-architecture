@@ -24,8 +24,8 @@ import {
   LoadingSpinner,
   neonColors,
 } from '../.exports.ts';
-import FlowPanelBank from '../molecules/flows/FlowPanelBank.tsx';
-import FlowPanelTemplate from '../templates/FlowPanelTemplate.tsx';
+import { FlowPanelBank } from '../molecules/flows/FlowPanelBank.tsx';
+import { FlowPanelTemplate } from '../templates/FlowPanelTemplate.tsx';
 
 export const IsIsland = true;
 
@@ -34,7 +34,7 @@ type FlowPanelProps = {
   onShowSimulatorLibrary?: () => void;
 };
 
-function FlowPanel({
+function FlowPanelInner({
   workspaceMgr,
   onShowSimulatorLibrary,
 }: FlowPanelProps): JSX.Element {
@@ -140,7 +140,7 @@ function FlowPanel({
   );
 }
 
-export default function WrappedFlowPanel(props: FlowPanelProps) {
+export function FlowPanel(props: FlowPanelProps): JSX.Element {
   if (!IS_BROWSER) {
     console.log('🚫 FlowPanel rendering skipped (not browser)');
     return <LoadingSpinner intentType={IntentTypes.Primary} />;
@@ -150,7 +150,7 @@ export default function WrappedFlowPanel(props: FlowPanelProps) {
 
   return (
     <ReactFlowProvider>
-      <FlowPanel {...props} />
+      <FlowPanelInner {...props} />
     </ReactFlowProvider>
   );
 }

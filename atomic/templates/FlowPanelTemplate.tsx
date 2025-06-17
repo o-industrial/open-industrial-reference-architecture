@@ -1,6 +1,6 @@
 import { JSX } from '../.deps.ts';
 
-export default function FlowPanelTemplate({
+export function FlowPanelTemplate({
   bank,
   canvas,
   systemControls,

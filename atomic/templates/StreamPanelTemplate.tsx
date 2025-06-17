@@ -1,6 +1,6 @@
 import { ComponentChildren, JSX } from '../.deps.ts';
 
-export default function StreamPanelTemplate({
+export function StreamPanelTemplate({
   children,
   header,
   footer,

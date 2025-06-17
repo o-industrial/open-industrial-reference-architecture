@@ -1,11 +1,11 @@
 import { JSX, WorkspaceManager } from '../.deps.ts';
-import InspectorPanelTemplate from '../templates/InspectorPanelTemplate.tsx';
+import { InspectorPanelTemplate } from '../templates/InspectorPanelTemplate.tsx';
 
 type InspectorPanelProps = {
   workspaceMgr: WorkspaceManager;
 };
 
-export default function InspectorPanel({
+export function InspectorPanel({
   workspaceMgr,
 }: InspectorPanelProps): JSX.Element {
   const { selected, inspectorProps } = workspaceMgr.UseInspector();

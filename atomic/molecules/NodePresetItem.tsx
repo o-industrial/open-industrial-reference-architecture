@@ -1,7 +1,7 @@
 import { IntentTypes, JSX, classSet } from '../.deps.ts';
 import { Icon } from '../.exports.ts';
 
-export default function NodePresetItem({
+export function NodePresetItem({
   label,
   iconKey,
   type,

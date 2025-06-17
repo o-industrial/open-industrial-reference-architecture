@@ -1,5 +1,5 @@
 import { JSX, NodePreset } from '../../.deps.ts';
-import NodePresetItem from '../NodePresetItem.tsx';
+import { NodePresetItem } from '../NodePresetItem.tsx';
 
 /**
  * FlowPanelBank
@@ -10,7 +10,7 @@ export type FlowPanelBankProps = {
   presets: Record<string, NodePreset>;
 };
 
-export default function FlowPanelBank({ presets }: FlowPanelBankProps): JSX.Element {
+export function FlowPanelBank({ presets }: FlowPanelBankProps): JSX.Element {
   return (
     <div class="flex flex-col items-center gap-2">
       {Object.entries(presets).map(([key, preset]) => (
