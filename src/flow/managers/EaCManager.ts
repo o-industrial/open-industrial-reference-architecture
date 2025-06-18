@@ -72,12 +72,12 @@ export class EaCManager {
       const caps = mod.Capabilities;
       if (!caps) continue;
 
-      if (caps.workspace?.length) {
-        scopeCaps.workspace.push(...caps.workspace);
+      if (caps.Workspace?.length) {
+        scopeCaps.workspace.push(...caps.Workspace);
       }
 
-      if (caps.surface?.length) {
-        scopeCaps.surface.push(...caps.surface);
+      if (caps.Surface?.length) {
+        scopeCaps.surface.push(...caps.Surface);
       }
     }
 
@@ -90,31 +90,35 @@ export class EaCManager {
     protected scope: NodeScopeTypes,
     protected graph: GraphStateManager,
     protected history: HistoryManager,
-    protected packs: Record<string, PackModule>,
   ) {
     this.diff = new EaCDiffManager(history, this.emitEaCChanged.bind(this));
     this.proposals = new EaCProposalManager(oiSvc, this);
-    this.LoadPacks(packs);
-    this.SwitchTo(scope);
+    this.LoadPacks().then(() => {
+      this.SwitchTo(scope);
+    });
   }
 
   /**
-   * Loads and caches pack modules from a pre-resolved map.
-   * Keys should match the declared lookup keys in EaC.Packs.
+   * Dynamically loads and caches all declared packs, by importing `.pack.ts` modules
+   * and extracting their capabilities and steps.
    */
-  public LoadPacks(loaded: Record<string, PackModule>): void {
+  public async LoadPacks(): Promise<void> {
     this.loadedPacks = {};
 
-    for (const [lookup, packModule] of Object.entries(loaded)) {
-      try {
-        if (!packModule) {
-          console.warn(`⚠️ Pack module missing for lookup: ${lookup}`);
-          continue;
-        }
+    const packs = this.eac.Packs;
+    if (!packs) return;
 
-        this.loadedPacks[lookup] = packModule;
+    for (const [lookup, packDef] of Object.entries(packs)) {
+      try {
+        const path = packDef.Details?.Path;
+        if (!path) throw new Error(`Missing pack path for ${lookup}`);
+
+        const mod = await import(path);
+        const exported: PackModule = mod.default ?? mod;
+
+        this.loadedPacks[lookup] = exported;
       } catch (err) {
-        console.error(`❌ Failed to register pack ${lookup}`, err);
+        console.error(`❌ Failed to load pack ${lookup}`, err);
       }
     }
   }

@@ -27,8 +27,8 @@
     "./fluent/utils": "./src/fluent/utils/.exports.ts",
     "./fluent/workspaces": "./src/fluent/workspaces/.exports.ts",
 
-    "./packs/azure-iot": "./packs/azure-iot/.pack.ts",
-    "./packs/oi-core": "./packs/oi-core/.pack.ts"
+    "./packs/azure-iot": "./src/packs/azure-iot/.pack.ts",
+    "./packs/oi-core": "./src/packs/oi-core/.pack.ts"
   },
   "license": "MIT",
   "tasks": {
