@@ -4,8 +4,8 @@ import { EaCFlowSettings, EaCFlowSettingsSchema } from './EaCFlowSettings.ts';
 import { EaCFlowNodeMetadata, EaCFlowNodeMetadataSchema } from './EaCFlowNodeMetadata.ts';
 
 export type SurfaceWarmQuerySettings = {
-  SchemaLookups: string[];
-  DataConnectionLookups: string[];
+  SchemaLookups?: string[];
+  DataConnectionLookups?: string[];
 } & EaCFlowSettings;
 
 /**
