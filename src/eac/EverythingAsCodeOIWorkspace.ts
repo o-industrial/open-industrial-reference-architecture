@@ -13,6 +13,7 @@ import { EaCSchemaAsCode, EaCSchemaAsCodeSchema } from './EaCSchemaAsCode.ts';
 import { EaCSurfaceAsCode, EaCSurfaceAsCodeSchema } from './EaCSurfaceAsCode.ts';
 import { EaCSimulatorAsCode, EaCSimulatorAsCodeSchema } from './EaCSimulatorAsCode.ts';
 import { EaCProposalConfigAsCode } from './EaCProposalConfigAsCode.ts';
+import { EaCPackAsCode, EaCPackAsCodeSchema } from './EaCPackAsCode.ts';
 
 /**
  * Options controlling impulse memory behavior at the workspace level.
@@ -66,6 +67,9 @@ export type EverythingAsCodeOIWorkspace = {
   /** External or streaming connections (MQTT, HTTP, etc.). */
   DataConnections?: Record<string, EaCDataConnectionAsCode>;
 
+  /** Declared runtime capability packs (modbus, test-utils, etc.). */
+  Packs?: Record<string, EaCPackAsCode>;
+
   /** Proposal configurations scoped for dynamic changes. */
   ProposalConfigs?: Record<string, EaCProposalConfigAsCode>;
 
@@ -109,6 +113,9 @@ export type EverythingAsCodeOIWorkspaceSchema = z.ZodObject<
     >;
     DataConnections: z.ZodOptional<
       z.ZodRecord<z.ZodString, typeof EaCDataConnectionAsCodeSchema>
+    >;
+    Packs: z.ZodOptional<
+      z.ZodRecord<z.ZodString, typeof EaCPackAsCodeSchema>
     >;
     Schemas: z.ZodOptional<
       z.ZodRecord<z.ZodString, typeof EaCSchemaAsCodeSchema>
@@ -192,6 +199,13 @@ export const EverythingAsCodeOIWorkspaceSchema: EverythingAsCodeOIWorkspaceSchem
       .record(EaCDataConnectionAsCodeSchema)
       .optional()
       .describe('Data sources (MQTT, HTTP, file) used to power schema memory.'),
+
+    Packs: z
+      .record(EaCPackAsCodeSchema)
+      .optional()
+      .describe(
+        'Runtime capability packs declared by path and optional enablement.',
+      ),
 
     Schemas: z
       .record(EaCSchemaAsCodeSchema)

@@ -5,13 +5,13 @@ export {
   EaCDetailsSchema,
   type EaCVertexDetails,
   EaCVertexDetailsSchema,
-} from 'jsr:@fathym/eac@0.2.110';
+} from 'jsr:@fathym/eac@0.2.111';
 
 export {
   type EaCWarmQueryAsCode,
   EaCWarmQueryAsCodeSchema,
   type EverythingAsCodeClouds,
   EverythingAsCodeCloudsSchema,
-} from 'jsr:@fathym/eac-azure@0.0.66';
+} from 'jsr:@fathym/eac-azure@0.0.68';
 
 export type { JSONSchema7 } from 'npm:jsonschema7@0.8.0';

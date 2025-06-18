@@ -3,6 +3,7 @@ export * from './IngestOption.ts';
 export * from './IntentTypes.ts';
 export * from './OpenIndustrialEaC.ts';
 export * from './OpenIndustrialJWTPayload.ts';
+export * from './PackModule.ts';
 export * from './Proposal.ts';
 export * from './RecordKeysOnly.ts';
 export * from './RecordKind.ts';

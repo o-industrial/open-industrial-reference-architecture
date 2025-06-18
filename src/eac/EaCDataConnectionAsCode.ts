@@ -11,7 +11,9 @@ import { EaCFlowNodeMetadata, EaCFlowNodeMetadataSchema } from './EaCFlowNodeMet
  * Data connections do not define relationships; they are globally declared,
  * and other nodes (e.g. surfaces) may point to them via lookup keys.
  */
-export type EaCDataConnectionAsCode = EaCDetails<EaCDataConnectionDetails> & {
+export type EaCDataConnectionAsCode<
+  TDetails extends EaCDataConnectionDetails = EaCDataConnectionDetails,
+> = EaCDetails<TDetails> & {
   /** Optional lookup key for associating this connection with a simulator instance. */
   SimulatorLookup?: string;
 

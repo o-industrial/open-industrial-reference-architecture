@@ -2,11 +2,33 @@
   "name": "@o-industrial/common",
   "version": "0.0.0",
   "exports": {
+    "./atomic/atoms": "./atomic/atoms/.exports.ts",
+    "./atomic/icons": "./build/iconset/icons/.exports.ts",
+    "./atomic/molecules": "./atomic/molecules/.exports.ts",
+    "./atomic/organisms": "./atomic/organisms/.exports.ts",
+    "./atomic/templates": "./atomic/templates/.exports.ts",
+    "./atomic/utils": "./atomic/utils/.exports.ts",
+
     "./api": "./src/api/.exports.ts",
     "./eac": "./src/eac/.exports.ts",
+    "./secrets": "./src/secrets/.exports.ts",
     "./sop": "./src/sop/.exports.ts",
     "./types": "./src/types/.exports.ts",
-    "./utils": "./src/utils/.exports.ts"
+    "./utils": "./src/utils/.exports.ts",
+
+    "./flow": "./src/flow/.exports.ts",
+    "./fluent": "./src/fluent/_/.exports.ts",
+    "./fluent/connections": "./src/fluent/connections/.exports.ts",
+    "./fluent/packs": "./src/fluent/packs/.exports.ts",
+    "./fluent/runtimes": "./src/fluent/runtimes/.exports.ts",
+    "./fluent/simulators": "./src/fluent/simulators/.exports.ts",
+    "./fluent/steps": "./src/fluent/steps/.exports.ts",
+    "./fluent/types": "./src/fluent/types/.exports.ts",
+    "./fluent/utils": "./src/fluent/utils/.exports.ts",
+    "./fluent/workspaces": "./src/fluent/workspaces/.exports.ts",
+
+    "./packs/azure-iot": "./src/packs/azure-iot/.pack.ts",
+    "./packs/oi-core": "./src/packs/oi-core/.pack.ts"
   },
   "license": "MIT",
   "tasks": {
@@ -19,37 +41,26 @@
     "test": "npx rimraf cov && deno test -A ./tests/tests.ts --coverage=cov",
     "version": "deno run -A jsr:@fathym/common@0/build/version"
   },
-  "imports": {},
-  "exclude": [
-    "**/_eac-runtime/*",
-    "!src/**/.exports.ts",
-    "!mod.ts"
-  ],
+  "imports": {
+    // "preact": "npm:preact@10.20.1",
+    // "react": "npm:preact@10.20.1/compat",
+    // "react-dom": "npm:preact@10.20.1/compat",
+    // "react/jsx-runtime": "npm:preact@10.20.1/jsx-runtime",
+    // "react/jsx-dev-runtime": "npm:preact@10.20.1/jsx-dev-runtime",
+    // "reactflow": "npm:reactflow@11.11.4"
+  },
+  "exclude": ["**/_eac-runtime/*", "!src/**/.exports.ts", "!mod.ts"],
   "lint": {
-    "include": [
-      "apps/",
-      "configs/",
-      "src/",
-      "tests/"
-    ],
+    "include": ["apps/", "configs/", "src/", "tests/"],
     "exclude": [],
     "rules": {
-      "tags": [
-        "recommended"
-      ],
-      "include": [
-        "ban-untagged-todo"
-      ],
-      "exclude": []
+      "tags": ["recommended"],
+      "include": ["ban-untagged-todo"],
+      "exclude": ["explicit-function-return-type"]
     }
   },
   "fmt": {
-    "include": [
-      "apps/",
-      "configs/",
-      "src/",
-      "tests/"
-    ],
+    "include": ["apps/", "configs/", "src/", "tests/"],
     "exclude": [],
     "indentWidth": 2,
     "lineWidth": 100,
@@ -58,8 +69,10 @@
     "singleQuote": true,
     "useTabs": false
   },
-  "unstable": [
-    "kv"
-  ],
+  "unstable": ["kv"],
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "npm:preact@10.20.1"
+  },
   "lock": false
 }
