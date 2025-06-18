@@ -6,8 +6,8 @@ import {
   LinePreviewWithValue,
   TriggerMatchIcon,
 } from '../../../../../atomic/.exports.ts';
-import NodeHandle from '../../../../../atomic/atoms/NodeHandle.tsx';
-import WorkspaceNodeRendererBase from '../../../../../atomic/organisms/renderers/WorkspaceNodeRendererBase.tsx';
+import { NodeHandle } from '../../../../../atomic/atoms/NodeHandle.tsx';
+import { WorkspaceNodeRendererBase } from '../../../../../atomic/organisms/renderers/WorkspaceNodeRendererBase.tsx';
 import { IntentTypes } from '../../../../types/IntentTypes.ts';
 import { memo, NodeProps } from '../../.deps.ts';
 import { DataConnectionNodeData } from './DataConnectionNodeData.tsx';

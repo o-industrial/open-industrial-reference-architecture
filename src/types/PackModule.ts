@@ -3,9 +3,9 @@ import { StepModule } from '../fluent/steps/StepModule.ts';
 
 export type PackModule = {
   Capabilities?: {
-    Surface?: EaCNodeCapabilityManager[];
+    surface?: EaCNodeCapabilityManager[];
 
-    Workspace?: EaCNodeCapabilityManager[];
+    workspace?: EaCNodeCapabilityManager[];
   };
 
   Steps: Record<string, StepModule>;

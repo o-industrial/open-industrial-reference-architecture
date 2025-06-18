@@ -7,8 +7,8 @@ import {
   NodeStatTile,
   parseTimeAgoString,
 } from '../../../../../atomic/.exports.ts';
-import NodeHandle from '../../../../../atomic/atoms/NodeHandle.tsx';
-import WorkspaceNodeRendererBase from '../../../../../atomic/organisms/renderers/WorkspaceNodeRendererBase.tsx';
+import { NodeHandle } from '../../../../../atomic/atoms/NodeHandle.tsx';
+import { WorkspaceNodeRendererBase } from '../../../../../atomic/organisms/renderers/WorkspaceNodeRendererBase.tsx';
 import { IntentTypes } from '../../../../types/IntentTypes.ts';
 import { SurfaceNodeData } from './SurfaceNodeData.ts';
 

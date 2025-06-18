@@ -8,12 +8,12 @@ import { SurfaceSchemaNodeCapabilityManager } from './capabilities/surface-schem
 import { SurfaceNodeCapabilityManager } from './capabilities/surface/SurfaceNodeCapabilityManager.ts';
 
 export default Pack().Capabilities({
-  Surface: [
+  surface: [
     new SurfaceSchemaNodeCapabilityManager(),
     new SurfaceAgentNodeCapabilityManager(),
     new SurfaceConnectionNodeCapabilityManager(),
   ],
-  Workspace: [
+  workspace: [
     new DataConnectionNodeCapabilityManager(),
     new SurfaceNodeCapabilityManager(),
     new SimulatorNodeCapabilityManager(),

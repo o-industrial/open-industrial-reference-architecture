@@ -1,10 +1,10 @@
 import { NodeProps } from '../../.deps.ts';
 import { Position } from '../../../../../atomic/.deps.ts';
 import { LinePreviewWithValue } from '../../../../../atomic/.exports.ts';
-import NodeHandle from '../../../../../atomic/atoms/NodeHandle.tsx';
+import { NodeHandle } from '../../../../../atomic/atoms/NodeHandle.tsx';
 import { IntentTypes } from '../../../../types/IntentTypes.ts';
 import { SurfaceConnectionNodeData } from './SurfaceConnectionNodeData.tsx';
-import WorkspaceNodeRendererBase from '../../../../../atomic/organisms/renderers/WorkspaceNodeRendererBase.tsx';
+import { WorkspaceNodeRendererBase } from '../../../../../atomic/organisms/renderers/WorkspaceNodeRendererBase.tsx';
 
 export default function SurfaceConnectionNodeRenderer({
   data,
