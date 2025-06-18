@@ -41,7 +41,7 @@ export type WorkspaceNodeRendererBaseProps = {
   onDoubleClick?: () => void;
 } & JSX.HTMLAttributes<HTMLDivElement>;
 
-export default function WorkspaceNodeRendererBase({
+export function WorkspaceNodeRendererBase({
   iconKey,
   label,
   showLabel = true,

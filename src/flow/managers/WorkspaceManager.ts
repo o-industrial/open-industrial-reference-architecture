@@ -37,6 +37,8 @@ import { BreadcrumbPart } from '../types/BreadcrumbPart.ts';
 import { IntentTypes } from '../../types/IntentTypes.ts';
 import { NodePreset } from '../.exports.ts';
 
+import { PackModule } from '../../types/PackModule.ts';
+
 export class WorkspaceManager {
   protected currentScope: {
     Scope: NodeScopeTypes;
@@ -57,6 +59,7 @@ export class WorkspaceManager {
   constructor(
     eac: OpenIndustrialEaC,
     protected oiSvc: OpenIndustrialAPIClient,
+    protected packs: Record<string, PackModule>,
     scope: NodeScopeTypes = 'workspace',
   ) {
     this.currentScope = { Scope: scope };
@@ -83,6 +86,7 @@ export class WorkspaceManager {
       this.currentScope.Scope,
       this.Graph,
       this.History,
+      packs,
     );
 
     this.Interaction.BindEaCManager(this.EaC);
@@ -519,10 +523,32 @@ export class WorkspaceManager {
     presets: Record<string, NodePreset>;
     nodeTypes: Record<string, ComponentType>;
   } {
-    const capabilityMgr = this.EaC.GetCapabilities();
+    const [presets, setPresets] = useState<Record<string, NodePreset>>({});
+    const [nodeTypes, setNodeTypes] = useState<Record<string, ComponentType>>(
+      {},
+    );
 
-    const presets = capabilityMgr.GetPresets();
-    const nodeTypes = capabilityMgr.GetRendererMap();
+    useEffect(() => {
+      const update = () => {
+        try {
+          const capabilityMgr = this.EaC.GetCapabilities();
+          setPresets(capabilityMgr.GetPresets());
+          setNodeTypes(capabilityMgr.GetRendererMap());
+        } catch (err) {
+          console.warn('⚠️ EaC scopeMgr not ready yet in UseUIContext:', err);
+          setPresets({});
+          setNodeTypes({});
+        }
+      };
+
+      // Prime immediately
+      update();
+
+      // Subscribe to EaC changes
+      const unsubscribe = this.EaC.OnEaCChanged(update);
+
+      return () => unsubscribe();
+    }, []);
 
     return {
       presets,
@@ -598,12 +624,13 @@ export class WorkspaceManager {
       setCurrent(getCurrentWorkspace());
     };
 
-    const save = async () => {
+    const save = () => {
       this.Commit();
 
       console.log('💾 Saved workspace details');
 
-      await this.ReloadPacks();
+      return Promise.resolve();
+      // this.ReloadPacks();
     };
 
     const archive = () => {
@@ -699,8 +726,8 @@ export class WorkspaceManager {
     }
   }
 
-  public async ReloadPacks(): Promise<void> {
-    await this.EaC.LoadPacks();
+  public ReloadPacks(packs: Record<string, PackModule>): void {
+    this.EaC.LoadPacks(packs);
 
     this.SwitchToScope(this.currentScope.Scope, this.currentScope.Lookup);
   }

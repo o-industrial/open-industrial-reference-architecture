@@ -13,7 +13,7 @@ export type NodeHandleProps = Partial<HandleProps> & {
   type: 'source' | 'target';
 };
 
-export default function NodeHandle({
+export function NodeHandle({
   type,
   position,
   intentType = IntentTypes.Tertiary,
