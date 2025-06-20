@@ -55,18 +55,34 @@ export class SurfaceAgentNodeCapabilityManager
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
   ): Partial<OpenIndustrialEaC> | null {
-    if (source.Type === 'agent' && target.Type?.includes('schema')) {
+    if (source.Type.includes('schema') && target.Type.includes('agent')) {
       const eac = context.GetEaC();
-      const agent = eac.Agents?.[source.ID];
+      const agent = eac.Agents?.[target.ID];
       if (!agent) return null;
 
       return {
         Agents: {
-          [source.ID]: {
+          [target.ID]: {
             ...agent,
             Schema: {
-              SchemaLookup: target.ID,
+              SchemaLookup: source.ID,
             },
+          },
+        },
+      };
+    } else if (source.Type.includes('warmquery') && target.Type.includes('agent')) {
+      const eac = context.GetEaC();
+      const agent = eac.Agents?.[target.ID];
+      const surface = eac.Surfaces?.[context.SurfaceLookup];
+
+      return {
+        Agents: {
+          [target.ID]: {
+            ...agent,
+            WarmQueryLookups: [
+              ...(surface?.Agents?.[target.ID]?.WarmQueryLookups ?? []),
+              source.ID,
+            ],
           },
         },
       };
@@ -80,22 +96,35 @@ export class SurfaceAgentNodeCapabilityManager
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
   ): Partial<OpenIndustrialEaC> | null {
-    if (source.Type !== 'agent' || !target.Type?.includes('schema')) {
-      return null;
-    }
-
     const eac = context.GetEaC();
-    const agent = eac.Agents?.[source.ID];
+    const agent = eac.Agents?.[target.ID];
 
-    if (!agent || agent.Schema?.SchemaLookup !== target.ID) return null;
+    if (!agent) return null;
 
-    const { Schema: _, ...rest } = agent;
+    if (source.Type.includes('schema') && target.Type.includes('agent')) {
+      const { Schema: _, ...rest } = agent;
 
-    return {
-      Agents: {
-        [source.ID]: rest,
-      },
-    };
+      return {
+        Agents: {
+          [target.ID]: rest,
+        },
+      };
+    } else if (source.Type.includes('warmquery') && target.Type.includes('agent')) {
+      if (!agent.WarmQueryLookups || agent.WarmQueryLookups.length === 0 || !agent.WarmQueryLookups.includes(source.ID)) return null;
+
+      const filtered = (agent.WarmQueryLookups as string[]).filter(
+        (item) => item !== source.ID
+      );
+
+      return {
+        Agents: {
+          [target.ID]: {
+            ...agent,
+            WarmQueryLookups: filtered,
+          },
+        },
+      };
+    }
   }
 
   protected override buildDeletePatch(
@@ -132,6 +161,19 @@ export class SurfaceAgentNodeCapabilityManager
         Source: targetSchema,
         Target: agentId,
         Label: 'targets',
+      });
+    }
+
+    const wqs = agent.WarmQueryLookups;
+
+    if (wqs) {
+      wqs.forEach((wq: string) => {
+        edges.push({
+          ID: `${wq}->${agentId}`,
+          Source: wq,
+          Target: agentId,
+          Label: 'informs',
+        });
       });
     }
 
@@ -198,6 +240,7 @@ export class SurfaceAgentNodeCapabilityManager
                 [id]: {
                   ShowHistory: false,
                   Metadata: metadata,
+                  WarmQueryLookups: [] as string[],
                 },
               },
             },

@@ -61,7 +61,7 @@ export class SurfaceSchemaNodeCapabilityManager
     const eac = context.GetEaC();
 
     // Case: schema → composite-schema
-    if (source.Type?.includes('schema') && target.Type === 'composite-schema') {
+    if (source.Type.includes('schema') && target.Type.includes('composite-schema')) {
       const comp = eac.Schemas?.[target.ID];
       if (!comp) return null;
 
@@ -81,20 +81,16 @@ export class SurfaceSchemaNodeCapabilityManager
           },
         },
       };
-    }
-
-    // Case: schema → agent
-    if (source.Type?.includes('schema') && target.Type === 'agent') {
-      const agent = eac.Agents?.[target.ID];
-      if (!agent) return null;
+    } else if (source.Type.includes('connection') && target.Type.includes('schema')) {
+      const [_surfaceId, connId] = this.extractCompoundIDs(source);
+      const schema = context.GetEaC().Schemas?.[target.ID];
+      if (!schema) return null;
 
       return {
-        Agents: {
+        Schemas: {
           [target.ID]: {
-            ...agent,
-            Schema: {
-              SchemaLookup: source.ID,
-            },
+            ...schema,
+            DataConnection: { Lookup: connId },
           },
         },
       };
@@ -127,7 +123,7 @@ export class SurfaceSchemaNodeCapabilityManager
     const eac = context.GetEaC() as EverythingAsCodeOIWorkspace;
 
     // Case: schema → composite-schema
-    if (source.Type?.includes('schema') && target.Type === 'composite-schema') {
+    if (source.Type.includes('schema') && target.Type.includes('composite-schema')) {
       const comp = eac.Schemas?.[target.ID];
       if (!comp) return null;
 
@@ -148,18 +144,19 @@ export class SurfaceSchemaNodeCapabilityManager
           },
         },
       };
-    }
+    } else if (source.Type.includes('connection') && target.Type.includes('schema')) {
+      const [_, connId] = this.extractCompoundIDs(source);
 
-    // Case: agent → schema (remove Schema ref)
-    if (source.Type === 'agent' && target.Type?.includes('schema')) {
-      const agent = eac.Agents?.[source.ID];
-      if (!agent || agent.Schema?.SchemaLookup !== target.ID) return null;
+      if (!target.Type.includes('schema')) return null;
 
-      const { Schema: _, ...rest } = agent;
+      const schema = eac.Schemas?.[target.ID];
+      if (!schema || schema.DataConnection?.Lookup !== connId) return null;
+
+      const { _DataConnection, ...rest } = schema;
 
       return {
-        Agents: {
-          [source.ID]: rest,
+        Schemas: {
+          [target.ID]: rest,
         },
       };
     }

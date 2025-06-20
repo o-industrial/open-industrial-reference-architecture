@@ -52,7 +52,7 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
     const eac = ctx.GetEaC() as EverythingAsCodeOIWorkspace;
 
     // simulator → connection
-    if (source.Type === 'simulator' && target.Type === this.Type) {
+    if (source.Type.includes('simulator') && target.Type.includes('connection')) {
       const existing = eac.DataConnections?.[target.ID]?.SimulatorLookup;
       if (existing === source.ID) return null;
 
@@ -62,26 +62,6 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
             ...eac.DataConnections?.[target.ID],
             SimulatorLookup: source.ID,
           } as EaCDataConnectionAsCode,
-        },
-      };
-    }
-
-    // connection → surface
-    if (source.Type === this.Type && target.Type === 'surface') {
-      const surface = eac.Surfaces?.[target.ID];
-      const connSet: Record<string, SurfaceDataConnectionSettings> = {
-        ...(surface?.DataConnections ?? {}),
-        [source.ID]: {
-          Metadata: { Enabled: true },
-        },
-      };
-
-      return {
-        Surfaces: {
-          [target.ID]: {
-            ...surface,
-            DataConnections: connSet,
-          } as EaCSurfaceAsCode,
         },
       };
     }
@@ -103,7 +83,7 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
     const eac = ctx.GetEaC() as EverythingAsCodeOIWorkspace;
 
     // simulator → connection
-    if (source.Type === 'simulator' && target.Type === this.Type) {
+    if (source.Type.includes('simulator') && target.Type.includes('connection')) {
       const existing = eac.DataConnections?.[target.ID]?.SimulatorLookup;
 
       if (existing === source.ID) {
@@ -112,24 +92,6 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
             [target.ID]: {
               ...eac.DataConnections?.[target.ID],
               SimulatorLookup: undefined,
-            },
-          },
-        };
-      }
-    }
-
-    // connection → surface
-    if (source.Type === this.Type && target.Type === 'surface') {
-      const surface = eac.Surfaces?.[target.ID];
-      if (surface?.DataConnections?.[source.ID]) {
-        const updatedConnections = { ...surface.DataConnections };
-        delete updatedConnections[source.ID];
-
-        return {
-          Surfaces: {
-            [target.ID]: {
-              ...surface,
-              DataConnections: updatedConnections,
             },
           },
         };

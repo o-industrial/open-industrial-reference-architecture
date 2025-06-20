@@ -14,6 +14,7 @@
       "simulator": "https://api.iconify.design/mdi:flask-outline.svg",
       "surface": "https://api.iconify.design/mdi:layers-outline.svg",
       "triggerMatch": "https://api.iconify.design/lucide:zap.svg",
+      "warmQuery": "https://api.iconify.design/mdi:sql-query.svg",
 
       "archive": "https://api.iconify.design/lucide:archive.svg",
       "commit": "https://api.iconify.design/lucide:git-commit.svg",
