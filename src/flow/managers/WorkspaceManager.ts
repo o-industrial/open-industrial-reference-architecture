@@ -489,7 +489,7 @@ export class WorkspaceManager {
 
   public UseStats<TStats extends Record<string, unknown>>(
     id: string,
-    intervalMs = 1000,
+    intervalMs = 10000,
   ): TStats | undefined {
     const [stats, setStats] = useState<TStats>({} as TStats);
 
