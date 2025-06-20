@@ -158,7 +158,7 @@ export function SurfaceRootSchemaInspector({
       iconKey='schema'
       label={details.Name ?? 'Root Schema'}
       enabled={enabled}
-      impulseRates={stats?.impulseRates ?? []}
+      impulseRates={stats?.ImpulseRates ?? []}
       onToggleEnabled={onToggleEnabled}
       onDelete={onDelete}
     >

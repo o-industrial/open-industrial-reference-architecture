@@ -32,7 +32,7 @@ export function ConnectionInspector({
       iconKey='connection'
       label={details.Name}
       enabled={enabled}
-      impulseRates={stats?.impulseRates ?? []}
+      impulseRates={stats?.ImpulseRates ?? []}
       onToggleEnabled={onToggleEnabled}
       onDelete={onDelete}
     >
@@ -54,7 +54,7 @@ export function ConnectionInspector({
           {
             key: 'connection',
             label: 'Connection Info',
-            content: <ConnectionInfoPanel connectionInfo={stats?.connectionInfo} />,
+            content: <ConnectionInfoPanel connectionInfo={stats?.Metadata} />,
           },
           {
             key: 'analytics',

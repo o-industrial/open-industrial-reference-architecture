@@ -4,19 +4,24 @@ import type { EaCDetails, EaCVertexDetails } from '../types/.deps.ts';
 import type { StepInvokerMap } from '../steps/StepInvokerMap.ts';
 import type { VerificationInvokerMap } from '../types/VerificationInvokerMap.ts';
 import type { FluentContext } from '../types/FluentContext.ts';
+import type { Status } from 'jsr:@fathym/common@0.2.264';
 
 /**
  * Base class for any fluent-configured runtime, driven by `.AsCode` + enriched context.
  *
  * @template TAsCode   Typed Everything-as-Code configuration
- * @template TOutput   Final result of `.Execute()`
- * @template TServices Service bindings injected during runtime setup
- * @template TSteps    Callable substep map for chaining
- * @template TContext  Enriched context type (default: FluentContext)
+ * @template TOutput   Output type for .Run()
+ * @template TDeploy   Output type for .Deploy()
+ * @template TStats    Output type for .Stats()
+ * @template TServices Services injected at runtime
+ * @template TSteps    Available step invokers
+ * @template TContext  Full execution context
  */
 export abstract class FluentRuntime<
   TAsCode extends EaCDetails<EaCVertexDetails>,
   TOutput = unknown,
+  TDeploy = Status,
+  TStats = unknown,
   TServices extends Record<string, unknown> = Record<string, unknown>,
   TSteps extends StepInvokerMap = StepInvokerMap,
   TContext extends FluentContext<TAsCode, TServices, TSteps> = FluentContext<
@@ -31,21 +36,74 @@ export abstract class FluentRuntime<
   public Init?(ctx: TContext): void | Promise<void>;
 
   /**
-   * User-defined main execution logic — must be implemented by subclasses.
+   * Optional cleanup hook after execution completes.
+   */
+  public Cleanup?(ctx: TContext): void | Promise<void>;
+
+  /**
+   * User-defined Run logic. Required.
    */
   protected abstract run(ctx: TContext): Promise<TOutput>;
 
   /**
-   * Entrypoint method. Validates verifications (if any) before calling `run()`.
+   * Optional Deploy logic. Must be set to use .Deploy().
    */
-  public async Execute(ctx: TContext): Promise<TOutput> {
-    return await this.runWithVerifications(ctx);
+  protected deploy?(ctx: TContext): Promise<TDeploy>;
+
+  /**
+   * Optional Stats logic. Must be set to use .Stats().
+   */
+  protected stats?(ctx: TContext): Promise<TStats>;
+
+  /**
+   * Entrypoint for standard execution.
+   */
+  public async Run(ctx: TContext): Promise<TOutput> {
+    return await this.executeWithVerifications(ctx, this.run.bind(this));
   }
 
   /**
-   * Optional cleanup hook after execution completes.
+   * Entrypoint for deployment behavior.
    */
-  public Cleanup?(ctx: TContext): void | Promise<void>;
+  public async Deploy(ctx: TContext): Promise<TDeploy> {
+    if (!this.deploy) throw new Error('Deploy() not implemented.');
+    return await this.executeWithVerifications(ctx, this.deploy.bind(this));
+  }
+
+  /**
+   * Entrypoint for stats query behavior.
+   */
+  public async Stats(ctx: TContext): Promise<TStats> {
+    if (!this.stats) throw new Error('Stats() not implemented.');
+    return await this.executeWithVerifications(ctx, this.stats.bind(this));
+  }
+
+  /**
+   * Shared execution logic across Run, Deploy, Stats with optional verifications.
+   */
+  protected async executeWithVerifications<TResult>(
+    ctx: TContext,
+    execute: (ctx: TContext) => Promise<TResult>,
+  ): Promise<TResult> {
+    const verifications = await this.injectVerifications?.(ctx);
+
+    if (verifications) {
+      const failures: Record<string, string> = {};
+
+      for (const [name, fn] of Object.entries(verifications)) {
+        const result = await fn(ctx);
+        if (result) failures[name] = result;
+      }
+
+      if (Object.keys(failures).length > 0) {
+        const err = new Error('FluentModule verification failed.');
+        (err as any).verifications = failures;
+        throw err;
+      }
+    }
+
+    return await execute(ctx);
+  }
 
   /**
    * Optionally injects services into context.
@@ -66,30 +124,6 @@ export abstract class FluentRuntime<
   protected injectVerifications?(
     ctx: TContext,
   ): Promise<VerificationInvokerMap<TContext>>;
-
-  /**
-   * Internal execution wrapper with optional verification check stage.
-   */
-  protected async runWithVerifications(ctx: TContext): Promise<TOutput> {
-    const verifications = await this.injectVerifications?.(ctx);
-
-    if (verifications) {
-      const failures: Record<string, string> = {};
-
-      for (const [name, fn] of Object.entries(verifications)) {
-        const result = await fn(ctx);
-        if (result) failures[name] = result;
-      }
-
-      if (Object.keys(failures).length > 0) {
-        const err = new Error('FluentModule verification failed.');
-        (err as any).verifications = failures;
-        throw err;
-      }
-    }
-
-    return await this.run(ctx);
-  }
 
   /**
    * Builds the full runtime context with injected services and substeps.

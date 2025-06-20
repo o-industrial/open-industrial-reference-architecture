@@ -17,10 +17,10 @@ export default function SimulatorNodeRenderer({
 }: NodeProps<SimulatorNodeData>) {
   const stats = data.useStats();
   const {
-    impulseRates = [],
-    instanceCount = 0,
-    avgStartupMs = 0,
-    lastDeploymentAt = '—',
+    ImpulseRates: impulseRates = [],
+    InstanceCount: instanceCount = 0,
+    AvgStartupMs: avgStartupMs = 0,
+    LastDeploymentAt: lastDeploymentAt = '—',
   } = stats || {};
 
   const lastDeployAge = useMemo(

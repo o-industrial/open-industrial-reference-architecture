@@ -1,3 +1,8 @@
-export type SurfaceConnectionStats = {
-  impulseRates?: number[];
-};
+import { RuntimeStatsSchema, z } from '../../.deps.ts';
+
+/**
+ * Stats model for a data connection inside a surface — impulse rate only.
+ */
+export const SurfaceConnectionStatsSchema = RuntimeStatsSchema;
+
+export type SurfaceConnectionStats = z.infer<typeof SurfaceConnectionStatsSchema>;

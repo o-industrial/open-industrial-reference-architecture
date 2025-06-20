@@ -10,7 +10,7 @@ export default function SurfaceConnectionNodeRenderer({
   data,
 }: NodeProps<SurfaceConnectionNodeData>) {
   const stats = data.useStats();
-  const impulses = stats?.impulseRates ?? [];
+  const impulses = stats?.ImpulseRates ?? [];
   const latest = impulses.at(-1);
 
   return (

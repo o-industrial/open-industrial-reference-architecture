@@ -3,6 +3,7 @@ import { OpenIndustrialConnectionAPI } from './OpenIndustrialConnectionAPI.ts';
 import { OpenIndustrialWorkspaceAPI } from './OpenIndustrialWorkspaceAPI.ts';
 import { OpenIndustrialProposalAPI } from './OpenIndustrialProposalAPI.ts';
 import { ClientHelperBridge } from './ClientHelperBridge.ts';
+import { OpenIndustrialStatsAPI } from './OpenIndustrialStatsAPI.ts';
 
 /**
  * The main OpenIndustrial client for interacting with all runtime APIs.
@@ -40,6 +41,14 @@ export class OpenIndustrialAPIClient extends EaCBaseClient {
   public readonly Proposals: OpenIndustrialProposalAPI;
 
   /**
+   * Subclient for runtime stats and observability.
+   *
+   * Currently supports:
+   * - `GetConnectionStats(connLookup)`
+   */
+  public readonly Stats: OpenIndustrialStatsAPI;
+
+  /**
    * Constructs a new OpenIndustrialAPIClient and initializes all subclients.
    *
    * @param baseUrl - The root API URL for OpenIndustrial (e.g. https://api.openindustrial.dev)
@@ -53,6 +62,7 @@ export class OpenIndustrialAPIClient extends EaCBaseClient {
     this.Workspaces = new OpenIndustrialWorkspaceAPI(bridge);
     this.Connections = new OpenIndustrialConnectionAPI(bridge);
     this.Proposals = new OpenIndustrialProposalAPI(bridge);
+    this.Stats = new OpenIndustrialStatsAPI(bridge);
   }
 
   /**

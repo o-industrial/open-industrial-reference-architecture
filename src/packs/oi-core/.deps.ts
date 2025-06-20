@@ -12,6 +12,16 @@ export type {
 } from '../../eac/.exports.ts';
 
 export {
+  DataConnection,
+  DataConnectionModuleBuilder,
+  type DataConnectionStats,
+} from '../../fluent/connections/.exports.ts';
+export { type StepInvokerMap } from '../../fluent/steps/.exports.ts';
+export { type RuntimeStats, RuntimeStatsSchema } from '../../types/.exports.ts';
+
+export { OpenIndustrialAPIClient } from '../../api/.exports.ts';
+
+export {
   type EaCNodeCapabilityAsCode,
   type EaCNodeCapabilityContext,
   EaCNodeCapabilityManager,
@@ -30,6 +40,8 @@ export {
   useEffect,
   useState,
 } from 'npm:preact@10.20.1/hooks';
-export type { NullableArrayOrObject } from 'jsr:@fathym/common@0.2.264';
 
 export { type NodeProps } from 'npm:reactflow@11.11.4';
+
+export type { NullableArrayOrObject } from 'jsr:@fathym/common@0.2.264';
+export { z } from 'jsr:@fathym/common@0.2.264/third-party/zod';

@@ -8,7 +8,7 @@ import { SurfaceAgentStats } from './SurfaceAgentStats.tsx';
 type SurfaceAgentInspectorProps = InspectorCommonProps<EaCAgentDetails, SurfaceAgentStats>;
 
 function AgentAnalyticsTab({ stats }: { stats?: SurfaceAgentStats }) {
-  const { matchesHandled = 0, avgLatencyMs = 0 } = stats ?? {};
+  const { MatchesHandled: matchesHandled = 0, AvgLatencyMs: avgLatencyMs = 0 } = stats ?? {};
 
   return (
     <div class='grid grid-cols-3 gap-2 mt-2'>
@@ -146,7 +146,7 @@ export function SurfaceAgentInspector({
       iconKey='agent'
       label={details.Name ?? 'OpenAI Agent'}
       enabled={enabled}
-      impulseRates={stats?.impulseRates ?? []}
+      impulseRates={stats?.ImpulseRates ?? []}
       onToggleEnabled={onToggleEnabled}
       onDelete={onDelete}
     >

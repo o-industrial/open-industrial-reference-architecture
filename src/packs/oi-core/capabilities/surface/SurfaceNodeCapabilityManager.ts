@@ -18,7 +18,6 @@ import {
 } from '../../.deps.ts';
 import { SurfaceInspector } from './SurfaceInspector.tsx';
 import SurfaceNodeRenderer from './SurfaceNodeRenderer.tsx';
-import { SurfaceStats } from './SurfaceStats.ts';
 
 /**
  * Capability manager for root-level surfaces (in workspace scope).
@@ -210,20 +209,5 @@ export class SurfaceNodeCapabilityManager extends EaCNodeCapabilityManager {
 
   protected override getRenderer() {
     return SurfaceNodeCapabilityManager.renderer;
-  }
-
-  protected override async getStats(
-    type: string,
-    id: string,
-    context: EaCNodeCapabilityContext,
-  ): Promise<SurfaceStats> {
-    const stats = await super.getStats(type, id, context);
-
-    return {
-      ...stats,
-      inputCount: Math.floor(Math.random() * 4) + 1,
-      agentCount: Math.floor(Math.random() * 3) + 1,
-      lastSignalAt: `${Math.floor(Math.random() * 60)}s ago`,
-    };
   }
 }

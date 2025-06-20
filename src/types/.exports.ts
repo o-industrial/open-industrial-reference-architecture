@@ -1,3 +1,4 @@
+export * from './RuntimeStatsSchema.ts';
 export * from './EaCHistorySnapshot.ts';
 export * from './IngestOption.ts';
 export * from './IntentTypes.ts';

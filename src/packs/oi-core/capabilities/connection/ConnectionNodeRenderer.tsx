@@ -19,7 +19,7 @@ export default function ConnectionNodeRenderer({
 }: NodeProps<DataConnectionNodeData>) {
   const stats = data.useStats();
 
-  const { impulseRates = [], connectionInfo = {} } = stats ?? {};
+  const { ImpulseRates: impulseRates = [], Metadata: connectionInfo = {} } = stats ?? {};
 
   const latest = impulseRates.at(-1);
 

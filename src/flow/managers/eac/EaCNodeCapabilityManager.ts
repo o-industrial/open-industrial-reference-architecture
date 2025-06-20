@@ -4,6 +4,7 @@ import {
   EaCFlowNodeMetadata,
   EaCVertexDetails,
   NullableArrayOrObject,
+  OpenIndustrialAPIClient,
   Position,
 } from '../../.deps.ts';
 import {
@@ -34,6 +35,9 @@ export abstract class EaCNodeCapabilityManager<
    * Canonical node type string, used for matching and capability resolution.
    */
   public abstract Type: string;
+
+  /** */
+  constructor(protected oiSvc: OpenIndustrialAPIClient) {}
 
   /**
    * Generate a partial EaC patch representing a valid connection from source → target.
@@ -265,21 +269,22 @@ export abstract class EaCNodeCapabilityManager<
    * Internal implementation of GetStats.
    * Subclasses can override this to extend or replace default metrics.
    */
-  protected getStats(
-    _type: string,
+  protected async getStats(
+    type: string,
     id: string,
     _1context: EaCNodeCapabilityContext,
   ): Promise<Record<string, unknown>> {
-    const buffer = this.getOrCreateImpulseBuffer(id);
+    return await this.oiSvc.Stats.GetStats(type, id);
+    // const buffer = this.getOrCreateImpulseBuffer(id);
 
-    const next = this.generateImpulseValue();
-    buffer.push(next);
+    // const next = this.generateImpulseValue();
+    // buffer.push(next);
 
-    if (buffer.length > 20) buffer.shift();
+    // if (buffer.length > 20) buffer.shift();
 
-    return Promise.resolve({
-      impulseRates: [...buffer],
-    });
+    // return Promise.resolve({
+    //   impulseRates: [...buffer],
+    // });
   }
 
   /**
@@ -330,34 +335,33 @@ export abstract class EaCNodeCapabilityManager<
     };
   }
 
-  //#region Temp Stats Share
-  protected readonly impulseBuffers: Record<string, number[]> = {};
+  // //#region Temp Stats Share
+  // protected readonly impulseBuffers: Record<string, number[]> = {};
 
-  /**
-   * Returns the rolling buffer for impulseRates. Creates it if missing.
-   */
-  protected getOrCreateImpulseBuffer(
-    id: string,
-    length = 20,
-    seed = 10,
-    range = 5,
-  ): number[] {
-    if (!this.impulseBuffers[id]) {
-      this.impulseBuffers[id] = Array.from(
-        { length },
-        () => this.generateImpulseValue(seed, range),
-      );
-    }
+  // /**
+  //  * Returns the rolling buffer for impulseRates. Creates it if missing.
+  //  */
+  // protected getOrCreateImpulseBuffer(
+  //   id: string,
+  //   length = 20,
+  //   seed = 10,
+  //   range = 5
+  // ): number[] {
+  //   if (!this.impulseBuffers[id]) {
+  //     this.impulseBuffers[id] = Array.from({ length }, () =>
+  //       this.generateImpulseValue(seed, range)
+  //     );
+  //   }
 
-    return this.impulseBuffers[id];
-  }
+  //   return this.impulseBuffers[id];
+  // }
 
-  /**
-   * Generates a synthetic impulse rate value.
-   * Subclasses may override to simulate different statistical patterns.
-   */
-  protected generateImpulseValue(seed = 10, range = 5): number {
-    return Number((seed + Math.random() * range).toFixed(2));
-  }
-  //#endregion
+  // /**
+  //  * Generates a synthetic impulse rate value.
+  //  * Subclasses may override to simulate different statistical patterns.
+  //  */
+  // protected generateImpulseValue(seed = 10, range = 5): number {
+  //   return Number((seed + Math.random() * range).toFixed(2));
+  // }
+  // //#endregion
 }

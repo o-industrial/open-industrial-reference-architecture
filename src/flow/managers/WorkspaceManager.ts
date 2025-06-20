@@ -35,9 +35,7 @@ import { WorkspaceSummary } from '../types/WorkspaceSummary.ts';
 import { TeamMember } from '../types/TeamMember.ts';
 import { BreadcrumbPart } from '../types/BreadcrumbPart.ts';
 import { IntentTypes } from '../../types/IntentTypes.ts';
-import { NodePreset } from '../.exports.ts';
-
-import { PackModule } from '../../types/PackModule.ts';
+import { EaCNodeCapabilityManager, NodePreset } from '../.exports.ts';
 
 export class WorkspaceManager {
   protected currentScope: {
@@ -59,7 +57,7 @@ export class WorkspaceManager {
   constructor(
     eac: OpenIndustrialEaC,
     protected oiSvc: OpenIndustrialAPIClient,
-    protected packs: Record<string, PackModule>,
+    capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>,
     scope: NodeScopeTypes = 'workspace',
   ) {
     this.currentScope = { Scope: scope };
@@ -86,7 +84,7 @@ export class WorkspaceManager {
       this.currentScope.Scope,
       this.Graph,
       this.History,
-      packs,
+      capabilitiesByScope,
     );
 
     this.Interaction.BindEaCManager(this.EaC);
@@ -726,8 +724,10 @@ export class WorkspaceManager {
     }
   }
 
-  public ReloadPacks(packs: Record<string, PackModule>): void {
-    this.EaC.LoadPacks(packs);
+  public ReloadCapabilities(
+    capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>,
+  ): void {
+    this.EaC.LoadCapabilities(capabilitiesByScope);
 
     this.SwitchToScope(this.currentScope.Scope, this.currentScope.Lookup);
   }

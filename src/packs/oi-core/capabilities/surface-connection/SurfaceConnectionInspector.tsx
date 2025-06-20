@@ -43,7 +43,7 @@ export function SurfaceConnectionInspector({
       iconKey='connection'
       label={details.Name}
       enabled={enabled}
-      impulseRates={stats?.impulseRates ?? []}
+      impulseRates={stats?.ImpulseRates ?? []}
       onToggleEnabled={onToggleEnabled}
       onDelete={onDelete}
     >

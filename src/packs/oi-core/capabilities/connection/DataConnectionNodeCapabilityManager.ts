@@ -20,7 +20,6 @@ import {
 } from '../../.deps.ts';
 import { ConnectionInspector } from './ConnectionInspector.tsx';
 import ConnectionNodeRenderer from './ConnectionNodeRenderer.tsx';
-import { DataConnectionStats } from './DataConnectionStats.ts';
 
 /**
  * Capability manager for workspace-scoped Data Connections.
@@ -246,21 +245,23 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
     return DataConnectionNodeCapabilityManager.renderer;
   }
 
-  protected override async getStats(
-    type: string,
-    id: string,
-    context: EaCNodeCapabilityContext,
-  ): Promise<DataConnectionStats> {
-    const stats = await super.getStats(type, id, context);
+  // protected override async getStats(
+  //   type: string,
+  //   id: string,
+  //   _context: EaCNodeCapabilityContext
+  // ): Promise<DataConnectionStats> {
+  //   return await this.oiSvc.Stats.GetStats(type, id);
 
-    return {
-      ...stats,
-      connectionInfo: {
-        BaseURL: 'https://api.mock.local',
-        Method: 'POST',
-        AuthType: 'SAS Token',
-        Status: 'Healthy',
-      },
-    };
-  }
+  //   // const stats = await super.getStats(type, id, context);
+
+  //   // return {
+  //   //   ...stats,
+  //   //   ConnectionInfo: {
+  //   //     BaseURL: 'https://api.mock.local',
+  //   //     Method: 'POST',
+  //   //     AuthType: 'SAS Token',
+  //   //     Status: 'Healthy',
+  //   //   },
+  //   // };
+  // }
 }

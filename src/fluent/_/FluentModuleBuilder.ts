@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any ban-types
-import type { ZodType } from './.deps.ts';
+import type { Status, ZodType } from './.deps.ts';
 import type { StepModule } from '../steps/StepModule.ts';
 import type { StepInvokerMap } from '../steps/StepInvokerMap.ts';
 import type { VerificationInvokerMap } from '../types/VerificationInvokerMap.ts';
@@ -11,15 +11,22 @@ import type { MaybeAsync } from '../types/MaybeAsync.ts';
 import { UsedKeys } from '../types/UsedKeys.ts';
 import { RemoveUsed } from '../types/RemoveUsed.ts';
 
-/**
- * Abstract fluent builder for creating typed runtime modules.
- */
 export abstract class FluentModuleBuilder<
   TAsCode extends EaCDetails<EaCVertexDetails>,
   TContext extends FluentContext<TAsCode, TServices, TSteps>,
-  TRuntime extends FluentRuntime<TAsCode, TOutput, TServices, TSteps, TContext>,
+  TRuntime extends FluentRuntime<
+    TAsCode,
+    TOutput,
+    TDeploy,
+    TStats,
+    TServices,
+    TSteps,
+    TContext
+  >,
   TModule,
   TOutput = unknown,
+  TDeploy = Status,
+  TStats = unknown,
   TServices extends Record<string, unknown> = Record<string, unknown>,
   TSteps extends StepInvokerMap = StepInvokerMap,
   TUsed extends UsedKeys = {},
@@ -42,8 +49,10 @@ export abstract class FluentModuleBuilder<
   ) => MaybeAsync<VerificationInvokerMap<TContext>>;
 
   protected runFn?: (ctx: TContext) => Promise<TOutput>;
+  protected deployFn?: (ctx: TContext) => Promise<TDeploy>;
+  protected statsFn?: (ctx: TContext) => Promise<TStats>;
 
-  constructor(protected readonly name: string) {}
+  constructor(protected readonly lookup: string) {}
 
   public Output<O extends TOutput>(
     schema: ZodType<O>,
@@ -51,9 +60,11 @@ export abstract class FluentModuleBuilder<
     FluentModuleBuilder<
       TAsCode,
       TContext,
-      FluentRuntime<TAsCode, O, TServices, TSteps, TContext>,
+      FluentRuntime<TAsCode, O, TDeploy, TStats, TServices, TSteps, TContext>,
       TModule,
       O,
+      TDeploy,
+      TStats,
       TServices,
       TSteps,
       TUsed & { Output: true }
@@ -76,12 +87,16 @@ export abstract class FluentModuleBuilder<
       FluentRuntime<
         TAsCode,
         TOutput,
+        TDeploy,
+        TStats,
         NextServices,
         TSteps,
         FluentContext<TAsCode, NextServices, TSteps>
       >,
       TModule,
       TOutput,
+      TDeploy,
+      TStats,
       NextServices,
       TSteps,
       TUsed & { Services: true }
@@ -118,6 +133,8 @@ export abstract class FluentModuleBuilder<
       FluentRuntime<
         TAsCode,
         TOutput,
+        TDeploy,
+        TStats,
         TServices,
         {
           [K in keyof TStepsRecord]: TStepsRecord[K] extends StepModule<
@@ -146,6 +163,8 @@ export abstract class FluentModuleBuilder<
       >,
       TModule,
       TOutput,
+      TDeploy,
+      TStats,
       TServices,
       {
         [K in keyof TStepsRecord]: TStepsRecord[K] extends StepModule<
@@ -179,6 +198,20 @@ export abstract class FluentModuleBuilder<
     return this as any;
   }
 
+  public Deploy(
+    fn: (ctx: TContext) => Promise<TDeploy>,
+  ): RemoveUsed<this, TUsed & { Deploy: true }> {
+    this.deployFn = fn;
+    return this as any;
+  }
+
+  public Stats(
+    fn: (ctx: TContext) => Promise<TStats>,
+  ): RemoveUsed<this, TUsed & { Stats: true }> {
+    this.statsFn = fn;
+    return this as any;
+  }
+
   public abstract Build(): TModule;
 
   protected customRuntimeClass?(): new () => TRuntime;
@@ -186,6 +219,8 @@ export abstract class FluentModuleBuilder<
   protected buildRuntime(): new () => TRuntime {
     const {
       runFn,
+      deployFn,
+      statsFn,
       servicesFactory,
       stepFactory,
       verificationFactory,
@@ -195,14 +230,33 @@ export abstract class FluentModuleBuilder<
     const RuntimeBase = (customRuntimeClass?.() as new () => FluentRuntime<
       TAsCode,
       TOutput,
+      TDeploy,
+      TStats,
       TServices,
       TSteps,
       TContext
-    >) ?? FluentRuntime<TAsCode, TOutput, TServices, TSteps, TContext>;
+    >) ??
+      FluentRuntime<
+        TAsCode,
+        TOutput,
+        TDeploy,
+        TStats,
+        TServices,
+        TSteps,
+        TContext
+      >;
 
     const RuntimeImpl = class extends RuntimeBase {
       override async run(ctx: TContext): Promise<TOutput> {
         return await runFn!(ctx);
+      }
+
+      override deploy?(ctx: TContext): Promise<TDeploy> {
+        return deployFn!(ctx);
+      }
+
+      override stats?(ctx: TContext): Promise<TStats> {
+        return statsFn!(ctx);
       }
 
       override async injectServices(
