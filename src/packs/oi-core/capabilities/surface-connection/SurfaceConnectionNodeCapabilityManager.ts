@@ -1,18 +1,15 @@
+import { SurfaceDataConnectionSettings } from '../../../../eac/EaCSurfaceAsCode.ts';
+import { EverythingAsCodeOIWorkspace } from '../../../../eac/EverythingAsCodeOIWorkspace.ts';
 import {
-  ComponentType,
   EaCNodeCapabilityAsCode,
   EaCNodeCapabilityContext,
   EaCNodeCapabilityManager,
   EaCNodeCapabilityPatch,
-  EverythingAsCodeOIWorkspace,
   FlowGraphEdge,
   FlowGraphNode,
-  FunctionComponent,
-  memo,
-  NullableArrayOrObject,
-  OpenIndustrialEaC,
-  SurfaceDataConnectionSettings,
-} from '../../.deps.ts';
+} from '../../../../flow/.exports.ts';
+import { OpenIndustrialEaC } from '../../../../types/OpenIndustrialEaC.ts';
+import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import { SurfaceConnectionInspector } from './SurfaceConnectionInspector.tsx';
 import SurfaceConnectionNodeRenderer from './SurfaceConnectionNodeRenderer.tsx';
 

@@ -1,14 +1,3 @@
-export { Step, StepModuleBuilder } from '../../fluent/steps/.exports.ts';
-
-export type {
-  EaCAzureIoTHubDataConnectionDetails,
-  EaCDataConnectionAsCode,
-} from '../../eac/.exports.ts';
-
-export { DataConnection, DataConnectionModuleBuilder } from '../../fluent/connections/.exports.ts';
-
-export { type StepInvokerMap } from '../../fluent/steps/.exports.ts';
-
 export { IotHubClient } from 'npm:@azure/arm-iothub@6.3.0';
 export { Registry as IoTRegistry } from 'npm:azure-iothub@1.16.5';
 

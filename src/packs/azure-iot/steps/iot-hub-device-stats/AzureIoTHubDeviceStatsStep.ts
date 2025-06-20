@@ -1,4 +1,6 @@
-import { AccessToken, IotHubClient, IoTRegistry, Step, StepModuleBuilder } from '../../.deps.ts';
+import { Step } from '../../../../fluent/steps/Step.ts';
+import { StepModuleBuilder } from '../../../../fluent/steps/StepModuleBuilder.ts';
+import { AccessToken, IotHubClient, IoTRegistry } from '../../.deps.ts';
 
 import { AzureResolveCredentialStep } from '../resolve-credential/AzureResolveCredentialStep.ts';
 

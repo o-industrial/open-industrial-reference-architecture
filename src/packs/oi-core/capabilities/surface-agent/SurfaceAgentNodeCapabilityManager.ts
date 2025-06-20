@@ -1,20 +1,17 @@
+import { Position } from '../../../../eac/.exports.ts';
 import { EaCAgentDetails } from '../../../../eac/EaCAgentDetails.ts';
+import { EaCFlowNodeMetadata } from '../../../../eac/EaCFlowNodeMetadata.ts';
 import { SurfaceAgentSettings } from '../../../../eac/EaCSurfaceAsCode.ts';
 import {
-  ComponentType,
-  EaCFlowNodeMetadata,
   EaCNodeCapabilityAsCode,
   EaCNodeCapabilityContext,
   EaCNodeCapabilityManager,
   EaCNodeCapabilityPatch,
   FlowGraphEdge,
   FlowGraphNode,
-  FunctionComponent,
-  memo,
-  NullableArrayOrObject,
-  OpenIndustrialEaC,
-  Position,
-} from '../../.deps.ts';
+} from '../../../../flow/.exports.ts';
+import { OpenIndustrialEaC } from '../../../../types/OpenIndustrialEaC.ts';
+import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import { SurfaceAgentInspector } from './SurfaceAgentInspector.tsx';
 import SurfaceAgentNodeRenderer from './SurfaceAgentNodeRenderer.tsx';
 

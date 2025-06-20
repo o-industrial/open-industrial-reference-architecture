@@ -1,21 +1,19 @@
-import { SurfaceEventRouter, WorkspaceManager } from '../../../../flow/.exports.ts';
+import { Position } from '../../../../eac/.exports.ts';
+import { EaCFlowNodeMetadata } from '../../../../eac/EaCFlowNodeMetadata.ts';
+import { EaCSurfaceAsCode } from '../../../../eac/EaCSurfaceAsCode.ts';
+import { EverythingAsCodeOIWorkspace } from '../../../../eac/EverythingAsCodeOIWorkspace.ts';
 import {
-  ComponentType,
-  EaCFlowNodeMetadata,
   EaCNodeCapabilityAsCode,
   EaCNodeCapabilityContext,
   EaCNodeCapabilityManager,
   EaCNodeCapabilityPatch,
-  EaCSurfaceAsCode,
-  EverythingAsCodeOIWorkspace,
   FlowGraphEdge,
   FlowGraphNode,
-  FunctionComponent,
-  memo,
-  NullableArrayOrObject,
-  OpenIndustrialEaC,
-  Position,
-} from '../../.deps.ts';
+  SurfaceEventRouter,
+  WorkspaceManager,
+} from '../../../../flow/.exports.ts';
+import { OpenIndustrialEaC } from '../../../../types/OpenIndustrialEaC.ts';
+import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import { SurfaceInspector } from './SurfaceInspector.tsx';
 import SurfaceNodeRenderer from './SurfaceNodeRenderer.tsx';
 

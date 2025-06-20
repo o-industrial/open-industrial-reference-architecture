@@ -1,21 +1,18 @@
+import { Position } from '../../../../eac/.exports.ts';
 import { EaCAzureDockerSimulatorDetails } from '../../../../eac/EaCAzureDockerSimulatorDetails.ts';
+import { EaCFlowNodeMetadata } from '../../../../eac/EaCFlowNodeMetadata.ts';
 import { EaCSimulatorAsCode } from '../../../../eac/EaCSimulatorAsCode.ts';
+import { EverythingAsCodeOIWorkspace } from '../../../../eac/EverythingAsCodeOIWorkspace.ts';
 import {
-  ComponentType,
-  EaCFlowNodeMetadata,
   EaCNodeCapabilityAsCode,
   EaCNodeCapabilityContext,
   EaCNodeCapabilityManager,
   EaCNodeCapabilityPatch,
-  EverythingAsCodeOIWorkspace,
   FlowGraphEdge,
   FlowGraphNode,
-  FunctionComponent,
-  memo,
-  NullableArrayOrObject,
-  OpenIndustrialEaC,
-  Position,
-} from '../../.deps.ts';
+} from '../../../../flow/.exports.ts';
+import { OpenIndustrialEaC } from '../../../../types/OpenIndustrialEaC.ts';
+import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import { SimulatorInspector } from './SimulatorInspector.tsx';
 import SimulatorNodeRenderer from './SimulatorNodeRenderer.tsx';
 

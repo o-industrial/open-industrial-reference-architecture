@@ -1,8 +1,11 @@
-import { RuntimeStatsSchema, z } from '../../.deps.ts';
+import { RuntimeStatsSchema } from '../../../../types/RuntimeStatsSchema.ts';
+import { z } from '../../.deps.ts';
 
 /**
  * Stats model for a data connection inside a surface — impulse rate only.
  */
 export const SurfaceConnectionStatsSchema = RuntimeStatsSchema;
 
-export type SurfaceConnectionStats = z.infer<typeof SurfaceConnectionStatsSchema>;
+export type SurfaceConnectionStats = z.infer<
+  typeof SurfaceConnectionStatsSchema
+>;

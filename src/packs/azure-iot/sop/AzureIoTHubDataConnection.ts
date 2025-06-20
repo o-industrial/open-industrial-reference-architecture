@@ -1,15 +1,13 @@
-import {
-  DataConnection,
-  DataConnectionModuleBuilder,
-  EaCAzureIoTHubDataConnectionDetails,
-  EaCDataConnectionAsCode,
-  Status,
-} from '../.deps.ts';
+import { Status } from '../.deps.ts';
 
 import { AzureIoTHubDeviceStep } from '../steps/iot-hub-device/AzureIoTHubDeviceStep.ts';
 import { AzureIoTHubDeviceStatsStep } from '../steps/iot-hub-device-stats/AzureIoTHubDeviceStatsStep.ts';
 import { AzureIoTHubDeviceOutput } from '../steps/iot-hub-device/AzureIoTHubDeviceOutput.ts';
 import { AzureIoTHubDeviceStatsOutput } from '../steps/iot-hub-device-stats/AzureIoTHubDeviceStatsOutput.ts';
+import { EaCAzureIoTHubDataConnectionDetails } from '../../../eac/EaCAzureIoTHubDataConnectionDetails.ts';
+import { EaCDataConnectionAsCode } from '../../../eac/EaCDataConnectionAsCode.ts';
+import { DataConnection } from '../../../fluent/connections/DataConnection.ts';
+import { DataConnectionModuleBuilder } from '../../../fluent/connections/DataConnectionModuleBuilder.ts';
 
 export function AzureIoTHubDataConnection(
   lookup: string,

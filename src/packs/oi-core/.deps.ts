@@ -1,36 +1,3 @@
-export type { IngestOption, OpenIndustrialEaC } from '../../types/.exports.ts';
-
-export type {
-  EaCAzureIoTHubDataConnectionDetails,
-  EaCDataConnectionAsCode,
-  EaCDataConnectionDetails,
-  EaCFlowNodeMetadata,
-  EaCSurfaceAsCode,
-  EverythingAsCodeOIWorkspace,
-  Position,
-  SurfaceDataConnectionSettings,
-} from '../../eac/.exports.ts';
-
-export {
-  DataConnection,
-  DataConnectionModuleBuilder,
-  type DataConnectionStats,
-} from '../../fluent/connections/.exports.ts';
-export { type StepInvokerMap } from '../../fluent/steps/.exports.ts';
-export { type RuntimeStats, RuntimeStatsSchema } from '../../types/.exports.ts';
-
-export { OpenIndustrialAPIClient } from '../../api/.exports.ts';
-
-export {
-  type EaCNodeCapabilityAsCode,
-  type EaCNodeCapabilityContext,
-  EaCNodeCapabilityManager,
-  type EaCNodeCapabilityPatch,
-  type FlowGraphEdge,
-  type FlowGraphNode,
-  type FlowNodeData,
-} from '../../flow/.exports.ts';
-
 export type { ComponentType, FunctionComponent, JSX } from 'npm:preact@10.20.1';
 export { memo, useMemo } from 'npm:preact@10.20.1/compat';
 export {

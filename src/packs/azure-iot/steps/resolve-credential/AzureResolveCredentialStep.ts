@@ -1,9 +1,6 @@
-import {
-  ClientSecretCredential,
-  ConfidentialClientApplication,
-  Step,
-  StepModuleBuilder,
-} from '../../.deps.ts';
+import { Step } from '../../../../fluent/steps/Step.ts';
+import { StepModuleBuilder } from '../../../../fluent/steps/StepModuleBuilder.ts';
+import { ClientSecretCredential, ConfidentialClientApplication } from '../../.deps.ts';
 import {
   AzureResolveCredentialInput,
   AzureResolveCredentialInputSchema,

@@ -1,10 +1,10 @@
-import { EaCAzureIoTHubDataConnectionDetails } from '../../.deps.ts';
 import {
   ConnectionInfoPanel,
   ConnectionManagementForm,
   InspectorBase,
   TabbedPanel,
 } from '../../../../../atomic/.exports.ts';
+import { EaCAzureIoTHubDataConnectionDetails } from '../../../../eac/EaCAzureIoTHubDataConnectionDetails.ts';
 import { InspectorCommonProps } from '../../../../flow/.exports.ts';
 import { DataConnectionConfig } from './DataConnectionConfig.ts';
 import { DataConnectionStats } from './DataConnectionStats.ts';

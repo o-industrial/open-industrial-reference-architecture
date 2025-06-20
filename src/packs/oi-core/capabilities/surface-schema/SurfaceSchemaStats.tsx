@@ -1,4 +1,5 @@
-import { RuntimeStatsSchema, z } from '../../.deps.ts';
+import { RuntimeStatsSchema } from '../../../../types/RuntimeStatsSchema.ts';
+import { z } from '../../.deps.ts';
 
 /**
  * Stats model for a schema attached to a surface — impulse rate only.

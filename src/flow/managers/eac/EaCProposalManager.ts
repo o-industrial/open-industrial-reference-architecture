@@ -1,5 +1,7 @@
-import { OpenIndustrialAPIClient, Proposal, RecordKind } from '../../.deps.ts';
+import { OpenIndustrialAPIClient } from '../../../api/.exports.ts';
 import { OpenIndustrialEaC } from '../../../types/OpenIndustrialEaC.ts';
+import { Proposal } from '../../../types/Proposal.ts';
+import { RecordKind } from '../../../types/RecordKind.ts';
 import { EaCManager } from '../EaCManager.ts';
 
 /**

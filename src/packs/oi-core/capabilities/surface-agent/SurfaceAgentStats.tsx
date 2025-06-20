@@ -1,4 +1,5 @@
-import { RuntimeStatsSchema, z } from '../../.deps.ts';
+import { RuntimeStatsSchema } from '../../../../types/RuntimeStatsSchema.ts';
+import { z } from '../../.deps.ts';
 
 /**
  * Stats model for a single surface-bound agent — includes match rate and latency.
@@ -21,7 +22,9 @@ export const SurfaceAgentStatsSchema = RuntimeStatsSchema.extend({
     .number()
     .nonnegative()
     .optional()
-    .describe('Average latency (ms) between impulse match and action execution'),
+    .describe(
+      'Average latency (ms) between impulse match and action execution',
+    ),
 
   /**
    * Duration since the agent was last triggered, expressed as a human-readable string.

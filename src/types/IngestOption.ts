@@ -1,4 +1,4 @@
-import { MultiProtocolIngestOption } from './.deps.ts';
+import { MultiProtocolIngestOption } from '../eac/EaCDataConnectionDetails.ts';
 
 export type IngestOption = {
   label: string;

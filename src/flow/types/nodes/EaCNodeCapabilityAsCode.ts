@@ -1,4 +1,5 @@
-import { EaCFlowNodeMetadata, EaCVertexDetails } from '../../.deps.ts';
+import { EaCFlowNodeMetadata } from '../../../eac/EaCFlowNodeMetadata.ts';
+import { EaCVertexDetails } from '../../.deps.ts';
 
 /**
  * Return structure for a GetAsCode call.

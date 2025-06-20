@@ -1,23 +1,22 @@
+import { Position } from '../../../../eac/.exports.ts';
+import { EaCAzureIoTHubDataConnectionDetails } from '../../../../eac/EaCAzureIoTHubDataConnectionDetails.ts';
+import { EaCDataConnectionAsCode } from '../../../../eac/EaCDataConnectionAsCode.ts';
+import { EaCFlowNodeMetadata } from '../../../../eac/EaCFlowNodeMetadata.ts';
 import {
-  ComponentType,
-  EaCAzureIoTHubDataConnectionDetails,
-  EaCDataConnectionAsCode,
-  EaCFlowNodeMetadata,
+  EaCSurfaceAsCode,
+  SurfaceDataConnectionSettings,
+} from '../../../../eac/EaCSurfaceAsCode.ts';
+import { EverythingAsCodeOIWorkspace } from '../../../../eac/EverythingAsCodeOIWorkspace.ts';
+import {
   EaCNodeCapabilityAsCode,
   EaCNodeCapabilityContext,
   EaCNodeCapabilityManager,
   EaCNodeCapabilityPatch,
-  EaCSurfaceAsCode,
-  EverythingAsCodeOIWorkspace,
   FlowGraphEdge,
   FlowGraphNode,
-  FunctionComponent,
-  memo,
-  NullableArrayOrObject,
-  OpenIndustrialEaC,
-  Position,
-  SurfaceDataConnectionSettings,
-} from '../../.deps.ts';
+} from '../../../../flow/.exports.ts';
+import { OpenIndustrialEaC } from '../../../../types/OpenIndustrialEaC.ts';
+import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import { ConnectionInspector } from './ConnectionInspector.tsx';
 import ConnectionNodeRenderer from './ConnectionNodeRenderer.tsx';
 

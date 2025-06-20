@@ -1,4 +1,4 @@
-import { parseEverythingAsCodeOIWorkspace, parseJsonc } from './.deps.ts';
+import { parseJsonc } from './.deps.ts';
 
 import type { WorkspaceDFSContextManager } from './WorkspaceDFSContextManager.ts';
 import { type WorkspaceContext, WorkspaceContextSchema } from '../types/WorkspaceContext.ts';
@@ -6,7 +6,10 @@ import type { WorkspaceConfig } from '../types/WorkspaceConfig.ts';
 import type { ISecretProvider } from '../../secrets/providers/ISecretProvider.ts';
 import { SecretResolverChain } from '../../secrets/SecretResolverChain.ts';
 import type { IoCContainer } from './.deps.ts';
-import type { EverythingAsCodeOIWorkspace } from '../types/.deps.ts';
+import {
+  EverythingAsCodeOIWorkspace,
+  parseEverythingAsCodeOIWorkspace,
+} from '../../eac/EverythingAsCodeOIWorkspace.ts';
 
 /**
  * Builds and manages a WorkspaceContext with DFS, Secrets, and Everything-as-Code.

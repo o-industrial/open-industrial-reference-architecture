@@ -1,12 +1,11 @@
-import {
-  EverythingAsCodeOIWorkspace,
-  EverythingAsCodeOIWorkspaceSchema,
-  IoCContainer,
-  z,
-} from './.deps.ts';
+import { IoCContainer, z } from './.deps.ts';
 
 import { WorkspaceDFSContextManager } from '../workspaces/WorkspaceDFSContextManager.ts';
 import { WorkspaceConfig, WorkspaceConfigSchema } from './WorkspaceConfig.ts';
+import {
+  EverythingAsCodeOIWorkspace,
+  EverythingAsCodeOIWorkspaceSchema,
+} from '../../eac/EverythingAsCodeOIWorkspace.ts';
 
 /**
  * Defines the full execution context for Workspace-related runtimes.

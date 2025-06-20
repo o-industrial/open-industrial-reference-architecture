@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { ComponentType, NullableArrayOrObject, Position } from '../../.deps.ts';
+import { ComponentType, NullableArrayOrObject } from '../../.deps.ts';
 
 import { FlowGraphEdge } from '../../types/graph/FlowGraphEdge.ts';
 import { FlowGraphNode } from '../../types/graph/FlowGraphNode.ts';
@@ -13,6 +13,7 @@ import { NodePreset } from '../../types/react/NodePreset.ts';
 import { WorkspaceManager } from '../WorkspaceManager.ts';
 import { NodeEventRouter } from '../../types/nodes/NodeEventRouter.ts';
 import { OpenIndustrialEaC } from '../../types/OpenIndustrialEaC.ts';
+import { Position } from '../../../eac/types/Position.ts';
 
 /**
  * Pure registry and dispatcher for active node capability managers.
@@ -28,9 +29,7 @@ export class EaCCapabilitiesManager {
     this.capabilities = capabilities;
 
     this.rendererMap = Object.fromEntries(
-      capabilities
-        .map((c) => [c.Type, c.GetRenderer()])
-        .filter(([, r]) => !!r),
+      capabilities.map((c) => [c.Type, c.GetRenderer()]).filter(([, r]) => !!r),
     );
   }
 

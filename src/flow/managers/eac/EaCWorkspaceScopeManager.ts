@@ -1,4 +1,4 @@
-import { EaCAzureDockerSimulatorDetails, Edge, EdgeChange } from '../../.deps.ts';
+import { Edge, EdgeChange } from '../../.deps.ts';
 import { EaCScopeManager } from './EaCScopeManager.ts';
 import { FlowGraph } from '../../types/graph/FlowGraph.ts';
 import { FlowGraphEdge } from '../../types/graph/FlowGraphEdge.ts';
@@ -6,6 +6,7 @@ import { FlowGraphNode } from '../../types/graph/FlowGraphNode.ts';
 
 import { OpenIndustrialEaC } from '../../../types/OpenIndustrialEaC.ts';
 import { SimulatorDefinition } from '../SimulatorLibraryManager.ts';
+import { EaCAzureDockerSimulatorDetails } from '../../../eac/EaCAzureDockerSimulatorDetails.ts';
 
 export class EaCWorkspaceScopeManager extends EaCScopeManager {
   public BuildGraph(): FlowGraph {

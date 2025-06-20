@@ -1,12 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
-import {
-  ComponentType,
-  EaCFlowNodeMetadata,
-  EaCVertexDetails,
-  NullableArrayOrObject,
-  OpenIndustrialAPIClient,
-  Position,
-} from '../../.deps.ts';
+import { OpenIndustrialAPIClient } from '../../../api/.exports.ts';
+import { Position } from '../../../eac/.exports.ts';
+import { EaCFlowNodeMetadata } from '../../../eac/EaCFlowNodeMetadata.ts';
+import { ComponentType, EaCVertexDetails, NullableArrayOrObject } from '../../.deps.ts';
 import {
   EaCNodeCapabilityAsCode,
   EaCNodeCapabilityContext,

@@ -1,15 +1,12 @@
-import {
-  defineFluentModule,
-  EaCDataConnectionAsCode,
-  EaCDataConnectionDetails,
-  FluentModule,
-  FluentModuleBuilder,
-  FluentRuntime,
-  Status,
-} from './.deps.ts';
+import { Status } from './.deps.ts';
 
 import type { StepInvokerMap } from '../steps/StepInvokerMap.ts';
 import type { FluentContext } from '../types/FluentContext.ts';
+import { EaCDataConnectionAsCode } from '../../eac/EaCDataConnectionAsCode.ts';
+import { EaCDataConnectionDetails } from '../../eac/EaCDataConnectionDetails.ts';
+import { defineFluentModule, FluentModule } from '../_/FluentModule.ts';
+import { FluentModuleBuilder } from '../_/FluentModuleBuilder.ts';
+import { FluentRuntime } from '../_/FluentRuntime.ts';
 
 /**
  * Concrete builder for DataConnection modules.

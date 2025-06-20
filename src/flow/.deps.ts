@@ -1,14 +1,3 @@
-export type {
-  EaCAzureDockerSimulatorDetails,
-  EaCFlowNodeMetadata,
-  EverythingAsCodeOIWorkspace,
-  Position,
-} from '../eac/.exports.ts';
-
-export { OpenIndustrialAPIClient } from '../api/.exports.ts';
-
-export type { EaCHistorySnapshot, Proposal, RecordKind } from '../types/.exports.ts';
-
 export { jsonMapSetClone, merge, type NullableArrayOrObject } from 'jsr:@fathym/common@0.2.264';
 
 export type {

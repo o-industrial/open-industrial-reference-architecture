@@ -1,7 +1,5 @@
 import {
   EaCEnterpriseDetails,
-  EaCFlowNodeMetadata,
-  EaCHistorySnapshot,
   EaCStatus,
   EaCVertexDetails,
   Edge,
@@ -11,10 +9,6 @@ import {
   Node,
   NodeChange,
   NullableArrayOrObject,
-  OpenIndustrialAPIClient,
-  Position,
-  Proposal,
-  RecordKind,
 } from '../.deps.ts';
 
 import { HistoryManager } from './HistoryManager.ts';
@@ -35,6 +29,12 @@ import { EaCNodeCapabilityManager } from './eac/EaCNodeCapabilityManager.ts';
 
 import { ProposalOverlayMode } from '../types/graph/ProposalOverlayMode.ts';
 import { WorkspaceSummary } from '../types/WorkspaceSummary.ts';
+import { OpenIndustrialAPIClient } from '../../api/.exports.ts';
+import { Position } from '../../eac/.exports.ts';
+import { EaCFlowNodeMetadata } from '../../eac/EaCFlowNodeMetadata.ts';
+import { EaCHistorySnapshot } from '../../types/EaCHistorySnapshot.ts';
+import { Proposal } from '../../types/Proposal.ts';
+import { RecordKind } from '../../types/RecordKind.ts';
 
 /**
  * Top-level controller for managing the Everything-as-Code runtime state,

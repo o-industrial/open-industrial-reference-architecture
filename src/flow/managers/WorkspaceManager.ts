@@ -10,7 +10,6 @@ import {
   merge,
   Node,
   NodeChange,
-  OpenIndustrialAPIClient,
   StateUpdater,
   useCallback,
   useEffect,
@@ -36,6 +35,7 @@ import { TeamMember } from '../types/TeamMember.ts';
 import { BreadcrumbPart } from '../types/BreadcrumbPart.ts';
 import { IntentTypes } from '../../types/IntentTypes.ts';
 import { EaCNodeCapabilityManager, NodePreset } from '../.exports.ts';
+import { OpenIndustrialAPIClient } from '../../api/clients/OpenIndustrialAPIClient.ts';
 
 export class WorkspaceManager {
   protected currentScope: {
