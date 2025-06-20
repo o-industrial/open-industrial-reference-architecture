@@ -1,20 +1,17 @@
+import { Position } from '../../../../eac/.exports.ts';
+import { EaCFlowNodeMetadata } from '../../../../eac/EaCFlowNodeMetadata.ts';
 import {
-    ComponentType,
-    EaCFlowNodeMetadata,
-    EaCNodeCapabilityAsCode,
-    EaCNodeCapabilityContext,
-    EaCNodeCapabilityManager,
-    EaCNodeCapabilityPatch,
-    FlowGraphEdge,
-    FlowGraphNode,
-    FunctionComponent,
-    memo,
-    NullableArrayOrObject,
-    OpenIndustrialEaC,
-    Position,
-  } from '../../.deps.ts';
+  EaCNodeCapabilityAsCode,
+  EaCNodeCapabilityContext,
+  EaCNodeCapabilityManager,
+  EaCNodeCapabilityPatch,
+  FlowGraphEdge,
+  FlowGraphNode,
+} from '../../../../flow/.exports.ts';
+import { OpenIndustrialEaC } from '../../../../types/OpenIndustrialEaC.ts';
 import { EaCWarmQueryDetails, SurfaceWarmQuerySettings } from '../../../../eac/.deps.ts';
 import { SurfaceWarmQueryInspector } from './SurfaceWarmQueryInspector.tsx';
+import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import SurfaceWarmQueryNodeRenderer from './SurfaceWarmQueryNodeRenderer.tsx';
 import { SurfaceWarmQueryStats } from './SurfaceWarmQueryStats.tsx';
 
