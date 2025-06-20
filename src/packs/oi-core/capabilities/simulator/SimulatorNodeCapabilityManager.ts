@@ -51,23 +51,7 @@ export class SimulatorNodeCapabilityManager
     target: FlowGraphNode,
     ctx: EaCNodeCapabilityContext,
   ): Partial<OpenIndustrialEaC> | null {
-    if (source.Type !== 'simulator' || target.Type !== 'connection') {
-      return null;
-    }
-
-    const eac = ctx.GetEaC() as EverythingAsCodeOIWorkspace;
-    const existing = eac.DataConnections?.[target.ID]?.SimulatorLookup;
-
-    if (existing === source.ID) return null;
-
-    return {
-      DataConnections: {
-        [target.ID]: {
-          ...eac.DataConnections?.[target.ID],
-          SimulatorLookup: source.ID,
-        },
-      },
-    };
+    return null;
   }
 
   protected override buildDeletePatch(
@@ -81,23 +65,7 @@ export class SimulatorNodeCapabilityManager
     target: FlowGraphNode,
     ctx: EaCNodeCapabilityContext,
   ): Partial<OpenIndustrialEaC> | null {
-    if (source.Type !== 'simulator' || target.Type !== 'connection') {
-      return null;
-    }
-
-    const eac = ctx.GetEaC() as EverythingAsCodeOIWorkspace;
-    const conn = eac.DataConnections?.[target.ID];
-
-    if (!conn || conn.SimulatorLookup !== source.ID) return null;
-
-    return {
-      DataConnections: {
-        [target.ID]: {
-          ...conn,
-          SimulatorLookup: undefined,
-        },
-      },
-    };
+    return null;
   }
 
   protected override buildEdgesForNode(

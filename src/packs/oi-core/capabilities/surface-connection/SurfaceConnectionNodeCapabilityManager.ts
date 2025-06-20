@@ -65,21 +65,7 @@ export class SurfaceConnectionNodeCapabilityManager
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
   ): Partial<OpenIndustrialEaC> | null {
-    const [_surfaceId, connId] = this.extractCompoundIDs(source);
-
-    if (!target.Type?.includes('schema')) return null;
-
-    const schema = context.GetEaC().Schemas?.[target.ID];
-    if (!schema) return null;
-
-    return {
-      Schemas: {
-        [target.ID]: {
-          ...schema,
-          DataConnection: { Lookup: connId },
-        },
-      },
-    };
+    return null;
   }
 
   protected override buildDeletePatch(
@@ -103,21 +89,7 @@ export class SurfaceConnectionNodeCapabilityManager
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
   ): Partial<OpenIndustrialEaC> | null {
-    const eac = context.GetEaC() as EverythingAsCodeOIWorkspace;
-    const [_, connId] = this.extractCompoundIDs(source);
-
-    if (!target.Type?.includes('schema')) return null;
-
-    const schema = eac.Schemas?.[target.ID];
-    if (!schema || schema.DataConnection?.Lookup !== connId) return null;
-
-    const { _DataConnection, ...rest } = schema;
-
-    return {
-      Schemas: {
-        [target.ID]: rest,
-      },
-    };
+    return null;
   }
 
   protected override buildEdgesForNode(

@@ -6,12 +6,14 @@ import { SurfaceAgentNodeCapabilityManager } from './capabilities/surface-agent/
 import { SurfaceConnectionNodeCapabilityManager } from './capabilities/surface-connection/SurfaceConnectionNodeCapabilityManager.ts';
 import { SurfaceSchemaNodeCapabilityManager } from './capabilities/surface-schema/SurfaceSchemaNodeCapabilityManager.ts';
 import { SurfaceNodeCapabilityManager } from './capabilities/surface/SurfaceNodeCapabilityManager.ts';
+import { SurfaceWarmQueryNodeCapabilityManager } from './capabilities/surface-warmquery/SurfaceWarmQueryNodeCapabilityManager.tsx';
 
 export default Pack().Capabilities({
   surface: [
     new SurfaceSchemaNodeCapabilityManager(),
     new SurfaceAgentNodeCapabilityManager(),
     new SurfaceConnectionNodeCapabilityManager(),
+    new SurfaceWarmQueryNodeCapabilityManager(),
   ],
   workspace: [
     new DataConnectionNodeCapabilityManager(),

@@ -11,14 +11,6 @@ export type AgentSchemaSettings = {
 };
 
 /**
- * Warm Query targeting configuration for an Agent.
- */
-export type AgentWarmQuerySettings = {
-  /** The lookup key for the warm query this agent operates over. */
-  WarmQueryLookup: string;
-};
-
-/**
  * Represents an Agent in Everything as Code (EaC).
  *
  * Agents contain decision logic and operate over schemas via reflex-style evaluations.
@@ -30,8 +22,8 @@ export type EaCAgentAsCode = EaCDetails<EaCAgentDetails> & {
   /** Target schema that this agent evaluates. */
   Schema?: AgentSchemaSettings;
 
-  /** Target warm query that this agent evaluates. */
-  WarmQuery?: AgentWarmQuerySettings;
+  /** Target warm querys that this agent evaluates. */
+  WarmQueryLookups?: string[];
 };
 
 /**
