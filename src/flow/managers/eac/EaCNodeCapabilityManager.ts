@@ -271,16 +271,6 @@ export abstract class EaCNodeCapabilityManager<
     _1context: EaCNodeCapabilityContext,
   ): Promise<Record<string, unknown>> {
     return await this.oiSvc.Stats.GetStats(type, id);
-    // const buffer = this.getOrCreateImpulseBuffer(id);
-
-    // const next = this.generateImpulseValue();
-    // buffer.push(next);
-
-    // if (buffer.length > 20) buffer.shift();
-
-    // return Promise.resolve({
-    //   impulseRates: [...buffer],
-    // });
   }
 
   /**
@@ -330,34 +320,4 @@ export abstract class EaCNodeCapabilityManager<
       },
     };
   }
-
-  // //#region Temp Stats Share
-  // protected readonly impulseBuffers: Record<string, number[]> = {};
-
-  // /**
-  //  * Returns the rolling buffer for impulseRates. Creates it if missing.
-  //  */
-  // protected getOrCreateImpulseBuffer(
-  //   id: string,
-  //   length = 20,
-  //   seed = 10,
-  //   range = 5
-  // ): number[] {
-  //   if (!this.impulseBuffers[id]) {
-  //     this.impulseBuffers[id] = Array.from({ length }, () =>
-  //       this.generateImpulseValue(seed, range)
-  //     );
-  //   }
-
-  //   return this.impulseBuffers[id];
-  // }
-
-  // /**
-  //  * Generates a synthetic impulse rate value.
-  //  * Subclasses may override to simulate different statistical patterns.
-  //  */
-  // protected generateImpulseValue(seed = 10, range = 5): number {
-  //   return Number((seed + Math.random() * range).toFixed(2));
-  // }
-  // //#endregion
 }
