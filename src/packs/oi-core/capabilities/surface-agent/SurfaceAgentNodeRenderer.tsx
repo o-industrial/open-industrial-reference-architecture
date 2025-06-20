@@ -17,10 +17,10 @@ export default function SurfaceAgentNodeRenderer({ data }: NodeProps<SurfaceAgen
   const stats = data.useStats();
 
   const {
-    impulseRates = [],
-    matchesHandled = 0,
-    avgLatencyMs = 0,
-    lastRunAgo = '—',
+    ImpulseRates: impulseRates = [],
+    MatchesHandled: matchesHandled = 0,
+    AvgLatencyMs: avgLatencyMs = 0,
+    LastRunAgo: lastRunAgo = '—',
   } = stats || {};
 
   const currentRate = impulseRates.at(-1);

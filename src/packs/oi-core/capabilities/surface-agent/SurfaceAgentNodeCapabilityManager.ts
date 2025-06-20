@@ -1,23 +1,19 @@
+import { Position } from '../../../../eac/.exports.ts';
 import { EaCAgentDetails } from '../../../../eac/EaCAgentDetails.ts';
+import { EaCFlowNodeMetadata } from '../../../../eac/EaCFlowNodeMetadata.ts';
 import { SurfaceAgentSettings } from '../../../../eac/EaCSurfaceAsCode.ts';
 import {
-  ComponentType,
-  EaCFlowNodeMetadata,
   EaCNodeCapabilityAsCode,
   EaCNodeCapabilityContext,
   EaCNodeCapabilityManager,
   EaCNodeCapabilityPatch,
   FlowGraphEdge,
   FlowGraphNode,
-  FunctionComponent,
-  memo,
-  NullableArrayOrObject,
-  OpenIndustrialEaC,
-  Position,
-} from '../../.deps.ts';
+} from '../../../../flow/.exports.ts';
+import { OpenIndustrialEaC } from '../../../../types/OpenIndustrialEaC.ts';
+import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import { SurfaceAgentInspector } from './SurfaceAgentInspector.tsx';
 import SurfaceAgentNodeRenderer from './SurfaceAgentNodeRenderer.tsx';
-import { SurfaceAgentStats } from './SurfaceAgentStats.tsx';
 
 // ✅ Compound node detail type
 type SurfaceAgentNodeDetails = EaCAgentDetails & SurfaceAgentSettings;
@@ -301,20 +297,5 @@ export class SurfaceAgentNodeCapabilityManager
 
   protected override getRenderer() {
     return SurfaceAgentNodeCapabilityManager.renderer;
-  }
-
-  protected override async getStats(
-    type: string,
-    id: string,
-    context: EaCNodeCapabilityContext,
-  ): Promise<SurfaceAgentStats> {
-    const stats = await super.getStats(type, id, context);
-
-    return {
-      ...stats,
-      matchesHandled: Math.floor(Math.random() * 200),
-      avgLatencyMs: Number((Math.random() * 40 + 10).toFixed(1)),
-      lastRunAgo: `${Math.floor(Math.random() * 90)}s ago`,
-    };
   }
 }

@@ -1,24 +1,20 @@
+import { Position } from '../../../../eac/.exports.ts';
 import { EaCAzureDockerSimulatorDetails } from '../../../../eac/EaCAzureDockerSimulatorDetails.ts';
+import { EaCFlowNodeMetadata } from '../../../../eac/EaCFlowNodeMetadata.ts';
 import { EaCSimulatorAsCode } from '../../../../eac/EaCSimulatorAsCode.ts';
+import { EverythingAsCodeOIWorkspace } from '../../../../eac/EverythingAsCodeOIWorkspace.ts';
 import {
-  ComponentType,
-  EaCFlowNodeMetadata,
   EaCNodeCapabilityAsCode,
   EaCNodeCapabilityContext,
   EaCNodeCapabilityManager,
   EaCNodeCapabilityPatch,
-  EverythingAsCodeOIWorkspace,
   FlowGraphEdge,
   FlowGraphNode,
-  FunctionComponent,
-  memo,
-  NullableArrayOrObject,
-  OpenIndustrialEaC,
-  Position,
-} from '../../.deps.ts';
+} from '../../../../flow/.exports.ts';
+import { OpenIndustrialEaC } from '../../../../types/OpenIndustrialEaC.ts';
+import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import { SimulatorInspector } from './SimulatorInspector.tsx';
 import SimulatorNodeRenderer from './SimulatorNodeRenderer.tsx';
-import { SimulatorStats } from './SimulatorStats.tsx';
 
 /**
  * Capability manager for workspace-scoped Simulators.
@@ -148,20 +144,5 @@ export class SimulatorNodeCapabilityManager
 
   protected override getRenderer() {
     return SimulatorNodeCapabilityManager.renderer;
-  }
-
-  protected override async getStats(
-    type: string,
-    id: string,
-    context: EaCNodeCapabilityContext,
-  ): Promise<SimulatorStats> {
-    const stats = await super.getStats(type, id, context);
-
-    return {
-      ...stats,
-      instanceCount: Math.floor(Math.random() * 10) + 1,
-      avgStartupMs: Number((Math.random() * 2 + 1).toFixed(2)),
-      lastDeploymentAt: new Date(Date.now()).toISOString(),
-    };
   }
 }

@@ -2,12 +2,15 @@ import type { ZodType, ZodTypeDef } from './.deps.ts';
 import type { StepInvokerMap } from '../steps/StepInvokerMap.ts';
 import type { FluentRuntime } from './FluentRuntime.ts';
 import type { EaCDetails, EaCVertexDetails } from '../types/.deps.ts';
+import { FluentContext } from '../types/FluentContext.ts';
 
 /**
  * Generic module output from a FluentModuleBuilder.
  *
  * @template TAsCode    The full EaC details object (must extend EaCDetails<EaCVertexDetails>)
  * @template TOutput    Output result from `.Run()`
+ * @template TDeploy    Output result from `.Deploy()`
+ * @template TStats     Output result from `.Stats()`
  * @template TServices  Services injected into runtime
  * @template TSteps     Runtime-executable step map
  * @template TRuntime   Bound runtime instance class
@@ -15,14 +18,27 @@ import type { EaCDetails, EaCVertexDetails } from '../types/.deps.ts';
 export type FluentModule<
   TAsCode extends EaCDetails<EaCVertexDetails>,
   TOutput = unknown,
+  TDeploy = unknown,
+  TStats = unknown,
   TServices extends Record<string, unknown> = Record<string, unknown>,
   TSteps extends StepInvokerMap = StepInvokerMap,
   TRuntime extends FluentRuntime<
     TAsCode,
     TOutput,
+    TDeploy,
+    TStats,
     TServices,
-    TSteps
-  > = FluentRuntime<TAsCode, TOutput, TServices, TSteps>,
+    TSteps,
+    FluentContext<TAsCode, TServices, TSteps>
+  > = FluentRuntime<
+    TAsCode,
+    TOutput,
+    TDeploy,
+    TStats,
+    TServices,
+    TSteps,
+    FluentContext<TAsCode, TServices, TSteps>
+  >,
 > = {
   /**
    * Optional Zod schema describing the runtime’s output payload.
@@ -43,13 +59,31 @@ export type FluentModule<
 export function defineFluentModule<
   TAsCode extends EaCDetails<EaCVertexDetails>,
   TOutput,
+  TDeploy,
+  TStats,
   TServices extends Record<string, unknown>,
   TSteps extends StepInvokerMap,
-  TRuntime extends FluentRuntime<TAsCode, TOutput, TServices, TSteps>,
+  TRuntime extends FluentRuntime<
+    TAsCode,
+    TOutput,
+    TDeploy,
+    TStats,
+    TServices,
+    TSteps,
+    FluentContext<TAsCode, TServices, TSteps>
+  >,
 >(def: {
   OutputSchema?: ZodType<TOutput, ZodTypeDef, TOutput>;
   Runtime: new () => TRuntime;
-}): FluentModule<TAsCode, TOutput, TServices, TSteps, TRuntime> {
+}): FluentModule<
+  TAsCode,
+  TOutput,
+  TDeploy,
+  TStats,
+  TServices,
+  TSteps,
+  TRuntime
+> {
   return {
     OutputSchema: def.OutputSchema,
     Runtime: def.Runtime,

@@ -1,24 +1,21 @@
+import { Position } from '../../../../eac/.exports.ts';
 import { EaCCompositeSchemaDetails } from '../../../../eac/EaCCompositeSchemaDetails.ts';
+import { EaCFlowNodeMetadata } from '../../../../eac/EaCFlowNodeMetadata.ts';
 import { EaCRootSchemaDetails } from '../../../../eac/EaCRootSchemaDetails.ts';
 import { EaCSchemaAsCode } from '../../../../eac/EaCSchemaAsCode.ts';
 import { EaCSchemaDetails } from '../../../../eac/EaCSchemaDetails.ts';
 import { SurfaceSchemaSettings } from '../../../../eac/EaCSurfaceAsCode.ts';
+import { EverythingAsCodeOIWorkspace } from '../../../../eac/EverythingAsCodeOIWorkspace.ts';
 import {
-  ComponentType,
-  EaCFlowNodeMetadata,
   EaCNodeCapabilityAsCode,
   EaCNodeCapabilityContext,
   EaCNodeCapabilityManager,
   EaCNodeCapabilityPatch,
-  EverythingAsCodeOIWorkspace,
   FlowGraphEdge,
   FlowGraphNode,
-  FunctionComponent,
-  memo,
-  NullableArrayOrObject,
-  OpenIndustrialEaC,
-  Position,
-} from '../../.deps.ts';
+} from '../../../../flow/.exports.ts';
+import { OpenIndustrialEaC } from '../../../../types/OpenIndustrialEaC.ts';
+import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import { SurfaceRootSchemaInspector } from './SurfaceRootSchemaInspector.tsx';
 import SurfaceSchemaNodeRenderer from './SurfaceSchemaNodeRenderer.tsx';
 

@@ -18,10 +18,10 @@ export default function SurfaceNodeRenderer({
 }: NodeProps<SurfaceNodeData>) {
   const stats = data.useStats();
 
-  const impulseRates = stats?.impulseRates ?? [];
-  const inputCount = stats?.inputCount ?? 0;
-  const agentCount = stats?.agentCount ?? 0;
-  const lastSignalAt = stats?.lastSignalAt ?? '—';
+  const impulseRates = stats?.ImpulseRates ?? [];
+  const inputCount = stats?.InputCount ?? 0;
+  const agentCount = stats?.AgentCount ?? 0;
+  const lastSignalAt = stats?.LastSignalAt ?? '—';
   const lastSignalAge = useMemo(
     () => parseTimeAgoString(lastSignalAt),
     [lastSignalAt],

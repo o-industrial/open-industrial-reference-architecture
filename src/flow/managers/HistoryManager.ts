@@ -1,5 +1,6 @@
-import { EaCHistorySnapshot, jsonMapSetClone, NullableArrayOrObject } from '../.deps.ts';
+import { jsonMapSetClone, NullableArrayOrObject } from '../.deps.ts';
 import { OpenIndustrialEaC } from '../../types/OpenIndustrialEaC.ts';
+import { EaCHistorySnapshot } from '../../types/EaCHistorySnapshot.ts';
 
 export class HistoryManager {
   protected history: EaCHistorySnapshot[] = [];

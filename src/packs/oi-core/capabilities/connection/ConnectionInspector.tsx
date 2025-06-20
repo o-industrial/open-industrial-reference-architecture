@@ -1,10 +1,10 @@
-import { EaCAzureIoTHubDataConnectionDetails } from '../../.deps.ts';
 import {
   ConnectionInfoPanel,
   ConnectionManagementForm,
   InspectorBase,
   TabbedPanel,
 } from '../../../../../atomic/.exports.ts';
+import { EaCAzureIoTHubDataConnectionDetails } from '../../../../eac/EaCAzureIoTHubDataConnectionDetails.ts';
 import { InspectorCommonProps } from '../../../../flow/.exports.ts';
 import { DataConnectionConfig } from './DataConnectionConfig.ts';
 import { DataConnectionStats } from './DataConnectionStats.ts';
@@ -32,7 +32,7 @@ export function ConnectionInspector({
       iconKey='connection'
       label={details.Name}
       enabled={enabled}
-      impulseRates={stats?.impulseRates ?? []}
+      impulseRates={stats?.ImpulseRates ?? []}
       onToggleEnabled={onToggleEnabled}
       onDelete={onDelete}
     >
@@ -54,7 +54,7 @@ export function ConnectionInspector({
           {
             key: 'connection',
             label: 'Connection Info',
-            content: <ConnectionInfoPanel connectionInfo={stats?.connectionInfo} />,
+            content: <ConnectionInfoPanel connectionInfo={stats?.Metadata} />,
           },
           {
             key: 'analytics',

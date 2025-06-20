@@ -1,10 +1,3 @@
-export {
-  type EaCDataConnectionAsCode,
-  type EaCDataConnectionDetails,
-  type EverythingAsCodeOIWorkspace,
-  EverythingAsCodeOIWorkspaceSchema,
-} from '../../eac/.exports.ts';
-
 export { IoCContainer } from 'jsr:@fathym/ioc@0.0.14';
 
 export { z } from 'jsr:@fathym/common@0.2.264/third-party/zod';

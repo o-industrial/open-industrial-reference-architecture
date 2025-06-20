@@ -1,6 +1,6 @@
-import { EnvSecretProvider, ISecretProvider } from './.deps.ts';
 import { WorkspaceRuntime } from './WorkspaceRuntime.ts';
 import { WorkspaceContext } from '../types/WorkspaceContext.ts';
+import { EnvSecretProvider, ISecretProvider } from '../../secrets/.exports.ts';
 
 export class WorkspaceBuilder {
   protected adapters: Map<string, unknown> = new Map<string, unknown>();

@@ -1,6 +1,5 @@
 import {
   applyNodeChanges,
-  EaCFlowNodeMetadata,
   EaCVertexDetails,
   Edge,
   EdgeChange,
@@ -8,7 +7,6 @@ import {
   Node,
   NodeChange,
   NullableArrayOrObject,
-  Position,
 } from '../../.deps.ts';
 import { OpenIndustrialEaC } from '../../../types/OpenIndustrialEaC.ts';
 import { FlowGraph } from '../../types/graph/FlowGraph.ts';
@@ -21,6 +19,8 @@ import { EaCNodeCapabilityPatch } from '../../types/nodes/EaCNodeCapabilityPatch
 import { EaCCapabilitiesManager } from './EaCCapabilitiesManager.ts';
 import { FlowGraphNode } from '../../types/graph/FlowGraphNode.ts';
 import { EaCNodeCapabilityAsCode } from '../../.exports.ts';
+import { Position } from '../../../eac/.exports.ts';
+import { EaCFlowNodeMetadata } from '../../../eac/EaCFlowNodeMetadata.ts';
 
 /**
  * Abstract base for scoped EaC logic (workspace, surface, etc.).

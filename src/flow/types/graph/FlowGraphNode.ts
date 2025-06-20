@@ -1,4 +1,5 @@
-import { EaCFlowNodeMetadata, EaCVertexDetails } from '../../.deps.ts';
+import { EaCFlowNodeMetadata } from '../../../eac/EaCFlowNodeMetadata.ts';
+import { EaCVertexDetails } from '../../.deps.ts';
 
 /**
  * Represents a single node in the flow graph canvas.

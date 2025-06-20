@@ -15,7 +15,7 @@ export default function SurfaceSchemaNodeRenderer({
   data,
 }: NodeProps<SurfaceSchemaNodeData>) {
   const stats = data.useStats();
-  const impulseRates = stats?.impulseRates ?? [];
+  const impulseRates = stats?.ImpulseRates ?? [];
   const latest = impulseRates.at(-1);
 
   const classes = `

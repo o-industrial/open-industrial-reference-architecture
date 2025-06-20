@@ -1,7 +1,5 @@
 import {
   EaCEnterpriseDetails,
-  EaCFlowNodeMetadata,
-  EaCHistorySnapshot,
   EaCStatus,
   EaCVertexDetails,
   Edge,
@@ -11,10 +9,6 @@ import {
   Node,
   NodeChange,
   NullableArrayOrObject,
-  OpenIndustrialAPIClient,
-  Position,
-  Proposal,
-  RecordKind,
 } from '../.deps.ts';
 
 import { HistoryManager } from './HistoryManager.ts';
@@ -35,7 +29,12 @@ import { EaCNodeCapabilityManager } from './eac/EaCNodeCapabilityManager.ts';
 
 import { ProposalOverlayMode } from '../types/graph/ProposalOverlayMode.ts';
 import { WorkspaceSummary } from '../types/WorkspaceSummary.ts';
-import { PackModule } from '../../types/PackModule.ts';
+import { OpenIndustrialAPIClient } from '../../api/.exports.ts';
+import { Position } from '../../eac/.exports.ts';
+import { EaCFlowNodeMetadata } from '../../eac/EaCFlowNodeMetadata.ts';
+import { EaCHistorySnapshot } from '../../types/EaCHistorySnapshot.ts';
+import { Proposal } from '../../types/Proposal.ts';
+import { RecordKind } from '../../types/RecordKind.ts';
 
 /**
  * Top-level controller for managing the Everything-as-Code runtime state,
@@ -51,50 +50,19 @@ export class EaCManager {
 
   // === New Pack Cache ===
 
-  /**
-   * Stores all successfully loaded packs, keyed by their declared EaC lookup.
-   */
-  protected loadedPacks: Record<string, PackModule> = {};
-
-  /**
-   * Returns all capabilities from loaded packs, grouped by node scope.
-   */
-  protected get capabilityManagersByScope(): Record<
-    NodeScopeTypes,
-    EaCNodeCapabilityManager[]
-  > {
-    const scopeCaps: Record<NodeScopeTypes, EaCNodeCapabilityManager[]> = {
-      workspace: [],
-      surface: [],
-    };
-
-    for (const mod of Object.values(this.loadedPacks)) {
-      const caps = mod.Capabilities;
-      if (!caps) continue;
-
-      if (caps.workspace?.length) {
-        scopeCaps.workspace.push(...caps.workspace);
-      }
-
-      if (caps.surface?.length) {
-        scopeCaps.surface.push(...caps.surface);
-      }
-    }
-
-    return scopeCaps;
-  }
-
   constructor(
     protected eac: OpenIndustrialEaC,
     protected oiSvc: OpenIndustrialAPIClient,
     protected scope: NodeScopeTypes,
     protected graph: GraphStateManager,
     protected history: HistoryManager,
-    protected packs: Record<string, PackModule>,
+    protected capabilitiesByScope: Record<
+      NodeScopeTypes,
+      EaCNodeCapabilityManager[]
+    >,
   ) {
     this.diff = new EaCDiffManager(history, this.emitEaCChanged.bind(this));
     this.proposals = new EaCProposalManager(oiSvc, this);
-    this.LoadPacks(packs);
     this.SwitchTo(scope);
   }
 
@@ -102,21 +70,10 @@ export class EaCManager {
    * Loads and caches pack modules from a pre-resolved map.
    * Keys should match the declared lookup keys in EaC.Packs.
    */
-  public LoadPacks(loaded: Record<string, PackModule>): void {
-    this.loadedPacks = {};
-
-    for (const [lookup, packModule] of Object.entries(loaded)) {
-      try {
-        if (!packModule) {
-          console.warn(`⚠️ Pack module missing for lookup: ${lookup}`);
-          continue;
-        }
-
-        this.loadedPacks[lookup] = packModule;
-      } catch (err) {
-        console.error(`❌ Failed to register pack ${lookup}`, err);
-      }
-    }
+  public LoadCapabilities(
+    capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>,
+  ): void {
+    this.capabilitiesByScope = capabilitiesByScope;
   }
 
   /**
@@ -336,7 +293,7 @@ export class EaCManager {
   protected getCapabilitiesByScope(
     scope: NodeScopeTypes,
   ): EaCNodeCapabilityManager[] {
-    return this.capabilityManagersByScope[scope] ?? [];
+    return this.capabilitiesByScope[scope] ?? [];
   }
 
   /**

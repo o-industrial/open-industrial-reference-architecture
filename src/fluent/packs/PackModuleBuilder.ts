@@ -1,41 +1,48 @@
-// deno-lint-ignore-file no-explicit-any
+import { IoCContainer } from './.deps.ts';
 import { PackModule } from '../../types/PackModule.ts';
 import { StepModule } from '../steps/StepModule.ts';
+import { MaybeAsync } from '../types/MaybeAsync.ts';
 
-/**
- * Fluent builder for defining a PackModule.
- * Supports chaining `Capabilities()` and `Steps()` for structured authoring.
- */
+type CapabilitiesResolver = (
+  ioc: IoCContainer,
+) => MaybeAsync<PackModule['Capabilities']>;
+type StepsResolver = (
+  ioc: IoCContainer,
+) => MaybeAsync<Record<string, StepModule>>;
+
 export class PackModuleBuilder {
-  protected capabilities: PackModule['Capabilities'] = {};
-  protected steps: Record<string, StepModule> = {};
+  private capabilitiesResolver?: CapabilitiesResolver;
+  private stepsResolver?: StepsResolver;
 
   /**
-   * Define capability managers scoped to the workspace or surface.
+   * Define capability managers using an IoC-aware resolver function.
    */
-  public Capabilities(caps: Partial<PackModule['Capabilities']>): this {
-    this.capabilities = {
-      ...this.capabilities,
-      ...caps,
-    };
+  public Capabilities(resolver: CapabilitiesResolver): this {
+    this.capabilitiesResolver = resolver;
     return this;
   }
 
   /**
-   * Define the executable step modules included in this pack.
+   * Define step modules using an IoC-aware resolver function.
    */
-  public Steps(steps: Record<string, StepModule<any, any, any, any, any, any>>): this {
-    this.steps = steps;
+  public Steps(resolver: StepsResolver): this {
+    this.stepsResolver = resolver;
     return this;
   }
 
   /**
-   * Finalize and return the PackModule object.
+   * Finalize and return the PackModule with injected dependencies.
    */
-  public Build(): PackModule {
+  public async Build(ioc: IoCContainer): Promise<PackModule> {
+    const capabilities = this.capabilitiesResolver
+      ? await this.capabilitiesResolver(ioc)
+      : { surface: [], workspace: [] };
+
+    const steps = this.stepsResolver ? await this.stepsResolver(ioc) : {};
+
     return {
-      ...(Object.keys(this.capabilities || {}).length ? { Capabilities: this.capabilities } : {}),
-      Steps: this.steps,
+      Capabilities: capabilities,
+      Steps: steps,
     };
   }
 }

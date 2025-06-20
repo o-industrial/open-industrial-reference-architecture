@@ -23,6 +23,8 @@ import { FluentModuleBuilder } from './FluentModuleBuilder.ts';
 export function Fluent<
   TAsCode extends EaCDetails<EaCVertexDetails>,
   TOutput = unknown,
+  TDeploy = unknown,
+  TStats = unknown,
   TServices extends Record<string, unknown> = Record<string, unknown>,
   TSteps extends StepInvokerMap = StepInvokerMap,
   TContext extends FluentContext<TAsCode, TServices, TSteps> = FluentContext<
@@ -33,10 +35,20 @@ export function Fluent<
   TRuntime extends FluentRuntime<
     TAsCode,
     TOutput,
+    TDeploy,
+    TStats,
     TServices,
     TSteps,
     TContext
-  > = FluentRuntime<TAsCode, TOutput, TServices, TSteps, TContext>,
+  > = FluentRuntime<
+    TAsCode,
+    TOutput,
+    TDeploy,
+    TStats,
+    TServices,
+    TSteps,
+    TContext
+  >,
   TModule = unknown,
   TBuilder extends FluentModuleBuilder<
     TAsCode,
@@ -44,6 +56,8 @@ export function Fluent<
     TRuntime,
     TModule,
     TOutput,
+    TDeploy,
+    TStats,
     TServices,
     TSteps
   > = FluentModuleBuilder<
@@ -52,6 +66,8 @@ export function Fluent<
     TRuntime,
     TModule,
     TOutput,
+    TDeploy,
+    TStats,
     TServices,
     TSteps
   >,
