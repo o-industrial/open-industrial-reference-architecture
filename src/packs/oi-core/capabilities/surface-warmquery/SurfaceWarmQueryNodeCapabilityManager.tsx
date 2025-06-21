@@ -9,7 +9,8 @@ import {
   FlowGraphNode,
 } from '../../../../flow/.exports.ts';
 import { OpenIndustrialEaC } from '../../../../types/OpenIndustrialEaC.ts';
-import { EaCWarmQueryDetails, SurfaceWarmQuerySettings } from '../../../../eac/.deps.ts';
+import { EaCWarmQueryDetails } from '../../../../eac/.deps.ts';
+import { SurfaceWarmQuerySettings } from '../../../../eac/.exports.ts'
 import { SurfaceWarmQueryInspector } from './SurfaceWarmQueryInspector.tsx';
 import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import SurfaceWarmQueryNodeRenderer from './SurfaceWarmQueryNodeRenderer.tsx';
