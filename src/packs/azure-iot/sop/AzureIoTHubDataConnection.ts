@@ -10,7 +10,7 @@ import { DataConnection } from '../../../fluent/connections/DataConnection.ts';
 import { DataConnectionModuleBuilder } from '../../../fluent/connections/DataConnectionModuleBuilder.ts';
 
 export function AzureIoTHubDataConnection(
-  lookup: string
+  lookup: string,
 ): DataConnectionModuleBuilder<
   EaCDataConnectionAsCode<EaCAzureIoTHubDataConnectionDetails>,
   AzureIoTHubDeviceOutput,
@@ -35,13 +35,10 @@ export function AzureIoTHubDataConnection(
           ClientId: await Secrets.Get('AZURE_IOT_CLIENT_ID'),
           ClientSecret: await Secrets.Get('AZURE_IOT_CLIENT_SECRET'),
         },
-        ResourceGroupName:
-          AsCode.Details?.ResourceGroupName ||
+        ResourceGroupName: AsCode.Details?.ResourceGroupName ||
           (await Secrets.Get('AZURE_IOT_RESOURCE_GROUP'))!,
-        SubscriptionID:
-          AsCode.Details?.SubscriptionID ||
+        SubscriptionID: AsCode.Details?.SubscriptionID ||
           (await Secrets.Get('AZURE_IOT_SUBSCRIPTION_ID'))!,
-          
       }),
       IoTStats: AzureIoTHubDeviceStatsStep.Build(),
     }))
@@ -71,9 +68,9 @@ export function AzureIoTHubDataConnection(
 
       return iot;
     }) as unknown as DataConnectionModuleBuilder<
-    EaCDataConnectionAsCode<EaCAzureIoTHubDataConnectionDetails>,
-    AzureIoTHubDeviceOutput,
-    Status,
-    AzureIoTHubDeviceStatsOutput
-  >;
+      EaCDataConnectionAsCode<EaCAzureIoTHubDataConnectionDetails>,
+      AzureIoTHubDeviceOutput,
+      Status,
+      AzureIoTHubDeviceStatsOutput
+    >;
 }

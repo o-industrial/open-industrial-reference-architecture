@@ -59,7 +59,7 @@ export class EaCManager {
     protected capabilitiesByScope: Record<
       NodeScopeTypes,
       EaCNodeCapabilityManager[]
-    >
+    >,
   ) {
     this.diff = new EaCDiffManager(history, this.emitEaCChanged.bind(this));
     this.proposals = new EaCProposalManager(oiSvc, this);
@@ -71,7 +71,7 @@ export class EaCManager {
    * Keys should match the declared lookup keys in EaC.Packs.
    */
   public LoadCapabilities(
-    capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>
+    capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>,
   ): void {
     this.capabilitiesByScope = capabilitiesByScope;
   }
@@ -85,7 +85,7 @@ export class EaCManager {
 
     this.scope = scope;
     const capabilities = new EaCCapabilitiesManager(
-      this.getCapabilitiesByScope(scope)
+      this.getCapabilitiesByScope(scope),
     );
 
     switch (scope) {
@@ -93,7 +93,7 @@ export class EaCManager {
         this.scopeMgr = new EaCWorkspaceScopeManager(
           this.graph,
           capabilities,
-          () => this.GetEaC()
+          () => this.GetEaC(),
         );
         break;
       case 'surface':
@@ -104,7 +104,7 @@ export class EaCManager {
           this.graph,
           capabilities,
           () => this.GetEaC(),
-          lookup
+          lookup,
         );
         break;
       default:
@@ -141,7 +141,7 @@ export class EaCManager {
   /** Applies flow node change set and merges any partial EaC updates. */
   public ApplyReactFlowNodeChanges(
     changes: NodeChange[],
-    currentNodes: Node<FlowNodeData>[]
+    currentNodes: Node<FlowNodeData>[],
   ): void {
     const partial = this.scopeMgr.UpdateNodesFromChanges(changes, currentNodes);
     if (partial) this.MergePartial(partial);
@@ -150,7 +150,7 @@ export class EaCManager {
   /** Applies flow edge change set and merges any partial EaC updates. */
   public ApplyReactFlowEdgeChanges(
     changes: EdgeChange[],
-    currentEdges: Edge[]
+    currentEdges: Edge[],
   ): void {
     const partial = this.scopeMgr.UpdateConnections(changes, currentEdges);
     if (partial) this.MergePartial(partial);
@@ -162,7 +162,7 @@ export class EaCManager {
     const partial = this.scopeMgr.CreatePartialEaCFromPreset(
       type,
       id,
-      position
+      position,
     );
     this.MergePartial(partial);
 
@@ -251,7 +251,7 @@ export class EaCManager {
     patch: Partial<{
       Details: EaCVertexDetails;
       Metadata: Partial<EaCFlowNodeMetadata>;
-    }>
+    }>,
   ): void {
     const partial = this.scopeMgr.UpdateNodePatch(id, patch);
     if (partial) this.MergePartial(partial);
@@ -266,7 +266,7 @@ export class EaCManager {
    * Returns capabilities for the given scope.
    */
   protected getCapabilitiesByScope(
-    scope: NodeScopeTypes
+    scope: NodeScopeTypes,
   ): EaCNodeCapabilityManager[] {
     return this.capabilitiesByScope[scope] ?? [];
   }
@@ -279,14 +279,13 @@ export class EaCManager {
 
     if (!this.proposals || this.overlayMode === 'none') return base;
 
-    const overlays =
-      this.overlayMode === 'pending'
-        ? this.proposals.GetPending()
-        : 'ids' in this.overlayMode
-        ? this.overlayMode.ids
-            .map((id) => this.proposals.GetByID(id))
-            .filter((p): p is Proposal<RecordKind> => !!p)
-        : [];
+    const overlays = this.overlayMode === 'pending'
+      ? this.proposals.GetPending()
+      : 'ids' in this.overlayMode
+      ? this.overlayMode.ids
+        .map((id) => this.proposals.GetByID(id))
+        .filter((p): p is Proposal<RecordKind> => !!p)
+      : [];
 
     for (const proposal of overlays) {
       const patch = {

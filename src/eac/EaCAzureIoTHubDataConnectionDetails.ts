@@ -66,7 +66,7 @@ export const EaCAzureIoTHubDataConnectionDetailsSchema: z.ZodObject<
  * Type guard to validate whether a given object is an EaCAzureIoTHubDataConnectionDetails.
  */
 export function isEaCAzureIoTHubDataConnectionDetails(
-  conn: unknown
+  conn: unknown,
 ): conn is EaCAzureIoTHubDataConnectionDetails {
   return EaCAzureIoTHubDataConnectionDetailsSchema.safeParse(conn).success;
 }
@@ -75,7 +75,7 @@ export function isEaCAzureIoTHubDataConnectionDetails(
  * Parses and validates the provided data as EaCAzureIoTHubDataConnectionDetails.
  */
 export function parseEaCAzureIoTHubDataConnectionDetails(
-  conn: unknown
+  conn: unknown,
 ): EaCAzureIoTHubDataConnectionDetails {
   return EaCAzureIoTHubDataConnectionDetailsSchema.parse(conn);
 }

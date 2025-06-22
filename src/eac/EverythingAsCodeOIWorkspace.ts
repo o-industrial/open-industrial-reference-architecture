@@ -10,14 +10,8 @@ import {
   EaCDataConnectionAsCodeSchema,
 } from './EaCDataConnectionAsCode.ts';
 import { EaCSchemaAsCode, EaCSchemaAsCodeSchema } from './EaCSchemaAsCode.ts';
-import {
-  EaCSurfaceAsCode,
-  EaCSurfaceAsCodeSchema,
-} from './EaCSurfaceAsCode.ts';
-import {
-  EaCSimulatorAsCode,
-  EaCSimulatorAsCodeSchema,
-} from './EaCSimulatorAsCode.ts';
+import { EaCSurfaceAsCode, EaCSurfaceAsCodeSchema } from './EaCSurfaceAsCode.ts';
+import { EaCSimulatorAsCode, EaCSimulatorAsCodeSchema } from './EaCSimulatorAsCode.ts';
 import { EaCProposalConfigAsCode } from './EaCProposalConfigAsCode.ts';
 import { EaCPackAsCode, EaCPackAsCodeSchema } from './EaCPackAsCode.ts';
 
@@ -60,35 +54,37 @@ export type SignalOptions = {
  *
  * Combines runtime memory, reflex agents, schema pipelines, and cloud/simulator bindings.
  */
-export type EverythingAsCodeOIWorkspace = {
-  /** Optional global runtime policies. */
-  $GlobalOptions?: {
-    Impulses?: ImpulseOptions;
-    Signals?: SignalOptions;
-  };
+export type EverythingAsCodeOIWorkspace =
+  & {
+    /** Optional global runtime policies. */
+    $GlobalOptions?: {
+      Impulses?: ImpulseOptions;
+      Signals?: SignalOptions;
+    };
 
-  /** Executable reflex agents mapped by ID. */
-  Agents?: Record<string, EaCAgentAsCode>;
+    /** Executable reflex agents mapped by ID. */
+    Agents?: Record<string, EaCAgentAsCode>;
 
-  /** External or streaming connections (MQTT, HTTP, etc.). */
-  DataConnections?: Record<string, EaCDataConnectionAsCode>;
+    /** External or streaming connections (MQTT, HTTP, etc.). */
+    DataConnections?: Record<string, EaCDataConnectionAsCode>;
 
-  /** Declared runtime capability packs (modbus, test-utils, etc.). */
-  Packs?: Record<string, EaCPackAsCode>;
+    /** Declared runtime capability packs (modbus, test-utils, etc.). */
+    Packs?: Record<string, EaCPackAsCode>;
 
-  /** Proposal configurations scoped for dynamic changes. */
-  ProposalConfigs?: Record<string, EaCProposalConfigAsCode>;
+    /** Proposal configurations scoped for dynamic changes. */
+    ProposalConfigs?: Record<string, EaCProposalConfigAsCode>;
 
-  /** Stream or signal-backed schemas for memory. */
-  Schemas?: Record<string, EaCSchemaAsCode>;
+    /** Stream or signal-backed schemas for memory. */
+    Schemas?: Record<string, EaCSchemaAsCode>;
 
-  /** Simulators used to inject or test impulses. */
-  Simulators?: Record<string, EaCSimulatorAsCode>;
+    /** Simulators used to inject or test impulses. */
+    Simulators?: Record<string, EaCSimulatorAsCode>;
 
-  /** Surfaces such as dashboards, panels, and visual UIs. */
-  Surfaces?: Record<string, EaCSurfaceAsCode>;
-} & EverythingAsCodeClouds &
-  EverythingAsCodeApplications;
+    /** Surfaces such as dashboards, panels, and visual UIs. */
+    Surfaces?: Record<string, EaCSurfaceAsCode>;
+  }
+  & EverythingAsCodeClouds
+  & EverythingAsCodeApplications;
 
 export type EverythingAsCodeOIWorkspaceSchema = z.ZodObject<
   {
@@ -206,7 +202,7 @@ export const EverythingAsCodeOIWorkspaceSchema: EverythingAsCodeOIWorkspaceSchem
       .record(EaCPackAsCodeSchema)
       .optional()
       .describe(
-        'Runtime capability packs declared by path and optional enablement.'
+        'Runtime capability packs declared by path and optional enablement.',
       ),
 
     Schemas: z
@@ -226,14 +222,14 @@ export const EverythingAsCodeOIWorkspaceSchema: EverythingAsCodeOIWorkspaceSchem
   })
     .strip()
     .describe(
-      'Everything-as-Code configuration for an Open Industrial workspace.'
+      'Everything-as-Code configuration for an Open Industrial workspace.',
     );
 
 /**
  * Type guard for `EverythingAsCodeOIWorkspace`.
  */
 export function isEverythingAsCodeOIWorkspace(
-  value: unknown
+  value: unknown,
 ): value is EverythingAsCodeOIWorkspace {
   return EverythingAsCodeOIWorkspaceSchema.safeParse(value).success;
 }
@@ -242,7 +238,7 @@ export function isEverythingAsCodeOIWorkspace(
  * Validates and parses an object as `EverythingAsCodeOIWorkspace`.
  */
 export function parseEverythingAsCodeOIWorkspace(
-  value: unknown
+  value: unknown,
 ): EverythingAsCodeOIWorkspace {
   return EverythingAsCodeOIWorkspaceSchema.parse(value);
 }
