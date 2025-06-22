@@ -15,7 +15,7 @@ export class StepModuleBuilder<
   TOptions extends Record<string, unknown> = Record<string, unknown>,
   TServices extends Record<string, unknown> = Record<string, unknown>,
   TSubSteps extends StepInvokerMap = StepInvokerMap,
-  TUsed extends UsedKeys = {},
+  TUsed extends UsedKeys = {}
 > {
   protected inputSchema?: ZodType<TInput>;
   protected outputSchema?: ZodType<TOutput>;
@@ -23,33 +23,38 @@ export class StepModuleBuilder<
 
   protected runFn?: (
     input: TInput,
-    ctx: StepContext<TOptions, TServices, TSubSteps>,
+    ctx: StepContext<TOptions, TServices, TSubSteps>
   ) => Promise<TOutput>;
 
   protected initFn?: (
     input: TInput,
-    ctx: StepContext<TOptions, TServices, TSubSteps>,
+    ctx: StepContext<TOptions, TServices, TSubSteps>
   ) => void | Promise<void>;
 
   protected cleanupFn?: (
     input: TInput,
-    ctx: StepContext<TOptions, TServices, TSubSteps>,
+    ctx: StepContext<TOptions, TServices, TSubSteps>
   ) => void | Promise<void>;
 
   protected servicesFactory?: (
     input: TInput,
-    ctx: StepContext<TOptions, TServices, TSubSteps>,
+    ctx: StepContext<TOptions, TServices, TSubSteps>
   ) => Promise<TServices>;
 
-  protected substeps?: Record<string, StepModule<any, any, any, any, any>>;
+  protected substepFactory?: (
+    input: TInput,
+    ctx: StepContext<TOptions, TServices, StepInvokerMap>
+  ) =>
+    | Promise<Record<string, StepModule<any, any, any, any, any>>>
+    | Record<string, StepModule<any, any, any, any, any>>;
 
   constructor(
     protected readonly name: string,
-    protected readonly description: string,
+    protected readonly description: string
   ) {}
 
   public Input<I extends TInput>(
-    schema: ZodType<I>,
+    schema: ZodType<I>
   ): RemoveUsed<
     StepModuleBuilder<
       I,
@@ -66,7 +71,7 @@ export class StepModuleBuilder<
   }
 
   public Output<O extends TOutput>(
-    schema: ZodType<O>,
+    schema: ZodType<O>
   ): RemoveUsed<
     StepModuleBuilder<
       TInput,
@@ -83,7 +88,7 @@ export class StepModuleBuilder<
   }
 
   public Options<O extends TOptions>(
-    schema: ZodType<O>,
+    schema: ZodType<O>
   ): RemoveUsed<
     StepModuleBuilder<
       TInput,
@@ -103,8 +108,8 @@ export class StepModuleBuilder<
     factory: (
       input: TInput,
       ctx: StepContext<TOptions, TServices, TSubSteps>,
-      ioc: IoCContainer,
-    ) => Promise<NextServices>,
+      ioc: IoCContainer
+    ) => Promise<NextServices>
   ): RemoveUsed<
     StepModuleBuilder<
       TInput,
@@ -123,8 +128,8 @@ export class StepModuleBuilder<
   public Init(
     fn: (
       input: TInput,
-      ctx: StepContext<TOptions, TServices, TSubSteps>,
-    ) => void | Promise<void>,
+      ctx: StepContext<TOptions, TServices, TSubSteps>
+    ) => void | Promise<void>
   ): RemoveUsed<
     StepModuleBuilder<
       TInput,
@@ -143,8 +148,8 @@ export class StepModuleBuilder<
   public Cleanup(
     fn: (
       input: TInput,
-      ctx: StepContext<TOptions, TServices, TSubSteps>,
-    ) => void | Promise<void>,
+      ctx: StepContext<TOptions, TServices, TSubSteps>
+    ) => void | Promise<void>
   ): RemoveUsed<
     StepModuleBuilder<
       TInput,
@@ -161,12 +166,12 @@ export class StepModuleBuilder<
   }
 
   public Steps<
-    TSteps extends Record<string, StepModule<any, any, any, any, any>>,
+    TSteps extends Record<string, StepModule<any, any, any, any, any>>
   >(
     factory: (
       input: TInput,
-      ctx: StepContext<TOptions, TServices, StepInvokerMap>,
-    ) => TSteps | Promise<TSteps>,
+      ctx: StepContext<TOptions, TServices, StepInvokerMap>
+    ) => TSteps | Promise<TSteps>
   ): RemoveUsed<
     StepModuleBuilder<
       TInput,
@@ -180,14 +185,15 @@ export class StepModuleBuilder<
           any,
           any,
           any
-        > ? (input: I) => Promise<O>
+        >
+          ? (input: I) => Promise<O>
           : never;
       },
       TUsed & { SubSteps: true }
     >,
     TUsed & { SubSteps: true }
   > {
-    this.substeps = factory as any;
+    this.substepFactory = factory;
     return this as any;
   }
 
@@ -212,8 +218,8 @@ export class StepModuleBuilder<
   public Run(
     fn: (
       input: TInput,
-      ctx: StepContext<TOptions, TServices, TSubSteps>,
-    ) => Promise<TOutput>,
+      ctx: StepContext<TOptions, TServices, TSubSteps>
+    ) => Promise<TOutput>
   ): RemoveUsed<
     StepModuleBuilder<
       TInput,
@@ -230,7 +236,7 @@ export class StepModuleBuilder<
   }
 
   public Build(
-    options?: TOptions,
+    options?: TOptions
   ): StepModule<
     TInput,
     TOutput,
@@ -249,7 +255,7 @@ export class StepModuleBuilder<
       initFn,
       cleanupFn,
       servicesFactory,
-      substeps,
+      substepFactory,
     } = this;
 
     class BuiltStep extends StepRuntime<
@@ -268,40 +274,42 @@ export class StepModuleBuilder<
       }
       override async Init(
         input: TInput,
-        ctx: StepContext<TOptions, TServices, TSubSteps>,
+        ctx: StepContext<TOptions, TServices, TSubSteps>
       ): Promise<void> {
         if (initFn) await initFn(input, ctx);
       }
 
       override async Execute(
         input: TInput,
-        ctx: StepContext<TOptions, TServices, TSubSteps>,
+        ctx: StepContext<TOptions, TServices, TSubSteps>
       ): Promise<TOutput> {
         return await runFn!(input, ctx);
       }
 
       override async Cleanup(
         input: TInput,
-        ctx: StepContext<TOptions, TServices, TSubSteps>,
+        ctx: StepContext<TOptions, TServices, TSubSteps>
       ): Promise<void> {
         if (cleanupFn) await cleanupFn(input, ctx);
       }
 
       protected override async injectServices(
         input: TInput,
-        ctx: StepContext<TOptions, TServices, TSubSteps>,
+        ctx: StepContext<TOptions, TServices, TSubSteps>
       ): Promise<Partial<TServices>> {
         return servicesFactory ? await servicesFactory(input, ctx) : {};
       }
 
-      protected override injectSubSteps(
-        ctx: StepContext<TOptions, TServices, TSubSteps>,
+      protected override async injectSubSteps(
+        input: TInput,
+        ctx: StepContext<TOptions, TServices, TSubSteps>
       ): Promise<TSubSteps> {
-        if (!substeps) return Promise.resolve({} as TSubSteps);
+        if (!substepFactory) return {} as TSubSteps;
 
+        const stepMap = await substepFactory(input, ctx);
         const invokers: StepInvokerMap = {};
 
-        for (const [key, mod] of Object.entries(substeps)) {
+        for (const [key, mod] of Object.entries(stepMap)) {
           const runtime = new mod.Step(ctx.Options || {});
           invokers[key] = async (input: unknown): Promise<unknown> => {
             const enrichedCtx = await runtime.ConfigureContext(input, {
@@ -312,7 +320,7 @@ export class StepModuleBuilder<
           };
         }
 
-        return Promise.resolve(invokers as TSubSteps);
+        return invokers as TSubSteps;
       }
 
       override BuildMetadata(): StepModuleMetadata {

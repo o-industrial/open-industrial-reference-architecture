@@ -17,7 +17,7 @@ export abstract class StepRuntime<
   TOutput = unknown,
   TOptions = unknown,
   TServices extends Record<string, unknown> = Record<string, unknown>,
-  TSubSteps extends StepInvokerMap = StepInvokerMap,
+  TSubSteps extends StepInvokerMap = StepInvokerMap
 > {
   protected readonly options: TOptions;
 
@@ -35,7 +35,7 @@ export abstract class StepRuntime<
    */
   public Init?(
     input: TInput,
-    ctx: StepContext<TOptions, TServices, TSubSteps>,
+    ctx: StepContext<TOptions, TServices, TSubSteps>
   ): void | Promise<void>;
 
   /**
@@ -44,7 +44,7 @@ export abstract class StepRuntime<
    */
   public abstract Execute(
     input: TInput,
-    ctx: StepContext<TOptions, TServices, TSubSteps>,
+    ctx: StepContext<TOptions, TServices, TSubSteps>
   ): Promise<TOutput>;
 
   /**
@@ -52,7 +52,7 @@ export abstract class StepRuntime<
    */
   public Cleanup?(
     input: TInput,
-    ctx: StepContext<TOptions, TServices, TSubSteps>,
+    ctx: StepContext<TOptions, TServices, TSubSteps>
   ): void | Promise<void>;
 
   /**
@@ -60,14 +60,15 @@ export abstract class StepRuntime<
    */
   protected injectServices?(
     input: TInput,
-    ctx: StepContext<TOptions, TServices, TSubSteps>,
+    ctx: StepContext<TOptions, TServices, TSubSteps>
   ): Promise<Partial<TServices>>;
 
   /**
    * Optional hook to inject callable substeps into the context.
    */
   protected injectSubSteps?(
-    ctx: StepContext<TOptions, TServices, TSubSteps>,
+    input: TInput,
+    ctx: StepContext<TOptions, TServices, TSubSteps>
   ): Promise<TSubSteps>;
 
   /**
@@ -75,31 +76,35 @@ export abstract class StepRuntime<
    */
   public async ConfigureContext(
     input: TInput,
-    ctx: Partial<StepContext<TOptions, TServices, TSubSteps>>,
+    ctx: Partial<StepContext<TOptions, TServices, TSubSteps>>
   ): Promise<StepContext<TOptions, TServices, TSubSteps>> {
     // Inject Options if available
     if (this.options) {
       ctx.Options = this.options;
     }
 
+    // Inject substeps
+    if (typeof this.injectSubSteps === 'function') {
+      const subSteps = await this.injectSubSteps(
+        input,
+        ctx as StepContext<TOptions, TServices, TSubSteps>
+      );
+      ctx.Steps = {
+        ...(ctx.Steps ?? {}),
+        ...subSteps,
+      } as TSubSteps;
+    }
+
     // Inject services
     if (typeof this.injectServices === 'function') {
       const services = await this.injectServices(
         input,
-        ctx as StepContext<TOptions, TServices, TSubSteps>,
+        ctx as StepContext<TOptions, TServices, TSubSteps>
       );
       ctx.Services = {
         ...(ctx.Services ?? {}),
         ...services,
       } as TServices;
-    }
-
-    // Inject substeps
-    if (typeof this.injectSubSteps === 'function') {
-      const subSteps = await this.injectSubSteps(
-        ctx as StepContext<TOptions, TServices, TSubSteps>,
-      );
-      ctx.Steps = subSteps;
     }
 
     return ctx as StepContext<TOptions, TServices, TSubSteps>;

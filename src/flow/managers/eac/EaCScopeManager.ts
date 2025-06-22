@@ -29,14 +29,14 @@ export abstract class EaCScopeManager {
   constructor(
     protected graph: GraphStateManager,
     protected capabilities: EaCCapabilitiesManager,
-    protected getEaC: () => OpenIndustrialEaC,
+    protected getEaC: () => OpenIndustrialEaC
   ) {}
 
   public abstract BuildGraph(): FlowGraph;
 
   public BuildPartialForNodeUpdate(
     id: string,
-    patch: EaCNodeCapabilityPatch,
+    patch: EaCNodeCapabilityPatch
   ): Partial<OpenIndustrialEaC> | null {
     const node = this.findNode(id);
     if (!node) return null;
@@ -44,38 +44,38 @@ export abstract class EaCScopeManager {
     return this.capabilities.BuildUpdatePatch(
       node,
       patch,
-      this.getCapabilityContext(),
+      this.getCapabilityContext()
     );
   }
 
   public BuildPartialForNodeDelete(
-    id: string,
+    id: string
   ): NullableArrayOrObject<OpenIndustrialEaC> | null {
     const node = this.findNode(id);
     if (!node) return null;
 
     return this.capabilities.BuildDeletePatch(
       node,
-      this.getCapabilityContext(),
+      this.getCapabilityContext()
     );
   }
 
   public abstract CreateConnectionEdge(
     source: string,
-    target: string,
+    target: string
   ): Partial<OpenIndustrialEaC> | null;
 
   public CreatePartialEaCFromPreset(
     type: string,
     id: string,
-    position: Position,
+    position: Position
   ): Partial<OpenIndustrialEaC> {
     return (
       this.capabilities.BuildPresetPatch(
         type,
         id,
         position,
-        this.getCapabilityContext(),
+        this.getCapabilityContext()
       ) ?? {}
     );
   }
@@ -108,15 +108,15 @@ export abstract class EaCScopeManager {
   public abstract HasConnection(source: string, target: string): boolean;
 
   public InstallSimulators(
-    _simDefs: SimulatorDefinition[],
+    _simDefs: SimulatorDefinition[]
   ): Partial<OpenIndustrialEaC> {
     throw new Deno.errors.NotSupported(
-      `InstallSimulators is not supported in scope ${this.constructor.name}`,
+      `InstallSimulators is not supported in scope ${this.constructor.name}`
     );
   }
 
   public RemoveConnectionEdge(
-    edgeId: string,
+    edgeId: string
   ): Partial<OpenIndustrialEaC> | null {
     const [sourceId, targetId] = edgeId.split('->');
 
@@ -128,18 +128,18 @@ export abstract class EaCScopeManager {
     return this.capabilities.BuildDisconnectionPatch(
       src,
       tgt,
-      this.getCapabilityContext(),
+      this.getCapabilityContext()
     );
   }
 
   public abstract UpdateConnections(
     changes: EdgeChange[],
-    edges: Edge[],
+    edges: Edge[]
   ): OpenIndustrialEaC | null;
 
   public UpdateNodesFromChanges(
     changes: NodeChange[],
-    currentNodes: Node<FlowNodeData>[],
+    currentNodes: Node<FlowNodeData>[]
   ): Partial<OpenIndustrialEaC> | null {
     const updated = applyNodeChanges(changes, currentNodes);
 
@@ -165,7 +165,7 @@ export abstract class EaCScopeManager {
       const update = this.capabilities.BuildUpdatePatch(
         graphNode,
         patch,
-        this.getCapabilityContext(),
+        this.getCapabilityContext()
       );
       if (!update) continue;
 
@@ -176,8 +176,45 @@ export abstract class EaCScopeManager {
     return modified ? partial : null;
   }
 
+  public UpdateNodePatch(
+    id: string,
+    patch: Partial<{
+      Details: EaCVertexDetails;
+      Metadata: Partial<EaCFlowNodeMetadata>;
+    }>
+  ): Partial<OpenIndustrialEaC> | null {
+    const current = this.GetNodeAsCode(id);
+    if (!current) return null;
+
+    const merged: Partial<{
+      Details: EaCVertexDetails;
+      Metadata: EaCFlowNodeMetadata;
+    }> = {};
+
+    if (patch.Details) {
+      const combined = { ...current.Details, ...patch.Details };
+
+      if (JSON.stringify(current.Details) !== JSON.stringify(combined)) {
+        merged.Details = combined;
+      }
+    }
+
+    if (patch.Metadata) {
+      const prevMeta = current.Metadata ?? {};
+      const combined = merge<EaCFlowNodeMetadata>(prevMeta, patch.Metadata);
+
+      if (JSON.stringify(prevMeta) !== JSON.stringify(combined)) {
+        merged.Metadata = combined;
+      }
+    }
+
+    if (Object.keys(merged).length === 0) return null;
+
+    return this.BuildPartialForNodeUpdate(id, merged);
+  }
+
   protected findAsCode(
-    node: Node<FlowNodeData>,
+    node: Node<FlowNodeData>
   ): EaCNodeCapabilityAsCode | null {
     const graphNode = this.findNode(node.id)!;
     if (!node) return null;

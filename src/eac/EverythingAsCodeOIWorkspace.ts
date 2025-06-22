@@ -1,12 +1,23 @@
-import { EverythingAsCodeClouds, EverythingAsCodeCloudsSchema, z } from './.deps.ts';
+import {
+  EverythingAsCodeApplications,
+  EverythingAsCodeClouds,
+  EverythingAsCodeCloudsSchema,
+  z,
+} from './.deps.ts';
 import { EaCAgentAsCode, EaCAgentAsCodeSchema } from './EaCAgentAsCode.ts';
 import {
   EaCDataConnectionAsCode,
   EaCDataConnectionAsCodeSchema,
 } from './EaCDataConnectionAsCode.ts';
 import { EaCSchemaAsCode, EaCSchemaAsCodeSchema } from './EaCSchemaAsCode.ts';
-import { EaCSurfaceAsCode, EaCSurfaceAsCodeSchema } from './EaCSurfaceAsCode.ts';
-import { EaCSimulatorAsCode, EaCSimulatorAsCodeSchema } from './EaCSimulatorAsCode.ts';
+import {
+  EaCSurfaceAsCode,
+  EaCSurfaceAsCodeSchema,
+} from './EaCSurfaceAsCode.ts';
+import {
+  EaCSimulatorAsCode,
+  EaCSimulatorAsCodeSchema,
+} from './EaCSimulatorAsCode.ts';
 import { EaCProposalConfigAsCode } from './EaCProposalConfigAsCode.ts';
 import { EaCPackAsCode, EaCPackAsCodeSchema } from './EaCPackAsCode.ts';
 
@@ -76,7 +87,8 @@ export type EverythingAsCodeOIWorkspace = {
 
   /** Surfaces such as dashboards, panels, and visual UIs. */
   Surfaces?: Record<string, EaCSurfaceAsCode>;
-} & EverythingAsCodeClouds;
+} & EverythingAsCodeClouds &
+  EverythingAsCodeApplications;
 
 export type EverythingAsCodeOIWorkspaceSchema = z.ZodObject<
   {
@@ -109,9 +121,7 @@ export type EverythingAsCodeOIWorkspaceSchema = z.ZodObject<
     DataConnections: z.ZodOptional<
       z.ZodRecord<z.ZodString, typeof EaCDataConnectionAsCodeSchema>
     >;
-    Packs: z.ZodOptional<
-      z.ZodRecord<z.ZodString, typeof EaCPackAsCodeSchema>
-    >;
+    Packs: z.ZodOptional<z.ZodRecord<z.ZodString, typeof EaCPackAsCodeSchema>>;
     Schemas: z.ZodOptional<
       z.ZodRecord<z.ZodString, typeof EaCSchemaAsCodeSchema>
     >;
@@ -196,7 +206,7 @@ export const EverythingAsCodeOIWorkspaceSchema: EverythingAsCodeOIWorkspaceSchem
       .record(EaCPackAsCodeSchema)
       .optional()
       .describe(
-        'Runtime capability packs declared by path and optional enablement.',
+        'Runtime capability packs declared by path and optional enablement.'
       ),
 
     Schemas: z
@@ -216,14 +226,14 @@ export const EverythingAsCodeOIWorkspaceSchema: EverythingAsCodeOIWorkspaceSchem
   })
     .strip()
     .describe(
-      'Everything-as-Code configuration for an Open Industrial workspace.',
+      'Everything-as-Code configuration for an Open Industrial workspace.'
     );
 
 /**
  * Type guard for `EverythingAsCodeOIWorkspace`.
  */
 export function isEverythingAsCodeOIWorkspace(
-  value: unknown,
+  value: unknown
 ): value is EverythingAsCodeOIWorkspace {
   return EverythingAsCodeOIWorkspaceSchema.safeParse(value).success;
 }
@@ -232,7 +242,7 @@ export function isEverythingAsCodeOIWorkspace(
  * Validates and parses an object as `EverythingAsCodeOIWorkspace`.
  */
 export function parseEverythingAsCodeOIWorkspace(
-  value: unknown,
+  value: unknown
 ): EverythingAsCodeOIWorkspace {
   return EverythingAsCodeOIWorkspaceSchema.parse(value);
 }

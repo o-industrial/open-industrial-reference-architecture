@@ -20,7 +20,6 @@
     "./fluent": "./src/fluent/_/.exports.ts",
     "./fluent/connections": "./src/fluent/connections/.exports.ts",
     "./fluent/packs": "./src/fluent/packs/.exports.ts",
-    "./fluent/runtimes": "./src/fluent/runtimes/.exports.ts",
     "./fluent/simulators": "./src/fluent/simulators/.exports.ts",
     "./fluent/steps": "./src/fluent/steps/.exports.ts",
     "./fluent/types": "./src/fluent/types/.exports.ts",
@@ -28,7 +27,9 @@
     "./fluent/workspaces": "./src/fluent/workspaces/.exports.ts",
 
     "./packs/azure-iot": "./src/packs/azure-iot/.pack.ts",
-    "./packs/oi-core": "./src/packs/oi-core/.pack.ts"
+    "./packs/oi-core": "./src/packs/oi-core/.pack.ts",
+
+    "./runtimes": "./src/runtimes/.exports.ts"
   },
   "license": "MIT",
   "tasks": {

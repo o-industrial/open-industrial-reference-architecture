@@ -17,16 +17,16 @@ export type EaCAzureIoTHubDataConnectionDetails = {
   DeviceID: string;
 
   /** Whether the device is setup as an Azure IoT Edge device or not. */
-  IsIoTEdge: boolean;
+  IsIoTEdge?: boolean;
 
   /** Azure subscription ID for resource provisioning. */
-  SubscriptionID: string;
+  SubscriptionID?: string;
 
   /** Azure resource group where the IoT Hub is located. */
-  ResourceGroupName: string;
+  ResourceGroupName?: string;
 
   /** IoT Hub name override. */
-  IoTHubName: string;
+  IoTHubName?: string;
 } & EaCDataConnectionDetails<'AzureIoTHub'>;
 
 /**
@@ -39,28 +39,34 @@ export const EaCAzureIoTHubDataConnectionDetailsSchema: z.ZodObject<
       Type: z.ZodLiteral<'AzureIoTHub'>;
       // ConnectionString: z.ZodString;
       DeviceID: z.ZodString;
-      IsIoTEdge: z.ZodBoolean;
-      IoTHubName: z.ZodString;
-      ResourceGroupName: z.ZodString;
-      SubscriptionID: z.ZodString;
+      IsIoTEdge: z.ZodOptional<z.ZodBoolean>;
+      IoTHubName: z.ZodOptional<z.ZodString>;
+      ResourceGroupName: z.ZodOptional<z.ZodString>;
+      SubscriptionID: z.ZodOptional<z.ZodString>;
     }
   >
 > = EaCDataConnectionDetailsSchema.extend({
   Type: z.literal('AzureIoTHub'),
   // ConnectionString: z.string().describe('Azure IoT Hub connection string.'),
   DeviceID: z.string().describe('Target device identifier in IoT Hub.'),
-  IsIoTEdge: z.boolean().describe('Whether the device is an IoT Edge device.'),
+  IsIoTEdge: z
+    .boolean()
+    .optional()
+    .describe('Whether the device is an IoT Edge device.'),
 
-  SubscriptionID: z.string().describe('Azure Subscription ID.'),
-  ResourceGroupName: z.string().describe('Azure Resource Group name.'),
-  IoTHubName: z.string().describe('Optional IoT Hub name override.'),
+  SubscriptionID: z.string().optional().describe('Azure Subscription ID.'),
+  ResourceGroupName: z
+    .string()
+    .optional()
+    .describe('Azure Resource Group name.'),
+  IoTHubName: z.string().optional().describe('Optional IoT Hub name override.'),
 }).describe('Schema for Azure IoT Hub-based Data Connection Details');
 
 /**
  * Type guard to validate whether a given object is an EaCAzureIoTHubDataConnectionDetails.
  */
 export function isEaCAzureIoTHubDataConnectionDetails(
-  conn: unknown,
+  conn: unknown
 ): conn is EaCAzureIoTHubDataConnectionDetails {
   return EaCAzureIoTHubDataConnectionDetailsSchema.safeParse(conn).success;
 }
@@ -69,7 +75,7 @@ export function isEaCAzureIoTHubDataConnectionDetails(
  * Parses and validates the provided data as EaCAzureIoTHubDataConnectionDetails.
  */
 export function parseEaCAzureIoTHubDataConnectionDetails(
-  conn: unknown,
+  conn: unknown
 ): EaCAzureIoTHubDataConnectionDetails {
   return EaCAzureIoTHubDataConnectionDetailsSchema.parse(conn);
 }

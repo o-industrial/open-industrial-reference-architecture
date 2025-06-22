@@ -7,6 +7,7 @@ import {
   SurfaceDataConnectionSettings,
 } from '../../../../eac/EaCSurfaceAsCode.ts';
 import { EverythingAsCodeOIWorkspace } from '../../../../eac/EverythingAsCodeOIWorkspace.ts';
+import { merge } from '../../../../flow/.deps.ts';
 import {
   EaCNodeCapabilityAsCode,
   EaCNodeCapabilityContext,
@@ -16,7 +17,12 @@ import {
   FlowGraphNode,
 } from '../../../../flow/.exports.ts';
 import { OpenIndustrialEaC } from '../../../../types/OpenIndustrialEaC.ts';
-import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
+import {
+  ComponentType,
+  FunctionComponent,
+  memo,
+  NullableArrayOrObject,
+} from '../../.deps.ts';
 import { ConnectionInspector } from './ConnectionInspector.tsx';
 import ConnectionNodeRenderer from './ConnectionNodeRenderer.tsx';
 
@@ -26,14 +32,14 @@ import ConnectionNodeRenderer from './ConnectionNodeRenderer.tsx';
  */
 export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManager {
   protected static renderer: ComponentType = memo(
-    ConnectionNodeRenderer as FunctionComponent,
+    ConnectionNodeRenderer as FunctionComponent
   );
 
   public override Type = 'connection';
 
   protected override buildAsCode(
     node: FlowGraphNode,
-    ctx: EaCNodeCapabilityContext,
+    ctx: EaCNodeCapabilityContext
   ): EaCNodeCapabilityAsCode | null {
     const conn = ctx.GetEaC().DataConnections?.[node.ID];
     if (!conn) return null;
@@ -47,7 +53,7 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
   protected override buildConnectionPatch(
     source: FlowGraphNode,
     target: FlowGraphNode,
-    ctx: EaCNodeCapabilityContext,
+    ctx: EaCNodeCapabilityContext
   ): Partial<OpenIndustrialEaC> | null {
     const eac = ctx.GetEaC() as EverythingAsCodeOIWorkspace;
 
@@ -90,7 +96,7 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
   }
 
   protected override buildDeletePatch(
-    node: FlowGraphNode,
+    node: FlowGraphNode
   ): NullableArrayOrObject<OpenIndustrialEaC> {
     return this.wrapDeletePatch('DataConnections', node.ID);
   }
@@ -98,7 +104,7 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
   protected override buildDisconnectionPatch(
     source: FlowGraphNode,
     target: FlowGraphNode,
-    ctx: EaCNodeCapabilityContext,
+    ctx: EaCNodeCapabilityContext
   ): Partial<OpenIndustrialEaC> | null {
     const eac = ctx.GetEaC() as EverythingAsCodeOIWorkspace;
 
@@ -141,7 +147,7 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
 
   protected override buildEdgesForNode(
     node: FlowGraphNode,
-    ctx: EaCNodeCapabilityContext,
+    ctx: EaCNodeCapabilityContext
   ): FlowGraphEdge[] {
     const eac = ctx.GetEaC() as EverythingAsCodeOIWorkspace;
     const edges: FlowGraphEdge[] = [];
@@ -162,7 +168,7 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
 
   protected override buildNode(
     id: string,
-    ctx: EaCNodeCapabilityContext,
+    ctx: EaCNodeCapabilityContext
   ): FlowGraphNode | null {
     const conn = ctx.GetEaC().DataConnections?.[id];
     if (!conn) return null;
@@ -179,7 +185,7 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
   protected override buildPresetPatch(
     id: string,
     position: Position,
-    _context: EaCNodeCapabilityContext,
+    _context: EaCNodeCapabilityContext
   ): Partial<OpenIndustrialEaC> {
     const metadata: EaCFlowNodeMetadata = {
       Position: position,
@@ -203,14 +209,15 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
 
   protected override buildUpdatePatch(
     node: FlowGraphNode,
-    update: EaCNodeCapabilityPatch,
+    update: EaCNodeCapabilityPatch
   ): Partial<OpenIndustrialEaC> {
+    debugger;
     return {
       DataConnections: {
-        [node.ID]: this.mergeDetailsAndMetadata(
-          update.Details,
-          update.Metadata,
-        ),
+        [node.ID]: {
+          Details: merge(node.Details || {}, update.Details || {}),
+          Metadata: merge(node.Metadata || {}, update.Metadata || {}),
+        } as EaCDataConnectionAsCode,
       },
     };
   }
