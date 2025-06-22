@@ -176,6 +176,43 @@ export abstract class EaCScopeManager {
     return modified ? partial : null;
   }
 
+  public UpdateNodePatch(
+    id: string,
+    patch: Partial<{
+      Details: EaCVertexDetails;
+      Metadata: Partial<EaCFlowNodeMetadata>;
+    }>,
+  ): Partial<OpenIndustrialEaC> | null {
+    const current = this.GetNodeAsCode(id);
+    if (!current) return null;
+
+    const merged: Partial<{
+      Details: EaCVertexDetails;
+      Metadata: EaCFlowNodeMetadata;
+    }> = {};
+
+    if (patch.Details) {
+      const combined = { ...current.Details, ...patch.Details };
+
+      if (JSON.stringify(current.Details) !== JSON.stringify(combined)) {
+        merged.Details = combined;
+      }
+    }
+
+    if (patch.Metadata) {
+      const prevMeta = current.Metadata ?? {};
+      const combined = merge<EaCFlowNodeMetadata>(prevMeta, patch.Metadata);
+
+      if (JSON.stringify(prevMeta) !== JSON.stringify(combined)) {
+        merged.Metadata = combined;
+      }
+    }
+
+    if (Object.keys(merged).length === 0) return null;
+
+    return this.BuildPartialForNodeUpdate(id, merged);
+  }
+
   protected findAsCode(
     node: Node<FlowNodeData>,
   ): EaCNodeCapabilityAsCode | null {

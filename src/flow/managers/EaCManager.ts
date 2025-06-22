@@ -253,33 +253,8 @@ export class EaCManager {
       Metadata: Partial<EaCFlowNodeMetadata>;
     }>,
   ): void {
-    const current = this.GetNodeAsCode(id);
-    if (!current) return;
-
-    const merged: Partial<{
-      Details: EaCVertexDetails;
-      Metadata: EaCFlowNodeMetadata;
-    }> = {};
-
-    if (patch.Details) {
-      const combined = { ...current.Details, ...patch.Details };
-      if (JSON.stringify(current.Details) !== JSON.stringify(combined)) {
-        merged.Details = combined;
-      }
-    }
-
-    if (patch.Metadata) {
-      const prevMeta = current.Metadata ?? {};
-      const combined = merge<EaCFlowNodeMetadata>(prevMeta, patch.Metadata);
-      if (JSON.stringify(prevMeta) !== JSON.stringify(combined)) {
-        merged.Metadata = combined;
-      }
-    }
-
-    if (Object.keys(merged).length > 0) {
-      const partial = this.scopeMgr.BuildPartialForNodeUpdate(id, merged);
-      if (partial) this.MergePartial(partial);
-    }
+    const partial = this.scopeMgr.UpdateNodePatch(id, patch);
+    if (partial) this.MergePartial(partial);
   }
 
   public OnEaCChanged(cb: () => void): () => void {

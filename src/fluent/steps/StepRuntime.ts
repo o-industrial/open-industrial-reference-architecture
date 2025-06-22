@@ -67,6 +67,7 @@ export abstract class StepRuntime<
    * Optional hook to inject callable substeps into the context.
    */
   protected injectSubSteps?(
+    input: TInput,
     ctx: StepContext<TOptions, TServices, TSubSteps>,
   ): Promise<TSubSteps>;
 
@@ -82,6 +83,18 @@ export abstract class StepRuntime<
       ctx.Options = this.options;
     }
 
+    // Inject substeps
+    if (typeof this.injectSubSteps === 'function') {
+      const subSteps = await this.injectSubSteps(
+        input,
+        ctx as StepContext<TOptions, TServices, TSubSteps>,
+      );
+      ctx.Steps = {
+        ...(ctx.Steps ?? {}),
+        ...subSteps,
+      } as TSubSteps;
+    }
+
     // Inject services
     if (typeof this.injectServices === 'function') {
       const services = await this.injectServices(
@@ -92,14 +105,6 @@ export abstract class StepRuntime<
         ...(ctx.Services ?? {}),
         ...services,
       } as TServices;
-    }
-
-    // Inject substeps
-    if (typeof this.injectSubSteps === 'function') {
-      const subSteps = await this.injectSubSteps(
-        ctx as StepContext<TOptions, TServices, TSubSteps>,
-      );
-      ctx.Steps = subSteps;
     }
 
     return ctx as StepContext<TOptions, TServices, TSubSteps>;

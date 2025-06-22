@@ -41,7 +41,12 @@ export class StepModuleBuilder<
     ctx: StepContext<TOptions, TServices, TSubSteps>,
   ) => Promise<TServices>;
 
-  protected substeps?: Record<string, StepModule<any, any, any, any, any>>;
+  protected substepFactory?: (
+    input: TInput,
+    ctx: StepContext<TOptions, TServices, StepInvokerMap>,
+  ) =>
+    | Promise<Record<string, StepModule<any, any, any, any, any>>>
+    | Record<string, StepModule<any, any, any, any, any>>;
 
   constructor(
     protected readonly name: string,
@@ -187,7 +192,7 @@ export class StepModuleBuilder<
     >,
     TUsed & { SubSteps: true }
   > {
-    this.substeps = factory as any;
+    this.substepFactory = factory;
     return this as any;
   }
 
@@ -249,7 +254,7 @@ export class StepModuleBuilder<
       initFn,
       cleanupFn,
       servicesFactory,
-      substeps,
+      substepFactory,
     } = this;
 
     class BuiltStep extends StepRuntime<
@@ -294,14 +299,16 @@ export class StepModuleBuilder<
         return servicesFactory ? await servicesFactory(input, ctx) : {};
       }
 
-      protected override injectSubSteps(
+      protected override async injectSubSteps(
+        input: TInput,
         ctx: StepContext<TOptions, TServices, TSubSteps>,
       ): Promise<TSubSteps> {
-        if (!substeps) return Promise.resolve({} as TSubSteps);
+        if (!substepFactory) return {} as TSubSteps;
 
+        const stepMap = await substepFactory(input, ctx);
         const invokers: StepInvokerMap = {};
 
-        for (const [key, mod] of Object.entries(substeps)) {
+        for (const [key, mod] of Object.entries(stepMap)) {
           const runtime = new mod.Step(ctx.Options || {});
           invokers[key] = async (input: unknown): Promise<unknown> => {
             const enrichedCtx = await runtime.ConfigureContext(input, {
@@ -312,7 +319,7 @@ export class StepModuleBuilder<
           };
         }
 
-        return Promise.resolve(invokers as TSubSteps);
+        return invokers as TSubSteps;
       }
 
       override BuildMetadata(): StepModuleMetadata {

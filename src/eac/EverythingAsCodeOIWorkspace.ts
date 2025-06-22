@@ -1,5 +1,6 @@
 import {
   EaCWarmQueryAsCodeSchema,
+  EverythingAsCodeApplications,
   EverythingAsCodeClouds,
   EverythingAsCodeCloudsSchema,
   z,
@@ -54,34 +55,37 @@ export type SignalOptions = {
  *
  * Combines runtime memory, reflex agents, schema pipelines, and cloud/simulator bindings.
  */
-export type EverythingAsCodeOIWorkspace = {
-  /** Optional global runtime policies. */
-  $GlobalOptions?: {
-    Impulses?: ImpulseOptions;
-    Signals?: SignalOptions;
-  };
+export type EverythingAsCodeOIWorkspace =
+  & {
+    /** Optional global runtime policies. */
+    $GlobalOptions?: {
+      Impulses?: ImpulseOptions;
+      Signals?: SignalOptions;
+    };
 
-  /** Executable reflex agents mapped by ID. */
-  Agents?: Record<string, EaCAgentAsCode>;
+    /** Executable reflex agents mapped by ID. */
+    Agents?: Record<string, EaCAgentAsCode>;
 
-  /** External or streaming connections (MQTT, HTTP, etc.). */
-  DataConnections?: Record<string, EaCDataConnectionAsCode>;
+    /** External or streaming connections (MQTT, HTTP, etc.). */
+    DataConnections?: Record<string, EaCDataConnectionAsCode>;
 
-  /** Declared runtime capability packs (modbus, test-utils, etc.). */
-  Packs?: Record<string, EaCPackAsCode>;
+    /** Declared runtime capability packs (modbus, test-utils, etc.). */
+    Packs?: Record<string, EaCPackAsCode>;
 
-  /** Proposal configurations scoped for dynamic changes. */
-  ProposalConfigs?: Record<string, EaCProposalConfigAsCode>;
+    /** Proposal configurations scoped for dynamic changes. */
+    ProposalConfigs?: Record<string, EaCProposalConfigAsCode>;
 
-  /** Stream or signal-backed schemas for memory. */
-  Schemas?: Record<string, EaCSchemaAsCode>;
+    /** Stream or signal-backed schemas for memory. */
+    Schemas?: Record<string, EaCSchemaAsCode>;
 
-  /** Simulators used to inject or test impulses. */
-  Simulators?: Record<string, EaCSimulatorAsCode>;
+    /** Simulators used to inject or test impulses. */
+    Simulators?: Record<string, EaCSimulatorAsCode>;
 
-  /** Surfaces such as dashboards, panels, and visual UIs. */
-  Surfaces?: Record<string, EaCSurfaceAsCode>;
-} & EverythingAsCodeClouds;
+    /** Surfaces such as dashboards, panels, and visual UIs. */
+    Surfaces?: Record<string, EaCSurfaceAsCode>;
+  }
+  & EverythingAsCodeClouds
+  & EverythingAsCodeApplications;
 
 export type EverythingAsCodeOIWorkspaceSchema = z.ZodObject<
   {
@@ -114,9 +118,7 @@ export type EverythingAsCodeOIWorkspaceSchema = z.ZodObject<
     DataConnections: z.ZodOptional<
       z.ZodRecord<z.ZodString, typeof EaCDataConnectionAsCodeSchema>
     >;
-    Packs: z.ZodOptional<
-      z.ZodRecord<z.ZodString, typeof EaCPackAsCodeSchema>
-    >;
+    Packs: z.ZodOptional<z.ZodRecord<z.ZodString, typeof EaCPackAsCodeSchema>>;
     Schemas: z.ZodOptional<
       z.ZodRecord<z.ZodString, typeof EaCSchemaAsCodeSchema>
     >;

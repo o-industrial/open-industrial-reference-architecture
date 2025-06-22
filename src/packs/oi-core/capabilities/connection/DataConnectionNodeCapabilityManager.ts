@@ -7,6 +7,7 @@ import {
   SurfaceDataConnectionSettings,
 } from '../../../../eac/EaCSurfaceAsCode.ts';
 import { EverythingAsCodeOIWorkspace } from '../../../../eac/EverythingAsCodeOIWorkspace.ts';
+import { merge } from '../../../../flow/.deps.ts';
 import {
   EaCNodeCapabilityAsCode,
   EaCNodeCapabilityContext,
@@ -167,12 +168,13 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
     node: FlowGraphNode,
     update: EaCNodeCapabilityPatch,
   ): Partial<OpenIndustrialEaC> {
+    debugger;
     return {
       DataConnections: {
-        [node.ID]: this.mergeDetailsAndMetadata(
-          update.Details,
-          update.Metadata,
-        ),
+        [node.ID]: {
+          Details: merge(node.Details || {}, update.Details || {}),
+          Metadata: merge(node.Metadata || {}, update.Metadata || {}),
+        } as EaCDataConnectionAsCode,
       },
     };
   }
