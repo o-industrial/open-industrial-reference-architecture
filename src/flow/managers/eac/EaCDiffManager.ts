@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { jsonMapSetClone, merge, NullableArrayOrObject } from '../../.deps.ts';
 import { HistoryManager } from '../HistoryManager.ts';
-import { OpenIndustrialEaC } from '../../types/OpenIndustrialEaC.ts';
+import { EverythingAsCodeOIWorkspace } from '../../../eac/EverythingAsCodeOIWorkspace.ts';
 
 /**
  * Handles diffing, merging, and deletion tracking for Everything-as-Code structures.
@@ -11,11 +11,11 @@ export class EaCDiffManager {
   constructor(protected history: HistoryManager, protected emit: () => void) {}
 
   public MergePartial(
-    current: OpenIndustrialEaC,
-    deleteEaC: NullableArrayOrObject<OpenIndustrialEaC>,
-    partial: OpenIndustrialEaC,
-  ): { updated: OpenIndustrialEaC; changed: boolean } {
-    const updated = merge<OpenIndustrialEaC>(current, partial);
+    current: EverythingAsCodeOIWorkspace,
+    deleteEaC: NullableArrayOrObject<EverythingAsCodeOIWorkspace>,
+    partial: EverythingAsCodeOIWorkspace,
+  ): { updated: EverythingAsCodeOIWorkspace; changed: boolean } {
+    const updated = merge<EverythingAsCodeOIWorkspace>(current, partial);
     const changed = JSON.stringify(current) !== JSON.stringify(updated);
 
     if (changed) {
@@ -27,13 +27,13 @@ export class EaCDiffManager {
   }
 
   public MergeDelete(
-    current: OpenIndustrialEaC,
-    deleteEaC: NullableArrayOrObject<OpenIndustrialEaC>,
-    partial: OpenIndustrialEaC,
+    current: EverythingAsCodeOIWorkspace,
+    deleteEaC: NullableArrayOrObject<EverythingAsCodeOIWorkspace>,
+    partial: EverythingAsCodeOIWorkspace,
   ): {
-    updated: OpenIndustrialEaC;
+    updated: EverythingAsCodeOIWorkspace;
     changed: boolean;
-    deleteEaC: NullableArrayOrObject<OpenIndustrialEaC>;
+    deleteEaC: NullableArrayOrObject<EverythingAsCodeOIWorkspace>;
   } {
     this.deepMergeDelete(deleteEaC, jsonMapSetClone(partial));
 

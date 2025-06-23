@@ -1,18 +1,17 @@
 // deno-lint-ignore-file no-explicit-any
-import { OpenIndustrialAPIClient } from '../../../api/.exports.ts';
-import { Position } from '../../../eac/.exports.ts';
+
+import { OpenIndustrialAPIClient } from '../../../api/clients/OpenIndustrialAPIClient.ts';
 import { EaCFlowNodeMetadata } from '../../../eac/EaCFlowNodeMetadata.ts';
+import { EverythingAsCodeOIWorkspace } from '../../../eac/EverythingAsCodeOIWorkspace.ts';
+import { Position } from '../../../eac/types/Position.ts';
 import { ComponentType, EaCVertexDetails, NullableArrayOrObject } from '../../.deps.ts';
-import {
-  EaCNodeCapabilityAsCode,
-  EaCNodeCapabilityContext,
-  EaCNodeCapabilityPatch,
-  FlowGraphEdge,
-  FlowGraphNode,
-  NodeEventRouter,
-  NodePreset,
-  OpenIndustrialEaC,
-} from '../../.exports.ts';
+import { FlowGraphEdge } from '../../types/graph/FlowGraphEdge.ts';
+import { FlowGraphNode } from '../../types/graph/FlowGraphNode.ts';
+import { EaCNodeCapabilityAsCode } from '../../types/nodes/EaCNodeCapabilityAsCode.ts';
+import { EaCNodeCapabilityContext } from '../../types/nodes/EaCNodeCapabilityContext.ts';
+import { EaCNodeCapabilityPatch } from '../../types/nodes/EaCNodeCapabilityPatch.ts';
+import { NodeEventRouter } from '../../types/nodes/NodeEventRouter.ts';
+import { NodePreset } from '../../types/react/NodePreset.ts';
 import { WorkspaceManager } from '../WorkspaceManager.ts';
 
 /**
@@ -42,7 +41,7 @@ export abstract class EaCNodeCapabilityManager<
     source: FlowGraphNode,
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     return this.buildConnectionPatch?.(source, target, context) ?? null;
   }
 
@@ -52,7 +51,7 @@ export abstract class EaCNodeCapabilityManager<
   public BuildDeletePatch(
     node: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): NullableArrayOrObject<OpenIndustrialEaC> | null {
+  ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> | null {
     return this.buildDeletePatch(node, context);
   }
 
@@ -63,7 +62,7 @@ export abstract class EaCNodeCapabilityManager<
     source: FlowGraphNode,
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     return this.buildDisconnectionPatch?.(source, target, context) ?? null;
   }
 
@@ -95,7 +94,7 @@ export abstract class EaCNodeCapabilityManager<
     id: string,
     position: Position,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> {
+  ): Partial<EverythingAsCodeOIWorkspace> {
     return this.buildPresetPatch?.(id, position, context) ?? {};
   }
 
@@ -106,7 +105,7 @@ export abstract class EaCNodeCapabilityManager<
     node: FlowGraphNode,
     update: EaCNodeCapabilityPatch<TDetails>,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     return this.buildUpdatePatch(node, update, context);
   }
 
@@ -192,12 +191,12 @@ export abstract class EaCNodeCapabilityManager<
     node: FlowGraphNode,
     update: EaCNodeCapabilityPatch<TDetails>,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null;
+  ): Partial<EverythingAsCodeOIWorkspace> | null;
 
   protected abstract buildDeletePatch(
     node: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): NullableArrayOrObject<OpenIndustrialEaC> | null;
+  ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> | null;
 
   /**
    * Optional override for building a node from ID.
@@ -222,7 +221,7 @@ export abstract class EaCNodeCapabilityManager<
     source: FlowGraphNode,
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null;
+  ): Partial<EverythingAsCodeOIWorkspace> | null;
 
   /**
    * Optional override for generating a patch that disconnects source → target.
@@ -231,7 +230,7 @@ export abstract class EaCNodeCapabilityManager<
     source: FlowGraphNode,
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null;
+  ): Partial<EverythingAsCodeOIWorkspace> | null;
 
   /**
    * Abstract hook for creating a new node definition from a UI preset.
@@ -241,7 +240,7 @@ export abstract class EaCNodeCapabilityManager<
     id: string,
     position: Position,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC>;
+  ): Partial<EverythingAsCodeOIWorkspace>;
 
   protected getConfig?(id: string): Record<string, unknown>;
 
@@ -311,9 +310,9 @@ export abstract class EaCNodeCapabilityManager<
    * Wraps a delete operation into the correct EaC nesting structure.
    */
   protected wrapDeletePatch(
-    outer: keyof OpenIndustrialEaC,
+    outer: keyof EverythingAsCodeOIWorkspace,
     inner: string,
-  ): NullableArrayOrObject<OpenIndustrialEaC> {
+  ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> {
     return {
       [outer]: {
         [inner]: null,

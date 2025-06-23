@@ -2,7 +2,7 @@ import { Edge, EdgeChange } from '../../.deps.ts';
 import { EaCScopeManager } from './EaCScopeManager.ts';
 import { GraphStateManager } from '../GraphStateManager.ts';
 
-import { OpenIndustrialEaC } from '../../../types/OpenIndustrialEaC.ts';
+import { EverythingAsCodeOIWorkspace } from '../../../eac/EverythingAsCodeOIWorkspace.ts';
 import { FlowGraph } from '../../types/graph/FlowGraph.ts';
 import { FlowGraphNode } from '../../types/graph/FlowGraphNode.ts';
 import { FlowGraphEdge } from '../../types/graph/FlowGraphEdge.ts';
@@ -13,7 +13,7 @@ export class EaCSurfaceScopeManager extends EaCScopeManager {
   constructor(
     graph: GraphStateManager,
     capabilities: EaCCapabilitiesManager,
-    getEaC: () => OpenIndustrialEaC,
+    getEaC: () => EverythingAsCodeOIWorkspace,
     protected surfaceLookup: string,
   ) {
     super(graph, capabilities, getEaC);
@@ -85,7 +85,7 @@ export class EaCSurfaceScopeManager extends EaCScopeManager {
   public CreateConnectionEdge(
     source: string,
     target: string,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     const src = this.findNode(source);
     const tgt = this.findNode(target);
 
@@ -107,9 +107,9 @@ export class EaCSurfaceScopeManager extends EaCScopeManager {
   public UpdateConnections(
     _changes: EdgeChange[],
     _edges: Edge[],
-  ): OpenIndustrialEaC | null {
+  ): EverythingAsCodeOIWorkspace | null {
     // let changed = false;
-    // const partial: OpenIndustrialEaC = {};
+    // const partial: EverythingAsCodeOIWorkspace = {};
 
     // for (const change of changes) {
     //   if (change.type === 'add') {

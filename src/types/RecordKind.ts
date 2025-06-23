@@ -1,8 +1,8 @@
-import { OpenIndustrialEaC } from './OpenIndustrialEaC.ts';
+import { EverythingAsCodeOIWorkspace } from '../eac/EverythingAsCodeOIWorkspace.ts';
 import { RecordKeysOnly } from './RecordKeysOnly.ts';
 
 /**
- * Union of all OpenIndustrialEaC record-like maps (Schemas, Agents, etc.)
+ * Union of all EverythingAsCodeOIWorkspace record-like maps (Schemas, Agents, etc.)
  */
 
-export type RecordKind = RecordKeysOnly<OpenIndustrialEaC>;
+export type RecordKind = RecordKeysOnly<EverythingAsCodeOIWorkspace>;

@@ -14,7 +14,6 @@ import {
   FlowGraphEdge,
   FlowGraphNode,
 } from '../../../../flow/.exports.ts';
-import { OpenIndustrialEaC } from '../../../../types/OpenIndustrialEaC.ts';
 import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import { SurfaceRootSchemaInspector } from './SurfaceRootSchemaInspector.tsx';
 import SurfaceSchemaNodeRenderer from './SurfaceSchemaNodeRenderer.tsx';
@@ -57,7 +56,7 @@ export class SurfaceSchemaNodeCapabilityManager
     source: FlowGraphNode,
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     const eac = context.GetEaC();
 
     // Case: schema → composite-schema
@@ -101,7 +100,7 @@ export class SurfaceSchemaNodeCapabilityManager
 
   protected override buildDeletePatch(
     node: FlowGraphNode,
-  ): NullableArrayOrObject<OpenIndustrialEaC> {
+  ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> {
     const [surfaceId, schemaId] = this.extractCompoundIDs(node);
 
     return {
@@ -112,14 +111,14 @@ export class SurfaceSchemaNodeCapabilityManager
           },
         },
       },
-    } as unknown as NullableArrayOrObject<OpenIndustrialEaC>;
+    } as unknown as NullableArrayOrObject<EverythingAsCodeOIWorkspace>;
   }
 
   protected override buildDisconnectionPatch(
     source: FlowGraphNode,
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     const eac = context.GetEaC() as EverythingAsCodeOIWorkspace;
 
     // Case: schema → composite-schema
@@ -252,7 +251,7 @@ export class SurfaceSchemaNodeCapabilityManager
     id: string,
     position: Position,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> {
+  ): Partial<EverythingAsCodeOIWorkspace> {
     const metadata: EaCFlowNodeMetadata = {
       Position: position,
       Enabled: true,
@@ -288,7 +287,7 @@ export class SurfaceSchemaNodeCapabilityManager
     node: FlowGraphNode,
     update: EaCNodeCapabilityPatch<SurfaceSchemaNodeDetails>,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> {
+  ): Partial<EverythingAsCodeOIWorkspace> {
     const schemaId = node.ID;
 
     const settings: SurfaceSchemaSettings = {
@@ -302,7 +301,7 @@ export class SurfaceSchemaNodeCapabilityManager
     const { DisplayMode: _, ...rest } = update.Details ?? {};
     const schemaDetails: Partial<EaCSchemaDetails> = rest;
 
-    const patch: Partial<OpenIndustrialEaC> = {};
+    const patch: Partial<EverythingAsCodeOIWorkspace> = {};
 
     if (Object.keys(settings).length > 0) {
       patch.Surfaces = {

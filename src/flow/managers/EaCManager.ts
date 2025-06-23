@@ -16,7 +16,6 @@ import { GraphStateManager } from './GraphStateManager.ts';
 import { FlowNodeData } from '../types/react/FlowNodeData.ts';
 import { SimulatorDefinition } from './SimulatorLibraryManager.ts';
 import { FlowGraphNode } from '../types/graph/FlowGraphNode.ts';
-import { OpenIndustrialEaC } from '../../types/OpenIndustrialEaC.ts';
 import { NodeScopeTypes } from '../types/graph/NodeScopeTypes.ts';
 
 import { EaCDiffManager } from './eac/EaCDiffManager.ts';
@@ -29,19 +28,20 @@ import { EaCNodeCapabilityManager } from './eac/EaCNodeCapabilityManager.ts';
 
 import { ProposalOverlayMode } from '../types/graph/ProposalOverlayMode.ts';
 import { WorkspaceSummary } from '../types/WorkspaceSummary.ts';
-import { OpenIndustrialAPIClient } from '../../api/.exports.ts';
-import { Position } from '../../eac/.exports.ts';
 import { EaCFlowNodeMetadata } from '../../eac/EaCFlowNodeMetadata.ts';
 import { EaCHistorySnapshot } from '../../types/EaCHistorySnapshot.ts';
 import { Proposal } from '../../types/Proposal.ts';
 import { RecordKind } from '../../types/RecordKind.ts';
+import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
+import { OpenIndustrialAPIClient } from '../../api/clients/OpenIndustrialAPIClient.ts';
+import { Position } from '../../eac/types/Position.ts';
 
 /**
  * Top-level controller for managing the Everything-as-Code runtime state,
  * scoped graphs, capability models, and proposal overlays.
  */
 export class EaCManager {
-  protected deleteEaC: NullableArrayOrObject<OpenIndustrialEaC> = {};
+  protected deleteEaC: NullableArrayOrObject<EverythingAsCodeOIWorkspace> = {};
   protected changeListeners: Set<() => void> = new Set<() => void>();
   protected diff: EaCDiffManager;
   protected proposals: EaCProposalManager;
@@ -51,7 +51,7 @@ export class EaCManager {
   // === New Pack Cache ===
 
   constructor(
-    protected eac: OpenIndustrialEaC,
+    protected eac: EverythingAsCodeOIWorkspace,
     protected oiSvc: OpenIndustrialAPIClient,
     protected scope: NodeScopeTypes,
     protected graph: GraphStateManager,
@@ -121,7 +121,7 @@ export class EaCManager {
   }
 
   /** Returns the current working Everything-as-Code runtime. */
-  public GetEaC(): OpenIndustrialEaC {
+  public GetEaC(): EverythingAsCodeOIWorkspace {
     return this.getEaCWithProposals();
   }
 
@@ -213,7 +213,7 @@ export class EaCManager {
     }));
   }
 
-  public MergePartial(partial: OpenIndustrialEaC): void {
+  public MergePartial(partial: EverythingAsCodeOIWorkspace): void {
     const result = this.diff.MergePartial(this.eac, this.deleteEaC, partial);
     if (result.changed) {
       this.eac = result.updated;
@@ -221,7 +221,9 @@ export class EaCManager {
     }
   }
 
-  public MergeDelete(partial: NullableArrayOrObject<OpenIndustrialEaC>): void {
+  public MergeDelete(
+    partial: NullableArrayOrObject<EverythingAsCodeOIWorkspace>,
+  ): void {
     const result = this.diff.MergeDelete(this.eac, this.deleteEaC, partial);
     if (result.changed) {
       this.eac = result.updated;
@@ -274,7 +276,7 @@ export class EaCManager {
   /**
    * Applies proposal overlays to the base EaC model and returns the composite.
    */
-  protected getEaCWithProposals(): OpenIndustrialEaC {
+  protected getEaCWithProposals(): EverythingAsCodeOIWorkspace {
     const base = jsonMapSetClone(this.eac);
 
     if (!this.proposals || this.overlayMode === 'none') return base;

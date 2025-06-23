@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { Step } from '../../../../fluent/steps/Step.ts';
 import { StepModuleBuilder } from '../../../../fluent/steps/StepModuleBuilder.ts';
 import { type AccessToken, IotHubClient, IoTRegistry } from '../../.deps.ts';
@@ -39,7 +40,7 @@ export const AzureIoTHubDeviceStep: TStepBuilder = Step(
       getToken: (): Promise<AccessToken> =>
         Promise.resolve({
           token: AccessToken,
-          expiresOnTimestamp: Date.now() + 3600 * 1000, // 1 hour in the future
+          expiresOnTimestamp: Date.now() + 3600 * 1000,
         }),
     };
 
@@ -48,7 +49,6 @@ export const AzureIoTHubDeviceStep: TStepBuilder = Step(
     const shortName = ResourceGroupName.split('-')
       .map((s) => s[0])
       .join('');
-
     const iotHubName = `${shortName}-iot-hub`;
 
     const keys = await iotClient.iotHubResource.getKeysForKeyName(
@@ -68,13 +68,19 @@ export const AzureIoTHubDeviceStep: TStepBuilder = Step(
     };
   })
   .Run(async (input, ctx) => {
-    const { Devices } = input;
+    const { WorkspaceLookup, Devices } = input;
     const { Registry } = ctx.Services!;
+
+    type DeviceDescription = {
+      deviceId: string;
+      capabilities: { iotEdge: boolean };
+      tags: { WorkspaceLookup: string; DataConnectionLookup?: string };
+    };
 
     const provisioning = await Promise.all(
       Object.entries(Devices).map(async ([id, def]) => {
         try {
-          await Registry.get(id); // Already exists
+          await Registry.get(id);
           return null;
         } catch (err) {
           if (!(err instanceof Error) || err.name !== 'DeviceNotFoundError') {
@@ -82,16 +88,23 @@ export const AzureIoTHubDeviceStep: TStepBuilder = Step(
           }
         }
 
-        return {
+        const device: DeviceDescription = {
           deviceId: id,
           capabilities: { iotEdge: def.IsIoTEdge ?? false },
+          tags: {
+            WorkspaceLookup,
+            ...(def.DataConnectionLookup && {
+              DataConnectionLookup: def.DataConnectionLookup,
+            }),
+          },
         };
+
+        return device;
       }),
     );
 
-    // ⬇️ Correct the type explicitly here
     const toAdd = provisioning.filter(
-      (d): d is { deviceId: string; capabilities: { iotEdge: boolean } } => d !== null,
+      (d): d is DeviceDescription => d !== null,
     );
 
     if (toAdd.length === 0) {
@@ -99,16 +112,18 @@ export const AzureIoTHubDeviceStep: TStepBuilder = Step(
     }
 
     const addResp = await Registry.addDevices(toAdd);
-    const errors = addResp?.responseBody.errors ?? [];
+
+    // Use `as any` fallback if type system doesn't guarantee `responseBody`
+    const errors = (addResp as any)?.responseBody?.errors ?? [];
 
     if (errors.length > 0) {
-      const mapped = errors.reduce((acc, e) => {
+      const mapped = errors.reduce((acc: Record<string, unknown>, e: any) => {
         acc[e.deviceId] = {
-          Error: e.errorCode.message,
+          Error: e.errorCode?.message ?? 'Unknown error',
           ErrorStatus: e.errorStatus,
         };
         return acc;
-      }, {} as Record<string, unknown>);
+      }, {});
 
       return { Errors: mapped };
     }

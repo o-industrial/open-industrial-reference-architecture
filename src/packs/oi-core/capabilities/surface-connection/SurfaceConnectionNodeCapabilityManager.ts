@@ -8,7 +8,6 @@ import {
   FlowGraphEdge,
   FlowGraphNode,
 } from '../../../../flow/.exports.ts';
-import { OpenIndustrialEaC } from '../../../../types/OpenIndustrialEaC.ts';
 import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import { SurfaceConnectionInspector } from './SurfaceConnectionInspector.tsx';
 import SurfaceConnectionNodeRenderer from './SurfaceConnectionNodeRenderer.tsx';
@@ -61,13 +60,27 @@ export class SurfaceConnectionNodeCapabilityManager
     source: FlowGraphNode,
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
-    return null;
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
+    const [_surfaceId, connId] = this.extractCompoundIDs(source);
+
+    if (!target.Type?.includes('schema')) return null;
+
+    const schema = context.GetEaC().Schemas?.[target.ID];
+    if (!schema) return null;
+
+    return {
+      Schemas: {
+        [target.ID]: {
+          ...schema,
+          DataConnection: { Lookup: connId },
+        },
+      },
+    };
   }
 
   protected override buildDeletePatch(
     node: FlowGraphNode,
-  ): NullableArrayOrObject<OpenIndustrialEaC> {
+  ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> {
     const [surfaceId, connId] = this.extractCompoundIDs(node);
 
     return {
@@ -78,15 +91,29 @@ export class SurfaceConnectionNodeCapabilityManager
           },
         },
       },
-    } as unknown as NullableArrayOrObject<OpenIndustrialEaC>;
+    } as unknown as NullableArrayOrObject<EverythingAsCodeOIWorkspace>;
   }
 
   protected override buildDisconnectionPatch(
     source: FlowGraphNode,
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
-    return null;
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
+    const eac = context.GetEaC() as EverythingAsCodeOIWorkspace;
+    const [_, connId] = this.extractCompoundIDs(source);
+
+    if (!target.Type?.includes('schema')) return null;
+
+    const schema = eac.Schemas?.[target.ID];
+    if (!schema || schema.DataConnection?.Lookup !== connId) return null;
+
+    const { _DataConnection, ...rest } = schema;
+
+    return {
+      Schemas: {
+        [target.ID]: rest,
+      },
+    };
   }
 
   protected override buildEdgesForNode(
@@ -153,7 +180,7 @@ export class SurfaceConnectionNodeCapabilityManager
     node: FlowGraphNode,
     patch: EaCNodeCapabilityPatch<SurfaceConnectionNodeDetails>,
     _context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> {
+  ): Partial<EverythingAsCodeOIWorkspace> {
     const [surfaceId, connId] = this.extractCompoundIDs(node);
 
     return {

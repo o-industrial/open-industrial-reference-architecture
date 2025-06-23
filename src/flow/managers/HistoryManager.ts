@@ -1,5 +1,5 @@
 import { jsonMapSetClone, NullableArrayOrObject } from '../.deps.ts';
-import { OpenIndustrialEaC } from '../../types/OpenIndustrialEaC.ts';
+import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
 import { EaCHistorySnapshot } from '../../types/EaCHistorySnapshot.ts';
 
 export class HistoryManager {
@@ -56,8 +56,8 @@ export class HistoryManager {
   }
 
   public FlushIfDirty(
-    eac: OpenIndustrialEaC,
-    deletes: NullableArrayOrObject<OpenIndustrialEaC>,
+    eac: EverythingAsCodeOIWorkspace,
+    deletes: NullableArrayOrObject<EverythingAsCodeOIWorkspace>,
   ): void {
     if (!this.dirty) return;
 
@@ -66,8 +66,8 @@ export class HistoryManager {
   }
 
   public Push(
-    eac: OpenIndustrialEaC,
-    deletes: NullableArrayOrObject<OpenIndustrialEaC> = {},
+    eac: EverythingAsCodeOIWorkspace,
+    deletes: NullableArrayOrObject<EverythingAsCodeOIWorkspace> = {},
   ): void {
     const snapshot: EaCHistorySnapshot = {
       eac: jsonMapSetClone(eac),
@@ -120,7 +120,7 @@ export class HistoryManager {
     return jsonMapSetClone(this.committed);
   }
 
-  public ForkRuntime(): OpenIndustrialEaC {
+  public ForkRuntime(): EverythingAsCodeOIWorkspace {
     const { eac } = this.GetCurrent();
     return jsonMapSetClone(eac);
   }

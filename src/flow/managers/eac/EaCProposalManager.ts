@@ -1,5 +1,5 @@
 import { OpenIndustrialAPIClient } from '../../../api/.exports.ts';
-import { OpenIndustrialEaC } from '../../../types/OpenIndustrialEaC.ts';
+import { EverythingAsCodeOIWorkspace } from '../../../eac/EverythingAsCodeOIWorkspace.ts';
 import { Proposal } from '../../../types/Proposal.ts';
 import { RecordKind } from '../../../types/RecordKind.ts';
 import { EaCManager } from '../EaCManager.ts';
@@ -78,7 +78,7 @@ export class EaCProposalManager {
       },
     };
 
-    this.eacManager.MergePartial(partial as OpenIndustrialEaC);
+    this.eacManager.MergePartial(partial as EverythingAsCodeOIWorkspace);
 
     proposal.Status = 'accepted';
     this.emit();

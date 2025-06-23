@@ -8,7 +8,7 @@ import {
   NodeChange,
   NullableArrayOrObject,
 } from '../../.deps.ts';
-import { OpenIndustrialEaC } from '../../../types/OpenIndustrialEaC.ts';
+import { EverythingAsCodeOIWorkspace } from '../../../eac/EverythingAsCodeOIWorkspace.ts';
 import { FlowGraph } from '../../types/graph/FlowGraph.ts';
 import { GraphStateManager } from '../GraphStateManager.ts';
 import { FlowNodeData } from '../../types/react/FlowNodeData.ts';
@@ -29,7 +29,7 @@ export abstract class EaCScopeManager {
   constructor(
     protected graph: GraphStateManager,
     protected capabilities: EaCCapabilitiesManager,
-    protected getEaC: () => OpenIndustrialEaC,
+    protected getEaC: () => EverythingAsCodeOIWorkspace,
   ) {}
 
   public abstract BuildGraph(): FlowGraph;
@@ -37,7 +37,7 @@ export abstract class EaCScopeManager {
   public BuildPartialForNodeUpdate(
     id: string,
     patch: EaCNodeCapabilityPatch,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     const node = this.findNode(id);
     if (!node) return null;
 
@@ -50,7 +50,7 @@ export abstract class EaCScopeManager {
 
   public BuildPartialForNodeDelete(
     id: string,
-  ): NullableArrayOrObject<OpenIndustrialEaC> | null {
+  ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> | null {
     const node = this.findNode(id);
     if (!node) return null;
 
@@ -63,13 +63,13 @@ export abstract class EaCScopeManager {
   public abstract CreateConnectionEdge(
     source: string,
     target: string,
-  ): Partial<OpenIndustrialEaC> | null;
+  ): Partial<EverythingAsCodeOIWorkspace> | null;
 
   public CreatePartialEaCFromPreset(
     type: string,
     id: string,
     position: Position,
-  ): Partial<OpenIndustrialEaC> {
+  ): Partial<EverythingAsCodeOIWorkspace> {
     return (
       this.capabilities.BuildPresetPatch(
         type,
@@ -109,7 +109,7 @@ export abstract class EaCScopeManager {
 
   public InstallSimulators(
     _simDefs: SimulatorDefinition[],
-  ): Partial<OpenIndustrialEaC> {
+  ): Partial<EverythingAsCodeOIWorkspace> {
     throw new Deno.errors.NotSupported(
       `InstallSimulators is not supported in scope ${this.constructor.name}`,
     );
@@ -117,7 +117,7 @@ export abstract class EaCScopeManager {
 
   public RemoveConnectionEdge(
     edgeId: string,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     const [sourceId, targetId] = edgeId.split('->');
 
     const src = this.findNode(sourceId);
@@ -135,15 +135,15 @@ export abstract class EaCScopeManager {
   public abstract UpdateConnections(
     changes: EdgeChange[],
     edges: Edge[],
-  ): OpenIndustrialEaC | null;
+  ): EverythingAsCodeOIWorkspace | null;
 
   public UpdateNodesFromChanges(
     changes: NodeChange[],
     currentNodes: Node<FlowNodeData>[],
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     const updated = applyNodeChanges(changes, currentNodes);
 
-    let partial: Partial<OpenIndustrialEaC> = {};
+    let partial: Partial<EverythingAsCodeOIWorkspace> = {};
     let modified = false;
 
     for (const node of updated) {
@@ -182,7 +182,7 @@ export abstract class EaCScopeManager {
       Details: EaCVertexDetails;
       Metadata: Partial<EaCFlowNodeMetadata>;
     }>,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     const current = this.GetNodeAsCode(id);
     if (!current) return null;
 

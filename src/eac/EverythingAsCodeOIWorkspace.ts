@@ -1,5 +1,6 @@
 import {
   EaCWarmQueryAsCodeSchema,
+  EverythingAsCode,
   EverythingAsCodeApplications,
   EverythingAsCodeClouds,
   EverythingAsCodeCloudsSchema,
@@ -84,6 +85,7 @@ export type EverythingAsCodeOIWorkspace =
     /** Surfaces such as dashboards, panels, and visual UIs. */
     Surfaces?: Record<string, EaCSurfaceAsCode>;
   }
+  & EverythingAsCode
   & EverythingAsCodeClouds
   & EverythingAsCodeApplications;
 

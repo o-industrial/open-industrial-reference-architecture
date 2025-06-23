@@ -25,7 +25,7 @@ import { AziManager, AziMessage } from './AziManager.ts';
 import { SimulatorLibraryManager } from './SimulatorLibraryManager.ts';
 import { EaCManager } from './EaCManager.ts';
 import { NodeScopeTypes } from '../types/graph/NodeScopeTypes.ts';
-import { OpenIndustrialEaC } from '../../types/OpenIndustrialEaC.ts';
+import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
 import { HistoryManager } from './HistoryManager.ts';
 import { TeamManager } from './TeamManager.ts';
 import { NodeEventManager } from './NodeEventManager.ts';
@@ -55,7 +55,7 @@ export class WorkspaceManager {
   public Team: TeamManager;
 
   constructor(
-    eac: OpenIndustrialEaC,
+    eac: EverythingAsCodeOIWorkspace,
     protected oiSvc: OpenIndustrialAPIClient,
     capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>,
     scope: NodeScopeTypes = 'workspace',
@@ -166,7 +166,7 @@ export class WorkspaceManager {
     return pathParts;
   }
 
-  public UseEaC(): OpenIndustrialEaC {
+  public UseEaC(): EverythingAsCodeOIWorkspace {
     const [eac, setEaC] = useState(this.EaC.GetEaC());
 
     useEffect(() => {

@@ -10,7 +10,7 @@ import {
   FlowGraphEdge,
   FlowGraphNode,
 } from '../../../../flow/.exports.ts';
-import { OpenIndustrialEaC } from '../../../../types/OpenIndustrialEaC.ts';
+import { EverythingAsCodeOIWorkspace } from '../../../../eac/EverythingAsCodeOIWorkspace.ts';
 import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import { SurfaceAgentInspector } from './SurfaceAgentInspector.tsx';
 import SurfaceAgentNodeRenderer from './SurfaceAgentNodeRenderer.tsx';
@@ -54,8 +54,8 @@ export class SurfaceAgentNodeCapabilityManager
     source: FlowGraphNode,
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
-    if (source.Type.includes('schema') && target.Type.includes('agent')) {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
+    if (source.Type === 'agent' && target.Type?.includes('schema')) {
       const eac = context.GetEaC();
       const agent = eac.Agents?.[target.ID];
       if (!agent) return null;
@@ -95,7 +95,11 @@ export class SurfaceAgentNodeCapabilityManager
     source: FlowGraphNode,
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
+    if (source.Type !== 'agent' || !target.Type?.includes('schema')) {
+      return null;
+    }
+
     const eac = context.GetEaC();
     const agent = eac.Agents?.[target.ID];
 
@@ -129,7 +133,7 @@ export class SurfaceAgentNodeCapabilityManager
 
   protected override buildDeletePatch(
     node: FlowGraphNode,
-  ): NullableArrayOrObject<OpenIndustrialEaC> {
+  ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> {
     const [surfaceId, agentId] = this.extractCompoundIDs(node);
 
     return {
@@ -140,7 +144,7 @@ export class SurfaceAgentNodeCapabilityManager
           },
         },
       },
-    } as unknown as NullableArrayOrObject<OpenIndustrialEaC>;
+    } as unknown as NullableArrayOrObject<EverythingAsCodeOIWorkspace>;
   }
 
   protected override buildEdgesForNode(
@@ -217,7 +221,7 @@ export class SurfaceAgentNodeCapabilityManager
     id: string,
     position: Position,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> {
+  ): Partial<EverythingAsCodeOIWorkspace> {
     const metadata: EaCFlowNodeMetadata = {
       Position: position,
       Enabled: true,
@@ -254,7 +258,7 @@ export class SurfaceAgentNodeCapabilityManager
     node: FlowGraphNode,
     update: EaCNodeCapabilityPatch<SurfaceAgentNodeDetails>,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> {
+  ): Partial<EverythingAsCodeOIWorkspace> {
     const agentId = node.ID;
 
     const settings: SurfaceAgentSettings = {
@@ -264,7 +268,7 @@ export class SurfaceAgentNodeCapabilityManager
     const { ShowHistory: _, ...rest } = update.Details ?? {};
     const agentDetails: Partial<EaCAgentDetails> = rest;
 
-    const patch: Partial<OpenIndustrialEaC> = {};
+    const patch: Partial<EverythingAsCodeOIWorkspace> = {};
 
     if (Object.keys(settings).length > 0) {
       patch.Surfaces = {
