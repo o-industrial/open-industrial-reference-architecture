@@ -28,7 +28,7 @@ export class OpenIndustrialRuntimePlugin implements EaCRuntimePlugin {
     _ioc: IoCContainer,
     _pluginCfg?: EaCRuntimePluginConfig<OpenIndustrialEaC>,
   ): Promise<void> {
-    await this.buildAppsForSurfaces(eac.EnterpriseLookup!, eac.Surfaces || {});
+    await this.buildAppsForSurfaces(eac, eac.Surfaces || {});
   }
 
   public Setup(
@@ -82,7 +82,7 @@ export class OpenIndustrialRuntimePlugin implements EaCRuntimePlugin {
   }
 
   protected async buildAppForAgent(
-    _entLookup: string,
+    _eac: OpenIndustrialEaC,
     _surfaceLookup: string,
     _agentLookup: string,
     _agent: EaCAgentAsCode,
@@ -91,7 +91,7 @@ export class OpenIndustrialRuntimePlugin implements EaCRuntimePlugin {
   }
 
   protected async buildAppForDataConnection(
-    _entLookup: string,
+    _eac: OpenIndustrialEaC,
     _surfaceLookup: string,
     _dataConnLookup: string,
     _dataConn: EaCDataConnectionAsCode,
@@ -100,7 +100,7 @@ export class OpenIndustrialRuntimePlugin implements EaCRuntimePlugin {
   }
 
   protected async buildAppForSchema(
-    _entLookup: string,
+    _eac: OpenIndustrialEaC,
     _surfaceLookup: string,
     _schemaLookup: string,
     _schema: EaCSchemaAsCode,
@@ -109,23 +109,23 @@ export class OpenIndustrialRuntimePlugin implements EaCRuntimePlugin {
   }
 
   protected async buildAppsForAgents(
-    entLookup: string,
+    eac: OpenIndustrialEaC,
     surfaceLookup: string,
     agents: Record<string, EaCAgentAsCode>,
   ): Promise<void> {
     for (const [agentLookup, agent] of Object.entries(agents)) {
-      await this.buildAppForAgent(entLookup, surfaceLookup, agentLookup, agent);
+      await this.buildAppForAgent(eac, surfaceLookup, agentLookup, agent);
     }
   }
 
   protected async buildAppsForDataConnections(
-    entLookup: string,
+    eac: OpenIndustrialEaC,
     surfaceLookup: string,
     dataConnections: Record<string, EaCDataConnectionAsCode>,
   ): Promise<void> {
     for (const [dataConnLookup, dataConn] of Object.entries(dataConnections)) {
       await this.buildAppForDataConnection(
-        entLookup,
+        eac,
         surfaceLookup,
         dataConnLookup,
         dataConn,
@@ -134,13 +134,13 @@ export class OpenIndustrialRuntimePlugin implements EaCRuntimePlugin {
   }
 
   protected async buildAppsForSchemas(
-    entLookup: string,
+    eac: OpenIndustrialEaC,
     surfaceLookup: string,
     schemas: Record<string, EaCSchemaAsCode>,
   ): Promise<void> {
     for (const [schemaLookup, schema] of Object.entries(schemas)) {
       await this.buildAppForSchema(
-        entLookup,
+        eac,
         surfaceLookup,
         schemaLookup,
         schema,
@@ -149,35 +149,35 @@ export class OpenIndustrialRuntimePlugin implements EaCRuntimePlugin {
   }
 
   protected async buildAppsForSurface(
-    entLookup: string,
+    eac: OpenIndustrialEaC,
     surfaceLookup: string,
     surface: EaCSurfaceAsCode,
   ): Promise<void> {
     await this.buildAppsForDataConnections(
-      entLookup,
+      eac,
       surfaceLookup,
       surface.DataConnections || {},
     );
 
     await this.buildAppsForSchemas(
-      entLookup,
+      eac,
       surfaceLookup,
       surface.Schemas || {},
     );
 
     await this.buildAppsForAgents(
-      entLookup,
+      eac,
       surfaceLookup,
       surface.Agents || {},
     );
   }
 
   protected async buildAppsForSurfaces(
-    entLookup: string,
+    eac: OpenIndustrialEaC,
     surfaces: Record<string, EaCSurfaceAsCode>,
   ): Promise<void> {
     for (const [surfLookup, surface] of Object.entries(surfaces || {})) {
-      await this.buildAppsForSurface(entLookup, surfLookup, surface);
+      await this.buildAppsForSurface(eac, surfLookup, surface);
     }
   }
 }
