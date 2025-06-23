@@ -15,6 +15,6 @@ export {
   type EaCWarmQueryDetails,
   type EverythingAsCodeClouds,
   EverythingAsCodeCloudsSchema,
-} from 'jsr:@fathym/eac-azure@0.0.68';
+} from 'jsr:@fathym/eac-azure@0.0.77';
 
 export type { JSONSchema7 } from 'npm:jsonschema7@0.8.0';
