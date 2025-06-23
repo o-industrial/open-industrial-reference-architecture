@@ -8,13 +8,13 @@ import {
   FlowGraphEdge,
   FlowGraphNode,
 } from '../../../../flow/.exports.ts';
-import { OpenIndustrialEaC } from '../../../../types/OpenIndustrialEaC.ts';
 import { EaCWarmQueryDetails } from '../../../../eac/.deps.ts';
 import { SurfaceWarmQuerySettings } from '../../../../eac/.exports.ts'
 import { SurfaceWarmQueryInspector } from './SurfaceWarmQueryInspector.tsx';
 import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import SurfaceWarmQueryNodeRenderer from './SurfaceWarmQueryNodeRenderer.tsx';
 import { SurfaceWarmQueryStats } from './SurfaceWarmQueryStats.tsx';
+import { EverythingAsCodeOIWorkspace } from '../../../../eac/EverythingAsCodeOIWorkspace.ts';
 
 // ✅ Compound node detail type
 type SurfaceWarmQueryNodeDetails = EaCWarmQueryDetails & SurfaceWarmQuerySettings;
@@ -55,7 +55,7 @@ export class SurfaceWarmQueryNodeCapabilityManager
     source: FlowGraphNode,
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     const surfaceId = context.SurfaceLookup as string;
     const wqId = target.ID;
     const eac = context.GetEaC();
@@ -106,7 +106,7 @@ export class SurfaceWarmQueryNodeCapabilityManager
     source: FlowGraphNode,
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     if (
       !target.Type.includes('warmquery') ||
       !(source.Type.includes('schema') || source.Type.includes('connection'))
@@ -166,7 +166,7 @@ export class SurfaceWarmQueryNodeCapabilityManager
   protected override buildDeletePatch(
     node: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): NullableArrayOrObject<OpenIndustrialEaC> {
+  ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> {
     const [surfaceId, wqId] = this.extractCompoundIDs(node);
     const eac = context.GetEaC();
     const surface = eac.Surfaces?.[surfaceId];
@@ -183,7 +183,7 @@ export class SurfaceWarmQueryNodeCapabilityManager
       WarmQueries: {
         [wqId]: null,
       }
-    } as unknown as NullableArrayOrObject<OpenIndustrialEaC>;
+    } as unknown as NullableArrayOrObject<EverythingAsCodeOIWorkspace>;
   }
 
   protected override buildEdgesForNode(
@@ -262,7 +262,7 @@ export class SurfaceWarmQueryNodeCapabilityManager
     id: string,
     position: Position,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> {
+  ): Partial<EverythingAsCodeOIWorkspace> {
     const metadata: EaCFlowNodeMetadata = {
       Position: position,
       Enabled: true,
@@ -298,7 +298,7 @@ export class SurfaceWarmQueryNodeCapabilityManager
     node: FlowGraphNode,
     update: EaCNodeCapabilityPatch<SurfaceWarmQueryNodeDetails>,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> {
+  ): Partial<EverythingAsCodeOIWorkspace> {
     const wqId = node.ID;
 
     const settings: SurfaceWarmQuerySettings = {
@@ -308,7 +308,7 @@ export class SurfaceWarmQueryNodeCapabilityManager
     const { SchemaLookups: _, DataConnectionLookups: __,  ...rest } = update.Details ?? {};
     const wqDetails: Partial<EaCWarmQueryDetails> = rest;
 
-    const patch: Partial<OpenIndustrialEaC> = {};
+    const patch: Partial<EverythingAsCodeOIWorkspace> = {};
 
     if (Object.keys(settings).length > 0) {
       patch.Surfaces = {
