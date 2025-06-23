@@ -206,7 +206,6 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
     node: FlowGraphNode,
     update: EaCNodeCapabilityPatch,
   ): Partial<OpenIndustrialEaC> {
-    debugger;
     return {
       DataConnections: {
         [node.ID]: {
