@@ -12,7 +12,7 @@ import { EaCNodeCapabilityManager } from './EaCNodeCapabilityManager.ts';
 import { NodePreset } from '../../types/react/NodePreset.ts';
 import { WorkspaceManager } from '../WorkspaceManager.ts';
 import { NodeEventRouter } from '../../types/nodes/NodeEventRouter.ts';
-import { OpenIndustrialEaC } from '../../types/OpenIndustrialEaC.ts';
+import { EverythingAsCodeOIWorkspace } from '../../../eac/EverythingAsCodeOIWorkspace.ts';
 import { Position } from '../../../eac/types/Position.ts';
 
 /**
@@ -37,7 +37,7 @@ export class EaCCapabilitiesManager {
     source: FlowGraphNode,
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     return (
       this.GetCapabilityFor(source)?.BuildConnectionPatch?.(
         source,
@@ -70,7 +70,7 @@ export class EaCCapabilitiesManager {
   public BuildDeletePatch(
     node: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): NullableArrayOrObject<OpenIndustrialEaC> | null {
+  ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> | null {
     return this.GetCapabilityFor(node)?.BuildDeletePatch(node, context) ?? null;
   }
 
@@ -78,7 +78,7 @@ export class EaCCapabilitiesManager {
     source: FlowGraphNode,
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     return (
       this.GetCapabilityFor(source)?.BuildDisconnectionPatch?.(
         source,
@@ -93,7 +93,7 @@ export class EaCCapabilitiesManager {
     id: string,
     position: Position,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     const capability = this.GetCapabilityFor({ ID: id, Type: type });
 
     if (!capability?.BuildPresetPatch) {
@@ -109,7 +109,7 @@ export class EaCCapabilitiesManager {
     node: FlowGraphNode,
     patch: EaCNodeCapabilityPatch,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     return (
       this.GetCapabilityFor(node)?.BuildUpdatePatch(node, patch, context) ??
         null

@@ -11,9 +11,14 @@ import { EaCProcessor, isEaCProcessor, StreamConfig } from '../.deps.ts';
  */
 export type EaCGlobalDataIngestProcessor = {
   /**
+   * The consumer group to use (default: `$Default`).
+   */
+  ConsumerGroup?: string;
+
+  /**
    * Azure Event Hub-compatible endpoint connection string.
    */
-  EventHubConnectionString: string;
+  EventHubConsumerConnectionString: string;
 
   /**
    * Name of the Event Hub (IoT Hub's fallback).
@@ -21,20 +26,20 @@ export type EaCGlobalDataIngestProcessor = {
   EventHubName: string;
 
   /**
-   * The consumer group to use (default: `$Default`).
+   * Azure IoT Hub connection string.
    */
-  ConsumerGroup?: string;
-
-  /**
-   * NATS connection string.
-   */
-  NATSServer: string;
+  IoTHubConnectionString: string;
 
   /**
    * Optional base configuration to apply to each JetStream stream.
    * This is merged with internal defaults (e.g., retention, storage, replication).
    */
   JetStreamDefaults?: Partial<StreamConfig>;
+
+  /**
+   * NATS connection string.
+   */
+  NATSServer: string;
 } & EaCProcessor<'GlobalDataIngest'>;
 
 /**
@@ -47,7 +52,7 @@ export function isEaCGlobalDataIngestProcessor(
 
   return (
     isEaCProcessor('GlobalDataIngest', x) &&
-    typeof x.EventHubConnectionString === 'string' &&
+    typeof x.EventHubConsumerConnectionString === 'string' &&
     typeof x.EventHubName === 'string' &&
     typeof x.NATSServer === 'string'
   );

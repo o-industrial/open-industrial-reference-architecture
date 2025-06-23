@@ -5,6 +5,7 @@ export {
   EaCDetailsSchema,
   type EaCVertexDetails,
   EaCVertexDetailsSchema,
+  type EverythingAsCode,
 } from 'jsr:@fathym/eac@0.2.111';
 
 export type { EverythingAsCodeApplications } from 'jsr:@fathym/eac-applications@0.0.151';

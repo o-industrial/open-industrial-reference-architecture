@@ -11,7 +11,6 @@ import {
   FlowGraphEdge,
   FlowGraphNode,
 } from '../../../../flow/.exports.ts';
-import { OpenIndustrialEaC } from '../../../../types/OpenIndustrialEaC.ts';
 import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import { SimulatorInspector } from './SimulatorInspector.tsx';
 import SimulatorNodeRenderer from './SimulatorNodeRenderer.tsx';
@@ -46,7 +45,7 @@ export class SimulatorNodeCapabilityManager
     source: FlowGraphNode,
     target: FlowGraphNode,
     ctx: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     if (source.Type !== 'simulator' || target.Type !== 'connection') {
       return null;
     }
@@ -68,7 +67,7 @@ export class SimulatorNodeCapabilityManager
 
   protected override buildDeletePatch(
     node: FlowGraphNode,
-  ): NullableArrayOrObject<OpenIndustrialEaC> {
+  ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> {
     return this.wrapDeletePatch('Simulators', node.ID);
   }
 
@@ -76,7 +75,7 @@ export class SimulatorNodeCapabilityManager
     source: FlowGraphNode,
     target: FlowGraphNode,
     ctx: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     if (source.Type !== 'simulator' || target.Type !== 'connection') {
       return null;
     }
@@ -138,7 +137,7 @@ export class SimulatorNodeCapabilityManager
     id: string,
     position: Position,
     _context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> {
+  ): Partial<EverythingAsCodeOIWorkspace> {
     const metadata: EaCFlowNodeMetadata = {
       Position: position,
       Enabled: true,
@@ -159,7 +158,7 @@ export class SimulatorNodeCapabilityManager
   protected override buildUpdatePatch(
     node: FlowGraphNode,
     update: EaCNodeCapabilityPatch<EaCAzureDockerSimulatorDetails>,
-  ): Partial<OpenIndustrialEaC> {
+  ): Partial<EverythingAsCodeOIWorkspace> {
     return {
       Simulators: {
         [node.ID]: this.mergeDetailsAndMetadata(

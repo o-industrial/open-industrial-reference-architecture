@@ -1,18 +1,18 @@
-import { EaCApplicationProcessorConfig } from 'jsr:@fathym/eac-applications@0.0.151/processors';
-import { ProcessorHandlerResolver } from 'jsr:@fathym/eac-applications@0.0.151/runtime/processors';
-import { IoCContainer } from 'jsr:@fathym/ioc@0.0.14';
 import {
   connect,
+  EaCApplicationProcessorConfig,
+  EaCRuntimeHandler,
+  getPackageLogger,
+  IoCContainer,
   JetStreamManager,
+  Logger,
   NatsConnection,
+  ProcessorHandlerResolver,
   StringCodec,
   Subscription,
-} from 'npm:nats@2.29.2';
-import { getPackageLogger } from 'jsr:@fathym/common@0.2.264/log';
-import { EaCRuntimeHandler } from 'jsr:@fathym/eac@0.2.111/runtime/pipelines';
+} from '../.deps.ts';
 import { ensureJetStreamStream } from '../../utils/ensureJetStreamStream.ts';
 import { isEaCOIDataConnectionProcessor } from './EaCOIDataConnectionProcessor.ts';
-import { Logger } from '../.deps.ts';
 
 /**
  * Surface-level processor that scopes workspace data connection telemetry
@@ -20,7 +20,7 @@ import { Logger } from '../.deps.ts';
  */
 export const EaCOIDataConnectionProcessorHandlerResolver: ProcessorHandlerResolver = {
   async Resolve(
-    ioc: IoCContainer,
+    _ioc: IoCContainer,
     appProcCfg: EaCApplicationProcessorConfig,
     eac,
   ): Promise<EaCRuntimeHandler> {
@@ -43,10 +43,6 @@ export const EaCOIDataConnectionProcessorHandlerResolver: ProcessorHandlerResolv
     const jsm: JetStreamManager = await nc.jetstreamManager();
 
     logger.debug(`✅ Connected to NATS at ${proc.NATSServer}`);
-
-    ioc.Register(() => nc, {
-      Type: ioc.Symbol('NatsConnection'),
-    });
 
     // Step 2: Define routing subjects
     const sourceSubject =

@@ -8,7 +8,6 @@ import {
   FlowGraphEdge,
   FlowGraphNode,
 } from '../../../../flow/.exports.ts';
-import { OpenIndustrialEaC } from '../../../../types/OpenIndustrialEaC.ts';
 import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import { SurfaceConnectionInspector } from './SurfaceConnectionInspector.tsx';
 import SurfaceConnectionNodeRenderer from './SurfaceConnectionNodeRenderer.tsx';
@@ -61,7 +60,7 @@ export class SurfaceConnectionNodeCapabilityManager
     source: FlowGraphNode,
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     const [_surfaceId, connId] = this.extractCompoundIDs(source);
 
     if (!target.Type?.includes('schema')) return null;
@@ -81,7 +80,7 @@ export class SurfaceConnectionNodeCapabilityManager
 
   protected override buildDeletePatch(
     node: FlowGraphNode,
-  ): NullableArrayOrObject<OpenIndustrialEaC> {
+  ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> {
     const [surfaceId, connId] = this.extractCompoundIDs(node);
 
     return {
@@ -92,14 +91,14 @@ export class SurfaceConnectionNodeCapabilityManager
           },
         },
       },
-    } as unknown as NullableArrayOrObject<OpenIndustrialEaC>;
+    } as unknown as NullableArrayOrObject<EverythingAsCodeOIWorkspace>;
   }
 
   protected override buildDisconnectionPatch(
     source: FlowGraphNode,
     target: FlowGraphNode,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     const eac = context.GetEaC() as EverythingAsCodeOIWorkspace;
     const [_, connId] = this.extractCompoundIDs(source);
 
@@ -181,7 +180,7 @@ export class SurfaceConnectionNodeCapabilityManager
     node: FlowGraphNode,
     patch: EaCNodeCapabilityPatch<SurfaceConnectionNodeDetails>,
     _context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> {
+  ): Partial<EverythingAsCodeOIWorkspace> {
     const [surfaceId, connId] = this.extractCompoundIDs(node);
 
     return {

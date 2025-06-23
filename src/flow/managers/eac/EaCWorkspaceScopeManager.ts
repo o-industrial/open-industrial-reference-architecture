@@ -4,7 +4,7 @@ import { FlowGraph } from '../../types/graph/FlowGraph.ts';
 import { FlowGraphEdge } from '../../types/graph/FlowGraphEdge.ts';
 import { FlowGraphNode } from '../../types/graph/FlowGraphNode.ts';
 
-import { OpenIndustrialEaC } from '../../../types/OpenIndustrialEaC.ts';
+import { EverythingAsCodeOIWorkspace } from '../../../eac/EverythingAsCodeOIWorkspace.ts';
 import { SimulatorDefinition } from '../SimulatorLibraryManager.ts';
 import { EaCAzureDockerSimulatorDetails } from '../../../eac/EaCAzureDockerSimulatorDetails.ts';
 
@@ -51,7 +51,7 @@ export class EaCWorkspaceScopeManager extends EaCScopeManager {
   public CreateConnectionEdge(
     source: string,
     target: string,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     const src = this.findNode(source);
     const tgt = this.findNode(target);
 
@@ -72,8 +72,8 @@ export class EaCWorkspaceScopeManager extends EaCScopeManager {
 
   public override InstallSimulators(
     simDefs: SimulatorDefinition[],
-  ): Partial<OpenIndustrialEaC> {
-    const partial: Partial<OpenIndustrialEaC> = { Simulators: {} };
+  ): Partial<EverythingAsCodeOIWorkspace> {
+    const partial: Partial<EverythingAsCodeOIWorkspace> = { Simulators: {} };
 
     for (const sim of simDefs) {
       partial.Simulators![sim.ID] = {
@@ -91,7 +91,7 @@ export class EaCWorkspaceScopeManager extends EaCScopeManager {
   public UpdateConnections(
     _changes: EdgeChange[],
     _updated: Edge[],
-  ): OpenIndustrialEaC | null {
+  ): EverythingAsCodeOIWorkspace | null {
     return null;
   }
 }

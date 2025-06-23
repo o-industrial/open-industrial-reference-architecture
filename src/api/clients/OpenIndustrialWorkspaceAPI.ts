@@ -1,6 +1,6 @@
 import { EaCStatus, EaCUserRecord } from '../.deps.ts';
 import { EaCHistorySnapshot } from '../../types/EaCHistorySnapshot.ts';
-import { OpenIndustrialEaC } from '../../types/OpenIndustrialEaC.ts';
+import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
 import { ClientHelperBridge } from './ClientHelperBridge.ts';
 
 /**
@@ -13,7 +13,7 @@ export class OpenIndustrialWorkspaceAPI {
   /**
    * Archive the current workspace.
    */
-  public async Archive(): Promise<OpenIndustrialEaC> {
+  public async Archive(): Promise<EverythingAsCodeOIWorkspace> {
     const res = await fetch(this.bridge.url('/api/workspaces/archive'), {
       method: 'DELETE',
       headers: this.bridge.headers(),
@@ -49,7 +49,7 @@ export class OpenIndustrialWorkspaceAPI {
    * Create a new workspace from the given OpenIndustrial EaC configuration.
    */
   public async Create(
-    eac: OpenIndustrialEaC,
+    eac: EverythingAsCodeOIWorkspace,
   ): Promise<{ EnterpriseLookup: string; CommitID: string }> {
     const res = await fetch(this.bridge.url('/api/workspaces'), {
       method: 'POST',
@@ -67,7 +67,7 @@ export class OpenIndustrialWorkspaceAPI {
   /**
    * Get the current workspace for the authenticated user.
    */
-  public async Get(): Promise<OpenIndustrialEaC> {
+  public async Get(): Promise<EverythingAsCodeOIWorkspace> {
     const res = await fetch(this.bridge.url('/api/workspaces'), {
       method: 'GET',
       headers: this.bridge.headers(),

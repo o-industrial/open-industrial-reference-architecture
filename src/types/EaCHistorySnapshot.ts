@@ -1,7 +1,7 @@
 import { NullableArrayOrObject } from './.deps.ts';
-import { OpenIndustrialEaC } from './OpenIndustrialEaC.ts';
+import { EverythingAsCodeOIWorkspace } from '../eac/EverythingAsCodeOIWorkspace.ts';
 
 export type EaCHistorySnapshot = {
-  eac: OpenIndustrialEaC;
-  deletes: NullableArrayOrObject<OpenIndustrialEaC>;
+  eac: EverythingAsCodeOIWorkspace;
+  deletes: NullableArrayOrObject<EverythingAsCodeOIWorkspace>;
 };

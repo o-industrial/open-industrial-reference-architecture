@@ -1,5 +1,5 @@
 import { Proposal } from '../../types/Proposal.ts';
-import { OpenIndustrialEaC } from '../../types/OpenIndustrialEaC.ts';
+import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
 import { ClientHelperBridge } from './ClientHelperBridge.ts';
 import { RecordKind } from '../../types/RecordKind.ts';
 
@@ -102,9 +102,9 @@ export class OpenIndustrialProposalAPI {
   }
 
   /**
-   * Consolidate all active proposals into a synthetic OpenIndustrialEaC structure.
+   * Consolidate all active proposals into a synthetic EverythingAsCodeOIWorkspace structure.
    */
-  public async Consolidate(): Promise<OpenIndustrialEaC> {
+  public async Consolidate(): Promise<EverythingAsCodeOIWorkspace> {
     const res = await fetch(this.bridge.url('/api/proposals/consolidate'), {
       method: 'GET',
       headers: this.bridge.headers(),
@@ -114,6 +114,6 @@ export class OpenIndustrialProposalAPI {
       throw new Error(`Failed to consolidate proposals: ${res.status}`);
     }
 
-    return await this.bridge.json<OpenIndustrialEaC>(res);
+    return await this.bridge.json<EverythingAsCodeOIWorkspace>(res);
   }
 }

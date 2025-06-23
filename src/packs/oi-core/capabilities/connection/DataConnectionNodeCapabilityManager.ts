@@ -16,7 +16,6 @@ import {
   FlowGraphEdge,
   FlowGraphNode,
 } from '../../../../flow/.exports.ts';
-import { OpenIndustrialEaC } from '../../../../types/OpenIndustrialEaC.ts';
 import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import { ConnectionInspector } from './ConnectionInspector.tsx';
 import ConnectionNodeRenderer from './ConnectionNodeRenderer.tsx';
@@ -49,7 +48,7 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
     source: FlowGraphNode,
     target: FlowGraphNode,
     ctx: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     const eac = ctx.GetEaC() as EverythingAsCodeOIWorkspace;
 
     // simulator → connection
@@ -92,7 +91,7 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
 
   protected override buildDeletePatch(
     node: FlowGraphNode,
-  ): NullableArrayOrObject<OpenIndustrialEaC> {
+  ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> {
     return this.wrapDeletePatch('DataConnections', node.ID);
   }
 
@@ -100,7 +99,7 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
     source: FlowGraphNode,
     target: FlowGraphNode,
     ctx: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     const eac = ctx.GetEaC() as EverythingAsCodeOIWorkspace;
 
     // simulator → connection
@@ -181,7 +180,7 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
     id: string,
     position: Position,
     _context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> {
+  ): Partial<EverythingAsCodeOIWorkspace> {
     const metadata: EaCFlowNodeMetadata = {
       Position: position,
       Enabled: true,
@@ -205,7 +204,7 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
   protected override buildUpdatePatch(
     node: FlowGraphNode,
     update: EaCNodeCapabilityPatch,
-  ): Partial<OpenIndustrialEaC> {
+  ): Partial<EverythingAsCodeOIWorkspace> {
     return {
       DataConnections: {
         [node.ID]: {

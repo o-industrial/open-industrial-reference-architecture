@@ -2,12 +2,12 @@ export { IoCContainer } from 'jsr:@fathym/ioc@0.0.14';
 
 export { getPackageLogger } from 'jsr:@fathym/common@0.2.264/log';
 
-export type { EverythingAsCode } from 'jsr:@fathym/eac@0.2.108';
+export type { EverythingAsCode } from 'jsr:@fathym/eac@0.2.111';
 export type {
   EaCRuntimeConfig,
   EaCRuntimePluginConfig,
-} from 'jsr:@fathym/eac@0.2.108/runtime/config';
-export type { EaCRuntimePlugin } from 'jsr:@fathym/eac@0.2.108/runtime/plugins';
+} from 'jsr:@fathym/eac@0.2.111/runtime/config';
+export type { EaCRuntimePlugin } from 'jsr:@fathym/eac@0.2.111/runtime/plugins';
 export type { EaCRuntimeHandler } from 'jsr:@fathym/eac@0.2.111/runtime/pipelines';
 
 export type { EverythingAsCodeApplications } from 'jsr:@fathym/eac-applications@0.0.151';
@@ -27,6 +27,7 @@ export {
   type NatsConnection,
   type StreamConfig,
   StringCodec,
+  type Subscription,
 } from 'npm:nats@2.29.2';
 
 export { EventHubConsumerClient } from 'npm:@azure/event-hubs@6.0.0';

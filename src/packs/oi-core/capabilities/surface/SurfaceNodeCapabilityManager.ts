@@ -12,7 +12,6 @@ import {
   SurfaceEventRouter,
   WorkspaceManager,
 } from '../../../../flow/.exports.ts';
-import { OpenIndustrialEaC } from '../../../../types/OpenIndustrialEaC.ts';
 import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import { SurfaceInspector } from './SurfaceInspector.tsx';
 import SurfaceNodeRenderer from './SurfaceNodeRenderer.tsx';
@@ -45,7 +44,7 @@ export class SurfaceNodeCapabilityManager extends EaCNodeCapabilityManager {
     source: FlowGraphNode,
     target: FlowGraphNode,
     ctx: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     const eac = ctx.GetEaC() as EverythingAsCodeOIWorkspace;
 
     // surface -> surface (assign parent)
@@ -68,7 +67,7 @@ export class SurfaceNodeCapabilityManager extends EaCNodeCapabilityManager {
 
   protected override buildDeletePatch(
     node: FlowGraphNode,
-  ): NullableArrayOrObject<OpenIndustrialEaC> {
+  ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> {
     return this.wrapDeletePatch('Surfaces', node.ID);
   }
 
@@ -76,7 +75,7 @@ export class SurfaceNodeCapabilityManager extends EaCNodeCapabilityManager {
     source: FlowGraphNode,
     target: FlowGraphNode,
     ctx: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> | null {
+  ): Partial<EverythingAsCodeOIWorkspace> | null {
     const eac = ctx.GetEaC() as EverythingAsCodeOIWorkspace;
 
     // Remove parent-child surface relationship
@@ -156,7 +155,7 @@ export class SurfaceNodeCapabilityManager extends EaCNodeCapabilityManager {
     id: string,
     position: Position,
     context: EaCNodeCapabilityContext,
-  ): Partial<OpenIndustrialEaC> {
+  ): Partial<EverythingAsCodeOIWorkspace> {
     const metadata: EaCFlowNodeMetadata = {
       Position: position,
       Enabled: true,
@@ -182,7 +181,7 @@ export class SurfaceNodeCapabilityManager extends EaCNodeCapabilityManager {
   protected override buildUpdatePatch(
     node: FlowGraphNode,
     update: EaCNodeCapabilityPatch,
-  ): Partial<OpenIndustrialEaC> {
+  ): Partial<EverythingAsCodeOIWorkspace> {
     return {
       Surfaces: {
         [node.ID]: this.mergeDetailsAndMetadata(

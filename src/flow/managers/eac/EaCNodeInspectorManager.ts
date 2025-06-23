@@ -8,7 +8,7 @@
 //   SurfaceSchemaSettings,
 // } from '@o-industrial/common/eac';
 // import { GraphStateManager } from '../GraphStateManager.ts';
-// import { OpenIndustrialEaC } from '../../../types/OpenIndustrialEaC.ts';
+// import { EverythingAsCodeOIWorkspace } from '../../../eac/EverythingAsCodeOIWorkspace.ts';
 
 // /**
 //  * Central inspector and mutator for EaC-backed node state.
@@ -16,7 +16,7 @@
 // export class EaCNodeInspectorManager {
 //   constructor(
 //     protected graph: GraphStateManager,
-//     protected getEaC: () => OpenIndustrialEaC
+//     protected getEaC: () => EverythingAsCodeOIWorkspace
 //   ) {}
 
 //   public BuildPartialForNodeUpdate(
@@ -25,7 +25,7 @@
 //       Metadata: EaCFlowNodeMetadata;
 //       Details: EaCVertexDetails;
 //     }>
-//   ): Partial<OpenIndustrialEaC> | null {
+//   ): Partial<EverythingAsCodeOIWorkspace> | null {
 //     const node = this.graph.GetGraph().Nodes.find((n) => n.ID === id);
 //     if (!node) return null;
 
@@ -63,7 +63,7 @@
 
 //   public BuildPartialForNodeDelete(
 //     id: string
-//   ): NullableArrayOrObject<OpenIndustrialEaC> | null {
+//   ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> | null {
 //     const node = this.graph.GetGraph().Nodes.find((n) => n.ID === id);
 //     if (!node) return null;
 
@@ -236,11 +236,11 @@
 //       Metadata?: EaCFlowNodeMetadata;
 //       Details?: EaCVertexDetails;
 //     }
-//   ): Partial<OpenIndustrialEaC> {
+//   ): Partial<EverythingAsCodeOIWorkspace> {
 //     const outerKey = this.getEaCKeyForType(from);
 
 //     if (from === 'surface' && to === 'schema') {
-//       const patch: Partial<OpenIndustrialEaC> = {};
+//       const patch: Partial<EverythingAsCodeOIWorkspace> = {};
 
 //       const { surfaceSettings, schemaDetails } =
 //         this.splitFlowSettingsForSurfaceSchema({
@@ -300,7 +300,7 @@
 //     };
 //   }
 
-//   protected getEaCKeyForType(type: string): keyof OpenIndustrialEaC {
+//   protected getEaCKeyForType(type: string): keyof EverythingAsCodeOIWorkspace {
 //     switch (type.toLowerCase()) {
 //       case 'agent':
 //         return 'Agents';

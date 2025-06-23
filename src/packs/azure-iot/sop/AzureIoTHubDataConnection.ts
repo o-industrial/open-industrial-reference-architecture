@@ -57,11 +57,18 @@ export function AzureIoTHubDataConnection(
         IoTHubName: AsCode.Details!.IoTHubName!,
       });
     })
-    .Run(async ({ Steps, AsCode }) => {
+    .Run(async ({ Steps, AsCode, Lookup, EaC }) => {
+      const deviceId = AsCode.Details!.DeviceID!;
+      const isIoTEdge = AsCode.Details!.IsIoTEdge ?? false;
+      const workspaceLookup = EaC.EnterpriseLookup!;
+      const dataConnectionLookup = Lookup;
+
       const iot = await Steps.IoT({
+        WorkspaceLookup: workspaceLookup,
         Devices: {
-          [AsCode.Details!.DeviceID!]: {
-            IsIoTEdge: AsCode.Details!.IsIoTEdge,
+          [deviceId]: {
+            IsIoTEdge: isIoTEdge,
+            DataConnectionLookup: dataConnectionLookup,
           },
         },
       });

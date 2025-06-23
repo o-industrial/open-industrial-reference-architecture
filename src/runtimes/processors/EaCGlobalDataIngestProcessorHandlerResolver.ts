@@ -39,17 +39,16 @@ export const EaCGlobalDataIngestProcessorHandlerResolver: ProcessorHandlerResolv
       `🔧 Starting global data ingest from Event Hub: ${proc.EventHubName}`,
     );
 
-    const nc = await connect({ servers: proc.NATSServer });
-    const jsm = await nc.jetstreamManager();
-    const sc = StringCodec();
+    try {
+      const nc = await connect({ servers: proc.NATSServer });
 
-    logger.info(`✅ Connected to NATS at ${proc.NATSServer}`);
+      logger.info(`✅ Connected to NATS at ${proc.NATSServer}`);
 
-    const registry = IoTRegistry.fromConnectionString(
-      proc.EventHubConnectionString,
-    );
-
-    startEventHubConsumer(proc, registry, nc, jsm, sc, logger);
+      await startEventHubConsumer(proc, nc, logger);
+    } catch (err) {
+      // debugger;
+      logger.error(err);
+    }
 
     return (_req, _ctx) =>
       Promise.resolve(
@@ -65,22 +64,28 @@ export const EaCGlobalDataIngestProcessorHandlerResolver: ProcessorHandlerResolv
 // 🔧 HELPER FUNCTIONS
 // -----------------------------
 
-function startEventHubConsumer(
+async function startEventHubConsumer(
   proc: EaCGlobalDataIngestProcessor,
-  registry: IoTRegistry,
   nc: NatsConnection,
-  jsm: JetStreamManager,
-  sc: ReturnType<typeof StringCodec>,
   logger: Logger,
 ) {
+  // debugger;
+  const registry = IoTRegistry.fromConnectionString(
+    proc.IoTHubConnectionString,
+  );
+
+  const sc = StringCodec();
+
   const consumerGroup = proc.ConsumerGroup ?? '$Default';
 
   const client = new EventHubConsumerClient(
     consumerGroup,
-    proc.EventHubConnectionString,
+    proc.EventHubConsumerConnectionString,
   );
 
   logger.info(`🔁 Subscribing to Event Hub partitions...`);
+
+  const jsm = await nc.jetstreamManager();
 
   client.subscribe({
     async processEvents(events) {
