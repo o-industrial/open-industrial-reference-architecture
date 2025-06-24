@@ -21,7 +21,7 @@ import { FlowNodeData } from '../types/react/FlowNodeData.ts';
 import { GraphStateManager } from './GraphStateManager.ts';
 import { InteractionManager } from './InteractionManager.ts';
 import { SelectionManager } from './SelectionManager.ts';
-import { AziManager, AziMessage } from './AziManager.ts';
+import { AziManager, AziState } from './AziManager.ts';
 import { SimulatorLibraryManager } from './SimulatorLibraryManager.ts';
 import { EaCManager } from './EaCManager.ts';
 import { NodeScopeTypes } from '../types/graph/NodeScopeTypes.ts';
@@ -59,10 +59,17 @@ export class WorkspaceManager {
     protected oiSvc: OpenIndustrialAPIClient,
     capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>,
     scope: NodeScopeTypes = 'workspace',
+    aziCircuitUrl: string,
+    jwt?: string,
   ) {
     this.currentScope = { Scope: scope };
 
-    this.Azi = new AziManager();
+    this.Azi = new AziManager({
+      url: aziCircuitUrl,
+      jwt,
+      threadId: `workspace-${eac.EnterpriseLookup}`,
+    });
+
     this.History = new HistoryManager();
     this.Selection = new SelectionManager();
     this.Simulators = new SimulatorLibraryManager();
@@ -99,33 +106,40 @@ export class WorkspaceManager {
   // === Hooks ===
 
   public UseAzi(): {
-    messages: AziMessage[];
-    send: (text: string) => void;
-    reset: () => void;
+    state: AziState;
+    isSending: boolean;
+    send: (text: string) => Promise<void>;
+    peek: (inputs?: Record<string, unknown>) => Promise<void>;
   } {
-    const [messages, setMessages] = useState(this.Azi.GetMessages());
+    const [state, setState] = useState(this.Azi.GetState());
+    const [isSending, setIsSending] = useState(this.Azi.IsSending());
 
     useEffect(() => {
-      const unsubscribe = this.Azi.OnMessagesChanged(() => {
-        setMessages(this.Azi.GetMessages());
-      });
+      const update = () => {
+        setState(this.Azi.GetState());
+        setIsSending(this.Azi.IsSending());
+      };
 
+      const unsubscribe = this.Azi.OnStateChanged(update);
       return unsubscribe;
     }, []);
 
-    const send = (text: string) => {
-      this.Azi.Send(text);
+    const send = async (text: string) => {
+      setIsSending(true);
+      await this.Azi.Send(text);
+      setIsSending(this.Azi.IsSending());
     };
 
-    const reset = () => {
-      this.Azi.Reset();
-      setMessages(this.Azi.GetMessages()); // optional: triggers immediate UI update
+    const peek = async (inputs?: Record<string, unknown>) => {
+      await this.Azi.Peek(inputs);
+      setIsSending(this.Azi.IsSending());
     };
 
     return {
-      messages,
+      state,
+      isSending,
       send,
-      reset,
+      peek,
     };
   }
 

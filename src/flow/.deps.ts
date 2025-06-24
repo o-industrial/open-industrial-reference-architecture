@@ -25,3 +25,13 @@ export {
   type NodeChange,
   type XYPosition,
 } from 'npm:reactflow@11.11.4';
+
+export {
+  AIMessage,
+  AIMessageChunk,
+  BaseMessage,
+  HumanMessage,
+  type MessageFieldWithRole,
+} from 'npm:@langchain/core@0.3.42/messages';
+export type { StringPromptValue } from 'npm:@langchain/core@0.3.42/prompt_values';
+export { RemoteRunnable } from 'npm:@langchain/core@0.3.42/runnables/remote';

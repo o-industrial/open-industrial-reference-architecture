@@ -3,7 +3,7 @@ import { SendIcon, Input, Action, ActionStyleTypes } from '../../.exports.ts';
 
 export type AziChatInputProps = {
   placeholder?: string;
-  onSend: (message: string) => void;
+  onSend: (message: string) => Promise<void>; // ✅ now async
   disabled?: boolean;
   inputIntentType?: IntentTypes;
   actionIntentType?: IntentTypes;
@@ -21,6 +21,7 @@ export function AziChatInput({
   maxHeight = 200,
 }: AziChatInputProps): JSX.Element {
   const [input, setInput] = useState('');
+  const [sending, setSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const resizeTextarea = () => {
@@ -38,19 +39,27 @@ export function AziChatInput({
     const value = e.currentTarget.value;
     setInput(value);
   };
+    
 
-  const handleSubmit = (e: JSX.TargetedEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: JSX.TargetedEvent<HTMLFormElement>) => {
     e.preventDefault();
     const trimmed = input.trim();
-    if (!trimmed) return;
+    if (!trimmed || sending || disabled) return;
 
-    onSend(trimmed);
-    setInput('');
+    setSending(true);
+    try {
+      await onSend(trimmed);
+      setInput('');
+    } finally {
+      setSending(false);
+    }
   };
 
   useEffect(() => {
     resizeTextarea();
   }, [input]);
+
+  const isDisabled = disabled || sending;
 
   return (
     <form onSubmit={handleSubmit} class="flex gap-2 w-full">
@@ -61,7 +70,7 @@ export function AziChatInput({
         value={input}
         onInput={handleInput}
         placeholder={placeholder}
-        disabled={disabled}
+        disabled={isDisabled}
         intentType={inputIntentType}
         class="flex-grow resize-none overflow-hidden"
       />
@@ -70,7 +79,7 @@ export function AziChatInput({
         type="submit"
         styleType={ActionStyleTypes.Solid | ActionStyleTypes.Thin}
         intentType={actionIntentType}
-        disabled={disabled}
+        disabled={isDisabled}
         class="text-xs"
       >
         {sendIcon}

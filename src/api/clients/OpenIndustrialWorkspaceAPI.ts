@@ -29,9 +29,7 @@ export class OpenIndustrialWorkspaceAPI {
   /**
    * Commit a snapshot of runtime memory (e.g. agent execution history).
    */
-  public async Commit(
-    snapshot: EaCHistorySnapshot,
-  ): Promise<EaCStatus> {
+  public async Commit(snapshot: EaCHistorySnapshot): Promise<EaCStatus> {
     const res = await fetch(this.bridge.url('/api/workspaces/commit'), {
       method: 'POST',
       headers: this.bridge.headers(),
@@ -59,6 +57,22 @@ export class OpenIndustrialWorkspaceAPI {
 
     if (!res.ok) {
       throw new Error(`Failed to create workspace: ${res.status}`);
+    }
+
+    return await this.bridge.json(res);
+  }
+
+  /**
+   * Get the EaC JWT for a workspace for the authenticated user.
+   */
+  public async EaCJWT(): Promise<{ Token: string }> {
+    const res = await fetch(this.bridge.url('/api/workspaces/eac/jwt'), {
+      method: 'GET',
+      headers: this.bridge.headers(),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch current workspace: ${res.status}`);
     }
 
     return await this.bridge.json(res);

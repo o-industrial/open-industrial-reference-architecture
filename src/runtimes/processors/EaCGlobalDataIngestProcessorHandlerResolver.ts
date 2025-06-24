@@ -46,7 +46,6 @@ export const EaCGlobalDataIngestProcessorHandlerResolver: ProcessorHandlerResolv
 
       await startEventHubConsumer(proc, nc, logger);
     } catch (err) {
-      // debugger;
       logger.error(err);
     }
 
@@ -69,7 +68,6 @@ async function startEventHubConsumer(
   nc: NatsConnection,
   logger: Logger,
 ) {
-  // debugger;
   const registry = IoTRegistry.fromConnectionString(
     proc.IoTHubConnectionString,
   );

@@ -43,3 +43,13 @@ export {
   MiniMap,
   type Node,
 } from 'npm:reactflow@11.11.4';
+
+export {
+  AIMessage,
+  AIMessageChunk,
+  HumanMessage,
+  HumanMessageChunk,
+  ToolMessage,
+  ToolMessageChunk,
+  BaseMessage,
+} from 'npm:@langchain/core@0.3.42/messages';
