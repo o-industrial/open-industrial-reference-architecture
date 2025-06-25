@@ -30,6 +30,11 @@ export type EaCOIDataConnectionProcessor = {
   NATSServer: string;
 
   /**
+   * NATS token.
+   */
+  NATSToken?: string;
+
+  /**
    * The surface this processor is associated with.
    * Used for namespacing telemetry subjects and resolving execution scope.
    */

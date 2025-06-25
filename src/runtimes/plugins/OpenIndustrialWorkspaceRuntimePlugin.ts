@@ -13,7 +13,11 @@ import { EaCOIDataConnectionProcessorHandlerResolver } from '../processors/EaCOI
 import { EaCOIDataConnectionProcessor } from '../processors/EaCOIDataConnectionProcessor.ts';
 
 export class OpenIndustrialWorkspaceRuntimePlugin implements EaCRuntimePlugin {
-  constructor(protected projectLookup: string, protected natsServer: string) {}
+  constructor(
+    protected projectLookup: string,
+    protected natsServer: string,
+    protected natsToken: string,
+  ) {}
 
   public async Build(
     eac: EverythingAsCodeOIWorkspace,
@@ -80,6 +84,7 @@ export class OpenIndustrialWorkspaceRuntimePlugin implements EaCRuntimePlugin {
         DataConnectionLookup: dataConnLookup,
         SurfaceLookup: surfaceLookup,
         NATSServer: this.natsServer,
+        NATSToken: this.natsToken,
       } as EaCOIDataConnectionProcessor,
     };
 

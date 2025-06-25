@@ -40,13 +40,15 @@ export const EaCGlobalDataIngestProcessorHandlerResolver: ProcessorHandlerResolv
     );
 
     try {
-      const nc = await connect({ servers: proc.NATSServer });
+      const nc = await connect({
+        servers: proc.NATSServer,
+        token: proc.NATSToken,
+      });
 
       logger.info(`✅ Connected to NATS at ${proc.NATSServer}`);
 
       await startEventHubConsumer(proc, nc, logger);
     } catch (err) {
-      // debugger;
       logger.error(err);
     }
 
@@ -69,7 +71,6 @@ async function startEventHubConsumer(
   nc: NatsConnection,
   logger: Logger,
 ) {
-  // debugger;
   const registry = IoTRegistry.fromConnectionString(
     proc.IoTHubConnectionString,
   );

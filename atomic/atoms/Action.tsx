@@ -159,7 +159,6 @@ export function Action(props: ActionProps): JSX.Element {
   return (
     <button
       {...(rest as JSX.HTMLAttributes<HTMLButtonElement>)}
-      type="button"
       disabled={disabled}
       class={classSet([classes], rest)}
     >

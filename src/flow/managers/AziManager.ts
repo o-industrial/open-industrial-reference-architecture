@@ -1,82 +1,155 @@
-export type AziMessage = {
-  role: 'user' | 'azi' | 'tool';
-  content: string;
-};
+// deno-lint-ignore-file no-explicit-any
+import { AIMessage, type BaseMessage, HumanMessage, RemoteRunnable } from '../.deps.ts';
+
+export type AziInputs = {
+  Input?: string;
+} & Record<string, unknown>;
+
+export type AziState = {
+  Messages: BaseMessage[];
+} & Record<string, unknown>;
 
 export class AziManager {
-  protected messages: AziMessage[] = [
-    {
-      role: 'azi',
-      content: 'Welcome. You can ask me about schemas, surfaces, or logic.',
-    },
-    {
-      role: 'user',
-      content: 'How do I connect this logic to a surface?',
-    },
-    {
-      role: 'azi',
-      content: 'Let me check the available schemas in memory...',
-    },
-    {
-      role: 'tool',
-      content: 'Queried: Found `RoomState.v1` and `RoomState.v2` as recent schemas.',
-    },
-    {
-      role: 'azi',
-      content:
-        'I recommend promoting `RoomState.v2` — it includes surface and environment metadata.',
-    },
-    {
-      role: 'user',
-      content: 'Okay. What happens if I promote it?',
-    },
-    {
-      role: 'azi',
-      content:
-        'It becomes part of your runtime memory. Any agent linked to that schema will begin receiving surface context.',
-    },
-  ];
+  protected state: AziState = { Messages: [] };
+  protected listeners: Set<() => void> = new Set();
+  protected circuit: RemoteRunnable<AziInputs, AziState, any>;
+  protected sending = false;
+  protected threadId: string;
 
-  protected listeners: Set<() => void> = new Set<() => void>();
+  constructor(opts: { url: string; jwt?: string; threadId?: string }) {
+    const { url, jwt, threadId = crypto.randomUUID() } = opts;
 
-  // === Message Handling ===
+    this.threadId = threadId;
 
-  public Send(text: string): void {
-    const userMsg: AziMessage = { role: 'user', content: text };
-
-    const response: AziMessage = {
-      role: 'azi',
-      content: `I'm processing your request about "${text}".`,
-    };
-
-    this.messages.push(userMsg, response);
-    this.emit();
-  }
-
-  public Reset(): void {
-    this.messages = [
-      {
-        role: 'azi',
-        content: 'Welcome. You can ask me about schemas, surfaces, or logic.',
+    this.circuit = new RemoteRunnable({
+      url,
+      options: {
+        headers: { Authorization: jwt ? `Bearer ${jwt}` : '' },
       },
-    ];
+      fetch: fetch.bind(window),
+    });
+
+    console.info(`[AziManager] Initialized with thread ID: ${this.threadId}`);
+  }
+
+  // === Peek (hydrate full memory state) ===
+  public async Peek(inputs?: AziInputs): Promise<void> {
+    console.info('[AziManager] Peek initiated', { inputs });
+
+    const state = await this.circuit.invoke(inputs ?? {}, {
+      configurable: {
+        thread_id: this.threadId,
+        checkpoint_ns: 'current',
+        peek: true,
+      },
+    });
+
+    console.info('[AziManager] Peek response received', { state });
+
+    this.state = state as AziState;
     this.emit();
   }
 
-  // === State Access ===
+  // === Send (stream, then sync full state) ===
+  public async Send(
+    input: string,
+    extraInputs?: Record<string, unknown>,
+  ): Promise<void> {
+    if (this.sending) return;
 
-  public GetMessages(): AziMessage[] {
-    return [...this.messages];
+    this.sending = true;
+    this.emit(); // notify listeners of sending=true
+
+    console.info('[AziManager] Send initiated', { input, extraInputs });
+
+    try {
+      const humanMsg = new HumanMessage(input);
+      const aiMsg = new AIMessage('');
+
+      this.state.Messages.push(humanMsg, aiMsg);
+      this.emit();
+
+      const events = await this.circuit.streamEvents(
+        { Input: input, ...(extraInputs ?? {}) },
+        {
+          version: 'v2',
+          configurable: {
+            thread_id: this.threadId,
+            checkpoint_ns: 'current',
+          },
+          recursionLimit: 100,
+        },
+      );
+
+      for await (const event of events) {
+        const { event: eventName, name, data } = event;
+
+        console.debug('[AziManager] Streamed event received', {
+          eventName,
+          name,
+          data,
+        });
+
+        if (eventName === 'on_custom_event' && name?.startsWith('thinky:')) {
+          this.handleCustomEvent(name.replace('thinky:', ''), data);
+        }
+
+        if (
+          eventName === 'on_chat_model_stream' ||
+          eventName === 'on_llm_stream'
+        ) {
+          const chunk = data?.chunk;
+          const value = typeof chunk === 'string'
+            ? chunk
+            : chunk?.content?.toString?.() ?? chunk?.value ?? '';
+
+          if (value && typeof value === 'string') {
+            aiMsg.content += value;
+            this.emit();
+          }
+        }
+      }
+
+      console.info('[AziManager] Stream complete — syncing final state');
+      await this.Peek(extraInputs);
+    } catch (err) {
+      console.error('[AziManager] Send error', err);
+    } finally {
+      this.sending = false;
+      this.emit(); // notify listeners of sending=false
+    }
   }
 
-  // === Listener Management ===
+  // === Accessors ===
+  public GetState(): AziState {
+    return {
+      ...this.state,
+      Messages: [...this.state.Messages],
+    };
+  }
 
-  public OnMessagesChanged(cb: () => void): () => void {
+  public IsSending(): boolean {
+    return this.sending;
+  }
+
+  public OnStateChanged(cb: () => void): () => void {
     this.listeners.add(cb);
     return () => this.listeners.delete(cb);
   }
 
   protected emit(): void {
     for (const cb of this.listeners) cb();
+  }
+
+  // === Optional Custom Events ===
+  protected handleCustomEvent(name: string, data: unknown): void {
+    console.debug('[AziManager] Handling custom event', { name, data });
+
+    switch (name) {
+      case 'page_navigate':
+        if (typeof data === 'string') location.href = data;
+        else location.reload();
+        break;
+    }
   }
 }

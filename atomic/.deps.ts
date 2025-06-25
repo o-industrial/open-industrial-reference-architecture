@@ -17,7 +17,7 @@ export { IntentTypes, type IngestOption } from '../src/types/.exports.ts';
 
 export { classSet, IS_BROWSER } from 'jsr:@fathym/atomic@0.0.184';
 
-export type { EaCEnterpriseDetails } from 'jsr:@fathym/eac@0.2.111';
+export type { EaCEnterpriseDetails } from 'jsr:@fathym/eac@0.2.112';
 
 export {
   type JSX,
@@ -43,3 +43,13 @@ export {
   MiniMap,
   type Node,
 } from 'npm:reactflow@11.11.4';
+
+export {
+  AIMessage,
+  AIMessageChunk,
+  HumanMessage,
+  HumanMessageChunk,
+  ToolMessage,
+  ToolMessageChunk,
+  BaseMessage,
+} from 'npm:@langchain/core@0.3.42/messages';

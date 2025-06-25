@@ -33,26 +33,38 @@ export const EaCOIDataConnectionProcessorHandlerResolver: ProcessorHandlerResolv
       );
     }
 
-    logger.debug(
-      `🔧 Initializing surface data router for surface=${proc.SurfaceLookup}, data=${proc.DataConnectionLookup}`,
+    const surface = proc.SurfaceLookup;
+    const dataConn = proc.DataConnectionLookup;
+
+    logger.info(
+      `🟢 [${surface}/${dataConn}] Initializing surface data connection processor`,
     );
 
     // Step 1: Connect to NATS
-    const nc: NatsConnection = await connect({ servers: proc.NATSServer });
+    const nc: NatsConnection = await connect({
+      servers: proc.NATSServer,
+      token: proc.NATSToken,
+    });
     const sc = StringCodec();
     const jsm: JetStreamManager = await nc.jetstreamManager();
 
-    logger.debug(`✅ Connected to NATS at ${proc.NATSServer}`);
+    logger.info(
+      `🔌 [${surface}/${dataConn}] Connected to NATS at ${proc.NATSServer}`,
+    );
 
     // Step 2: Define routing subjects
-    const sourceSubject =
-      `workspace.${eac.EnterpriseLookup}.data-connection.${proc.DataConnectionLookup}.impulse`;
+    const sourceSubject = `workspace.${eac.EnterpriseLookup}.data-connection.${dataConn}.impulse`;
     const streamName =
-      `workspace.${eac.EnterpriseLookup}.surface.${proc.SurfaceLookup}.data-connection.${proc.DataConnectionLookup}`;
+      `workspace.${eac.EnterpriseLookup}.surface.${surface}.data-connection.${dataConn}`;
     const targetSubject = `${streamName}.impulse`;
 
-    logger.debug(`🔁 Subscribing to ${sourceSubject}`);
-    logger.debug(`🔄 Forwarding to ${targetSubject}`);
+    logger.info(
+      `📥 [${surface}/${dataConn}] Subscribing to source subject: ${sourceSubject}`,
+    );
+    logger.info(
+      `📤 [${surface}/${dataConn}] Forwarding to surface subject: ${targetSubject}`,
+    );
+    logger.debug(`🧭 Stream name: ${streamName}`);
 
     // Step 3: Create JetStream stream if missing
     await ensureJetStreamStream(
@@ -61,12 +73,23 @@ export const EaCOIDataConnectionProcessorHandlerResolver: ProcessorHandlerResolv
       [targetSubject],
       proc.JetStreamDefaults,
     );
+    logger.info(
+      `📦 [${surface}/${dataConn}] JetStream stream ensured: ${streamName}`,
+    );
 
     // Step 4: Subscribe and forward
     const sub: Subscription = nc.subscribe(sourceSubject);
     (async () => {
       for await (const msg of sub) {
-        forwardToSurfaceSubject(msg.data, targetSubject, nc, sc, logger);
+        forwardToSurfaceSubject(
+          msg.data,
+          targetSubject,
+          nc,
+          sc,
+          logger,
+          surface,
+          dataConn,
+        );
       }
     })();
 
@@ -91,7 +114,9 @@ function forwardToSurfaceSubject(
   nc: NatsConnection,
   sc: ReturnType<typeof StringCodec>,
   logger: Logger,
+  surface: string,
+  dataConn: string,
 ) {
   nc.publish(subject, data);
-  logger.debug(`📤 ${subject} ← ${sc.decode(data)}`);
+  logger.info(`📤 [${surface}/${dataConn}] ${subject} ← ${sc.decode(data)}`);
 }

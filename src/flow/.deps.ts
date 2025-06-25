@@ -4,8 +4,8 @@ export type {
   EaCEnterpriseDetails,
   EaCVertexDetails,
   EverythingAsCode,
-} from 'jsr:@fathym/eac@0.2.111';
-export { type EaCStatus, EaCStatusProcessingTypes } from 'jsr:@fathym/eac@0.2.111/steward/status';
+} from 'jsr:@fathym/eac@0.2.112';
+export { type EaCStatus, EaCStatusProcessingTypes } from 'jsr:@fathym/eac@0.2.112/steward/status';
 
 export type { ComponentType } from 'npm:preact@10.20.1';
 export {
@@ -25,3 +25,13 @@ export {
   type NodeChange,
   type XYPosition,
 } from 'npm:reactflow@11.11.4';
+
+export {
+  AIMessage,
+  AIMessageChunk,
+  BaseMessage,
+  HumanMessage,
+  type MessageFieldWithRole,
+} from 'npm:@langchain/core@0.3.42/messages';
+export type { StringPromptValue } from 'npm:@langchain/core@0.3.42/prompt_values';
+export { RemoteRunnable } from 'npm:@langchain/core@0.3.42/runnables/remote';

@@ -21,7 +21,7 @@ type TStepBuilder = StepModuleBuilder<
 
 export const AzureIoTHubDeviceStep: TStepBuilder = Step(
   'Azure IoT Hub Device Provisioning',
-  'Adds devices to an Azure IoT Hub',
+  'Adds devices to an Azure IoT Hub and updates tags if needed',
 )
   .Input(AzureIoTHubDeviceInputSchema)
   .Output(AzureIoTHubDeviceOutputSchema)
@@ -77,56 +77,87 @@ export const AzureIoTHubDeviceStep: TStepBuilder = Step(
       tags: { WorkspaceLookup: string; DataConnectionLookup?: string };
     };
 
-    const provisioning = await Promise.all(
+    const toAdd: DeviceDescription[] = [];
+    const toUpdate: {
+      deviceId: string;
+      etag: string;
+      tags: Record<string, string>;
+    }[] = [];
+
+    await Promise.all(
       Object.entries(Devices).map(async ([id, def]) => {
+        const desiredTags: Record<string, string> = {
+          WorkspaceLookup,
+          ...(def.DataConnectionLookup && {
+            DataConnectionLookup: def.DataConnectionLookup,
+          }),
+        };
+
         try {
-          await Registry.get(id);
-          return null;
+          const twin = (await Registry.getTwin(id)).responseBody;
+          const currentTags = twin.tags ?? {};
+
+          const tagMismatch = Object.entries(desiredTags).some(
+            ([k, v]) => currentTags[k] !== v,
+          );
+
+          if (tagMismatch) {
+            toUpdate.push({ deviceId: id, tags: desiredTags, etag: twin.etag });
+          }
         } catch (err) {
           if (!(err instanceof Error) || err.name !== 'DeviceNotFoundError') {
             throw err;
           }
+
+          const device: DeviceDescription = {
+            deviceId: id,
+            capabilities: { iotEdge: def.IsIoTEdge ?? false },
+            tags: desiredTags as DeviceDescription['tags'],
+          };
+
+          toAdd.push(device);
         }
-
-        const device: DeviceDescription = {
-          deviceId: id,
-          capabilities: { iotEdge: def.IsIoTEdge ?? false },
-          tags: {
-            WorkspaceLookup,
-            ...(def.DataConnectionLookup && {
-              DataConnectionLookup: def.DataConnectionLookup,
-            }),
-          },
-        };
-
-        return device;
       }),
     );
 
-    const toAdd = provisioning.filter(
-      (d): d is DeviceDescription => d !== null,
-    );
+    const results: Record<string, unknown> = {};
 
-    if (toAdd.length === 0) {
-      return { Message: 'All devices already exist.' };
+    if (toAdd.length > 0) {
+      const addResp = await Registry.addDevices(toAdd);
+
+      const errors = (addResp as any)?.responseBody?.errors ?? [];
+
+      if (errors.length > 0) {
+        results.Errors = errors.reduce(
+          (acc: Record<string, unknown>, e: any) => {
+            acc[e.deviceId] = {
+              Error: e.errorCode?.message ?? 'Unknown error',
+              ErrorStatus: e.errorStatus,
+            };
+            return acc;
+          },
+          {},
+        );
+      } else {
+        results.Added = toAdd.map((d) => d.deviceId);
+      }
     }
 
-    const addResp = await Registry.addDevices(toAdd);
-
-    // Use `as any` fallback if type system doesn't guarantee `responseBody`
-    const errors = (addResp as any)?.responseBody?.errors ?? [];
-
-    if (errors.length > 0) {
-      const mapped = errors.reduce((acc: Record<string, unknown>, e: any) => {
-        acc[e.deviceId] = {
-          Error: e.errorCode?.message ?? 'Unknown error',
-          ErrorStatus: e.errorStatus,
-        };
-        return acc;
-      }, {});
-
-      return { Errors: mapped };
+    for (const update of toUpdate) {
+      await Registry.updateTwin(
+        update.deviceId,
+        { tags: update.tags },
+        update.etag,
+      );
     }
 
-    return { Added: toAdd.map((d) => d.deviceId) };
+    if (toUpdate.length > 0) {
+      results.Updated = toUpdate.map((u) => u.deviceId);
+    }
+
+    if (!results.Added && !results.Updated) {
+      results.Message = 'All devices already exist and are up to date.';
+    }
+
+    return results;
   }) as unknown as TStepBuilder;

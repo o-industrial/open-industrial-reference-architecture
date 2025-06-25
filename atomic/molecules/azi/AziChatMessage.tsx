@@ -1,4 +1,10 @@
-import { JSX, ComponentChildren, classSet, IntentTypes } from '../../.deps.ts';
+import {
+  JSX,
+  ComponentChildren,
+  classSet,
+  IntentTypes,
+  BaseMessage,
+} from '../../.deps.ts';
 import { Badge } from '../../.exports.ts';
 
 export type AziChatMessageProps = {
@@ -7,6 +13,7 @@ export type AziChatMessageProps = {
   badge: ComponentChildren;
   intentType?: IntentTypes;
   inline?: boolean;
+  renderMessage?: (message: string) => string;
 } & JSX.HTMLAttributes<HTMLDivElement>;
 
 export function AziChatMessage({
@@ -15,6 +22,7 @@ export function AziChatMessage({
   badge,
   intentType = IntentTypes.Info,
   inline = false,
+  renderMessage,
   ...rest
 }: AziChatMessageProps): JSX.Element {
   const isRight = align === 'right';
@@ -35,23 +43,27 @@ export function AziChatMessage({
   const containerAlign = isRight ? 'items-end' : 'items-start';
   const rowDirection = isRight ? 'flex-row-reverse' : 'flex-row';
 
+  const rendered = renderMessage ? renderMessage(content) : content;
+
   return (
     <div {...rest} class={classSet(['flex', rootAlign], rest)}>
       {inline ? (
         <div class={`flex ${rowDirection} items-center gap-2 max-w-[80%]`}>
           <Badge intentType={intentType}>{badge}</Badge>
-          <div class={`border rounded px-3 py-2 text-sm ${bubbleClass}`}>
-            {content}
-          </div>
+          <div
+            class={`border rounded px-3 py-2 text-sm ${bubbleClass}`}
+            dangerouslySetInnerHTML={{ __html: rendered }}
+          ></div>
         </div>
       ) : (
         <div class={`flex flex-col ${containerAlign} max-w-[80%]`}>
           <Badge intentType={intentType} class="mb-1">
             {badge}
           </Badge>
-          <div class={`border rounded px-3 py-2 text-sm ${bubbleClass}`}>
-            {content}
-          </div>
+          <div
+            class={`border rounded px-3 py-2 text-sm ${bubbleClass}`}
+            dangerouslySetInnerHTML={{ __html: rendered }}
+          ></div>
         </div>
       )}
     </div>
