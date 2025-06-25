@@ -100,7 +100,7 @@ export class SurfaceSchemaNodeCapabilityManager
 
   protected override buildDeletePatch(
     node: FlowGraphNode,
-    context: EaCNodeCapabilityContext
+    context: EaCNodeCapabilityContext,
   ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> {
     const surfaceId = context.SurfaceLookup!;
     const schemaId = node.ID;

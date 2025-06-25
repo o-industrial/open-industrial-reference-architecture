@@ -73,7 +73,7 @@ export class SurfaceAgentNodeCapabilityManager
     } else if (source.Type.includes('warmquery') && target.Type.includes('agent')) {
       const eac = context.GetEaC();
       const agent = eac.Agents?.[target.ID];
-      const surface = eac.Surfaces?.[context.SurfaceLookup];
+      const surface = eac.Surfaces?.[context.SurfaceLookup!];
 
       return {
         Agents: {
@@ -114,10 +114,13 @@ export class SurfaceAgentNodeCapabilityManager
         },
       };
     } else if (source.Type.includes('warmquery') && target.Type.includes('agent')) {
-      if (!agent.WarmQueryLookups || agent.WarmQueryLookups.length === 0 || !agent.WarmQueryLookups.includes(source.ID)) return null;
+      if (
+        !agent.WarmQueryLookups || agent.WarmQueryLookups.length === 0 ||
+        !agent.WarmQueryLookups.includes(source.ID)
+      ) return null;
 
       const filtered = (agent.WarmQueryLookups as string[]).filter(
-        (item) => item !== source.ID
+        (item) => item !== source.ID,
       );
 
       return {
@@ -129,11 +132,12 @@ export class SurfaceAgentNodeCapabilityManager
         },
       };
     }
+    return null;
   }
 
   protected override buildDeletePatch(
     node: FlowGraphNode,
-    context: EaCNodeCapabilityContext
+    context: EaCNodeCapabilityContext,
   ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> {
     const surfaceId = context.SurfaceLookup!;
     const agentId = node.ID;
@@ -158,6 +162,10 @@ export class SurfaceAgentNodeCapabilityManager
     const agent = eac.Agents?.[agentId];
 
     const edges: FlowGraphEdge[] = [];
+
+    if (!agent) {
+      return edges;
+    }
 
     const targetSchema = agent?.Schema?.SchemaLookup;
 

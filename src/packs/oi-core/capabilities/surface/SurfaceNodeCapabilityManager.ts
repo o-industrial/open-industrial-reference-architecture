@@ -1,6 +1,6 @@
 import { Position } from '../../../../eac/.exports.ts';
 import { EaCFlowNodeMetadata } from '../../../../eac/EaCFlowNodeMetadata.ts';
-import { EaCSurfaceAsCode } from '../../../../eac/EaCSurfaceAsCode.ts';
+import { EaCSurfaceAsCode, SurfaceDataConnectionSettings } from '../../../../eac/EaCSurfaceAsCode.ts';
 import { EverythingAsCodeOIWorkspace } from '../../../../eac/EverythingAsCodeOIWorkspace.ts';
 import {
   EaCNodeCapabilityAsCode,
@@ -109,7 +109,7 @@ export class SurfaceNodeCapabilityManager extends EaCNodeCapabilityManager {
           },
         };
       }
-    } else  if (source.Type.includes('connection') && target.Type.includes('surface')) {
+    } else if (source.Type.includes('connection') && target.Type.includes('surface')) {
       const surface = eac.Surfaces?.[target.ID];
       if (surface?.DataConnections?.[source.ID]) {
         const updatedConnections = { ...surface.DataConnections };

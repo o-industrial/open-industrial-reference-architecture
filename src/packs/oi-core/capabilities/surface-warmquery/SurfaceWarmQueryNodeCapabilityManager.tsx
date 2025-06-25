@@ -9,7 +9,7 @@ import {
   FlowGraphNode,
 } from '../../../../flow/.exports.ts';
 import { EaCWarmQueryDetails } from '../../../../eac/.deps.ts';
-import { SurfaceWarmQuerySettings } from '../../../../eac/.exports.ts'
+import { SurfaceWarmQuerySettings } from '../../../../eac/.exports.ts';
 import { SurfaceWarmQueryInspector } from './SurfaceWarmQueryInspector.tsx';
 import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import SurfaceWarmQueryNodeRenderer from './SurfaceWarmQueryNodeRenderer.tsx';
@@ -123,10 +123,13 @@ export class SurfaceWarmQueryNodeCapabilityManager
     const wqSettings = surface?.WarmQueries?.[wqId];
 
     if (source.Type.includes('schema')) {
-      if (!wqSettings || !wqSettings.SchemaLookups || wqSettings.SchemaLookups.length === 0 || !wqSettings.SchemaLookups.includes(source.ID)) return null;
+      if (
+        !wqSettings || !wqSettings.SchemaLookups || wqSettings.SchemaLookups.length === 0 ||
+        !wqSettings.SchemaLookups.includes(source.ID)
+      ) return null;
 
       const filtered = (wqSettings.SchemaLookups as string[]).filter(
-        (item) => item !== source.ID
+        (item) => item !== source.ID,
       );
 
       return {
@@ -143,9 +146,15 @@ export class SurfaceWarmQueryNodeCapabilityManager
         },
       };
     } else if (source.Type.includes('connection')) {
-      if (!wqSettings || !wqSettings.DataConnectionLookups || wqSettings.DataConnectionLookups.length === 0 || !wqSettings.DataConnectionLookups.includes(source.ID)) return null;
+      if (
+        !wqSettings || !wqSettings.DataConnectionLookups ||
+        wqSettings.DataConnectionLookups.length === 0 ||
+        !wqSettings.DataConnectionLookups.includes(source.ID)
+      ) return null;
 
-      const filtered = (wqSettings.DataConnectionLookups as string[]).filter(item => item !== source.ID);
+      const filtered = (wqSettings.DataConnectionLookups as string[]).filter((item) =>
+        item !== source.ID
+      );
 
       return {
         Surfaces: {
@@ -161,6 +170,7 @@ export class SurfaceWarmQueryNodeCapabilityManager
         },
       };
     }
+    return null;
   }
 
   protected override buildDeletePatch(
@@ -183,7 +193,7 @@ export class SurfaceWarmQueryNodeCapabilityManager
       },
       WarmQueries: {
         [wqId]: null,
-      }
+      },
     } as unknown as NullableArrayOrObject<EverythingAsCodeOIWorkspace>;
   }
 
@@ -193,7 +203,7 @@ export class SurfaceWarmQueryNodeCapabilityManager
   ): FlowGraphEdge[] {
     const eac = context.GetEaC();
     const wqId = node.ID;
-    const surface = eac.Surfaces?.[context.SurfaceLookup];
+    const surface = eac.Surfaces?.[context.SurfaceLookup!];
 
     const edges: FlowGraphEdge[] = [];
 
@@ -284,8 +294,8 @@ export class SurfaceWarmQueryNodeCapabilityManager
             [context.SurfaceLookup]: {
               WarmQueries: {
                 [id]: {
-                  SchemaLookups:[] as string[],
-                  DataConnectionLookups:[] as string[],
+                  SchemaLookups: [] as string[],
+                  DataConnectionLookups: [] as string[],
                 },
               },
             },
@@ -306,7 +316,7 @@ export class SurfaceWarmQueryNodeCapabilityManager
       ...(update.Metadata ? { Metadata: update.Metadata } : {}),
     };
 
-    const { SchemaLookups: _, DataConnectionLookups: __,  ...rest } = update.Details ?? {};
+    const { SchemaLookups: _, DataConnectionLookups: __, ...rest } = update.Details ?? {};
     const wqDetails: Partial<EaCWarmQueryDetails> = rest;
 
     const patch: Partial<EverythingAsCodeOIWorkspace> = {};

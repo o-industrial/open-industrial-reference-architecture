@@ -41,7 +41,7 @@ export const EaCAgentAsCodeSchema: z.ZodType<EaCAgentAsCode> = EaCDetailsSchema.
     .optional()
     .describe('Required lookup key for the schema this agent evaluates.'),
 
-    WarmQuery: z
+  WarmQuery: z
     .object({
       WarmQueryLookup: z.string(),
     })
