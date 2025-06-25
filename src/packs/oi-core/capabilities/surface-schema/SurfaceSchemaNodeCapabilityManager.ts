@@ -1,3 +1,4 @@
+import { context } from 'npm:esbuild@0.24.2';
 import { Position } from '../../../../eac/.exports.ts';
 import { EaCCompositeSchemaDetails } from '../../../../eac/EaCCompositeSchemaDetails.ts';
 import { EaCFlowNodeMetadata } from '../../../../eac/EaCFlowNodeMetadata.ts';
@@ -100,8 +101,10 @@ export class SurfaceSchemaNodeCapabilityManager
 
   protected override buildDeletePatch(
     node: FlowGraphNode,
+    context: EaCNodeCapabilityContext
   ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> {
-    const [surfaceId, schemaId] = this.extractCompoundIDs(node);
+    const surfaceId = context.SurfaceLookup!;
+    const schemaId = node.ID;
 
     return {
       Surfaces: {

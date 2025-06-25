@@ -167,7 +167,8 @@ export class SurfaceWarmQueryNodeCapabilityManager
     node: FlowGraphNode,
     context: EaCNodeCapabilityContext,
   ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> {
-    const [surfaceId, wqId] = this.extractCompoundIDs(node);
+    const wqId = node.ID;
+    const surfaceId = context.SurfaceLookup!;
     const eac = context.GetEaC();
     const surface = eac.Surfaces?.[surfaceId];
 

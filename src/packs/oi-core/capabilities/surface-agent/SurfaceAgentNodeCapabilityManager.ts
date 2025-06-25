@@ -133,8 +133,10 @@ export class SurfaceAgentNodeCapabilityManager
 
   protected override buildDeletePatch(
     node: FlowGraphNode,
+    context: EaCNodeCapabilityContext
   ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> {
-    const [surfaceId, agentId] = this.extractCompoundIDs(node);
+    const surfaceId = context.SurfaceLookup!;
+    const agentId = node.ID;
 
     return {
       Surfaces: {
