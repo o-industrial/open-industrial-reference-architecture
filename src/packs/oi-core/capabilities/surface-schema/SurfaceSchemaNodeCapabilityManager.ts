@@ -1,4 +1,3 @@
-import { context } from 'npm:esbuild@0.24.2';
 import { Position } from '../../../../eac/.exports.ts';
 import { EaCCompositeSchemaDetails } from '../../../../eac/EaCCompositeSchemaDetails.ts';
 import { EaCFlowNodeMetadata } from '../../../../eac/EaCFlowNodeMetadata.ts';
