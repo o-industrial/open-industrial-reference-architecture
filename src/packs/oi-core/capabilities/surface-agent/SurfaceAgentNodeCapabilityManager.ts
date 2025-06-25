@@ -80,7 +80,7 @@ export class SurfaceAgentNodeCapabilityManager
           [target.ID]: {
             ...agent,
             WarmQueryLookups: [
-              ...(surface?.Agents?.[target.ID]?.WarmQueryLookups ?? []),
+              ...(surface?.Agents?.[target.ID]?.WarmQueryLookups as string[] ?? []),
               source.ID,
             ],
           },

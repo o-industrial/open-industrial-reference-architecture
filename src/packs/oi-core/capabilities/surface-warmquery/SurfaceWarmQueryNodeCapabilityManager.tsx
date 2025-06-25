@@ -207,7 +207,7 @@ export class SurfaceWarmQueryNodeCapabilityManager
 
     const edges: FlowGraphEdge[] = [];
 
-    const targetSchemas = surface?.WarmQueries[wqId]?.SchemaLookups;
+    const targetSchemas = surface?.WarmQueries?.[wqId]?.SchemaLookups;
 
     if (targetSchemas) {
       targetSchemas.forEach((targetSchema: string) => {
@@ -220,7 +220,7 @@ export class SurfaceWarmQueryNodeCapabilityManager
       });
     }
 
-    const targetConnections = surface?.WarmQueries[wqId]?.DataConnectionLookups;
+    const targetConnections = surface?.WarmQueries?.[wqId]?.DataConnectionLookups;
 
     if (targetConnections) {
       targetConnections.forEach((targetConnection: string) => {
