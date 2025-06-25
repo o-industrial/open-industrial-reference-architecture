@@ -4,8 +4,8 @@ export type {
   EaCEnterpriseDetails,
   EaCVertexDetails,
   EverythingAsCode,
-} from 'jsr:@fathym/eac@0.2.111';
-export { type EaCStatus, EaCStatusProcessingTypes } from 'jsr:@fathym/eac@0.2.111/steward/status';
+} from 'jsr:@fathym/eac@0.2.112';
+export { type EaCStatus, EaCStatusProcessingTypes } from 'jsr:@fathym/eac@0.2.112/steward/status';
 
 export type { ComponentType } from 'npm:preact@10.20.1';
 export {

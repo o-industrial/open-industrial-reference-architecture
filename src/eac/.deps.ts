@@ -6,9 +6,9 @@ export {
   type EaCVertexDetails,
   EaCVertexDetailsSchema,
   type EverythingAsCode,
-} from 'jsr:@fathym/eac@0.2.111';
+} from 'jsr:@fathym/eac@0.2.112';
 
-export type { EverythingAsCodeApplications } from 'jsr:@fathym/eac-applications@0.0.151';
+export type { EverythingAsCodeApplications } from 'jsr:@fathym/eac-applications@0.0.152';
 
 export {
   type EverythingAsCodeClouds,
