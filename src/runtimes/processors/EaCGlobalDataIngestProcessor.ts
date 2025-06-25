@@ -40,6 +40,11 @@ export type EaCGlobalDataIngestProcessor = {
    * NATS connection string.
    */
   NATSServer: string;
+
+  /**
+   * NATS token.
+   */
+  NATSToken?: string;
 } & EaCProcessor<'GlobalDataIngest'>;
 
 /**

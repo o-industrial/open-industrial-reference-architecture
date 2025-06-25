@@ -41,11 +41,16 @@ export const EaCOIDataConnectionProcessorHandlerResolver: ProcessorHandlerResolv
     );
 
     // Step 1: Connect to NATS
-    const nc: NatsConnection = await connect({ servers: proc.NATSServer });
+    const nc: NatsConnection = await connect({
+      servers: proc.NATSServer,
+      token: proc.NATSToken,
+    });
     const sc = StringCodec();
     const jsm: JetStreamManager = await nc.jetstreamManager();
 
-    logger.info(`🔌 [${surface}/${dataConn}] Connected to NATS at ${proc.NATSServer}`);
+    logger.info(
+      `🔌 [${surface}/${dataConn}] Connected to NATS at ${proc.NATSServer}`,
+    );
 
     // Step 2: Define routing subjects
     const sourceSubject = `workspace.${eac.EnterpriseLookup}.data-connection.${dataConn}.impulse`;
@@ -53,8 +58,12 @@ export const EaCOIDataConnectionProcessorHandlerResolver: ProcessorHandlerResolv
       `workspace.${eac.EnterpriseLookup}.surface.${surface}.data-connection.${dataConn}`;
     const targetSubject = `${streamName}.impulse`;
 
-    logger.info(`📥 [${surface}/${dataConn}] Subscribing to source subject: ${sourceSubject}`);
-    logger.info(`📤 [${surface}/${dataConn}] Forwarding to surface subject: ${targetSubject}`);
+    logger.info(
+      `📥 [${surface}/${dataConn}] Subscribing to source subject: ${sourceSubject}`,
+    );
+    logger.info(
+      `📤 [${surface}/${dataConn}] Forwarding to surface subject: ${targetSubject}`,
+    );
     logger.debug(`🧭 Stream name: ${streamName}`);
 
     // Step 3: Create JetStream stream if missing
@@ -64,13 +73,23 @@ export const EaCOIDataConnectionProcessorHandlerResolver: ProcessorHandlerResolv
       [targetSubject],
       proc.JetStreamDefaults,
     );
-    logger.info(`📦 [${surface}/${dataConn}] JetStream stream ensured: ${streamName}`);
+    logger.info(
+      `📦 [${surface}/${dataConn}] JetStream stream ensured: ${streamName}`,
+    );
 
     // Step 4: Subscribe and forward
     const sub: Subscription = nc.subscribe(sourceSubject);
     (async () => {
       for await (const msg of sub) {
-        forwardToSurfaceSubject(msg.data, targetSubject, nc, sc, logger, surface, dataConn);
+        forwardToSurfaceSubject(
+          msg.data,
+          targetSubject,
+          nc,
+          sc,
+          logger,
+          surface,
+          dataConn,
+        );
       }
     })();
 

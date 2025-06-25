@@ -12,6 +12,7 @@ export class OpenIndustrialGlobalDataIngestPlugin implements EaCRuntimePlugin {
   constructor(
     protected projectLookup: string,
     protected natsServer: string,
+    protected natsToken: string,
     protected eventHubConnStr: string,
     protected eventHubName: string,
     protected iotHubConnStr: string,
@@ -41,6 +42,7 @@ export class OpenIndustrialGlobalDataIngestPlugin implements EaCRuntimePlugin {
             Processor: {
               Type: 'GlobalDataIngest',
               NATSServer: this.natsServer,
+              NATSToken: this.natsToken,
               EventHubConsumerConnectionString: this.eventHubConnStr,
               EventHubName: this.eventHubName,
               IoTHubConnectionString: this.iotHubConnStr,

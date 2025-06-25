@@ -40,7 +40,10 @@ export const EaCGlobalDataIngestProcessorHandlerResolver: ProcessorHandlerResolv
     );
 
     try {
-      const nc = await connect({ servers: proc.NATSServer });
+      const nc = await connect({
+        servers: proc.NATSServer,
+        token: proc.NATSToken,
+      });
 
       logger.info(`✅ Connected to NATS at ${proc.NATSServer}`);
 
