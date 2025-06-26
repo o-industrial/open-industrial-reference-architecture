@@ -50,7 +50,7 @@
     // "react/jsx-dev-runtime": "npm:preact@10.20.1/jsx-dev-runtime",
     // "reactflow": "npm:reactflow@11.11.4"
   },
-  "exclude": ["**/_eac-runtime/*", "!src/**/.exports.ts", "!mod.ts"],
+  "exclude": ["**/_eac-runtime/*", "!src/**/.exports.ts", "!src/**/.deps.ts","!mod.ts"],
   "lint": {
     "include": ["apps/", "configs/", "src/", "tests/"],
     "exclude": [],
