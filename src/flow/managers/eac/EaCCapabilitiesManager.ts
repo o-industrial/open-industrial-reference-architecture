@@ -39,7 +39,7 @@ export class EaCCapabilitiesManager {
     context: EaCNodeCapabilityContext,
   ): Partial<EverythingAsCodeOIWorkspace> | null {
     return (
-      this.GetCapabilityFor(source)?.BuildConnectionPatch?.(
+      this.GetCapabilityFor(target)?.BuildConnectionPatch?.(
         source,
         target,
         context,
@@ -80,7 +80,7 @@ export class EaCCapabilitiesManager {
     context: EaCNodeCapabilityContext,
   ): Partial<EverythingAsCodeOIWorkspace> | null {
     return (
-      this.GetCapabilityFor(source)?.BuildDisconnectionPatch?.(
+      this.GetCapabilityFor(target)?.BuildDisconnectionPatch?.(
         source,
         target,
         context,

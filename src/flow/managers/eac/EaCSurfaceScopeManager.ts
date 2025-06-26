@@ -56,6 +56,14 @@ export class EaCSurfaceScopeManager extends EaCScopeManager {
       }
     }
 
+    for (const wqKey of Object.keys(surface.WarmQueries ?? {})) {
+      const node = this.capabilities.BuildNode(wqKey, 'warmquery', ctx);
+      if (node) {
+        nodes.push(node);
+        edges.push(...this.capabilities.BuildEdgesForNode(node, ctx));
+      }
+    }
+
     // // Child surfaces
     // for (const [key, child] of Object.entries(
     //   (eac as EverythingAsCodeOIWorkspace).Surfaces ?? {}
