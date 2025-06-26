@@ -1,6 +1,9 @@
 import { Position } from '../../../../eac/.exports.ts';
 import { EaCFlowNodeMetadata } from '../../../../eac/EaCFlowNodeMetadata.ts';
-import { EaCSurfaceAsCode, SurfaceDataConnectionSettings } from '../../../../eac/EaCSurfaceAsCode.ts';
+import {
+  EaCSurfaceAsCode,
+  SurfaceDataConnectionSettings,
+} from '../../../../eac/EaCSurfaceAsCode.ts';
 import { EverythingAsCodeOIWorkspace } from '../../../../eac/EverythingAsCodeOIWorkspace.ts';
 import {
   EaCNodeCapabilityAsCode,
