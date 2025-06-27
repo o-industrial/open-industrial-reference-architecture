@@ -11,4 +11,5 @@ export interface ClientHelperBridge {
   url(path: string | URL): string | URL;
   headers(extra?: HeadersInit): HeadersInit;
   json<T>(response: Response): Promise<T>;
+  token(): string;
 }

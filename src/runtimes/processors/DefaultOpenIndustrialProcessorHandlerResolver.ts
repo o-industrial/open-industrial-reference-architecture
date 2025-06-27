@@ -7,12 +7,15 @@ import {
 } from '../.deps.ts';
 import { isEaCGlobalDataIngestProcessor } from './EaCGlobalDataIngestProcessor.ts';
 import { isEaCOIDataConnectionProcessor } from './EaCOIDataConnectionProcessor.ts';
+import { isEaCOIImpulseStreamProcessor } from './EaCOIImpulseStreamProcessor.ts';
 
-export class DefaultOpenIndustrialProcessorHandlerResolver implements ProcessorHandlerResolver {
+export class DefaultOpenIndustrialProcessorHandlerResolver
+  implements ProcessorHandlerResolver
+{
   public async Resolve(
     ioc: IoCContainer,
     appProcCfg: EaCApplicationProcessorConfig,
-    eac: EverythingAsCode,
+    eac: EverythingAsCode
   ): Promise<EaCRuntimeHandler | undefined> {
     let toResolveName: string = '';
 
@@ -22,12 +25,16 @@ export class DefaultOpenIndustrialProcessorHandlerResolver implements ProcessorH
       isEaCOIDataConnectionProcessor(appProcCfg.Application.Processor)
     ) {
       toResolveName = 'EaCOIDataConnectionProcessor';
+    } else if (
+      isEaCOIImpulseStreamProcessor(appProcCfg.Application.Processor)
+    ) {
+      toResolveName = 'EaCOIImpulseStreamProcessor';
     }
 
     if (toResolveName) {
       const resolver = await ioc.Resolve<ProcessorHandlerResolver>(
         ioc.Symbol('ProcessorHandlerResolver'),
-        toResolveName,
+        toResolveName
       );
 
       return await resolver.Resolve(ioc, appProcCfg, eac);

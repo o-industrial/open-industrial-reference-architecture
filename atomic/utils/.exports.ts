@@ -4,6 +4,7 @@ export * from './buildSmoothPath.ts';
 export * from './buildStepPath.ts';
 export * from './getIntentColor.ts';
 export * from './getIntentStyles.ts';
+export * from './impulseSourceColorMap.ts';
 export * from './neonColors.ts';
 export * from './parseTimeAgoString.tsx';
 export * from './translateFromReactFlow.ts';

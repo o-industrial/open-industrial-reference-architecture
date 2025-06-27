@@ -7,3 +7,4 @@ export * from './PackModule.ts';
 export * from './Proposal.ts';
 export * from './RecordKeysOnly.ts';
 export * from './RecordKind.ts';
+export * from './RuntimeImpulse.ts';

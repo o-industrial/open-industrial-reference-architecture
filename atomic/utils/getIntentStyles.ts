@@ -1,7 +1,6 @@
 import { IntentTypes } from '../.deps.ts';
 
-
-type IntentStyleMap = {
+export type IntentStyleMap = {
   border: string;
   background: string;
   glow: string;
@@ -101,15 +100,21 @@ export const intentStyleMap: Record<IntentTypes, IntentStyleMap> = {
   },
 };
 
-export function getIntentStyles(intent: IntentTypes = IntentTypes.Info): IntentStyleMap {
+export function getIntentStyles(
+  intent: IntentTypes = IntentTypes.Info
+): IntentStyleMap {
   return intentStyleMap[intent] ?? intentStyleMap[IntentTypes.Info];
 }
 
-export function getIntentClasses(intent: IntentTypes = IntentTypes.Info): string {
+export function getIntentClasses(
+  intent: IntentTypes = IntentTypes.Info
+): string {
   const { text, border, background } = getIntentStyles(intent);
   return `${text} ${border} ${background}`;
 }
 
-export function getIntentBackgroundMap(intent: IntentTypes = IntentTypes.Info): string {
+export function getIntentBackgroundMap(
+  intent: IntentTypes = IntentTypes.Info
+): string {
   return getIntentStyles(intent).background;
 }

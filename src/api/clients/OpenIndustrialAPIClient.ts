@@ -1,4 +1,4 @@
-import { EaCBaseClient } from '../.deps.ts';
+import { EaCBaseClient } from '../.client.deps.ts';
 import { OpenIndustrialConnectionAPI } from './OpenIndustrialConnectionAPI.ts';
 import { OpenIndustrialWorkspaceAPI } from './OpenIndustrialWorkspaceAPI.ts';
 import { OpenIndustrialProposalAPI } from './OpenIndustrialProposalAPI.ts';
@@ -74,6 +74,7 @@ export class OpenIndustrialAPIClient extends EaCBaseClient {
       url: (ref: string | URL) => this.loadClientUrl(ref),
       headers: (headers?: HeadersInit) => this.loadHeaders(headers),
       json: <T>(res: Response) => this.json<T>(res),
+      token: () => this.apiToken,
     };
   }
 }

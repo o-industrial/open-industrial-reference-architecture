@@ -7,7 +7,7 @@ export function TimelinePanel(): JSX.Element {
     <TimelinePanelTemplate>
       <div class="relative">
         {/* Overlay */}
-        <div class="absolute inset-0 z-10 bg-neutral-900/70 backdrop-blur-sm flex flex-col items-center justify-center text-center text-white pointer-events-none">
+        <div class="absolute inset-0 z-10 bg-neutral-900/50 backdrop-blur-sm flex flex-col items-center justify-center text-center text-white pointer-events-none">
           <div class="text-sm font-semibold text-white/90">Timeline UI Coming Soon</div>
           <div class="text-xs text-neutral-400 mt-1 max-w-sm">
             You’re seeing a static preview of upcoming runtime event flows.

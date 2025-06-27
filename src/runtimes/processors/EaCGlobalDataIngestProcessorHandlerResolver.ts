@@ -149,7 +149,7 @@ async function forwardEventToJetStream(
 
   nc.publish(subject, sc.encode(JSON.stringify(payload)));
 
-  logger.debug(`📤 ${subject} ← ${JSON.stringify(payload)}`);
+  // logger.debug(`📤 ${subject} ← ${JSON.stringify(payload)}`);
 }
 
 function resolveTag(twin: Twin, key: string): string | undefined {

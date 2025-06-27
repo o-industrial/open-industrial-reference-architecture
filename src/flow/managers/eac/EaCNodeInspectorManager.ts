@@ -6,7 +6,7 @@
 //   EaCFlowSettings,
 //   EaCSchemaAsCode,
 //   SurfaceSchemaSettings,
-// } from '@o-industrial/common/eac';
+// } from '../../../eac/.exports.ts';
 // import { GraphStateManager } from '../GraphStateManager.ts';
 // import { EverythingAsCodeOIWorkspace } from '../../../eac/EverythingAsCodeOIWorkspace.ts';
 

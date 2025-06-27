@@ -5,6 +5,7 @@ import {
   StorageType,
   StreamConfig,
 } from './.deps.ts';
+import { sanitizeStreamName } from './sanitizeStreamName.ts';
 
 /**
  * Ensure a JetStream stream exists with safe, durable defaults for Open Industrial.
@@ -64,9 +65,3 @@ export async function ensureJetStreamStream(
   }
 }
 
-/**
- * Convert dot- and slash-based stream names to NATS-safe dash-separated names.
- */
-function sanitizeStreamName(name: string): string {
-  return name.replace(/[.\s\/]+/g, '-');
-}

@@ -1,14 +1,20 @@
 export { IoCContainer } from 'jsr:@fathym/ioc@0.0.14';
 
+export { loadJwtConfig } from 'jsr:@fathym/common@0.2.264/jwt';
 export { getPackageLogger } from 'jsr:@fathym/common@0.2.264/log';
 
 export type { EverythingAsCode } from 'jsr:@fathym/eac@0.2.112';
+export type { EaCRuntimeContext } from 'jsr:@fathym/eac@0.2.112/runtime';
 export type {
   EaCRuntimeConfig,
   EaCRuntimePluginConfig,
 } from 'jsr:@fathym/eac@0.2.112/runtime/config';
+export { establishJwtValidationMiddleware } from 'jsr:@fathym/eac-applications@0.0.152/runtime/modules';
 export type { EaCRuntimePlugin } from 'jsr:@fathym/eac@0.2.112/runtime/plugins';
-export type { EaCRuntimeHandler } from 'jsr:@fathym/eac@0.2.112/runtime/pipelines';
+export {
+  type EaCRuntimeHandler,
+  EaCRuntimeHandlerPipeline,
+} from 'jsr:@fathym/eac@0.2.112/runtime/pipelines';
 
 export type { EverythingAsCodeApplications } from 'jsr:@fathym/eac-applications@0.0.152';
 export {
@@ -23,6 +29,8 @@ export { Logger } from 'jsr:@std/log@0.224.14/logger';
 
 export {
   connect,
+  type Codec,
+  type JetStreamClient,
   type JetStreamManager,
   type NatsConnection,
   type StreamConfig,
