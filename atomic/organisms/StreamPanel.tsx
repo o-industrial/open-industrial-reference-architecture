@@ -17,6 +17,10 @@ export function StreamPanel({ workspaceMgr }: StreamPanelProps): JSX.Element {
   return (
     <StreamPanelTemplate>
       <div class="flex flex-col gap-3 text-xs text-neutral-300 font-mono">
+        <div class="text-center text-sm text-neutral-600 my-3 italic">
+          Waiting for next impulse...
+        </div>
+
         {impulses
           .slice()
           .reverse()
@@ -28,10 +32,6 @@ export function StreamPanel({ workspaceMgr }: StreamPanelProps): JSX.Element {
               key={idx}
             />
           ))}
-
-        <div class="text-center text-sm text-neutral-600 my-3 italic">
-          Waiting for next impulse...
-        </div>
       </div>
     </StreamPanelTemplate>
   );
