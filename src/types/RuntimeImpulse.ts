@@ -26,6 +26,11 @@ export type BaseImpulseFields = {
    * Identifier for this impulse source.
    */
   Source: RuntimeImpulseSources;
+
+  /**
+   * Impulse subject.
+   */
+  Subject: string;
 };
 
 type impulseSources =

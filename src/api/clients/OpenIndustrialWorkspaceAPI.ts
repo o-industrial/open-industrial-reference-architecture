@@ -141,29 +141,42 @@ export class OpenIndustrialWorkspaceAPI {
   ): () => void {
     const url = new URL(this.bridge.url('/api/workspaces/impulses/stream'));
 
-    // ✅ Surface filter
+    // 🌐 Attach surface filter if present
     if (filters?.Surface) {
       url.searchParams.set('surface', filters.Surface);
       console.info('[StreamImpulses] 🌐 Surface filter:', filters.Surface);
     }
 
+    // 🔐 Attach auth token if present
     const token = this.bridge.token();
     if (token) {
       url.searchParams.set('Authorization', token);
-
       console.info('[StreamImpulses] 🛡️ Token attached');
     } else {
       console.warn('[StreamImpulses] ⚠️ No auth token present!');
     }
 
-    // ✅ Convert http/https to ws/wss properly
+    // 🔁 Convert http/https to ws/wss
     url.protocol = url.protocol.replace(/^http/, 'ws');
 
     console.info('[StreamImpulses] 🚀 Connecting to:', url.toString());
 
     const socket = new WebSocket(url.toString());
 
-    // ✅ Confirm schema before calling back
+    let isOpen = false;
+    const messageQueue: string[] = [];
+
+    // ✅ Helper to safely send messages
+    const send = (msg: string) => {
+      if (isOpen && socket.readyState === WebSocket.OPEN) {
+        socket.send(msg);
+      } else {
+        messageQueue.push(msg);
+        console.debug('[StreamImpulses] ⏳ Queued message until open:', msg);
+      }
+    };
+
+    // ✅ Validate runtime impulse
     const isRuntimeImpulse = (obj: any): obj is RuntimeImpulse => {
       const valid =
         obj &&
@@ -179,9 +192,19 @@ export class OpenIndustrialWorkspaceAPI {
       return valid;
     };
 
-    // ✅ Socket events
+    // ✅ WebSocket events
     socket.onopen = () => {
+      isOpen = true;
       console.info('[StreamImpulses] ✅ WebSocket opened');
+
+      // Flush message queue
+      for (const msg of messageQueue) {
+        socket.send(msg);
+      }
+      messageQueue.length = 0;
+
+      // (Optional) Send greeting or subscription request here
+      // send(JSON.stringify({ type: 'subscribe', ts: Date.now() }));
     };
 
     socket.onmessage = (event) => {
@@ -193,18 +216,17 @@ export class OpenIndustrialWorkspaceAPI {
           onImpulse(parsed);
         }
       } catch (err) {
-        console.error('[StreamImpulses] ❌ Parse error');
-        console.error(err);
+        console.error('[StreamImpulses] ❌ Parse error:', err);
         console.debug('Raw data:', event.data);
       }
     };
 
     socket.onerror = (err) => {
-      console.error('[StreamImpulses] ❌ WebSocket error:');
-      console.error(err);
+      console.error('[StreamImpulses] ❌ WebSocket error:', err);
     };
 
     socket.onclose = (evt) => {
+      isOpen = false;
       console.info(
         '[StreamImpulses] 🔻 WebSocket closed:',
         evt.reason || '(no reason)',
@@ -212,13 +234,13 @@ export class OpenIndustrialWorkspaceAPI {
       );
     };
 
-    // ✅ Cleanup function
+    // ✅ Return cleanup function
     return () => {
       if (
         socket.readyState === WebSocket.OPEN ||
         socket.readyState === WebSocket.CONNECTING
       ) {
-        console.info('[StreamImpulses] 🔌 Manually closing WebSocket');
+        console.info('[StreamImpulses] 🔌 Closing WebSocket manually');
         socket.close(1000, 'Client disconnect');
       }
     };
@@ -233,7 +255,7 @@ export class OpenIndustrialWorkspaceAPI {
   public StreamImpulsesSimple(onMessage?: (data: string) => void): () => void {
     const url = new URL(this.bridge.url('/api/workspaces/impulses/stream'));
 
-    // 🔐 Attach token (if present)
+    // 🔐 Attach token
     const token = this.bridge.token();
     if (token) {
       url.searchParams.set('Authorization', token);
@@ -242,16 +264,35 @@ export class OpenIndustrialWorkspaceAPI {
       console.warn('[StreamImpulsesSimple] ⚠️ No auth token present!');
     }
 
-    // 🌐 Force ws/wss protocol
+    // 🌐 Force correct protocol
     url.protocol = url.protocol.replace(/^http/, 'ws');
-
     console.info('[StreamImpulsesSimple] 🚀 Connecting to:', url.toString());
 
     const socket = new WebSocket(url.toString());
 
+    let isOpen = false;
+    const pendingMessages: string[] = [];
+
+    const sendMessage = (msg: string) => {
+      if (isOpen && socket.readyState === WebSocket.OPEN) {
+        socket.send(msg);
+      } else {
+        pendingMessages.push(msg);
+      }
+    };
+
     socket.onopen = () => {
       console.info('[StreamImpulsesSimple] ✅ WebSocket opened');
-      socket.send(
+      isOpen = true;
+
+      // Flush queued messages
+      for (const msg of pendingMessages) {
+        socket.send(msg);
+      }
+      pendingMessages.length = 0;
+
+      // Optionally send a hello
+      sendMessage(
         JSON.stringify({ type: 'hello', ts: new Date().toISOString() })
       );
     };
@@ -262,8 +303,7 @@ export class OpenIndustrialWorkspaceAPI {
     };
 
     socket.onerror = (err) => {
-      console.error('[StreamImpulsesSimple] ❌ WebSocket error:');
-      console.error(err);
+      console.error('[StreamImpulsesSimple] ❌ WebSocket error:', err);
     };
 
     socket.onclose = (evt) => {
@@ -271,9 +311,9 @@ export class OpenIndustrialWorkspaceAPI {
         '[StreamImpulsesSimple] 🔻 WebSocket closed:',
         evt.reason || '(no reason)'
       );
+      isOpen = false;
     };
 
-    // 🧹 Cleanup
     return () => {
       if (
         socket.readyState === WebSocket.OPEN ||

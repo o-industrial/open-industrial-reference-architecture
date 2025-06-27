@@ -1,4 +1,9 @@
-import { JetStreamManager, AckPolicy, JetStreamClient } from './.deps.ts';
+import {
+  JetStreamManager,
+  AckPolicy,
+  JetStreamClient,
+  ConsumerConfig,
+} from './.deps.ts';
 import { sanitizeStreamName } from './sanitizeStreamName.ts';
 
 export async function createEphemeralConsumer(
@@ -6,7 +11,12 @@ export async function createEphemeralConsumer(
   jsm: JetStreamManager,
   stream: string,
   subject: string,
-  onMsg: (msg: { subject: string; data: Uint8Array; headers?: Headers }) => void
+  onMsg: (msg: {
+    subject: string;
+    data: Uint8Array;
+    headers?: Headers;
+  }) => void,
+  consumerConfig?: Partial<ConsumerConfig>
 ): Promise<{ stop: () => void }> {
   stream = sanitizeStreamName(stream);
 
@@ -24,6 +34,7 @@ export async function createEphemeralConsumer(
     name: consumerName,
     ack_policy: AckPolicy.None,
     filter_subject: subject,
+    ...(consumerConfig || {}),
   });
 
   const consumer = await js.consumers.get(stream, consumerName);
@@ -50,6 +61,9 @@ export async function createEphemeralConsumer(
   })();
 
   return {
-    stop: () => abort.abort(),
+    stop: () => {
+      debugger;
+      abort.abort();
+    },
   };
 }

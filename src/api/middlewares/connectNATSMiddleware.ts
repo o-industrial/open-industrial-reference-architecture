@@ -50,9 +50,8 @@ export async function useNATS(): Promise<NATSContext['NATS']> {
 export function connectNATSMiddleware(): EaCRuntimeHandler<NATSContext> {
   return async (_req, ctx) => {
     try {
-    debugger;
       ctx.State.NATS = await useNATS();
-
+      
       return ctx.Next();
     } catch (err) {
       console.error('[ConnectNATSMiddleware] Connection failed:', err);

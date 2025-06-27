@@ -30,9 +30,11 @@ export { Logger } from 'jsr:@std/log@0.224.14/logger';
 export {
   connect,
   type Codec,
+  DeliverPolicy,
   type JetStreamClient,
   type JetStreamManager,
   type NatsConnection,
+  RetentionPolicy,
   type StreamConfig,
   StringCodec,
   type Subscription,

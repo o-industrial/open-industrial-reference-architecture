@@ -23,24 +23,25 @@ export class ImpulseStreamManager {
 
     let impulseCount = 0;
 
-    // this.disconnect = this.oiSvc.Workspaces.StreamImpulses(
-    //   (impulse: RuntimeImpulse) => {
-    //     impulseCount++;
-    //     console.debug(`[ImpulseStreamManager] Received impulse #${impulseCount}:`, impulse);
-
-    //     this.impulses.push(impulse);
-    //     this.listeners.forEach((cb) => cb());
-    //   },
-    //   this.filters
-    // );
-    this.disconnect = this.oiSvc.Workspaces.StreamImpulsesSimple(
-      (impulse: string) => {
+    this.disconnect = this.oiSvc.Workspaces.StreamImpulses(
+      (impulse: RuntimeImpulse) => {
+        debugger;
         impulseCount++;
-        console.debug(`[ImpulseStreamManager] Received impulse #${impulseCount}:`);
-        console.debug(impulse);
+        console.debug(`[ImpulseStreamManager] Received impulse #${impulseCount}:`, impulse);
+
+        this.impulses.push(impulse);
         this.listeners.forEach((cb) => cb());
-      }
+      },
+      this.filters
     );
+    // this.disconnect = this.oiSvc.Workspaces.StreamImpulsesSimple(
+    //   (impulse: string) => {
+    //     impulseCount++;
+    //     console.debug(`[ImpulseStreamManager] Received impulse #${impulseCount}:`);
+    //     console.debug(impulse);
+    //     this.listeners.forEach((cb) => cb());
+    //   }
+    // );
   }
 
   public Disconnect(): void {

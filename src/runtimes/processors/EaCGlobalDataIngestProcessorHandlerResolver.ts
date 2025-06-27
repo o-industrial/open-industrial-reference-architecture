@@ -20,47 +20,48 @@ import {
   isEaCGlobalDataIngestProcessor,
 } from './EaCGlobalDataIngestProcessor.ts';
 
-export const EaCGlobalDataIngestProcessorHandlerResolver: ProcessorHandlerResolver = {
-  async Resolve(
-    _ioc: IoCContainer,
-    appProcCfg: EaCApplicationProcessorConfig,
-    _eac,
-  ): Promise<EaCRuntimeHandler> {
-    const logger = await getPackageLogger(import.meta);
-    const proc = appProcCfg.Application.Processor;
+export const EaCGlobalDataIngestProcessorHandlerResolver: ProcessorHandlerResolver =
+  {
+    async Resolve(
+      _ioc: IoCContainer,
+      appProcCfg: EaCApplicationProcessorConfig,
+      _eac
+    ): Promise<EaCRuntimeHandler> {
+      const logger = await getPackageLogger(import.meta);
+      const proc = appProcCfg.Application.Processor;
 
-    if (!isEaCGlobalDataIngestProcessor(proc)) {
-      throw new Deno.errors.NotSupported(
-        'Expected a valid EaCGlobalDataIngestProcessor configuration.',
+      if (!isEaCGlobalDataIngestProcessor(proc)) {
+        throw new Deno.errors.NotSupported(
+          'Expected a valid EaCGlobalDataIngestProcessor configuration.'
+        );
+      }
+
+      logger.info(
+        `🔧 Starting global data ingest from Event Hub: ${proc.EventHubName}`
       );
-    }
 
-    logger.info(
-      `🔧 Starting global data ingest from Event Hub: ${proc.EventHubName}`,
-    );
+      try {
+        const nc = await connect({
+          servers: proc.NATSServer,
+          token: proc.NATSToken,
+        });
 
-    try {
-      const nc = await connect({
-        servers: proc.NATSServer,
-        token: proc.NATSToken,
-      });
+        logger.info(`✅ Connected to NATS at ${proc.NATSServer}`);
 
-      logger.info(`✅ Connected to NATS at ${proc.NATSServer}`);
+        await startEventHubConsumer(proc, nc, logger);
+      } catch (err) {
+        logger.error(err);
+      }
 
-      await startEventHubConsumer(proc, nc, logger);
-    } catch (err) {
-      logger.error(err);
-    }
-
-    return (_req, _ctx) =>
-      Promise.resolve(
-        new Response('Global Data Ingest processor is active.', {
-          status: 200,
-          headers: { 'Content-Type': 'text/plain' },
-        }),
-      );
-  },
-};
+      return (_req, _ctx) =>
+        Promise.resolve(
+          new Response('Global Data Ingest processor is active.', {
+            status: 200,
+            headers: { 'Content-Type': 'text/plain' },
+          })
+        );
+    },
+  };
 
 // -----------------------------
 // 🔧 HELPER FUNCTIONS
@@ -69,10 +70,10 @@ export const EaCGlobalDataIngestProcessorHandlerResolver: ProcessorHandlerResolv
 async function startEventHubConsumer(
   proc: EaCGlobalDataIngestProcessor,
   nc: NatsConnection,
-  logger: Logger,
+  logger: Logger
 ) {
   const registry = IoTRegistry.fromConnectionString(
-    proc.IoTHubConnectionString,
+    proc.IoTHubConnectionString
   );
 
   const sc = StringCodec();
@@ -81,7 +82,7 @@ async function startEventHubConsumer(
 
   const client = new EventHubConsumerClient(
     consumerGroup,
-    proc.EventHubConsumerConnectionString,
+    proc.EventHubConsumerConnectionString
   );
 
   logger.info(`🔁 Subscribing to Event Hub partitions...`);
@@ -104,7 +105,7 @@ async function startEventHubConsumer(
 
           if (!entLookup || !connLookup) {
             logger.warn(
-              `⚠️ Device ${deviceId} missing ent/data tags — skipping.`,
+              `⚠️ Device ${deviceId} missing ent/data tags — skipping.`
             );
             continue;
           }
@@ -117,7 +118,7 @@ async function startEventHubConsumer(
             nc,
             sc,
             proc,
-            logger,
+            logger
           );
         } catch (err) {
           logger.error(`❌ Error resolving device twin for ${deviceId}`, err);
@@ -140,7 +141,7 @@ async function forwardEventToJetStream(
   nc: NatsConnection,
   sc: ReturnType<typeof StringCodec>,
   proc: EaCGlobalDataIngestProcessor,
-  logger: Logger,
+  logger: Logger
 ) {
   const stream = `workspace.${entLookup}.data-connection.${connLookup}`;
   const subject = `${stream}.impulse`;
@@ -149,7 +150,7 @@ async function forwardEventToJetStream(
 
   nc.publish(subject, sc.encode(JSON.stringify(payload)));
 
-  // logger.debug(`📤 ${subject} ← ${JSON.stringify(payload)}`);
+  logger.debug(`📤 Forwarding ${subject} `); //← ${JSON.stringify(payload)}`);
 }
 
 function resolveTag(twin: Twin, key: string): string | undefined {

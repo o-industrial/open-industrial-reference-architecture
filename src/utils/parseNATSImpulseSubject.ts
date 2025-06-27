@@ -1,4 +1,4 @@
-import { RuntimeImpulse } from '../types/RuntimeImpulse.ts';
+import { BaseImpulseFields, RuntimeImpulse } from '../types/RuntimeImpulse.ts';
 
 /**
  * Return a structured set of URLPattern objects to match known NATS subject structures.
@@ -43,6 +43,7 @@ export function parseNATSImpulseSubject(
     Timestamp: new Date().toISOString(),
     Confidence: 1.0,
     Payload: payload,
+    Subject: subject,
   };
 
   // Convert and include headers in .Raw for reference/debugging

@@ -6,6 +6,7 @@ export { Mqtt } from 'npm:azure-iot-device-mqtt@1.16.3';
 
 export {
   AckPolicy,
+  type ConsumerConfig,
   DiscardPolicy,
   type JetStreamClient,
   type JetStreamManager,
