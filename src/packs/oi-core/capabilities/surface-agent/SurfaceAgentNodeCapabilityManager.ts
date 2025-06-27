@@ -73,14 +73,13 @@ export class SurfaceAgentNodeCapabilityManager
     } else if (source.Type.includes('warmquery') && target.Type.includes('agent')) {
       const eac = context.GetEaC();
       const agent = eac.Agents?.[target.ID];
-      const surface = eac.Surfaces?.[context.SurfaceLookup!];
 
       return {
         Agents: {
           [target.ID]: {
             ...agent,
             WarmQueryLookups: [
-              ...(surface?.Agents?.[target.ID]?.WarmQueryLookups as string[] ?? []),
+              ...(agent?.WarmQueryLookups as string[] ?? []),
               source.ID,
             ],
           },
