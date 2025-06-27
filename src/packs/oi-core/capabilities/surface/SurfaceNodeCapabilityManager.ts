@@ -1,6 +1,9 @@
 import { Position } from '../../../../eac/.exports.ts';
 import { EaCFlowNodeMetadata } from '../../../../eac/EaCFlowNodeMetadata.ts';
-import { EaCSurfaceAsCode } from '../../../../eac/EaCSurfaceAsCode.ts';
+import {
+  EaCSurfaceAsCode,
+  SurfaceDataConnectionSettings,
+} from '../../../../eac/EaCSurfaceAsCode.ts';
 import { EverythingAsCodeOIWorkspace } from '../../../../eac/EverythingAsCodeOIWorkspace.ts';
 import {
   EaCNodeCapabilityAsCode,
@@ -48,7 +51,7 @@ export class SurfaceNodeCapabilityManager extends EaCNodeCapabilityManager {
     const eac = ctx.GetEaC() as EverythingAsCodeOIWorkspace;
 
     // surface -> surface (assign parent)
-    if (source.Type === this.Type && target.Type === this.Type) {
+    if (source.Type.includes('surface') && target.Type.includes('surface')) {
       const existing = eac.Surfaces?.[target.ID]?.ParentSurfaceLookup;
       if (existing === source.ID) return null;
 
@@ -57,6 +60,23 @@ export class SurfaceNodeCapabilityManager extends EaCNodeCapabilityManager {
           [target.ID]: {
             ...eac.Surfaces?.[target.ID],
             ParentSurfaceLookup: source.ID,
+          } as EaCSurfaceAsCode,
+        },
+      };
+    } else if (source.Type.includes('connection') && target.Type.includes('surface')) {
+      const surface = eac.Surfaces?.[target.ID];
+      const connSet: Record<string, SurfaceDataConnectionSettings> = {
+        ...(surface?.DataConnections ?? {}),
+        [source.ID]: {
+          Metadata: { Enabled: true },
+        },
+      };
+
+      return {
+        Surfaces: {
+          [target.ID]: {
+            ...surface,
+            DataConnections: connSet,
           } as EaCSurfaceAsCode,
         },
       };
@@ -79,7 +99,7 @@ export class SurfaceNodeCapabilityManager extends EaCNodeCapabilityManager {
     const eac = ctx.GetEaC() as EverythingAsCodeOIWorkspace;
 
     // Remove parent-child surface relationship
-    if (source.Type === this.Type && target.Type === this.Type) {
+    if (source.Type.includes('surface') && target.Type.includes('surface')) {
       const targetSurface = eac.Surfaces?.[target.ID];
 
       if (targetSurface?.ParentSurfaceLookup === source.ID) {
@@ -88,6 +108,21 @@ export class SurfaceNodeCapabilityManager extends EaCNodeCapabilityManager {
             [target.ID]: {
               ...targetSurface,
               ParentSurfaceLookup: undefined,
+            },
+          },
+        };
+      }
+    } else if (source.Type.includes('connection') && target.Type.includes('surface')) {
+      const surface = eac.Surfaces?.[target.ID];
+      if (surface?.DataConnections?.[source.ID]) {
+        const updatedConnections = { ...surface.DataConnections };
+        delete updatedConnections[source.ID];
+
+        return {
+          Surfaces: {
+            [target.ID]: {
+              ...surface,
+              DataConnections: updatedConnections,
             },
           },
         };

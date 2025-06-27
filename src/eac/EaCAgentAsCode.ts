@@ -21,6 +21,9 @@ export type EaCAgentAsCode = EaCDetails<EaCAgentDetails> & {
 
   /** Target schema that this agent evaluates. */
   Schema?: AgentSchemaSettings;
+
+  /** Target warm querys that this agent evaluates. */
+  WarmQueryLookups?: string[];
 };
 
 /**
@@ -37,6 +40,13 @@ export const EaCAgentAsCodeSchema: z.ZodType<EaCAgentAsCode> = EaCDetailsSchema.
     })
     .optional()
     .describe('Required lookup key for the schema this agent evaluates.'),
+
+  WarmQuery: z
+    .object({
+      WarmQueryLookup: z.string(),
+    })
+    .optional()
+    .describe('Required lookup key for the warm query this agent evaluates.'),
 }).describe(
   'Schema for an agent node with reflex logic, targeting configuration, and canvas layout.',
 );

@@ -57,16 +57,32 @@ export class SurfaceAgentNodeCapabilityManager
   ): Partial<EverythingAsCodeOIWorkspace> | null {
     if (source.Type === 'agent' && target.Type?.includes('schema')) {
       const eac = context.GetEaC();
-      const agent = eac.Agents?.[source.ID];
+      const agent = eac.Agents?.[target.ID];
       if (!agent) return null;
 
       return {
         Agents: {
-          [source.ID]: {
+          [target.ID]: {
             ...agent,
             Schema: {
-              SchemaLookup: target.ID,
+              SchemaLookup: source.ID,
             },
+          },
+        },
+      };
+    } else if (source.Type.includes('warmquery') && target.Type.includes('agent')) {
+      const eac = context.GetEaC();
+      const agent = eac.Agents?.[target.ID];
+      const surface = eac.Surfaces?.[context.SurfaceLookup!];
+
+      return {
+        Agents: {
+          [target.ID]: {
+            ...agent,
+            WarmQueryLookups: [
+              ...(surface?.Agents?.[target.ID]?.WarmQueryLookups as string[] ?? []),
+              source.ID,
+            ],
           },
         },
       };
@@ -85,23 +101,46 @@ export class SurfaceAgentNodeCapabilityManager
     }
 
     const eac = context.GetEaC();
-    const agent = eac.Agents?.[source.ID];
+    const agent = eac.Agents?.[target.ID];
 
-    if (!agent || agent.Schema?.SchemaLookup !== target.ID) return null;
+    if (!agent) return null;
 
-    const { Schema: _, ...rest } = agent;
+    if (source.Type.includes('schema') && target.Type.includes('agent')) {
+      const { Schema: _, ...rest } = agent;
 
-    return {
-      Agents: {
-        [source.ID]: rest,
-      },
-    };
+      return {
+        Agents: {
+          [target.ID]: rest,
+        },
+      };
+    } else if (source.Type.includes('warmquery') && target.Type.includes('agent')) {
+      if (
+        !agent.WarmQueryLookups || agent.WarmQueryLookups.length === 0 ||
+        !agent.WarmQueryLookups.includes(source.ID)
+      ) return null;
+
+      const filtered = (agent.WarmQueryLookups as string[]).filter(
+        (item) => item !== source.ID,
+      );
+
+      return {
+        Agents: {
+          [target.ID]: {
+            ...agent,
+            WarmQueryLookups: filtered,
+          },
+        },
+      };
+    }
+    return null;
   }
 
   protected override buildDeletePatch(
     node: FlowGraphNode,
+    context: EaCNodeCapabilityContext,
   ): NullableArrayOrObject<EverythingAsCodeOIWorkspace> {
-    const [surfaceId, agentId] = this.extractCompoundIDs(node);
+    const surfaceId = context.SurfaceLookup!;
+    const agentId = node.ID;
 
     return {
       Surfaces: {
@@ -124,6 +163,10 @@ export class SurfaceAgentNodeCapabilityManager
 
     const edges: FlowGraphEdge[] = [];
 
+    if (!agent) {
+      return edges;
+    }
+
     const targetSchema = agent?.Schema?.SchemaLookup;
 
     if (targetSchema) {
@@ -132,6 +175,19 @@ export class SurfaceAgentNodeCapabilityManager
         Source: targetSchema,
         Target: agentId,
         Label: 'targets',
+      });
+    }
+
+    const wqs = agent.WarmQueryLookups;
+
+    if (wqs) {
+      wqs.forEach((wq: string) => {
+        edges.push({
+          ID: `${wq}->${agentId}`,
+          Source: wq,
+          Target: agentId,
+          Label: 'informs',
+        });
       });
     }
 
@@ -198,6 +254,7 @@ export class SurfaceAgentNodeCapabilityManager
                 [id]: {
                   ShowHistory: false,
                   Metadata: metadata,
+                  WarmQueryLookups: [] as string[],
                 },
               },
             },
