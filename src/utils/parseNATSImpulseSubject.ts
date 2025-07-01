@@ -39,11 +39,12 @@ export function parseNATSImpulseSubject(
   const path = '/' + subject.replace(/\./g, '/');
   const patterns = loadPatterns();
 
-  const base: Record<string, unknown> = {
+  const base = {
     Timestamp: new Date().toISOString(),
     Confidence: 1.0,
     Payload: payload,
     Subject: subject,
+    Raw: {}
   };
 
   // Convert and include headers in .Raw for reference/debugging
