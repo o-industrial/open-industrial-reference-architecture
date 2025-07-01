@@ -25,7 +25,7 @@ export class ImpulseStreamManager {
 
     this.disconnect = this.oiSvc.Workspaces.StreamImpulses(
       (impulse: RuntimeImpulse) => {
-        debugger;
+        //debugger;
         impulseCount++;
         console.debug(`[ImpulseStreamManager] Received impulse #${impulseCount}:`, impulse);
 

@@ -56,7 +56,7 @@ export const EaCOIImpulseStreamProcessorHandlerResolver: ProcessorHandlerResolve
         const method = req.method.toUpperCase();
         const headers = Object.fromEntries(req.headers.entries());
 
-        debugger;
+        //debugger;
         console.log(
           `[ImpulseStream] 📡 Incoming ${method} request: ${req.url}`
         );
@@ -113,8 +113,8 @@ function establishImpulseRuntime(
   impulseRuntimeCache: Map<string, Promise<ImpulseRuntime>>,
   logger: Logger
 ): EaCRuntimeHandler {
-  return (async (
-    req,
+  return (async ( 
+    _req,
     {
       Runtime,
       State,
@@ -126,7 +126,7 @@ function establishImpulseRuntime(
 
     if (!workspace) {
       logger.error('[ImpulseStream] ❌ Missing workspace');
-      return new Response('Missing workspace parameter', { status: 400 });
+      return await new Response('Missing workspace parameter', { status: 400 });
     }
 
     const surfaceFilter =
@@ -226,7 +226,7 @@ async function createImpulseRuntime({
         listeners.delete(cb);
         refCount = Math.max(0, refCount - 1);
         logger.info('[ImpulseStream] ❌ Listener removed');
-        debugger;
+        //debugger;
         if (refCount <= 0 && !closed) {
           closed = true;
           try {
@@ -242,7 +242,7 @@ async function createImpulseRuntime({
       if (closed) return;
       closed = true;
       try {
-        stop();
+        await stop();
       } catch (err) {
         logger.warn('[ImpulseStream] ⚠️ Error stopping consumer', err);
       }

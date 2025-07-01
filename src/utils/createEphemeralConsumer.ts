@@ -62,7 +62,7 @@ export async function createEphemeralConsumer(
 
   return {
     stop: () => {
-      debugger;
+      //debugger;
       abort.abort();
     },
   };

@@ -10,7 +10,7 @@ import {
   SurfaceSchemaSettings,
 } from '../eac/EaCSurfaceAsCode.ts';
 import { EaCDataConnectionDetails } from '../eac/EaCDataConnectionDetails.ts';
-import { EaCVertexDetails, EaCWarmQueryDetails } from './.deps.ts';
+import { EaCWarmQueryDetails } from './.deps.ts';
 import { EaCAgentDetails } from '../eac/EaCAgentDetails.ts';
 import { EaCSurfaceDetails } from '../eac/EaCSurfaceDetails.ts';
 

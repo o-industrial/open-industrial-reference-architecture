@@ -1,4 +1,4 @@
-import { BaseImpulseFields, RuntimeImpulse } from '../types/RuntimeImpulse.ts';
+import { RuntimeImpulse } from '../types/RuntimeImpulse.ts';
 
 /**
  * Return a structured set of URLPattern objects to match known NATS subject structures.
@@ -39,7 +39,7 @@ export function parseNATSImpulseSubject(
   const path = '/' + subject.replace(/\./g, '/');
   const patterns = loadPatterns();
 
-  const base = {
+  const base: Record<string, unknown> = {
     Timestamp: new Date().toISOString(),
     Confidence: 1.0,
     Payload: payload,
@@ -54,7 +54,7 @@ export function parseNATSImpulseSubject(
       headerMap[key] = value;
     }
 
-    (base as any).Raw = { Headers: headerMap };
+    base.Raw = { Headers: headerMap };
   }
 
   const matchAndBuild = <T extends RuntimeImpulse>(

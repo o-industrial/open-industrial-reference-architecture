@@ -167,7 +167,7 @@ export class OpenIndustrialWorkspaceAPI {
     const messageQueue: string[] = [];
 
     // ✅ Helper to safely send messages
-    const send = (msg: string) => {
+    const _send = (msg: string) => {
       if (isOpen && socket.readyState === WebSocket.OPEN) {
         socket.send(msg);
       } else {
@@ -177,7 +177,7 @@ export class OpenIndustrialWorkspaceAPI {
     };
 
     // ✅ Validate runtime impulse
-    const isRuntimeImpulse = (obj: any): obj is RuntimeImpulse => {
+    const isRuntimeImpulse = (obj: RuntimeImpulse): obj is RuntimeImpulse => {
       const valid =
         obj &&
         typeof obj.Timestamp === 'string' &&
