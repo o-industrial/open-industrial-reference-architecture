@@ -9,7 +9,7 @@ import type { FluentContext } from '../types/FluentContext.ts';
 /**
  * Concrete builder for Simulator modules.
  */
-export class SimulatorBuilder<
+export class SimulatorModuleBuilder<
   TAsCode extends EaCSimulatorAsCode<EaCSimulatorDetails> = EaCSimulatorAsCode<EaCSimulatorDetails>,
   TOutput = unknown,
   TDeploy = unknown,
@@ -46,7 +46,9 @@ export class SimulatorBuilder<
     const Runtime = this.buildRuntime();
 
     return defineFluentModule({
+      DeploySchema: this.deploySchema,
       OutputSchema: this.outputSchema,
+      StatsSchema: this.statsSchema,
       Runtime,
     });
   }

@@ -28,8 +28,8 @@ export type { ProcessorHandlerResolver } from 'jsr:@fathym/eac-applications@0.0.
 export { Logger } from 'jsr:@std/log@0.224.14/logger';
 
 export {
-  connect,
   type Codec,
+  connect,
   DeliverPolicy,
   type JetStreamClient,
   type JetStreamManager,

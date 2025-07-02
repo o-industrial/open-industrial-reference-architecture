@@ -1,4 +1,5 @@
-import { ensureJetStreamStream } from '../../utils/ensureJetStreamStream.ts';
+import { buildRuntimeImpulseForSubject } from '../../utils/buildRuntimeImpulseForSubject.ts';
+import { ensureWorkspaceJetStreamBuilder } from '../../utils/ensureWorkspaceJetStream.ts';
 import {
   connect,
   EaCApplicationProcessorConfig,
@@ -7,6 +8,7 @@ import {
   getPackageLogger,
   IoCContainer,
   IoTRegistry,
+  JetStreamClient,
   JetStreamManager,
   Logger,
   NatsConnection,
@@ -20,48 +22,47 @@ import {
   isEaCGlobalDataIngestProcessor,
 } from './EaCGlobalDataIngestProcessor.ts';
 
-export const EaCGlobalDataIngestProcessorHandlerResolver: ProcessorHandlerResolver =
-  {
-    async Resolve(
-      _ioc: IoCContainer,
-      appProcCfg: EaCApplicationProcessorConfig,
-      _eac
-    ): Promise<EaCRuntimeHandler> {
-      const logger = await getPackageLogger(import.meta);
-      const proc = appProcCfg.Application.Processor;
+export const EaCGlobalDataIngestProcessorHandlerResolver: ProcessorHandlerResolver = {
+  async Resolve(
+    _ioc: IoCContainer,
+    appProcCfg: EaCApplicationProcessorConfig,
+    _eac,
+  ): Promise<EaCRuntimeHandler> {
+    const logger = await getPackageLogger(import.meta);
+    const proc = appProcCfg.Application.Processor;
 
-      if (!isEaCGlobalDataIngestProcessor(proc)) {
-        throw new Deno.errors.NotSupported(
-          'Expected a valid EaCGlobalDataIngestProcessor configuration.'
-        );
-      }
-
-      logger.info(
-        `🔧 Starting global data ingest from Event Hub: ${proc.EventHubName}`
+    if (!isEaCGlobalDataIngestProcessor(proc)) {
+      throw new Deno.errors.NotSupported(
+        'Expected a valid EaCGlobalDataIngestProcessor configuration.',
       );
+    }
 
-      try {
-        const nc = await connect({
-          servers: proc.NATSServer,
-          token: proc.NATSToken,
-        });
+    logger.info(
+      `🔧 Starting global data ingest from Event Hub: ${proc.EventHubName}`,
+    );
 
-        logger.info(`✅ Connected to NATS at ${proc.NATSServer}`);
+    try {
+      const nc = await connect({
+        servers: proc.NATSServer,
+        token: proc.NATSToken,
+      });
 
-        await startEventHubConsumer(proc, nc, logger);
-      } catch (err) {
-        logger.error(err);
-      }
+      logger.info(`✅ Connected to NATS at ${proc.NATSServer}`);
 
-      return (_req, _ctx) =>
-        Promise.resolve(
-          new Response('Global Data Ingest processor is active.', {
-            status: 200,
-            headers: { 'Content-Type': 'text/plain' },
-          })
-        );
-    },
-  };
+      await startEventHubConsumer(proc, nc, logger);
+    } catch (err) {
+      logger.error(err);
+    }
+
+    return (_req, _ctx) =>
+      Promise.resolve(
+        new Response('Global Data Ingest processor is active.', {
+          status: 200,
+          headers: { 'Content-Type': 'text/plain' },
+        }),
+      );
+  },
+};
 
 // -----------------------------
 // 🔧 HELPER FUNCTIONS
@@ -70,24 +71,24 @@ export const EaCGlobalDataIngestProcessorHandlerResolver: ProcessorHandlerResolv
 async function startEventHubConsumer(
   proc: EaCGlobalDataIngestProcessor,
   nc: NatsConnection,
-  logger: Logger
+  logger: Logger,
 ) {
   const registry = IoTRegistry.fromConnectionString(
-    proc.IoTHubConnectionString
+    proc.IoTHubConnectionString,
   );
-
   const sc = StringCodec();
-
   const consumerGroup = proc.ConsumerGroup ?? '$Default';
-
   const client = new EventHubConsumerClient(
     consumerGroup,
-    proc.EventHubConsumerConnectionString
+    proc.EventHubConsumerConnectionString,
   );
+
+  const js = nc.jetstream(); // ✅ JetStream client for deduplication
+  const jsm = await nc.jetstreamManager();
 
   logger.info(`🔁 Subscribing to Event Hub partitions...`);
 
-  const jsm = await nc.jetstreamManager();
+  const initializedStreams = new Set<string>();
 
   client.subscribe({
     async processEvents(events) {
@@ -99,13 +100,12 @@ async function startEventHubConsumer(
 
         try {
           const { responseBody: twin } = await registry.getTwin(deviceId);
-
           const entLookup = resolveTag(twin, 'WorkspaceLookup');
           const connLookup = resolveTag(twin, 'DataConnectionLookup');
 
           if (!entLookup || !connLookup) {
             logger.warn(
-              `⚠️ Device ${deviceId} missing ent/data tags — skipping.`
+              `⚠️ Device ${deviceId} missing ent/data tags — skipping.`,
             );
             continue;
           }
@@ -114,11 +114,13 @@ async function startEventHubConsumer(
             entLookup,
             connLookup,
             payload,
+            evt.systemProperties || {},
+            js,
             jsm,
-            nc,
             sc,
             proc,
-            logger
+            logger,
+            initializedStreams,
           );
         } catch (err) {
           logger.error(`❌ Error resolving device twin for ${deviceId}`, err);
@@ -127,7 +129,6 @@ async function startEventHubConsumer(
     },
     processError(err) {
       logger.error('❌ EventHub processing error:', err);
-
       return Promise.resolve();
     },
   });
@@ -136,21 +137,39 @@ async function startEventHubConsumer(
 async function forwardEventToJetStream(
   entLookup: string,
   connLookup: string,
-  payload: unknown,
+  payload: Record<string, unknown>,
+  systemProperties: Record<string, string>,
+  js: JetStreamClient,
   jsm: JetStreamManager,
-  nc: NatsConnection,
   sc: ReturnType<typeof StringCodec>,
   proc: EaCGlobalDataIngestProcessor,
-  logger: Logger
+  logger: Logger,
+  initializedStreams: Set<string>,
 ) {
-  const stream = `workspace.${entLookup}.data-connection.${connLookup}`;
+  const stream = `workspace.${entLookup}.connection.${connLookup}`;
   const subject = `${stream}.impulse`;
 
-  await ensureJetStreamStream(jsm, stream, [subject], proc.JetStreamDefaults);
+  await ensureWorkspaceJetStreamBuilder(
+    jsm,
+    entLookup,
+    proc.JetStreamDefaults,
+    !initializedStreams.has(stream),
+  );
 
-  nc.publish(subject, sc.encode(JSON.stringify(payload)));
+  initializedStreams.add(stream);
 
-  logger.debug(`📤 Forwarding ${subject} `); //← ${JSON.stringify(payload)}`);
+  const impulse = buildRuntimeImpulseForSubject(
+    subject,
+    payload,
+    systemProperties,
+  );
+
+  // ✅ Deduplicated publish using JetStream + msgID
+  await js.publish(subject, sc.encode(JSON.stringify(impulse)), {
+    msgID: impulse.ID,
+  });
+
+  logger.debug(`📤 Forwarded impulse ${impulse.ID} → ${subject}`);
 }
 
 function resolveTag(twin: Twin, key: string): string | undefined {

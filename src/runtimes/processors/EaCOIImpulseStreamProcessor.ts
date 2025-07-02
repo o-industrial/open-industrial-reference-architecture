@@ -7,7 +7,7 @@ export type EaCOIImpulseStreamProcessor = {
 } & EaCProcessor<'OIImpulseStream'>;
 
 export function isEaCOIImpulseStreamProcessor(
-  proc: unknown
+  proc: unknown,
 ): proc is EaCOIImpulseStreamProcessor {
   const x = proc as EaCOIImpulseStreamProcessor;
 

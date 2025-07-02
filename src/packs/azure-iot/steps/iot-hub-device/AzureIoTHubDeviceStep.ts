@@ -1,8 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
 import { Step } from '../../../../fluent/steps/Step.ts';
 import { StepModuleBuilder } from '../../../../fluent/steps/StepModuleBuilder.ts';
-import { type AccessToken, IotHubClient, IoTRegistry } from '../../.deps.ts';
-import { AzureResolveCredentialStep } from '../resolve-credential/AzureResolveCredentialStep.ts';
+import { shaHash } from '../../../../utils/shaHash.ts';
+import { IoTRegistry } from '../../.deps.ts';
+import { AzureResolveIoTHubConnectionStringStep } from '../resolve-device-connection-string/AzureResolveIoTHubConnectionStringStep.ts';
+
 import { AzureIoTHubDeviceInput, AzureIoTHubDeviceInputSchema } from './AzureIoTHubDeviceInput.ts';
 import {
   AzureIoTHubDeviceOptions,
@@ -26,45 +28,30 @@ export const AzureIoTHubDeviceStep: TStepBuilder = Step(
   .Input(AzureIoTHubDeviceInputSchema)
   .Output(AzureIoTHubDeviceOutputSchema)
   .Options(AzureIoTHubDeviceOptionsSchema)
-  .Steps(() => ({
-    ResolveCredential: AzureResolveCredentialStep.Build(),
-  }))
-  .Services(async (_input, ctx, _ioc) => {
-    const { SubscriptionID, ResourceGroupName, CredentialStrategy } = ctx.Options!;
-
-    const { AccessToken } = await ctx.Steps!.ResolveCredential(
-      CredentialStrategy,
-    );
-
-    const cred = {
-      getToken: (): Promise<AccessToken> =>
-        Promise.resolve({
-          token: AccessToken,
-          expiresOnTimestamp: Date.now() + 3600 * 1000,
-        }),
-    };
-
-    const iotClient = new IotHubClient(cred, SubscriptionID);
-
-    const shortName = ResourceGroupName.split('-')
-      .map((s) => s[0])
-      .join('');
-    const iotHubName = `${shortName}-iot-hub`;
-
-    const keys = await iotClient.iotHubResource.getKeysForKeyName(
-      ResourceGroupName,
-      iotHubName,
-      'iothubowner',
-    );
-
-    const connStr =
-      `HostName=${iotHubName}.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=${keys.secondaryKey}`;
-
-    const registry = IoTRegistry.fromConnectionString(connStr);
+  .Steps((_input, ctx) => {
+    const { SubscriptionID, CredentialStrategy } = ctx.Options!;
 
     return {
-      IotClient: iotClient,
-      Registry: registry,
+      ResolveIoTHubConnectionString: AzureResolveIoTHubConnectionStringStep.Build({
+        SubscriptionID,
+        CredentialStrategy,
+      }),
+    };
+  })
+  .Services(async (_input, ctx) => {
+    const { ResourceGroupName } = ctx.Options!;
+
+    const { ConnectionString, IoTHubName: IoTHubName } = await ctx.Steps!
+      .ResolveIoTHubConnectionString({
+        ResourceGroupName,
+        KeyName: 'iothubowner',
+      });
+
+    const Registry = IoTRegistry.fromConnectionString(ConnectionString);
+
+    return {
+      Registry,
+      IoTHubName,
     };
   })
   .Run(async (input, ctx) => {
@@ -88,10 +75,13 @@ export const AzureIoTHubDeviceStep: TStepBuilder = Step(
       Object.entries(Devices).map(async ([id, def]) => {
         const desiredTags: Record<string, string> = {
           WorkspaceLookup,
+          DeviceID: id,
           ...(def.DataConnectionLookup && {
             DataConnectionLookup: def.DataConnectionLookup,
           }),
         };
+
+        id = await shaHash(WorkspaceLookup, id);
 
         try {
           const twin = (await Registry.getTwin(id)).responseBody;

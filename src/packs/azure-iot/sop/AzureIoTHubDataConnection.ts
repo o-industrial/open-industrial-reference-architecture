@@ -1,9 +1,13 @@
-import { Status } from '../.deps.ts';
-
 import { AzureIoTHubDeviceStep } from '../steps/iot-hub-device/AzureIoTHubDeviceStep.ts';
 import { AzureIoTHubDeviceStatsStep } from '../steps/iot-hub-device-stats/AzureIoTHubDeviceStatsStep.ts';
-import { AzureIoTHubDeviceOutput } from '../steps/iot-hub-device/AzureIoTHubDeviceOutput.ts';
-import { AzureIoTHubDeviceStatsOutput } from '../steps/iot-hub-device-stats/AzureIoTHubDeviceStatsOutput.ts';
+import {
+  AzureIoTHubDeviceOutput,
+  AzureIoTHubDeviceOutputSchema,
+} from '../steps/iot-hub-device/AzureIoTHubDeviceOutput.ts';
+import {
+  AzureIoTHubDeviceStatsOutput,
+  AzureIoTHubDeviceStatsOutputSchema,
+} from '../steps/iot-hub-device-stats/AzureIoTHubDeviceStatsOutput.ts';
 import { EaCAzureIoTHubDataConnectionDetails } from '../../../eac/EaCAzureIoTHubDataConnectionDetails.ts';
 import { EaCDataConnectionAsCode } from '../../../eac/EaCDataConnectionAsCode.ts';
 import { DataConnection } from '../../../fluent/connections/DataConnection.ts';
@@ -13,15 +17,15 @@ export function AzureIoTHubDataConnection(
   lookup: string,
 ): DataConnectionModuleBuilder<
   EaCDataConnectionAsCode<EaCAzureIoTHubDataConnectionDetails>,
+  void,
   AzureIoTHubDeviceOutput,
-  Status,
   AzureIoTHubDeviceStatsOutput
 > {
   return DataConnection<
     EaCAzureIoTHubDataConnectionDetails,
     EaCDataConnectionAsCode<EaCAzureIoTHubDataConnectionDetails>,
+    void,
     AzureIoTHubDeviceOutput,
-    Status,
     AzureIoTHubDeviceStatsOutput
   >(lookup)
     .Services((ctx, _ioc) => ({
@@ -49,6 +53,7 @@ export function AzureIoTHubDataConnection(
         }
       },
     }))
+    .StatsType(AzureIoTHubDeviceStatsOutputSchema)
     .Stats(async ({ Steps, AsCode }) => {
       return await Steps.IoTStats({
         DeviceID: AsCode.Details!.DeviceID!,
@@ -57,7 +62,8 @@ export function AzureIoTHubDataConnection(
         IoTHubName: AsCode.Details!.IoTHubName!,
       });
     })
-    .Run(async ({ Steps, AsCode, Lookup, EaC }) => {
+    .DeployType(AzureIoTHubDeviceOutputSchema)
+    .Deploy(async ({ Steps, AsCode, Lookup, EaC }) => {
       const deviceId = AsCode.Details!.DeviceID!;
       const isIoTEdge = AsCode.Details!.IsIoTEdge ?? false;
       const workspaceLookup = EaC.EnterpriseLookup!;
@@ -76,8 +82,8 @@ export function AzureIoTHubDataConnection(
       return iot;
     }) as unknown as DataConnectionModuleBuilder<
       EaCDataConnectionAsCode<EaCAzureIoTHubDataConnectionDetails>,
+      void,
       AzureIoTHubDeviceOutput,
-      Status,
       AzureIoTHubDeviceStatsOutput
     >;
 }

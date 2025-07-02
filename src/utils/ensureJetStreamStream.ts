@@ -1,67 +1,53 @@
-import {
-  DiscardPolicy,
-  JetStreamManager,
-  RetentionPolicy,
-  StorageType,
-  StreamConfig,
-} from './.deps.ts';
+import { JetStreamManager, RetentionPolicy, StorageType, StreamConfig } from './.deps.ts';
 import { sanitizeStreamName } from './sanitizeStreamName.ts';
 
 /**
  * Ensure a JetStream stream exists with safe, durable defaults for Open Industrial.
  *
- * Defaults:
- * - Retains up to 10,000 messages or 7 days
- * - File-backed persistent storage
- * - Discards oldest messages when limits are hit
- * - Deduplication window of 60s
- * - Allows rollup headers
- * - Stream is not sealed, not mirrored, and supports unlimited consumers
+ * If the stream already exists, it will be updated with the provided subjects and overrides.
  */
 export async function ensureJetStreamStream(
   jsm: JetStreamManager,
   rawName: string,
   subjects: string[],
-  overrides?: Partial<StreamConfig>,
+  overrides: Partial<StreamConfig> = {},
+  withUpdate: boolean = false,
 ): Promise<void> {
-  if (overrides === undefined) return;
-
   const name = sanitizeStreamName(rawName);
+
+  const baseConfig: StreamConfig = {
+    name,
+    subjects,
+    retention: RetentionPolicy.Limits,
+    storage: StorageType.File,
+    max_msgs: 10_000,
+    max_age: 1000 * 60 * 60 * 24 * 7 * 1_000_000, // 7 days
+    duplicate_window: 60 * 1000 * 1_000_000, // 60s
+    max_consumers: -1,
+    allow_rollup_hdrs: true,
+    consumer_limits: {
+      inactive_threshold: 300 * 1000 * 1_000_000, // 5 min
+      max_ack_pending: 1000,
+    },
+    ...overrides,
+  } as StreamConfig;
 
   try {
     await jsm.streams.info(name);
+
+    if (withUpdate) {
+      // Stream exists — update it
+      await jsm.streams.update(name, {
+        ...baseConfig,
+        subjects,
+      });
+    }
   } catch {
-    const config: StreamConfig = {
+    // Stream doesn't exist — create it
+    await jsm.streams.add({
+      ...baseConfig,
       name,
       subjects,
-      retention: RetentionPolicy.Limits,
-      storage: StorageType.File,
-      discard: DiscardPolicy.Old,
-      max_msgs: 10_000,
-      max_msgs_per_subject: -1,
-      max_age: 1000 * 60 * 60 * 24 * 7,
-      max_bytes: -1,
-      max_msg_size: -1,
-      max_consumers: -1,
-      num_replicas: 1,
-      sealed: false,
-      first_seq: 0,
-      discard_new_per_subject: false,
-      no_ack: false,
-      duplicate_window: 60 * 1000 * 1_000_000,
-      allow_rollup_hdrs: true,
-      allow_direct: false,
-      mirror_direct: false,
-      deny_delete: false,
-      deny_purge: false,
-      consumer_limits: {
-        inactive_threshold: 300 * 1000 * 1_000_000,
-        max_ack_pending: 1000,
-      },
-      ...overrides,
-    };
-
-    await jsm.streams.add(config);
+    });
   }
 }
-

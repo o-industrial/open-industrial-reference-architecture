@@ -50,7 +50,9 @@ export class DataConnectionModuleBuilder<
     const Runtime = this.buildRuntime();
 
     return defineFluentModule({
+      DeploySchema: this.deploySchema,
       OutputSchema: this.outputSchema,
+      StatsSchema: this.statsSchema,
       Runtime,
     });
   }

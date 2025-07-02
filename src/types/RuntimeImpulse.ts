@@ -3,6 +3,16 @@
  */
 export type BaseImpulseFields = {
   /**
+   * The collectin of headers for the impulse.
+   */
+  Headers: Record<string, string>;
+
+  /**
+   * The unique ID that identifies this impulse.
+   */
+  ID: string;
+
+  /**
    * Timestamp of when the impulse occurred (ISO 8601 format).
    */
   Timestamp: string;

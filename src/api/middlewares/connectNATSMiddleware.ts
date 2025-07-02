@@ -1,11 +1,11 @@
 import {
+  Codec,
   connect,
-  NatsConnection,
+  EaCRuntimeHandler,
   JetStreamClient,
   JetStreamManager,
-  EaCRuntimeHandler,
+  NatsConnection,
   StringCodec,
-  Codec,
 } from '../.deps.ts';
 
 /**
@@ -51,7 +51,7 @@ export function connectNATSMiddleware(): EaCRuntimeHandler<NATSContext> {
   return async (_req, ctx) => {
     try {
       ctx.State.NATS = await useNATS();
-      
+
       return ctx.Next();
     } catch (err) {
       console.error('[ConnectNATSMiddleware] Connection failed:', err);

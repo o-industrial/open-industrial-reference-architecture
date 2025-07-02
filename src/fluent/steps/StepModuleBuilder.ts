@@ -5,6 +5,7 @@ import { StepInvokerMap } from './StepInvokerMap.ts';
 import { defineStepModule, StepModule } from './StepModule.ts';
 import { StepModuleMetadata } from './StepModuleMetadata.ts';
 import { StepRuntime } from './StepRuntime.ts';
+import { MaybeAsync } from '../types/MaybeAsync.ts';
 
 type UsedKeys = Record<string, true>;
 type RemoveUsed<T, Used extends UsedKeys> = Omit<T, keyof Used>;
@@ -109,7 +110,7 @@ export class StepModuleBuilder<
       input: TInput,
       ctx: StepContext<TOptions, TServices, TSubSteps>,
       ioc: IoCContainer,
-    ) => Promise<NextServices>,
+    ) => MaybeAsync<NextServices>,
   ): RemoveUsed<
     StepModuleBuilder<
       TInput,

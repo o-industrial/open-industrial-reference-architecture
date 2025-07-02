@@ -78,42 +78,47 @@ export function ImpulseDetailTemplate({
 
   const confidenceClasses = buildConfidenceClasses();
 
+  // ✅ Outer border (outer visual box)
   return (
-    <details
-      class={`rounded ${shellBorder} ${shellBackground} ${shellGlow} transition-colors`}
+    <div
+      class={`rounded border ${shellBorder} ${shellBackground} ${shellGlow} transition-colors`}
     >
-      <summary
-        class={`px-3 py-2 flex items-center justify-between cursor-pointer list-none focus:outline-none focus-visible:ring-2 ${shellRing}`}
-      >
-        <div class="flex items-center gap-2">
-          <span class={`w-2 h-2 rounded-full ${confidenceClasses}`} />
-          <span class={`text-[10px] tracking-widest uppercase ${shellText}`}>
-            {name}
-          </span>
-        </div>
-        <span class={`text-[10px] ${shellText}`}>{timestamp}</span>
-      </summary>
-
-      <div class={`px-3 pb-1 text-[11px] ${shellText} truncate`}>
-        {Object.entries(payload)
-          .map(([k, v]) => `${k}: ${v}`)
-          .join(', ')}
-      </div>
-
-      {children && (
-        <div class={`px-3 pb-1 ${shellText} text-[10px] italic`}>
-          {children}
-        </div>
-      )}
-
-      <details class={`px-3 pb-3 pt-2 text-[10px] ${shellText}`}>
-        <summary class={`${shellText} underline cursor-pointer`}>
-          Full Payload
+      <details class={``}>
+        <summary
+          class={`px-3 py-2 flex items-center justify-between cursor-pointer list-none focus:outline-none focus-visible:ring-2 ${shellRing}`}
+        >
+          <div class="flex items-center gap-2">
+            <span class={`w-2 h-2 rounded-full ${confidenceClasses}`} />
+            <span class={`text-[10px] tracking-widest uppercase ${shellText}`}>
+              {name}
+            </span>
+          </div>
+          <span class={`text-[10px] ${shellText}`}>{timestamp}</span>
         </summary>
-        <pre class={`mt-1 whitespace-pre-wrap break-words text-[10px] ${shellText}`}>
-          {JSON.stringify(payload, null, 2)}
-        </pre>
+
+        <div class={`px-3 pb-3 mt-1 border-b border-t ${shellBorder} pt-2`}>
+          {children && (
+            <div class={`px-3 pb-1 ${shellText} text-[12px] italic`}>
+              {children}
+            </div>
+          )}
+        </div>
+
+        <details class={`px-3 pb-3 pt-2 text-[10px] ${shellText}`}>
+          <summary class={`${shellText} underline cursor-pointer`}>
+            Full Payload -
+            {Object.entries(payload)
+              .map(([k, v]) => `${k}: ${v}`)
+              .join(', ')}
+          </summary>
+
+          <pre
+            class={`mt-1 whitespace-pre-wrap break-words text-[10px] inset ${shellText}`}
+          >
+            {JSON.stringify(payload, null, 2)}
+          </pre>
+        </details>
       </details>
-    </details>
+    </div>
   );
 }
