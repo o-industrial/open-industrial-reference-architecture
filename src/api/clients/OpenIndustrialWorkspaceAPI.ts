@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
 import { EaCStatus, EaCUserRecord } from '../.client.deps.ts';
 import { EaCHistorySnapshot } from '../../types/EaCHistorySnapshot.ts';
 import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
@@ -178,8 +177,10 @@ export class OpenIndustrialWorkspaceAPI {
     };
 
     // ✅ Validate runtime impulse
-    const isRuntimeImpulse = (obj: any): obj is RuntimeImpulse => {
-      const valid = obj &&
+    const isRuntimeImpulse = (obj: RuntimeImpulse): obj is RuntimeImpulse => {
+      const valid =
+        obj &&
+
         typeof obj.Timestamp === 'string' &&
         typeof obj.Confidence === 'number' &&
         typeof obj.Payload === 'object' &&
