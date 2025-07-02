@@ -46,16 +46,21 @@ export type FluentModule<
   OutputSchema?: ZodType<TOutput, ZodTypeDef, TOutput>;
 
   /**
+   * Optional Zod schema describing the runtime’s deploy output.
+   */
+  DeploySchema?: ZodType<TDeploy, ZodTypeDef, TDeploy>;
+
+  /**
+   * Optional Zod schema describing the runtime’s stats output.
+   */
+  StatsSchema?: ZodType<TStats, ZodTypeDef, TStats>;
+
+  /**
    * Executable runtime class that performs the configured behavior.
    */
   Runtime: new () => TRuntime;
 };
 
-/**
- * Strongly typed fluent module definition utility.
- *
- * @returns a `FluentModule<T>` object with type-safe output and runtime
- */
 export function defineFluentModule<
   TAsCode extends EaCDetails<EaCVertexDetails>,
   TOutput,
@@ -74,6 +79,8 @@ export function defineFluentModule<
   >,
 >(def: {
   OutputSchema?: ZodType<TOutput, ZodTypeDef, TOutput>;
+  DeploySchema?: ZodType<TDeploy, ZodTypeDef, TDeploy>;
+  StatsSchema?: ZodType<TStats, ZodTypeDef, TStats>;
   Runtime: new () => TRuntime;
 }): FluentModule<
   TAsCode,
@@ -86,6 +93,8 @@ export function defineFluentModule<
 > {
   return {
     OutputSchema: def.OutputSchema,
+    DeploySchema: def.DeploySchema,
+    StatsSchema: def.StatsSchema,
     Runtime: def.Runtime,
   };
 }

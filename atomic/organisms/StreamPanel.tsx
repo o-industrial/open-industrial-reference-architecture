@@ -24,12 +24,12 @@ export function StreamPanel({ workspaceMgr }: StreamPanelProps): JSX.Element {
         {impulses
           .slice()
           .reverse()
-          .map((imp, idx) => (
+          .map((imp) => (
             <ImpulseEntry
               impulse={imp}
               eac={eac}
               colorMap={impulseSourceColorMap[imp.Source]}
-              key={idx}
+              key={imp.ID}
             />
           ))}
       </div>

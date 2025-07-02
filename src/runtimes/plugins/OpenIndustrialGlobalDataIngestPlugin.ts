@@ -18,11 +18,11 @@ export class OpenIndustrialGlobalDataIngestPlugin implements EaCRuntimePlugin {
     protected eventHubConnStr: string,
     protected eventHubName: string,
     protected iotHubConnStr: string,
-    protected impulseStreamPath: string = '/api/workspaces/impulses/stream'
+    protected impulseStreamPath: string = '/api/workspaces/impulses/stream',
   ) {}
 
   public Setup(
-    _config: EaCRuntimeConfig
+    _config: EaCRuntimeConfig,
   ): Promise<EaCRuntimePluginConfig<EverythingAsCodeOIWorkspace>> {
     const impulseStreamApp = 'impulseStream';
 
@@ -79,7 +79,7 @@ export class OpenIndustrialGlobalDataIngestPlugin implements EaCRuntimePlugin {
       {
         Name: 'EaCGlobalDataIngestProcessor',
         Type: pluginConfig.IoC!.Symbol('ProcessorHandlerResolver'),
-      }
+      },
     );
 
     pluginConfig.IoC!.Register(
@@ -87,7 +87,7 @@ export class OpenIndustrialGlobalDataIngestPlugin implements EaCRuntimePlugin {
       {
         Name: 'EaCOIImpulseStreamProcessor',
         Type: pluginConfig.IoC!.Symbol('ProcessorHandlerResolver'),
-      }
+      },
     );
 
     return Promise.resolve(pluginConfig);

@@ -25,14 +25,13 @@ export class ImpulseStreamManager {
 
     this.disconnect = this.oiSvc.Workspaces.StreamImpulses(
       (impulse: RuntimeImpulse) => {
-        //debugger;
         impulseCount++;
         console.debug(`[ImpulseStreamManager] Received impulse #${impulseCount}:`, impulse);
 
         this.impulses.push(impulse);
         this.listeners.forEach((cb) => cb());
       },
-      this.filters
+      this.filters,
     );
     // this.disconnect = this.oiSvc.Workspaces.StreamImpulsesSimple(
     //   (impulse: string) => {
@@ -57,7 +56,11 @@ export class ImpulseStreamManager {
   public SetFilters(filters: Partial<ImpulseStreamFilter>): void {
     const shouldReconnect = filters.Surface !== this.filters.Surface;
 
-    console.info('[ImpulseStreamManager] Updating filters:', filters, `(reconnect = ${shouldReconnect})`);
+    console.info(
+      '[ImpulseStreamManager] Updating filters:',
+      filters,
+      `(reconnect = ${shouldReconnect})`,
+    );
 
     this.filters = { ...filters };
 
@@ -80,3 +83,4 @@ export class ImpulseStreamManager {
     return this.impulses;
   }
 }
+

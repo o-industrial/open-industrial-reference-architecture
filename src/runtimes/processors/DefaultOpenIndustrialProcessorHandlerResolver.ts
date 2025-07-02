@@ -9,13 +9,11 @@ import { isEaCGlobalDataIngestProcessor } from './EaCGlobalDataIngestProcessor.t
 import { isEaCOIDataConnectionProcessor } from './EaCOIDataConnectionProcessor.ts';
 import { isEaCOIImpulseStreamProcessor } from './EaCOIImpulseStreamProcessor.ts';
 
-export class DefaultOpenIndustrialProcessorHandlerResolver
-  implements ProcessorHandlerResolver
-{
+export class DefaultOpenIndustrialProcessorHandlerResolver implements ProcessorHandlerResolver {
   public async Resolve(
     ioc: IoCContainer,
     appProcCfg: EaCApplicationProcessorConfig,
-    eac: EverythingAsCode
+    eac: EverythingAsCode,
   ): Promise<EaCRuntimeHandler | undefined> {
     let toResolveName: string = '';
 
@@ -34,7 +32,7 @@ export class DefaultOpenIndustrialProcessorHandlerResolver
     if (toResolveName) {
       const resolver = await ioc.Resolve<ProcessorHandlerResolver>(
         ioc.Symbol('ProcessorHandlerResolver'),
-        toResolveName
+        toResolveName,
       );
 
       return await resolver.Resolve(ioc, appProcCfg, eac);

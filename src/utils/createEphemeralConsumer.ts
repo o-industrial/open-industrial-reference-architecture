@@ -1,9 +1,4 @@
-import {
-  JetStreamManager,
-  AckPolicy,
-  JetStreamClient,
-  ConsumerConfig,
-} from './.deps.ts';
+import { AckPolicy, ConsumerConfig, JetStreamClient, JetStreamManager } from './.deps.ts';
 import { sanitizeStreamName } from './sanitizeStreamName.ts';
 
 export async function createEphemeralConsumer(
@@ -16,7 +11,7 @@ export async function createEphemeralConsumer(
     data: Uint8Array;
     headers?: Headers;
   }) => void,
-  consumerConfig?: Partial<ConsumerConfig>
+  consumerConfig?: Partial<ConsumerConfig>,
 ): Promise<{ stop: () => void }> {
   stream = sanitizeStreamName(stream);
 
@@ -62,7 +57,6 @@ export async function createEphemeralConsumer(
 
   return {
     stop: () => {
-      //debugger;
       abort.abort();
     },
   };

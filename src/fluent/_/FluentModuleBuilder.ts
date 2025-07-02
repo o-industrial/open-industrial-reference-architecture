@@ -31,7 +31,9 @@ export abstract class FluentModuleBuilder<
   TSteps extends StepInvokerMap = StepInvokerMap,
   TUsed extends UsedKeys = {},
 > {
+  protected deploySchema?: ZodType<TDeploy>;
   protected outputSchema?: ZodType<TOutput>;
+  protected statsSchema?: ZodType<TStats>;
 
   protected servicesFactory?: (
     ctx: TContext,
@@ -54,7 +56,28 @@ export abstract class FluentModuleBuilder<
 
   constructor(protected readonly lookup: string) {}
 
-  public Output<O extends TOutput>(
+  public DeployType<D extends TDeploy>(
+    schema: ZodType<D>,
+  ): RemoveUsed<
+    FluentModuleBuilder<
+      TAsCode,
+      TContext,
+      FluentRuntime<TAsCode, TOutput, D, TStats, TServices, TSteps, TContext>,
+      TModule,
+      TOutput,
+      D,
+      TStats,
+      TServices,
+      TSteps,
+      TUsed & { DeployType: true }
+    >,
+    TUsed & { DeployType: true }
+  > {
+    this.deploySchema = schema as any;
+    return this as any;
+  }
+
+  public OutputType<O extends TOutput>(
     schema: ZodType<O>,
   ): RemoveUsed<
     FluentModuleBuilder<
@@ -67,11 +90,32 @@ export abstract class FluentModuleBuilder<
       TStats,
       TServices,
       TSteps,
-      TUsed & { Output: true }
+      TUsed & { OutputType: true }
     >,
-    TUsed & { Output: true }
+    TUsed & { OutputType: true }
   > {
     this.outputSchema = schema as any;
+    return this as any;
+  }
+
+  public StatsType<S extends TStats>(
+    schema: ZodType<S>,
+  ): RemoveUsed<
+    FluentModuleBuilder<
+      TAsCode,
+      TContext,
+      FluentRuntime<TAsCode, TOutput, TDeploy, S, TServices, TSteps, TContext>,
+      TModule,
+      TOutput,
+      TDeploy,
+      S,
+      TServices,
+      TSteps,
+      TUsed & { StatsType: true }
+    >,
+    TUsed & { StatsType: true }
+  > {
+    this.statsSchema = schema as any;
     return this as any;
   }
 

@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { EaCStatus, EaCUserRecord } from '../.client.deps.ts';
 import { EaCHistorySnapshot } from '../../types/EaCHistorySnapshot.ts';
 import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
@@ -49,7 +50,7 @@ export class OpenIndustrialWorkspaceAPI {
    * Create a new workspace from the given OpenIndustrial EaC configuration.
    */
   public async Create(
-    eac: EverythingAsCodeOIWorkspace
+    eac: EverythingAsCodeOIWorkspace,
   ): Promise<{ EnterpriseLookup: string; CommitID: string }> {
     const res = await fetch(this.bridge.url('/api/workspaces'), {
       method: 'POST',
@@ -137,7 +138,7 @@ export class OpenIndustrialWorkspaceAPI {
    */
   public StreamImpulses(
     onImpulse: (impulse: RuntimeImpulse) => void,
-    filters?: ImpulseStreamFilter
+    filters?: ImpulseStreamFilter,
   ): () => void {
     const url = new URL(this.bridge.url('/api/workspaces/impulses/stream'));
 
@@ -180,6 +181,7 @@ export class OpenIndustrialWorkspaceAPI {
     const isRuntimeImpulse = (obj: RuntimeImpulse): obj is RuntimeImpulse => {
       const valid =
         obj &&
+
         typeof obj.Timestamp === 'string' &&
         typeof obj.Confidence === 'number' &&
         typeof obj.Payload === 'object' &&
@@ -230,7 +232,7 @@ export class OpenIndustrialWorkspaceAPI {
       console.info(
         '[StreamImpulses] 🔻 WebSocket closed:',
         evt.reason || '(no reason)',
-        ` | code=${evt.code}`
+        ` | code=${evt.code}`,
       );
     };
 
@@ -241,85 +243,6 @@ export class OpenIndustrialWorkspaceAPI {
         socket.readyState === WebSocket.CONNECTING
       ) {
         console.info('[StreamImpulses] 🔌 Closing WebSocket manually');
-        socket.close(1000, 'Client disconnect');
-      }
-    };
-  }
-
-  /**
-   * TEMP: Connect to the raw impulse stream just to confirm WebSocket connectivity.
-   *
-   * @param onMessage - Raw message handler (optional)
-   * @returns Cleanup function to close the connection.
-   */
-  public StreamImpulsesSimple(onMessage?: (data: string) => void): () => void {
-    const url = new URL(this.bridge.url('/api/workspaces/impulses/stream'));
-
-    // 🔐 Attach token
-    const token = this.bridge.token();
-    if (token) {
-      url.searchParams.set('Authorization', token);
-      console.info('[StreamImpulsesSimple] 🛡️ Token attached');
-    } else {
-      console.warn('[StreamImpulsesSimple] ⚠️ No auth token present!');
-    }
-
-    // 🌐 Force correct protocol
-    url.protocol = url.protocol.replace(/^http/, 'ws');
-    console.info('[StreamImpulsesSimple] 🚀 Connecting to:', url.toString());
-
-    const socket = new WebSocket(url.toString());
-
-    let isOpen = false;
-    const pendingMessages: string[] = [];
-
-    const sendMessage = (msg: string) => {
-      if (isOpen && socket.readyState === WebSocket.OPEN) {
-        socket.send(msg);
-      } else {
-        pendingMessages.push(msg);
-      }
-    };
-
-    socket.onopen = () => {
-      console.info('[StreamImpulsesSimple] ✅ WebSocket opened');
-      isOpen = true;
-
-      // Flush queued messages
-      for (const msg of pendingMessages) {
-        socket.send(msg);
-      }
-      pendingMessages.length = 0;
-
-      // Optionally send a hello
-      sendMessage(
-        JSON.stringify({ type: 'hello', ts: new Date().toISOString() })
-      );
-    };
-
-    socket.onmessage = (event) => {
-      console.info('[StreamImpulsesSimple] 📥 Received:', event.data);
-      if (onMessage) onMessage(event.data);
-    };
-
-    socket.onerror = (err) => {
-      console.error('[StreamImpulsesSimple] ❌ WebSocket error:', err);
-    };
-
-    socket.onclose = (evt) => {
-      console.warn(
-        '[StreamImpulsesSimple] 🔻 WebSocket closed:',
-        evt.reason || '(no reason)'
-      );
-      isOpen = false;
-    };
-
-    return () => {
-      if (
-        socket.readyState === WebSocket.OPEN ||
-        socket.readyState === WebSocket.CONNECTING
-      ) {
-        console.info('[StreamImpulsesSimple] 🔌 Closing WebSocket manually');
         socket.close(1000, 'Client disconnect');
       }
     };

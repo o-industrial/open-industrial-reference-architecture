@@ -1,7 +1,7 @@
 import { EaCSimulatorAsCode } from '../../eac/EaCSimulatorAsCode.ts';
 import { EaCSimulatorDetails } from '../../eac/EaCSimulatorDetails.ts';
 import { StepInvokerMap } from '../steps/StepInvokerMap.ts';
-import { SimulatorBuilder } from './SimulatorBuilder.ts';
+import { SimulatorModuleBuilder } from './SimulatorModuleBuilder.ts';
 
 /**
  * Entry point for building a typed Simulator fluent module.
@@ -16,8 +16,8 @@ export function Simulator<
   TSteps extends StepInvokerMap = StepInvokerMap,
 >(
   key: string,
-): SimulatorBuilder<TAsCode, TOutput, TDeploy, TStats, TServices, TSteps> {
-  return new SimulatorBuilder<
+): SimulatorModuleBuilder<TAsCode, TOutput, TDeploy, TStats, TServices, TSteps> {
+  return new SimulatorModuleBuilder<
     TAsCode,
     TOutput,
     TDeploy,

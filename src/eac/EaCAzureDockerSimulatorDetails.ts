@@ -8,15 +8,6 @@ import { EaCSimulatorDetails, EaCSimulatorDetailsSchema } from './EaCSimulatorDe
  * https://learn.microsoft.com/en-us/samples/azure-samples/iot-telemetry-simulator/azure-iot-device-telemetry-simulator/
  */
 export type EaCAzureDockerSimulatorDetails = EaCSimulatorDetails<'AzureDocker'> & {
-  /** Number of devices to simulate. */
-  DeviceCount?: number;
-
-  /** Prefix used to generate device IDs. */
-  DevicePrefix?: string;
-
-  /** Starting index for simulated device IDs. */
-  DeviceIndexOffset?: number;
-
   /** JSON object defining variable values used in message templating. */
   Variables?: Record<string, unknown>;
 

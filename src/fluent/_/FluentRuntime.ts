@@ -1,4 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
+import type { ZodType } from './.deps.ts';
 import type { IoCContainer } from './.deps.ts';
 import type { EaCDetails, EaCVertexDetails } from '../types/.deps.ts';
 import type { StepInvokerMap } from '../steps/StepInvokerMap.ts';
@@ -30,6 +31,11 @@ export abstract class FluentRuntime<
     TSteps
   >,
 > {
+  // ✅ Optional zod schemas exposed for introspection
+  public OutputSchema?: ZodType<TOutput>;
+  public DeploySchema?: ZodType<TDeploy>;
+  public StatsSchema?: ZodType<TStats>;
+
   /**
    * Optional setup hook before main execution.
    */
@@ -55,32 +61,20 @@ export abstract class FluentRuntime<
    */
   protected stats?(ctx: TContext): Promise<TStats>;
 
-  /**
-   * Entrypoint for standard execution.
-   */
   public async Run(ctx: TContext): Promise<TOutput> {
     return await this.executeWithVerifications(ctx, this.run.bind(this));
   }
 
-  /**
-   * Entrypoint for deployment behavior.
-   */
   public async Deploy(ctx: TContext): Promise<TDeploy> {
     if (!this.deploy) throw new Error('Deploy() not implemented.');
     return await this.executeWithVerifications(ctx, this.deploy.bind(this));
   }
 
-  /**
-   * Entrypoint for stats query behavior.
-   */
   public async Stats(ctx: TContext): Promise<TStats> {
     if (!this.stats) throw new Error('Stats() not implemented.');
     return await this.executeWithVerifications(ctx, this.stats.bind(this));
   }
 
-  /**
-   * Shared execution logic across Run, Deploy, Stats with optional verifications.
-   */
   protected async executeWithVerifications<TResult>(
     ctx: TContext,
     execute: (ctx: TContext) => Promise<TResult>,
@@ -105,29 +99,17 @@ export abstract class FluentRuntime<
     return await execute(ctx);
   }
 
-  /**
-   * Optionally injects services into context.
-   */
   protected injectServices?(
     ctx: TContext,
     ioc: IoCContainer,
   ): Promise<Partial<TServices>>;
 
-  /**
-   * Optionally injects step invokers into context.
-   */
   protected injectSteps?(ctx: TContext): Promise<TSteps>;
 
-  /**
-   * Optionally injects verification checks.
-   */
   protected injectVerifications?(
     ctx: TContext,
   ): Promise<VerificationInvokerMap<TContext>>;
 
-  /**
-   * Builds the full runtime context with injected services and substeps.
-   */
   public async ConfigureContext(
     base: Partial<TContext>,
     ioc?: IoCContainer,

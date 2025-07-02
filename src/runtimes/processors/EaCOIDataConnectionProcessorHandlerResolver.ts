@@ -11,8 +11,10 @@ import {
   StringCodec,
   Subscription,
 } from '../.deps.ts';
-import { ensureJetStreamStream } from '../../utils/ensureJetStreamStream.ts';
+
 import { isEaCOIDataConnectionProcessor } from './EaCOIDataConnectionProcessor.ts';
+import type { RuntimeImpulse } from '../../types/RuntimeImpulse.ts';
+import { ensureWorkspaceSurfaceJetStream } from '../../utils/ensureWorkspaceSurfaceJetStream.ts';
 
 /**
  * Surface-level processor that scopes workspace data connection telemetry
@@ -40,51 +42,48 @@ export const EaCOIDataConnectionProcessorHandlerResolver: ProcessorHandlerResolv
       `🟢 [${surface}/${dataConn}] Initializing surface data connection processor`,
     );
 
-    // Step 1: Connect to NATS
     const nc: NatsConnection = await connect({
       servers: proc.NATSServer,
       token: proc.NATSToken,
     });
+
     const sc = StringCodec();
+    const js = nc.jetstream(); // ✅ JetStream publish
     const jsm: JetStreamManager = await nc.jetstreamManager();
 
     logger.info(
       `🔌 [${surface}/${dataConn}] Connected to NATS at ${proc.NATSServer}`,
     );
 
-    // Step 2: Define routing subjects
-    const sourceSubject = `workspace.${eac.EnterpriseLookup}.data-connection.${dataConn}.impulse`;
-    const streamName =
-      `workspace.${eac.EnterpriseLookup}.surface.${surface}.data-connection.${dataConn}`;
-    const targetSubject = `${streamName}.impulse`;
+    const sourceSubject = `workspace.${eac.EnterpriseLookup}.connection.${dataConn}.impulse`;
+    const targetSubject =
+      `workspace.${eac.EnterpriseLookup}.surface.${surface}.connection.${dataConn}.impulse`;
 
     logger.info(
-      `📥 [${surface}/${dataConn}] Subscribing to source subject: ${sourceSubject}`,
+      `📥 [${surface}/${dataConn}] Subscribing to: ${sourceSubject}`,
     );
     logger.info(
-      `📤 [${surface}/${dataConn}] Forwarding to surface subject: ${targetSubject}`,
+      `📤 [${surface}/${dataConn}] Forwarding to: ${targetSubject}`,
     );
-    logger.debug(`🧭 Stream name: ${streamName}`);
 
-    // Step 3: Create JetStream stream if missing
-    await ensureJetStreamStream(
+    await ensureWorkspaceSurfaceJetStream(
       jsm,
-      streamName,
-      [targetSubject],
+      eac.EnterpriseLookup!,
+      surface,
       proc.JetStreamDefaults,
+      true,
     );
     logger.info(
-      `📦 [${surface}/${dataConn}] JetStream stream ensured: ${streamName}`,
+      `📦 [${surface}/${dataConn}] JetStream stream ensured: workspace.${eac.EnterpriseLookup}.surface.${surface}`,
     );
 
-    // Step 4: Subscribe and forward
     const sub: Subscription = nc.subscribe(sourceSubject);
     (async () => {
       for await (const msg of sub) {
         forwardToSurfaceSubject(
           msg.data,
           targetSubject,
-          nc,
+          js,
           sc,
           logger,
           surface,
@@ -93,7 +92,6 @@ export const EaCOIDataConnectionProcessorHandlerResolver: ProcessorHandlerResolv
       }
     })();
 
-    // Step 5: Return handler
     return (_req, _ctx) =>
       Promise.resolve(
         new Response('Surface DataConnection processor is active.', {
@@ -105,18 +103,35 @@ export const EaCOIDataConnectionProcessorHandlerResolver: ProcessorHandlerResolv
 };
 
 // -----------------------------
-// 🔧 HELPER FUNCTIONS
+// 🔧 FORWARDER WITH msgID
 // -----------------------------
 
-function forwardToSurfaceSubject(
+async function forwardToSurfaceSubject(
   data: Uint8Array,
   subject: string,
-  nc: NatsConnection,
+  js: ReturnType<NatsConnection['jetstream']>,
   sc: ReturnType<typeof StringCodec>,
   logger: Logger,
   surface: string,
   dataConn: string,
 ) {
-  nc.publish(subject, data);
-  logger.info(`📤 [${surface}/${dataConn}] ${subject} ← ${sc.decode(data)}`);
+  try {
+    const decoded = sc.decode(data);
+    const impulse = JSON.parse(decoded) as RuntimeImpulse;
+
+    if (!impulse?.ID) {
+      logger.warn(
+        `⚠️ [${surface}/${dataConn}] Skipped message: missing impulse ID`,
+      );
+      return;
+    }
+
+    await js.publish(subject, data, { msgID: impulse.ID });
+
+    logger.debug(
+      `📤 [${surface}/${dataConn}] Forwarded impulse ${impulse.ID} → ${subject}`,
+    );
+  } catch (err) {
+    logger.error(`❌ [${surface}/${dataConn}] Error forwarding impulse`, err);
+  }
 }

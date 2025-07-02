@@ -1,99 +1,93 @@
 import {
+  Codec,
+  DeliverPolicy,
   EaCRuntimeContext,
   EaCRuntimeHandler,
-  getPackageLogger,
-  DeliverPolicy,
-  RetentionPolicy,
-  ProcessorHandlerResolver,
-  Logger,
-  JetStreamClient,
-  JetStreamManager,
-  Codec,
   EaCRuntimeHandlerPipeline,
   establishJwtValidationMiddleware,
+  getPackageLogger,
+  JetStreamClient,
+  JetStreamManager,
   loadJwtConfig,
+  Logger,
+  ProcessorHandlerResolver,
+  RetentionPolicy,
 } from '../.deps.ts';
-import {
-  NATSContext,
-  connectNATSMiddleware,
-} from '../../api/middlewares/connectNATSMiddleware.ts';
+import { connectNATSMiddleware, NATSContext } from '../../api/middlewares/connectNATSMiddleware.ts';
 import { OpenIndustrialJWTPayload } from '../../types/OpenIndustrialJWTPayload.ts';
 import { RuntimeImpulse } from '../../types/RuntimeImpulse.ts';
 import { buildNATSSubject } from '../../utils/buildNATSSubject.ts';
 import { createEphemeralConsumer } from '../../utils/createEphemeralConsumer.ts';
-import { parseNATSImpulseSubject } from '../../utils/parseNATSImpulseSubject.ts';
-import { ensureJetStreamStream } from '../../utils/ensureJetStreamStream.ts';
 import { isEaCOIImpulseStreamProcessor } from './EaCOIImpulseStreamProcessor.ts';
+import { ensureWorkspaceSurfaceJetStream } from '../../utils/ensureWorkspaceSurfaceJetStream.ts';
+import { ensureWorkspaceJetStreamBuilder } from '../../utils/ensureWorkspaceJetStream.ts';
+import { MaybeAsync } from '../../fluent/types/MaybeAsync.ts';
 
 type ImpulseRuntime = {
   AddWebSocketListener: (cb: (impulse: RuntimeImpulse) => void) => () => void;
-  Close: () => Promise<void>;
+  Close: () => MaybeAsync<void>;
 };
 
-export const EaCOIImpulseStreamProcessorHandlerResolver: ProcessorHandlerResolver =
-  {
-    async Resolve(_ioc, appProcCfg, _eac): Promise<EaCRuntimeHandler> {
-      const logger = await getPackageLogger(import.meta);
-      const proc = appProcCfg.Application.Processor;
+export const EaCOIImpulseStreamProcessorHandlerResolver: ProcessorHandlerResolver = {
+  async Resolve(_ioc, appProcCfg, _eac): Promise<EaCRuntimeHandler> {
+    const logger = await getPackageLogger(import.meta);
+    const proc = appProcCfg.Application.Processor;
 
-      if (!isEaCOIImpulseStreamProcessor(proc)) {
-        throw new Deno.errors.NotSupported(
-          'Invalid EaCOIImpulseStreamProcessor configuration.'
-        );
+    if (!isEaCOIImpulseStreamProcessor(proc)) {
+      throw new Deno.errors.NotSupported(
+        'Invalid EaCOIImpulseStreamProcessor configuration.',
+      );
+    }
+
+    logger.info('[ImpulseStream] ✅ Processor initialized using shared NATS');
+
+    const impulseRuntimeCache = new Map<string, Promise<ImpulseRuntime>>();
+    const pipeline = new EaCRuntimeHandlerPipeline();
+
+    pipeline.Append(establishJwtValidationMiddleware(loadJwtConfig()));
+    pipeline.Append(connectNATSMiddleware() as EaCRuntimeHandler);
+    pipeline.Append(establishImpulseRuntime(impulseRuntimeCache, logger));
+    pipeline.Append(streamImpulses(impulseRuntimeCache, logger));
+
+    return (req, ctx) => {
+      const method = req.method.toUpperCase();
+      const headers = Object.fromEntries(req.headers.entries());
+
+      console.log(
+        `[ImpulseStream] 📡 Incoming ${method} request: ${req.url}`,
+      );
+      console.log(`[ImpulseStream] 📡 Headers:`, headers);
+
+      if (method === 'OPTIONS') {
+        // 🔐 CORS preflight support
+        return new Response(null, {
+          status: 204,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+            'Access-Control-Max-Age': '86400', // 24 hours
+          },
+        });
       }
 
-      logger.info('[ImpulseStream] ✅ Processor initialized using shared NATS');
-
-      const impulseRuntimeCache = new Map<string, Promise<ImpulseRuntime>>();
-      const pipeline = new EaCRuntimeHandlerPipeline();
-
-      pipeline.Append(establishJwtValidationMiddleware(loadJwtConfig()));
-      pipeline.Append(connectNATSMiddleware() as EaCRuntimeHandler);
-      pipeline.Append(establishImpulseRuntime(impulseRuntimeCache, logger));
-      pipeline.Append(streamImpulses(impulseRuntimeCache, logger));
-
-      return (req, ctx) => {
-        const method = req.method.toUpperCase();
-        const headers = Object.fromEntries(req.headers.entries());
-
-        //debugger;
-        console.log(
-          `[ImpulseStream] 📡 Incoming ${method} request: ${req.url}`
-        );
-        console.log(`[ImpulseStream] 📡 Headers:`, headers);
-
-        if (method === 'OPTIONS') {
-          // 🔐 CORS preflight support
-          return new Response(null, {
-            status: 204,
-            headers: {
-              'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods': 'GET, OPTIONS',
-              'Access-Control-Allow-Headers': 'Authorization, Content-Type',
-              'Access-Control-Max-Age': '86400', // 24 hours
-            },
-          });
-        }
-
-        return pipeline.Execute(req, ctx);
-      };
-    },
-  };
+      return pipeline.Execute(req, ctx);
+    };
+  },
+};
 
 function streamImpulses(
   impulseRuntimeCache: Map<string, Promise<ImpulseRuntime>>,
-  logger: Logger
+  logger: Logger,
 ): EaCRuntimeHandler {
   return (async (
     req,
-    ctx: EaCRuntimeContext<OpenIndustrialJWTPayload & NATSContext>
+    ctx: EaCRuntimeContext<OpenIndustrialJWTPayload & NATSContext>,
   ) => {
     const { WorkspaceLookup: workspace } = ctx.State;
 
-    const surfaceFilter =
-      ctx.Runtime.URLMatch.SearchParams?.get('surface') ?? undefined;
-    const schemaFilter =
-      ctx.Runtime.URLMatch.SearchParams?.get('schema') ?? undefined;
+    const surfaceFilter = ctx.Runtime.URLMatch.SearchParams?.get('surface') ?? undefined;
+    const schemaFilter = ctx.Runtime.URLMatch.SearchParams?.get('schema') ?? undefined;
 
     logger.info('[ImpulseStream] 🔌 WebSocket upgrade complete');
 
@@ -111,38 +105,37 @@ function streamImpulses(
 
 function establishImpulseRuntime(
   impulseRuntimeCache: Map<string, Promise<ImpulseRuntime>>,
-  logger: Logger
+  logger: Logger,
 ): EaCRuntimeHandler {
-  return (async ( 
+  return ((
     _req,
     {
       Runtime,
       State,
       Next,
-    }: EaCRuntimeContext<OpenIndustrialJWTPayload & NATSContext>
+    }: EaCRuntimeContext<OpenIndustrialJWTPayload & NATSContext>,
   ) => {
     const { NATS, WorkspaceLookup: workspace } = State;
     const { JetStream, JetStreamManager, SC } = NATS;
 
     if (!workspace) {
       logger.error('[ImpulseStream] ❌ Missing workspace');
-      return await new Response('Missing workspace parameter', { status: 400 });
+      return new Response('Missing workspace parameter', { status: 400 });
     }
 
-    const surfaceFilter =
-      Runtime.URLMatch.SearchParams?.get('surface') ?? undefined;
+    const surfaceFilter = Runtime.URLMatch.SearchParams?.get('surface') ?? undefined;
 
     logger.info(
       `[ImpulseStream] 🔍 Preparing stream for workspace: ${workspace}, surface: ${
         surfaceFilter ?? '*'
-      }`
+      }`,
     );
 
     const cacheKey = `${workspace}::${surfaceFilter ?? '*'}`;
 
     if (!impulseRuntimeCache.has(cacheKey)) {
       logger.debug(
-        `[ImpulseStream] 🆕 Creating new impulse runtime: ${cacheKey}`
+        `[ImpulseStream] 🆕 Creating new impulse runtime: ${cacheKey}`,
       );
       impulseRuntimeCache.set(
         cacheKey,
@@ -150,10 +143,10 @@ function establishImpulseRuntime(
           workspace,
           surfaceFilter,
           JetStream,
-          JetStreamManager,
+          jsm: JetStreamManager,
           SC,
           logger,
-        })
+        }),
       );
     }
 
@@ -165,43 +158,57 @@ async function createImpulseRuntime({
   workspace,
   surfaceFilter,
   JetStream,
-  JetStreamManager,
+  jsm,
   SC,
   logger,
 }: {
   workspace: string;
   surfaceFilter?: string;
   JetStream: JetStreamClient;
-  JetStreamManager: JetStreamManager;
+  jsm: JetStreamManager;
   SC: Codec<string>;
   logger: Logger;
 }): Promise<ImpulseRuntime> {
   const listeners = new Set<(imp: RuntimeImpulse) => void>();
   const subject = buildNATSSubject(workspace, surfaceFilter);
-  const stream = `workspace.${workspace}${
-    surfaceFilter ? `.surface.${surfaceFilter}` : ''
-  }`;
+  const stream = `workspace.${workspace}${surfaceFilter ? `.surface.${surfaceFilter}` : ''}`;
 
   logger.info('[ImpulseStream] 🧩 Stream config', { stream, subject });
 
-  await ensureJetStreamStream(JetStreamManager, stream, [subject], {
+  const jsmDefaults = {
     max_msgs_per_subject: 1000,
     retention: RetentionPolicy.Limits,
     max_age: 0,
-  });
+  };
+
+  if (surfaceFilter) {
+    await ensureWorkspaceSurfaceJetStream(
+      jsm,
+      workspace,
+      surfaceFilter,
+      jsmDefaults,
+      true,
+    );
+  } else {
+    await ensureWorkspaceJetStreamBuilder(jsm, workspace, jsmDefaults, true);
+  }
 
   logger.info('[ImpulseStream] ✅ Stream ensured, creating consumer');
 
   const { stop } = await createEphemeralConsumer(
     JetStream,
-    JetStreamManager,
+    jsm,
     stream,
     subject,
     ({ subject, data, headers }) => {
       try {
         logger.debug('[ImpulseStream] 📥 Impulse received', { subject });
-        const payload = JSON.parse(SC.decode(data));
-        const impulse = parseNATSImpulseSubject(subject, payload, headers);
+        const impulse: RuntimeImpulse = JSON.parse(SC.decode(data));
+
+        headers?.forEach((val, key) => {
+          impulse.Headers[key] = val;
+        });
+
         listeners.forEach((cb) => cb(impulse));
       } catch (err) {
         logger.warn('[ImpulseStream] ⚠️ Failed to parse impulse', err);
@@ -210,7 +217,7 @@ async function createImpulseRuntime({
     {
       deliver_policy: DeliverPolicy.StartTime,
       opt_start_time: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-    }
+    },
   );
 
   let closed = false;
@@ -226,7 +233,6 @@ async function createImpulseRuntime({
         listeners.delete(cb);
         refCount = Math.max(0, refCount - 1);
         logger.info('[ImpulseStream] ❌ Listener removed');
-        //debugger;
         if (refCount <= 0 && !closed) {
           closed = true;
           try {
@@ -238,11 +244,11 @@ async function createImpulseRuntime({
         }
       };
     },
-    Close: async () => {
+    Close: () => {
       if (closed) return;
       closed = true;
       try {
-        await stop();
+        stop();
       } catch (err) {
         logger.warn('[ImpulseStream] ⚠️ Error stopping consumer', err);
       }
@@ -254,14 +260,12 @@ async function createImpulseRuntime({
 function impulseMatchesFilter(
   impulse: RuntimeImpulse,
   surface?: string,
-  schema?: string
+  schema?: string,
 ): boolean | undefined {
   const meta = impulse.Metadata;
-  const matchesSurface =
-    !surface ||
+  const matchesSurface = !surface ||
     (meta && 'SurfaceLookup' in meta && meta.SurfaceLookup === surface);
-  const matchesSchema =
-    !schema || (meta && 'SchemaLookup' in meta && meta.SchemaLookup === schema);
+  const matchesSchema = !schema || (meta && 'SchemaLookup' in meta && meta.SchemaLookup === schema);
   return matchesSurface && matchesSchema;
 }
 
@@ -322,7 +326,7 @@ async function handleImpulseStreamConnection({
 
     if (socketReady && socket.readyState === WebSocket.OPEN) {
       logger.debug(
-        `[WS] ✅ Sending impulse to open socket: ${impulse.Subject}`
+        `[WS] ✅ Sending impulse to open socket: ${impulse.Subject}`,
       );
       try {
         socket.send(JSON.stringify(impulse));
@@ -331,7 +335,7 @@ async function handleImpulseStreamConnection({
       }
     } else {
       logger.warn(
-        `[WS] ⏳ Socket not open — queueing impulse: ${impulse.Subject}`
+        `[WS] ⏳ Socket not open — queueing impulse: ${impulse.Subject}`,
       );
       impulseQueue.push(impulse);
     }
@@ -369,7 +373,7 @@ async function handleImpulseStreamConnection({
 
     setTimeout(() => {
       socket.send(
-        JSON.stringify({ status: 'connected', ts: new Date().toISOString() })
+        JSON.stringify({ status: 'connected', ts: new Date().toISOString() }),
       );
       flushQueue();
     }, 0);
