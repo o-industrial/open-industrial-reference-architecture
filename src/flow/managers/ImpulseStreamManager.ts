@@ -83,3 +83,4 @@ export class ImpulseStreamManager {
     return this.impulses;
   }
 }
+
