@@ -1,5 +1,11 @@
 // deno-lint-ignore-file no-explicit-any
-import { AIMessage, type BaseMessage, HumanMessage, RemoteRunnable } from '../.deps.ts';
+import {
+  AIMessage,
+  type BaseMessage,
+  HumanMessage,
+  RemoteRunnable,
+  ToolMessage,
+} from '../.deps.ts';
 
 export type AziInputs = {
   Input?: string;
@@ -53,21 +59,22 @@ export class AziManager {
   // === Send (stream, then sync full state) ===
   public async Send(
     input: string,
-    extraInputs?: Record<string, unknown>,
+    extraInputs?: Record<string, unknown>
   ): Promise<void> {
     if (this.sending) return;
 
     this.sending = true;
-    this.emit(); // notify listeners of sending=true
+    this.emit();
 
     console.info('[AziManager] Send initiated', { input, extraInputs });
 
     try {
       const humanMsg = new HumanMessage(input);
       const aiMsg = new AIMessage('');
-
       this.state.Messages.push(humanMsg, aiMsg);
       this.emit();
+
+      const toolStreams: Record<string, ToolMessage> = {};
 
       const events = await this.circuit.streamEvents(
         { Input: input, ...(extraInputs ?? {}) },
@@ -78,36 +85,60 @@ export class AziManager {
             checkpoint_ns: 'current',
           },
           recursionLimit: 100,
-        },
+        }
       );
 
       for await (const event of events) {
         const { event: eventName, name, data } = event;
 
-        console.debug('[AziManager] Streamed event received', {
+        console.log('[AziManager] Streamed event received', {
           eventName,
           name,
           data,
         });
 
+        // === Handle custom events ===
         if (eventName === 'on_custom_event' && name?.startsWith('thinky:')) {
           this.handleCustomEvent(name.replace('thinky:', ''), data);
         }
 
+        // === Handle LLM streaming ===
         if (
           eventName === 'on_chat_model_stream' ||
           eventName === 'on_llm_stream'
         ) {
           const chunk = data?.chunk;
-          const value = typeof chunk === 'string'
-            ? chunk
-            : chunk?.content?.toString?.() ?? chunk?.value ?? '';
+          const value =
+            typeof chunk === 'string'
+              ? chunk
+              : chunk?.content?.toString?.() ?? chunk?.value ?? '';
 
           if (value && typeof value === 'string') {
             aiMsg.content += value;
             this.emit();
           }
         }
+
+        // // === Handle tool stream ===
+        // if (eventName === 'on_tool_stream') {
+        //   const callId = data?.tool_call_id ?? data?.id ?? 'tool-call-unknown';
+        //   const name = data?.name ?? 'tool';
+        //   const contentChunk = data?.chunk ?? '';
+
+        //   if (!toolStreams[callId]) {
+        //     const toolMsg = new ToolMessage({
+        //       tool_call_id: callId,
+        //       name,
+        //       content: '',
+        //     });
+        //     this.state.Messages.push(toolMsg);
+        //     toolStreams[callId] = toolMsg;
+        //   }
+
+        //   // Accumulate the content
+        //   toolStreams[callId].content += contentChunk;
+        //   this.emit();
+        // }
       }
 
       console.info('[AziManager] Stream complete — syncing final state');
@@ -116,7 +147,7 @@ export class AziManager {
       console.error('[AziManager] Send error', err);
     } finally {
       this.sending = false;
-      this.emit(); // notify listeners of sending=false
+      this.emit();
     }
   }
 

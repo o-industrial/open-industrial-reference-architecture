@@ -5,13 +5,18 @@ import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspa
 import { ClientHelperBridge } from './ClientHelperBridge.ts';
 import { RuntimeImpulse } from '../../types/RuntimeImpulse.ts';
 import { ImpulseStreamFilter } from '../../flow/managers/ImpulseStreamManager.ts';
+import { OpenIndustrialWorkspaceExplorerAPI } from './OpenIndustrialWorkspaceExplorerAPI.ts';
 
 /**
  * Subclient for managing OpenIndustrial workspace lifecycle and memory commits.
  */
 
 export class OpenIndustrialWorkspaceAPI {
-  constructor(private bridge: ClientHelperBridge) {}
+  public readonly Explorer: OpenIndustrialWorkspaceExplorerAPI;
+
+  constructor(private bridge: ClientHelperBridge) {
+    this.Explorer = new OpenIndustrialWorkspaceExplorerAPI(bridge);
+  }
 
   /**
    * Archive the current workspace.
@@ -50,7 +55,7 @@ export class OpenIndustrialWorkspaceAPI {
    * Create a new workspace from the given OpenIndustrial EaC configuration.
    */
   public async Create(
-    eac: EverythingAsCodeOIWorkspace,
+    eac: EverythingAsCodeOIWorkspace
   ): Promise<{ EnterpriseLookup: string; CommitID: string }> {
     const res = await fetch(this.bridge.url('/api/workspaces'), {
       method: 'POST',
@@ -138,7 +143,7 @@ export class OpenIndustrialWorkspaceAPI {
    */
   public StreamImpulses(
     onImpulse: (impulse: RuntimeImpulse) => void,
-    filters?: ImpulseStreamFilter,
+    filters?: ImpulseStreamFilter
   ): () => void {
     const url = new URL(this.bridge.url('/api/workspaces/impulses/stream'));
 
@@ -179,7 +184,8 @@ export class OpenIndustrialWorkspaceAPI {
 
     // ✅ Validate runtime impulse
     const isRuntimeImpulse = (obj: any): obj is RuntimeImpulse => {
-      const valid = obj &&
+      const valid =
+        obj &&
         typeof obj.Timestamp === 'string' &&
         typeof obj.Confidence === 'number' &&
         typeof obj.Payload === 'object' &&
@@ -230,7 +236,7 @@ export class OpenIndustrialWorkspaceAPI {
       console.info(
         '[StreamImpulses] 🔻 WebSocket closed:',
         evt.reason || '(no reason)',
-        ` | code=${evt.code}`,
+        ` | code=${evt.code}`
       );
     };
 

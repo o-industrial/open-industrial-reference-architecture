@@ -1,11 +1,18 @@
-export { jsonMapSetClone, merge, type NullableArrayOrObject } from 'jsr:@fathym/common@0.2.264';
+export {
+  jsonMapSetClone,
+  merge,
+  type NullableArrayOrObject,
+} from 'jsr:@fathym/common@0.2.264';
 
 export type {
   EaCEnterpriseDetails,
   EaCVertexDetails,
   EverythingAsCode,
 } from 'jsr:@fathym/eac@0.2.112';
-export { type EaCStatus, EaCStatusProcessingTypes } from 'jsr:@fathym/eac@0.2.112/steward/status';
+export {
+  type EaCStatus,
+  EaCStatusProcessingTypes,
+} from 'jsr:@fathym/eac@0.2.112/steward/status';
 
 export type { ComponentType } from 'npm:preact@10.20.1';
 export {
@@ -32,6 +39,7 @@ export {
   BaseMessage,
   HumanMessage,
   type MessageFieldWithRole,
+  ToolMessage,
 } from 'npm:@langchain/core@0.3.42/messages';
 export type { StringPromptValue } from 'npm:@langchain/core@0.3.42/prompt_values';
 export { RemoteRunnable } from 'npm:@langchain/core@0.3.42/runnables/remote';

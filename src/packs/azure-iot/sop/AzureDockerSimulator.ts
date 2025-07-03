@@ -46,6 +46,8 @@ export function AzureDockerSimulator(
     AzureContainerAppJobDeployOutput[],
     AzureContainerAppJobStatsOutput
   >(lookup)
+    .DeployType(z.array(AzureContainerAppJobDeployOutputSchema))
+    .StatsType(AzureContainerAppJobStatsOutputSchema)
     .Steps(async ({ Secrets }) => {
       const subId = (await Secrets.Get('AZURE_IOT_SUBSCRIPTION_ID'))!;
 
@@ -87,7 +89,6 @@ export function AzureDockerSimulator(
         };
       },
     )
-    .StatsType(AzureContainerAppJobStatsOutputSchema)
     .Stats(async ({ Steps, EaC, Services: { ApplicationName } }) => {
       const ensured = await Steps.EnsureResGroup({
         WorkspaceLookup: EaC.EnterpriseLookup!,
@@ -98,7 +99,6 @@ export function AzureDockerSimulator(
         AppName: ApplicationName,
       });
     })
-    .DeployType(z.array(AzureContainerAppJobDeployOutputSchema))
     .Deploy(
       async ({
         Steps,
