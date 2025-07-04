@@ -91,7 +91,7 @@ export class AziManager {
       for await (const event of events) {
         const { event: eventName, name, data } = event;
 
-        console.log('[AziManager] Streamed event received', {
+        console.debug('[AziManager] Streamed event received', {
           eventName,
           name,
           data,

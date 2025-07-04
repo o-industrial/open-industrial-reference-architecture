@@ -14,12 +14,14 @@ export {
   EaCStatusProcessingTypes,
 } from 'jsr:@fathym/eac@0.2.112/steward/status';
 
-export type { ComponentType } from 'npm:preact@10.20.1';
+export type { RefObject, ComponentType } from 'npm:preact@10.20.1';
 export {
   type Dispatch,
   type StateUpdater,
   useCallback,
   useEffect,
+  useLayoutEffect,
+  useRef,
   useState,
 } from 'npm:preact@10.20.1/hooks';
 

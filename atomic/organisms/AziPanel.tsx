@@ -9,6 +9,7 @@ import {
   ToolMessage,
   ToolMessageChunk,
   useEffect,
+  useRef,
   useState,
 } from '../.deps.ts';
 
@@ -66,14 +67,25 @@ export function AziPanel({
   },
   renderMessage,
 }: AziPanelProps): JSX.Element {
-  const { state, send, peek, isSending } = workspaceMgr.UseAzi();
+  const {
+    state,
+    isSending,
+    send,
+    peek,
+    scrollRef,
+    registerStreamAnchor,
+  } = workspaceMgr.UseAzi();
 
+  // Initial peek when mounted
   useEffect(() => {
+    console.log('[AziPanel] Initial peek()');
     peek();
   }, []);
 
+  // On first load, trigger empty message to prompt stream
   useEffect(() => {
     if (state.Messages?.length === 0) {
+      console.log('[AziPanel] No messages — sending empty message');
       send('');
     }
   }, [state]);
@@ -83,7 +95,8 @@ export function AziPanel({
       return 'user';
     if (msg instanceof ToolMessage || msg instanceof ToolMessageChunk)
       return 'tool';
-    if (msg instanceof AIMessage || msg instanceof AIMessageChunk) return 'azi';
+    if (msg instanceof AIMessage || msg instanceof AIMessageChunk)
+      return 'azi';
     return 'azi';
   };
 
@@ -104,7 +117,7 @@ export function AziPanel({
 
       if (nextRole !== 'tool') {
         toolBlocks.push({ index: renderedMessages.length, messages: buffer });
-        renderedMessages.push(<></>); // Placeholder — replaced later
+        renderedMessages.push(<></>);
         buffer = [];
       }
     } else {
@@ -124,6 +137,7 @@ export function AziPanel({
             intentType={intentTypes[role] ?? IntentTypes.None}
             inline
             renderMessage={renderMessage}
+            class="mb-3"
           />
         );
       }
@@ -133,11 +147,12 @@ export function AziPanel({
   const lastToolBlockIndex = toolBlocks.length - 1;
 
   toolBlocks.forEach(({ index, messages }, i) => {
+    const isLast = i === lastToolBlockIndex;
     renderedMessages[index] = (
       <ReasoningBlock
         key={`tool-${index}`}
         messages={messages}
-        isStreaming={i === lastToolBlockIndex && isSending}
+        isStreaming={isLast && isSending}
       />
     );
   });
@@ -147,7 +162,16 @@ export function AziPanel({
       onClose={onClose}
       input={<AziChatInput onSend={send} disabled={isSending} />}
     >
-      {renderedMessages}
+      <div ref={scrollRef} class="overflow-y-auto h-full">
+        {renderedMessages}
+
+        <div
+          ref={(el) => {
+            registerStreamAnchor(el);
+          }}
+          class="h-4"
+        />
+      </div>
     </AziPanelTemplate>
   );
 }
