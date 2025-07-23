@@ -58,14 +58,13 @@ export class AziManager {
     if (this.sending) return;
 
     this.sending = true;
-    this.emit(); // notify listeners of sending=true
+    this.emit();
 
     console.info('[AziManager] Send initiated', { input, extraInputs });
 
     try {
       const humanMsg = new HumanMessage(input);
       const aiMsg = new AIMessage('');
-
       this.state.Messages.push(humanMsg, aiMsg);
       this.emit();
 
@@ -90,10 +89,12 @@ export class AziManager {
           data,
         });
 
+        // === Handle custom events ===
         if (eventName === 'on_custom_event' && name?.startsWith('thinky:')) {
           this.handleCustomEvent(name.replace('thinky:', ''), data);
         }
 
+        // === Handle LLM streaming ===
         if (
           eventName === 'on_chat_model_stream' ||
           eventName === 'on_llm_stream'
@@ -108,6 +109,27 @@ export class AziManager {
             this.emit();
           }
         }
+
+        // // === Handle tool stream ===
+        // if (eventName === 'on_tool_stream') {
+        //   const callId = data?.tool_call_id ?? data?.id ?? 'tool-call-unknown';
+        //   const name = data?.name ?? 'tool';
+        //   const contentChunk = data?.chunk ?? '';
+
+        //   if (!toolStreams[callId]) {
+        //     const toolMsg = new ToolMessage({
+        //       tool_call_id: callId,
+        //       name,
+        //       content: '',
+        //     });
+        //     this.state.Messages.push(toolMsg);
+        //     toolStreams[callId] = toolMsg;
+        //   }
+
+        //   // Accumulate the content
+        //   toolStreams[callId].content += contentChunk;
+        //   this.emit();
+        // }
       }
 
       console.info('[AziManager] Stream complete — syncing final state');
@@ -116,7 +138,7 @@ export class AziManager {
       console.error('[AziManager] Send error', err);
     } finally {
       this.sending = false;
-      this.emit(); // notify listeners of sending=false
+      this.emit();
     }
   }
 

@@ -28,6 +28,8 @@ export function AzureIoTHubDataConnection(
     AzureIoTHubDeviceOutput,
     AzureIoTHubDeviceStatsOutput
   >(lookup)
+    .StatsType(AzureIoTHubDeviceStatsOutputSchema)
+    .DeployType(AzureIoTHubDeviceOutputSchema)
     .Services((ctx, _ioc) => ({
       Skip: () => !ctx.AsCode.Metadata?.Enabled,
     }))
@@ -53,7 +55,6 @@ export function AzureIoTHubDataConnection(
         }
       },
     }))
-    .StatsType(AzureIoTHubDeviceStatsOutputSchema)
     .Stats(async ({ Steps, AsCode }) => {
       return await Steps.IoTStats({
         DeviceID: AsCode.Details!.DeviceID!,
@@ -62,7 +63,6 @@ export function AzureIoTHubDataConnection(
         IoTHubName: AsCode.Details!.IoTHubName!,
       });
     })
-    .DeployType(AzureIoTHubDeviceOutputSchema)
     .Deploy(async ({ Steps, AsCode, Lookup, EaC }) => {
       const deviceId = AsCode.Details!.DeviceID!;
       const isIoTEdge = AsCode.Details!.IsIoTEdge ?? false;

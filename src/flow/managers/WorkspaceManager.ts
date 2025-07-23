@@ -10,9 +10,12 @@ import {
   merge,
   Node,
   NodeChange,
+  RefObject,
   StateUpdater,
   useCallback,
   useEffect,
+  useLayoutEffect,
+  useRef,
   useState,
   XYPosition,
 } from '../.deps.ts';
@@ -116,23 +119,67 @@ export class WorkspaceManager {
     isSending: boolean;
     send: (text: string) => Promise<void>;
     peek: (inputs?: Record<string, unknown>) => Promise<void>;
+    scrollRef: RefObject<HTMLDivElement>;
+    registerStreamAnchor: (el: HTMLElement | null) => void;
+    isAutoScrolling: boolean;
   } {
     const [state, setState] = useState(this.Azi.GetState());
     const [isSending, setIsSending] = useState(this.Azi.IsSending());
 
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const streamAnchorRef = useRef<HTMLElement | null>(null);
+    const hasScrolledInitially = useRef(false);
+
+    const animateScroll = (container: HTMLDivElement) => {
+      requestAnimationFrame(() => {
+        container.scrollTo({ top: container.scrollHeight, behavior: 'auto' });
+
+        console.log(
+          '[UseAzi] ✅ Initial scroll to bottom:',
+          container.scrollHeight,
+        );
+      });
+    };
+
+    // === Scroll to bottom once on first non-empty message render
+    useLayoutEffect(() => {
+      const container = scrollRef.current;
+      if (!container) {
+        console.log('[UseAzi] ❌ No scroll container');
+        return;
+      }
+
+      if (hasScrolledInitially.current) {
+        console.log('[UseAzi] ⚠️ Already scrolled initially — skipping');
+        return;
+      }
+
+      if (state.Messages.length <= 1) {
+        console.log('[UseAzi] ⏳ No messages yet — waiting');
+        return;
+      }
+
+      animateScroll(container);
+    }, [state.Messages]);
+
+    // === Keep state synced
     useEffect(() => {
       const update = () => {
         setState(this.Azi.GetState());
         setIsSending(this.Azi.IsSending());
-      };
 
-      const unsubscribe = this.Azi.OnStateChanged(update);
-      return unsubscribe;
+        animateScroll(scrollRef.current!);
+      };
+      return this.Azi.OnStateChanged(update);
     }, []);
 
+    const registerStreamAnchor = (el: HTMLElement | null) => {
+      streamAnchorRef.current = el;
+    };
+
     const send = async (text: string) => {
-      setIsSending(true);
       await this.Azi.Send(text);
+      hasScrolledInitially.current = true;
       setIsSending(this.Azi.IsSending());
     };
 
@@ -146,6 +193,9 @@ export class WorkspaceManager {
       isSending,
       send,
       peek,
+      scrollRef,
+      registerStreamAnchor,
+      isAutoScrolling: true,
     };
   }
 

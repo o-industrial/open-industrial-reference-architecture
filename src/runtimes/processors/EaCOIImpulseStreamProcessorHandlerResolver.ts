@@ -22,6 +22,8 @@ import { isEaCOIImpulseStreamProcessor } from './EaCOIImpulseStreamProcessor.ts'
 import { ensureWorkspaceSurfaceJetStream } from '../../utils/ensureWorkspaceSurfaceJetStream.ts';
 import { ensureWorkspaceJetStreamBuilder } from '../../utils/ensureWorkspaceJetStream.ts';
 import { MaybeAsync } from '../../fluent/types/MaybeAsync.ts';
+import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
+import { OpenIndustrialAPIClient } from '../../api/clients/OpenIndustrialAPIClient.ts';
 
 type ImpulseRuntime = {
   AddWebSocketListener: (cb: (impulse: RuntimeImpulse) => void) => () => void;
@@ -46,7 +48,9 @@ export const EaCOIImpulseStreamProcessorHandlerResolver: ProcessorHandlerResolve
 
     pipeline.Append(establishJwtValidationMiddleware(loadJwtConfig()));
     pipeline.Append(connectNATSMiddleware() as EaCRuntimeHandler);
-    pipeline.Append(establishImpulseRuntime(impulseRuntimeCache, logger));
+    pipeline.Append(
+      establishImpulseRuntime(proc.OIServiceURL, impulseRuntimeCache, logger),
+    );
     pipeline.Append(streamImpulses(impulseRuntimeCache, logger));
 
     return (req, ctx) => {
@@ -99,11 +103,11 @@ function streamImpulses(
       surfaceFilter,
       schemaFilter,
     });
-    // return establishWebSocketOnly(req, logger);
   }) as EaCRuntimeHandler;
 }
 
 function establishImpulseRuntime(
+  oiServiceURL: string,
   impulseRuntimeCache: Map<string, Promise<ImpulseRuntime>>,
   logger: Logger,
 ): EaCRuntimeHandler {
@@ -140,12 +144,14 @@ function establishImpulseRuntime(
       impulseRuntimeCache.set(
         cacheKey,
         createImpulseRuntime({
+          oiServiceURL,
           workspace,
           surfaceFilter,
           JetStream,
           jsm: JetStreamManager,
           SC,
           logger,
+          jwt: State.JWT,
         }),
       );
     }
@@ -155,19 +161,23 @@ function establishImpulseRuntime(
 }
 
 async function createImpulseRuntime({
+  oiServiceURL,
   workspace,
   surfaceFilter,
   JetStream,
   jsm,
   SC,
   logger,
+  jwt,
 }: {
+  oiServiceURL: string;
   workspace: string;
   surfaceFilter?: string;
   JetStream: JetStreamClient;
   jsm: JetStreamManager;
   SC: Codec<string>;
   logger: Logger;
+  jwt: string;
 }): Promise<ImpulseRuntime> {
   const listeners = new Set<(imp: RuntimeImpulse) => void>();
   const subject = buildNATSSubject(workspace, surfaceFilter);
@@ -187,13 +197,23 @@ async function createImpulseRuntime({
       workspace,
       surfaceFilter,
       jsmDefaults,
-      true,
+      false,
     );
   } else {
-    await ensureWorkspaceJetStreamBuilder(jsm, workspace, jsmDefaults, true);
+    await ensureWorkspaceJetStreamBuilder(jsm, workspace, jsmDefaults, false);
   }
 
   logger.info('[ImpulseStream] ✅ Stream ensured, creating consumer');
+
+  let eac: EverythingAsCodeOIWorkspace;
+
+  const loadEaC = async () => {
+    const oiSvc = new OpenIndustrialAPIClient(new URL(oiServiceURL), jwt);
+
+    eac = await oiSvc.Workspaces.Get();
+  };
+
+  await loadEaC();
 
   const { stop } = await createEphemeralConsumer(
     JetStream,
@@ -205,11 +225,18 @@ async function createImpulseRuntime({
         logger.debug('[ImpulseStream] 📥 Impulse received', { subject });
         const impulse: RuntimeImpulse = JSON.parse(SC.decode(data));
 
+        if (!validateImpulseAgainstEaC(impulse, eac)) {
+          logger.warn('[WS] ❌ Impulse failed EaC validation');
+          return;
+        }
+
         headers?.forEach((val, key) => {
           impulse.Headers[key] = val;
         });
 
         listeners.forEach((cb) => cb(impulse));
+
+        loadEaC();
       } catch (err) {
         logger.warn('[ImpulseStream] ⚠️ Failed to parse impulse', err);
       }
@@ -390,9 +417,74 @@ async function handleImpulseStreamConnection({
   };
 
   socket.onerror = async (err) => {
-    logger.error('[WS] ❌ WebSocket error:', err);
+    logger.error('[WS] ❌ WebSocket error:');
+    logger.error(err);
     await shutdown();
   };
 
   return response;
+}
+
+function validateImpulseAgainstEaC(
+  impulse: RuntimeImpulse,
+  eac: EverythingAsCodeOIWorkspace,
+): boolean {
+  if (impulse.Source === 'DataConnection') {
+    return (
+      !!impulse.Metadata?.ConnectionLookup &&
+      !!eac.DataConnections?.[impulse.Metadata.ConnectionLookup]
+    );
+  }
+
+  if (impulse.Source === 'SurfaceConnection') {
+    return (
+      !!impulse.Metadata?.SurfaceLookup &&
+      !!impulse.Metadata?.ConnectionLookup &&
+      !!eac.Surfaces?.[impulse.Metadata.SurfaceLookup]?.DataConnections?.[
+        impulse.Metadata.ConnectionLookup
+      ]
+    );
+  }
+
+  if (impulse.Source === 'SurfaceSchema') {
+    return (
+      !!impulse.Metadata?.SurfaceLookup &&
+      !!impulse.Metadata?.SchemaLookup &&
+      !!eac.Surfaces?.[impulse.Metadata.SurfaceLookup]?.Schemas?.[
+        impulse.Metadata.SchemaLookup
+      ]
+    );
+  }
+
+  if (impulse.Source === 'SurfaceAgent') {
+    return (
+      !!impulse.Metadata?.SurfaceLookup &&
+      !!impulse.Metadata?.AgentLookup &&
+      !!impulse.Metadata?.MatchedSchemaLookup &&
+      !!eac.Surfaces?.[impulse.Metadata.SurfaceLookup]?.Agents?.[
+        impulse.Metadata.AgentLookup
+      ] &&
+      !!eac.Schemas?.[impulse.Metadata.MatchedSchemaLookup]
+    );
+  }
+
+  if (impulse.Source === 'SurfaceWarmQuery') {
+    // TODO(kbowers): When WarmQuery metadata is formalized, validate using eac.Surfaces
+    return (
+      !!impulse.Metadata?.SurfaceLookup && !!impulse.Metadata?.WarmQueryLookup
+    );
+  }
+
+  if (impulse.Source === 'Signal') {
+    return (
+      !!impulse.Metadata?.SignalLookup &&
+      !!impulse.Metadata?.TriggeringAgentLookup
+    );
+  }
+
+  if (impulse.Source === 'System') {
+    return true;
+  }
+
+  return false;
 }

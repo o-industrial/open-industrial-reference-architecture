@@ -21,33 +21,54 @@ export async function ensureJetStreamStream(
     retention: RetentionPolicy.Limits,
     storage: StorageType.File,
     max_msgs: 10_000,
-    max_age: 1000 * 60 * 60 * 24 * 7 * 1_000_000, // 7 days
-    duplicate_window: 60 * 1000 * 1_000_000, // 60s
+    max_age: 1000 * 60 * 60 * 24 * 7 * 1_000_000,
+    duplicate_window: 60 * 1000 * 1_000_000,
     max_consumers: -1,
     allow_rollup_hdrs: true,
     consumer_limits: {
-      inactive_threshold: 300 * 1000 * 1_000_000, // 5 min
+      inactive_threshold: 300 * 1000 * 1_000_000,
       max_ack_pending: 1000,
     },
     ...overrides,
   } as StreamConfig;
 
+  let streamCreatedOrUpdated = false;
+
   try {
     await jsm.streams.info(name);
-
     if (withUpdate) {
-      // Stream exists — update it
       await jsm.streams.update(name, {
         ...baseConfig,
         subjects,
       });
+      streamCreatedOrUpdated = true;
     }
   } catch {
-    // Stream doesn't exist — create it
-    await jsm.streams.add({
-      ...baseConfig,
-      name,
-      subjects,
-    });
+    await jsm.streams.add(baseConfig);
+    streamCreatedOrUpdated = true;
   }
+
+  if (streamCreatedOrUpdated) {
+    await waitForStreamReady(jsm, name);
+  }
+}
+
+export async function waitForStreamReady(
+  jsm: JetStreamManager,
+  name: string,
+  retries = 10,
+  delayMs = 100,
+): Promise<void> {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const info = await jsm.streams.info(name);
+      if (info?.config?.subjects?.length > 0) {
+        return; // Stream is fully registered and visible
+      }
+    } catch {
+      // stream may not be ready yet
+    }
+    await new Promise((res) => setTimeout(res, delayMs));
+  }
+  throw new Error(`[JetStream] Stream ${name} not ready after retries`);
 }

@@ -5,13 +5,18 @@ import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspa
 import { ClientHelperBridge } from './ClientHelperBridge.ts';
 import { RuntimeImpulse } from '../../types/RuntimeImpulse.ts';
 import { ImpulseStreamFilter } from '../../flow/managers/ImpulseStreamManager.ts';
+import { OpenIndustrialWorkspaceExplorerAPI } from './OpenIndustrialWorkspaceExplorerAPI.ts';
 
 /**
  * Subclient for managing OpenIndustrial workspace lifecycle and memory commits.
  */
 
 export class OpenIndustrialWorkspaceAPI {
-  constructor(private bridge: ClientHelperBridge) {}
+  public readonly Explorer: OpenIndustrialWorkspaceExplorerAPI;
+
+  constructor(private bridge: ClientHelperBridge) {
+    this.Explorer = new OpenIndustrialWorkspaceExplorerAPI(bridge);
+  }
 
   /**
    * Archive the current workspace.
