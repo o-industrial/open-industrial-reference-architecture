@@ -48,20 +48,26 @@ export function AziChatMessage({
   return (
     <div {...rest} class={classSet(['flex', rootAlign], rest)}>
       {inline ? (
-        <div class={`flex ${rowDirection} items-center gap-2 max-w-[80%]`}>
+        <div
+          class={`flex ${rowDirection} items-center gap-2 max-w-[80%] overflow-hidden`}
+          // style="overflow-wrap: break-word; word-break: break-word;"
+        >
           <Badge intentType={intentType}>{badge}</Badge>
           <div
-            class={`border rounded px-3 py-2 text-sm ${bubbleClass}`}
+            class={`border rounded px-3 py-2 text-sm ${bubbleClass} overflow-auto`}
             dangerouslySetInnerHTML={{ __html: rendered }}
           ></div>
         </div>
       ) : (
-        <div class={`flex flex-col ${containerAlign} max-w-[80%]`}>
+        <div
+          class={`flex flex-col ${containerAlign} max-w-[80%] overflow-hidden`}
+          // style="overflow-wrap: break-word; word-break: break-word;"
+        >
           <Badge intentType={intentType} class="mb-1">
             {badge}
           </Badge>
           <div
-            class={`border rounded px-3 py-2 text-sm ${bubbleClass}`}
+            class={`border rounded px-3 py-2 text-sm ${bubbleClass} overflow-auto`}
             dangerouslySetInnerHTML={{ __html: rendered }}
           ></div>
         </div>

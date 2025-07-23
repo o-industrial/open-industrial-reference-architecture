@@ -21,14 +21,14 @@ export class OpenIndustrialWorkspaceExplorerAPI {
    * @returns The structured query result from Azure Data Explorer.
    */
   public async RunNamedQuery(
-    queryLookup: string
+    queryLookup: string,
   ): Promise<AzureDataExplorerOutput> {
     const res = await fetch(
       this.bridge.url(`/api/workspaces/explorer/${queryLookup}`),
       {
         method: 'GET',
         headers: this.bridge.headers(),
-      }
+      },
     );
 
     if (!res.ok) {
@@ -47,7 +47,7 @@ export class OpenIndustrialWorkspaceExplorerAPI {
    * @returns The structured query result from Azure Data Explorer.
    */
   public async RunAdHocQuery(
-    details: EaCWarmQueryDetails
+    details: EaCWarmQueryDetails,
   ): Promise<AzureDataExplorerOutput> {
     const res = await fetch(this.bridge.url('/api/workspaces/explorer/warm-queries'), {
       method: 'POST',

@@ -57,7 +57,7 @@ export async function waitForStreamReady(
   jsm: JetStreamManager,
   name: string,
   retries = 10,
-  delayMs = 100
+  delayMs = 100,
 ): Promise<void> {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {

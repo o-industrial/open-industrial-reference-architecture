@@ -1,11 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import {
-  AIMessage,
-  type BaseMessage,
-  HumanMessage,
-  RemoteRunnable,
-  ToolMessage,
-} from '../.deps.ts';
+import { AIMessage, type BaseMessage, HumanMessage, RemoteRunnable } from '../.deps.ts';
 
 export type AziInputs = {
   Input?: string;
@@ -59,7 +53,7 @@ export class AziManager {
   // === Send (stream, then sync full state) ===
   public async Send(
     input: string,
-    extraInputs?: Record<string, unknown>
+    extraInputs?: Record<string, unknown>,
   ): Promise<void> {
     if (this.sending) return;
 
@@ -74,8 +68,6 @@ export class AziManager {
       this.state.Messages.push(humanMsg, aiMsg);
       this.emit();
 
-      const toolStreams: Record<string, ToolMessage> = {};
-
       const events = await this.circuit.streamEvents(
         { Input: input, ...(extraInputs ?? {}) },
         {
@@ -85,7 +77,7 @@ export class AziManager {
             checkpoint_ns: 'current',
           },
           recursionLimit: 100,
-        }
+        },
       );
 
       for await (const event of events) {
@@ -108,10 +100,9 @@ export class AziManager {
           eventName === 'on_llm_stream'
         ) {
           const chunk = data?.chunk;
-          const value =
-            typeof chunk === 'string'
-              ? chunk
-              : chunk?.content?.toString?.() ?? chunk?.value ?? '';
+          const value = typeof chunk === 'string'
+            ? chunk
+            : chunk?.content?.toString?.() ?? chunk?.value ?? '';
 
           if (value && typeof value === 'string') {
             aiMsg.content += value;

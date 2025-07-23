@@ -15,7 +15,7 @@ export class WarmQueryModuleBuilder<
   TDeploy = Status,
   TStats = unknown,
   TServices extends Record<string, unknown> = Record<string, unknown>,
-  TSteps extends StepInvokerMap = StepInvokerMap
+  TSteps extends StepInvokerMap = StepInvokerMap,
 > extends FluentModuleBuilder<
   TAsCode,
   FluentContext<TAsCode, TServices, TSteps>,

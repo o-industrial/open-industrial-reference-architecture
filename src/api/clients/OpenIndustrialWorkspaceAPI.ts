@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { EaCStatus, EaCUserRecord } from '../.client.deps.ts';
 import { EaCHistorySnapshot } from '../../types/EaCHistorySnapshot.ts';
 import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
@@ -54,7 +55,7 @@ export class OpenIndustrialWorkspaceAPI {
    * Create a new workspace from the given OpenIndustrial EaC configuration.
    */
   public async Create(
-    eac: EverythingAsCodeOIWorkspace
+    eac: EverythingAsCodeOIWorkspace,
   ): Promise<{ EnterpriseLookup: string; CommitID: string }> {
     const res = await fetch(this.bridge.url('/api/workspaces'), {
       method: 'POST',
@@ -142,7 +143,7 @@ export class OpenIndustrialWorkspaceAPI {
    */
   public StreamImpulses(
     onImpulse: (impulse: RuntimeImpulse) => void,
-    filters?: ImpulseStreamFilter
+    filters?: ImpulseStreamFilter,
   ): () => void {
     const url = new URL(this.bridge.url('/api/workspaces/impulses/stream'));
 
@@ -183,8 +184,7 @@ export class OpenIndustrialWorkspaceAPI {
 
     // ✅ Validate runtime impulse
     const isRuntimeImpulse = (obj: any): obj is RuntimeImpulse => {
-      const valid =
-        obj &&
+      const valid = obj &&
         typeof obj.Timestamp === 'string' &&
         typeof obj.Confidence === 'number' &&
         typeof obj.Payload === 'object' &&
@@ -235,7 +235,7 @@ export class OpenIndustrialWorkspaceAPI {
       console.info(
         '[StreamImpulses] 🔻 WebSocket closed:',
         evt.reason || '(no reason)',
-        ` | code=${evt.code}`
+        ` | code=${evt.code}`,
       );
     };
 
