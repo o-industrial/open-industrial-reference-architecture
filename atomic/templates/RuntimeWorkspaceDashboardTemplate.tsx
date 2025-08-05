@@ -8,6 +8,7 @@ import {
 } from '../.exports.ts';
 
 export type RuntimeWorkspaceDashboardTemplateProps = {
+  appBar?: preact.ComponentChildren;
   azi?: preact.ComponentChildren;
   breadcrumb?: preact.ComponentChildren;
   children?: preact.ComponentChildren;
@@ -18,6 +19,7 @@ export type RuntimeWorkspaceDashboardTemplateProps = {
 } & JSX.HTMLAttributes<HTMLDivElement>;
 
 export function RuntimeWorkspaceDashboardTemplate({
+  appBar,
   azi,
   children,
   inspector,
@@ -31,9 +33,10 @@ export function RuntimeWorkspaceDashboardTemplate({
   const [timelineExpanded, setTimelineExpanded] = useState(true);
 
   const bottomBothCollapsed = !streamExpanded && !timelineExpanded;
-  const topRowSpan = bottomBothCollapsed ? 8 : 6;
 
   // Top row layout
+  const topRowStart = 1;
+  const topRowSpan = bottomBothCollapsed ? 11 : 8;
   const aziColSpan = aziExpanded ? 4 : 1;
   const aziColStart = 1;
   const inspectorColSpan = inspectorExpanded ? 3 : 1;
@@ -42,7 +45,9 @@ export function RuntimeWorkspaceDashboardTemplate({
   const flowColSpan = inspectorColStart - flowColStart;
 
   // Bottom row layout (rowStart = 9)
-  const rowStart = bottomBothCollapsed ? 9 : 7;
+  const rowStart = topRowSpan + topRowStart;
+
+  const streamRowSpan = bottomBothCollapsed ? 1 : 4;
   const streamColSpan = bottomBothCollapsed
     ? 7
     : streamExpanded
@@ -50,7 +55,8 @@ export function RuntimeWorkspaceDashboardTemplate({
       ? 7
       : 15
     : 1;
-  const streamRowSpan = bottomBothCollapsed ? 1 : 3;
+
+  const timelineRowSpan = bottomBothCollapsed ? 1 : 4;
   const timelineColSpan = bottomBothCollapsed
     ? 9
     : timelineExpanded
@@ -63,157 +69,185 @@ export function RuntimeWorkspaceDashboardTemplate({
     : streamExpanded
     ? streamColSpan + 1
     : 2;
-  const timelineRowSpan = bottomBothCollapsed ? 1 : 3;
 
   return (
     <div
       class={classSet([
-        '-:grid -:h-full -:grid-cols-16 -:grid-rows-9',
+        '-:h-full',
         '-:gap-0 -:bg-neutral-950 -:text-neutral-100 -:overflow-hidden',
         '-:relative -:transition-all -:duration-500',
       ])}
       {...props}
     >
-      {/* Azi Panel */}
-      <PanelShell
-        rowSpan={topRowSpan}
-        colStart={aziColStart}
-        colSpan={aziColSpan}
-        class="-:border-r -:bg-neutral-900 relative"
-      >
-        <div
-          class={classSet([
-            '-:transition-all -:duration-500 -:overflow-hidden -:h-full',
-            aziExpanded ? '-:opacity-100 -:w-full' : '-:opacity-30 -:w-0',
-          ])}
+      {/* App Frame Bar */}
+      {appBar && (
+        <PanelShell
+          rowStart={1}
+          rowSpan={1}
+          colStart={1}
+          colSpan={12}
+          class="-:bg-neutral-950 -:border-b -:flex -:items-center -:justify-between -:max-h-10 -:min-h-10 -:overflow-visible"
         >
-          {azi}
-        </div>
-        <Action
-          title={aziExpanded ? 'Collapse Azi' : 'Expand Azi'}
-          styleType={ActionStyleTypes.Icon}
-          intentType={IntentTypes.Primary}
-          onClick={() => setAziExpanded(!aziExpanded)}
-          class="-:absolute -:top-1 -:right-1 -:z-50"
-        >
-          {aziExpanded ? (
-            <CloseIcon class="w-5 h-5" />
-          ) : (
-            <ExpandIcon class="w-5 h-5" />
-          )}
-        </Action>
-      </PanelShell>
+          {appBar}
+        </PanelShell>
+      )}
 
-      {/* Flow Panel */}
-      <PanelShell
-        rowSpan={topRowSpan}
-        colStart={flowColStart}
-        colSpan={flowColSpan}
-        class="-:border-x -:bg-neutral-950 -:flex -:flex-col"
+      <div
+        class={classSet([
+          '-:grid -:h-full -:grid-cols-16 -:grid-rows-12',
+        ])}
+        {...props}
       >
-        {props.breadcrumb && (
+        {/* Azi Panel */}
+        <PanelShell
+          rowStart={topRowStart}
+          rowSpan={topRowSpan}
+          colStart={aziColStart}
+          colSpan={aziColSpan}
+          class="-:border-r -:bg-neutral-900 relative"
+        >
           <div
-            class="-:col-span-full -:flex -:items-center"
-            style={{
-              gridColumnStart: flowColStart,
-              gridColumnEnd: flowColStart + flowColSpan,
-              gridRowStart: 1,
-            }}
+            class={classSet([
+              '-:transition-all -:duration-500 -:overflow-hidden -:h-full',
+              aziExpanded ? '-:opacity-100 -:w-full' : '-:opacity-30 -:w-0',
+            ])}
           >
-            {props.breadcrumb}
+            {azi}
           </div>
-        )}
+          <Action
+            title={aziExpanded ? 'Collapse Azi' : 'Expand Azi'}
+            styleType={ActionStyleTypes.Icon}
+            intentType={IntentTypes.Primary}
+            onClick={() => setAziExpanded(!aziExpanded)}
+            class="-:absolute -:top-1 -:right-1 -:z-50"
+          >
+            {aziExpanded ? (
+              <CloseIcon class="w-5 h-5" />
+            ) : (
+              <ExpandIcon class="w-5 h-5" />
+            )}
+          </Action>
+        </PanelShell>
 
-        {children}
-      </PanelShell>
-
-      {/* Inspector Panel */}
-      <PanelShell
-        rowSpan={topRowSpan}
-        colStart={inspectorColStart}
-        colSpan={inspectorColSpan}
-        class="-:border-l -:bg-neutral-900 relative"
-      >
-        <div
-          class={classSet([
-            '-:transition-all -:duration-500 -:overflow-hidden -:h-full',
-            inspectorExpanded ? '-:opacity-100 -:w-full' : '-:opacity-30 -:w-0',
-          ])}
+        {/* Flow Panel */}
+        <PanelShell
+          rowStart={topRowStart}
+          rowSpan={topRowSpan}
+          colStart={flowColStart}
+          colSpan={flowColSpan}
+          class="-:border-x -:bg-neutral-950 -:flex -:flex-col"
         >
-          {inspector}
-        </div>
-        <Action
-          title={inspectorExpanded ? 'Collapse Inspector' : 'Expand Inspector'}
-          styleType={ActionStyleTypes.Icon}
-          intentType={IntentTypes.Primary}
-          onClick={() => setInspectorExpanded(!inspectorExpanded)}
-          class="-:absolute -:top-1 -:right-1 -:z-50"
-        >
-          {inspectorExpanded ? (
-            <CloseIcon class="w-5 h-5" />
-          ) : (
-            <ExpandIcon class="w-5 h-5" />
+          {props.breadcrumb && (
+            <div
+              class="-:col-span-full -:flex -:items-center"
+              style={{
+                gridColumnStart: flowColStart,
+                gridColumnEnd: flowColStart + flowColSpan,
+                gridRowStart: 1,
+              }}
+            >
+              {props.breadcrumb}
+            </div>
           )}
-        </Action>
-      </PanelShell>
 
-      {/* Stream Panel
+          {children}
+        </PanelShell>
+
+        {/* Inspector Panel */}
+        <PanelShell
+          rowStart={topRowStart}
+          rowSpan={topRowSpan}
+          colStart={inspectorColStart}
+          colSpan={inspectorColSpan}
+          class="-:border-l -:bg-neutral-900 relative"
+        >
+          <div
+            class={classSet([
+              '-:transition-all -:duration-500 -:overflow-hidden -:h-full',
+              inspectorExpanded
+                ? '-:opacity-100 -:w-full'
+                : '-:opacity-30 -:w-0',
+            ])}
+          >
+            {inspector}
+          </div>
+          <Action
+            title={
+              inspectorExpanded ? 'Collapse Inspector' : 'Expand Inspector'
+            }
+            styleType={ActionStyleTypes.Icon}
+            intentType={IntentTypes.Primary}
+            onClick={() => setInspectorExpanded(!inspectorExpanded)}
+            class="-:absolute -:top-1 -:right-1 -:z-50"
+          >
+            {inspectorExpanded ? (
+              <CloseIcon class="w-5 h-5" />
+            ) : (
+              <ExpandIcon class="w-5 h-5" />
+            )}
+          </Action>
+        </PanelShell>
+
+        {/* Stream Panel
 
       TODO:  Support the tabbed approach to including AziResponds here*/}
-      <PanelShell
-        rowStart={rowStart}
-        rowSpan={streamRowSpan}
-        colStart={1}
-        colSpan={streamColSpan}
-        class="-:border-t -:bg-neutral-900 -:flex -:flex-col -:h-full relative"
-      >
-        <div
-          class={classSet([
-            '-:transition-all -:duration-500 -:overflow-hidden -:h-full',
-            streamExpanded ? '-:opacity-100 -:w-full' : '-:opacity-30 -:w-0',
-          ])}
+        <PanelShell
+          rowStart={rowStart}
+          rowSpan={streamRowSpan}
+          colStart={1}
+          colSpan={streamColSpan}
+          class="-:border-t -:bg-neutral-900 -:flex -:flex-col -:h-full relative"
         >
-          {stream}
-        </div>
-        <Action
-          title={streamExpanded ? 'Collapse Stream' : 'Expand Stream'}
-          styleType={ActionStyleTypes.Icon}
-          intentType={IntentTypes.Primary}
-          onClick={() => setStreamExpanded(!streamExpanded)}
-          class="-:absolute -:top-1 -:right-1 -:z-50"
-        >
-          {streamExpanded ? <CloseIcon class="w-5 h-5" /> : '▲'}
-        </Action>
-      </PanelShell>
+          <div
+            class={classSet([
+              '-:transition-all -:duration-500 -:overflow-hidden -:h-full',
+              streamExpanded ? '-:opacity-100 -:w-full' : '-:opacity-30 -:w-0',
+            ])}
+          >
+            {stream}
+          </div>
+          <Action
+            title={streamExpanded ? 'Collapse Stream' : 'Expand Stream'}
+            styleType={ActionStyleTypes.Icon}
+            intentType={IntentTypes.Primary}
+            onClick={() => setStreamExpanded(!streamExpanded)}
+            class="-:absolute -:top-1 -:right-1 -:z-50"
+          >
+            {streamExpanded ? <CloseIcon class="w-5 h-5" /> : '▲'}
+          </Action>
+        </PanelShell>
 
-      {/* Timeline Panel */}
-      <PanelShell
-        rowStart={rowStart}
-        rowSpan={timelineRowSpan}
-        colStart={timelineColStart}
-        colSpan={timelineColSpan}
-        class="-:border-t -:border-l -:bg-neutral-800 -:flex -:flex-col -:h-full relative"
-      >
-        <div
-          class={classSet([
-            '-:transition-all -:duration-500 -:overflow-hidden -:h-full',
-            timelineExpanded ? '-:opacity-100 -:w-full' : '-:opacity-30 -:w-0',
-          ])}
+        {/* Timeline Panel */}
+        <PanelShell
+          rowStart={rowStart}
+          rowSpan={timelineRowSpan}
+          colStart={timelineColStart}
+          colSpan={timelineColSpan}
+          class="-:border-t -:border-l -:bg-neutral-800 -:flex -:flex-col -:h-full relative"
         >
-          {timeline}
-        </div>
-        <Action
-          title={timelineExpanded ? 'Collapse Timeline' : 'Expand Timeline'}
-          styleType={ActionStyleTypes.Icon}
-          intentType={IntentTypes.Primary}
-          onClick={() => setTimelineExpanded(!timelineExpanded)}
-          class="-:absolute -:top-1 -:right-1 -:z-50"
-        >
-          {timelineExpanded ? <CloseIcon class="w-5 h-5" /> : '▲'}
-        </Action>
-      </PanelShell>
+          <div
+            class={classSet([
+              '-:transition-all -:duration-500 -:overflow-hidden -:h-full',
+              timelineExpanded
+                ? '-:opacity-100 -:w-full'
+                : '-:opacity-30 -:w-0',
+            ])}
+          >
+            {timeline}
+          </div>
+          <Action
+            title={timelineExpanded ? 'Collapse Timeline' : 'Expand Timeline'}
+            styleType={ActionStyleTypes.Icon}
+            intentType={IntentTypes.Primary}
+            onClick={() => setTimelineExpanded(!timelineExpanded)}
+            class="-:absolute -:top-1 -:right-1 -:z-50"
+          >
+            {timelineExpanded ? <CloseIcon class="w-5 h-5" /> : '▲'}
+          </Action>
+        </PanelShell>
 
-      {props.modals}
+        {props.modals}
+      </div>
     </div>
   );
 }
