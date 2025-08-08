@@ -61,6 +61,7 @@ import {
   WorkspaceSettingsModal,
 } from "../../../atomic/organisms/modals/.exports.ts";
 import { MenuActionItem } from "../../../atomic/molecules/FlyoutMenu.tsx";
+import { EaCLicenseAsCode, EaCUserLicense } from "@fathym/eac-licensing";
 
 export type AccountProfile = {
   Name: string;
@@ -240,6 +241,138 @@ export class WorkspaceManager {
       showDataSuite,
       showBilling,
       showLicense,
+    };
+  }
+
+  public UseLicenses(): {
+    license?: EaCLicenseAsCode;
+    licLookup?: string;
+    userLicense?: EaCUserLicense;
+    stripePublishableKey?: string;
+    isMonthly: boolean;
+    activePlan?: string;
+    clientSecret?: string;
+    error: string;
+    loading: boolean;
+    activateMonthly: () => Promise<void>;
+    activatePlan: (planLookup: string, isMonthly: boolean) => Promise<void>;
+    setActivePlan: (lookup: string | undefined) => void;
+    setIsMonthly: (monthly: boolean) => void;
+  } {
+    const [license, setLicense] = useState<EaCLicenseAsCode | undefined>();
+    const [licLookup, setLicLookup] = useState<string | undefined>();
+    const [stripePublishableKey, setStripePublishableKey] =
+      useState<string | undefined>();
+    const [userLicense] = useState<EaCUserLicense | undefined>(undefined);
+    const [isMonthly, setIsMonthly] = useState(true);
+    const [activePlan, setActivePlan] = useState<string | undefined>();
+    const [clientSecret, setClientSecret] = useState<string | undefined>();
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+      const eac = this.EaC.GetEaC();
+      const lookup = Object.keys(eac.Licenses ?? {})[0];
+
+      if (lookup) {
+        setLicLookup(lookup);
+        const lic = eac.Licenses![lookup];
+        setLicense(lic);
+        // deno-lint-ignore no-explicit-any
+        const details: any = lic.Details;
+        setStripePublishableKey(details?.PublishableKey);
+      }
+    }, []);
+
+    const activateMonthly = async () => {
+      const next = !isMonthly;
+      setIsMonthly(next);
+
+      if (activePlan) {
+        await activatePlan(activePlan, next);
+      }
+    };
+
+    const activatePlan = async (
+      planLookup: string,
+      monthly: boolean,
+    ): Promise<void> => {
+      if (!license || !licLookup) return;
+
+      const interval = monthly ? 'month' : 'year';
+
+      const plans = Object.keys(license.Plans)
+        .map((pl) => {
+          const plan = license.Plans[pl];
+
+          const prices = Object.keys(plan.Prices).map((pr) => {
+            const price = plan.Prices[pr];
+
+            return {
+              Lookup: `${pl}-${price.Details!.Interval}`,
+              PlanLookup: pl,
+              PriceLookup: pr,
+              Interval: price.Details!.Interval,
+            };
+          });
+
+          return prices;
+        })
+        .flatMap((p) => p);
+
+      const selected = plans.find((p) =>
+        p.Lookup === `${planLookup}-${interval}`
+      );
+      if (!selected) return;
+
+      setLoading(true);
+      setError('');
+
+      try {
+        const resp = await fetch(
+          `/workspace/api/${licLookup}/licensing/subscribe`,
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              LicenseLookup: licLookup,
+              PlanLookup: planLookup,
+              PriceLookup: selected.PriceLookup,
+              SubscriptionID: '',
+            } as EaCUserLicense),
+          },
+        );
+
+        const licData = await resp.json();
+
+        if (licData?.Subscription) {
+          setClientSecret(
+            licData.Subscription.latest_invoice.payment_intent.client_secret,
+          );
+          setActivePlan(planLookup);
+        } else if (licData?.Error) {
+          setError(licData.Error);
+        }
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return {
+      license,
+      licLookup,
+      userLicense,
+      stripePublishableKey,
+      isMonthly,
+      activePlan,
+      clientSecret,
+      error,
+      loading,
+      activateMonthly,
+      activatePlan,
+      setActivePlan,
+      setIsMonthly,
     };
   }
 
