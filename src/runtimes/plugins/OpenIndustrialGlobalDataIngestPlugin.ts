@@ -18,6 +18,7 @@ export class OpenIndustrialGlobalDataIngestPlugin implements EaCRuntimePlugin {
     protected eventHubConnStr: string,
     protected eventHubName: string,
     protected iotHubConnStr: string,
+    protected oiSvcUrl: string,
     protected impulseStreamPath: string = '/api/workspaces/impulses/stream',
   ) {}
 
@@ -70,6 +71,7 @@ export class OpenIndustrialGlobalDataIngestPlugin implements EaCRuntimePlugin {
           Type: 'OIImpulseStream',
           NATSServer: this.natsServer,
           NATSToken: this.natsToken,
+          OIServiceURL: this.oiSvcUrl,
         } as EaCOIImpulseStreamProcessor,
       };
     }

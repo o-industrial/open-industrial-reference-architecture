@@ -4,6 +4,8 @@ export type EaCOIImpulseStreamProcessor = {
   NATSServer: string;
 
   NATSToken?: string;
+
+  OIServiceURL: string;
 } & EaCProcessor<'OIImpulseStream'>;
 
 export function isEaCOIImpulseStreamProcessor(

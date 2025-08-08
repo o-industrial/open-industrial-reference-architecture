@@ -36,25 +36,47 @@ function ReasoningBlock({
   messages: ToolMessage[];
   isStreaming: boolean;
 }) {
-  const content = messages
-    .map((msg) => {
-      try {
-        return JSON.stringify(JSON.parse(msg.content.toString()), null, 2);
-      } catch {
-        return msg.content;
-      }
-    })
-    .join('\n\n');
+  const renderMessage = (msg: ToolMessage, index: number) => {
+    let parsed: unknown;
+    let pretty = msg.content.toString();
+
+    try {
+      parsed = JSON.parse(msg.content.toString());
+      pretty = JSON.stringify(parsed, null, 2);
+    } catch {
+      // fall back to plain text
+    }
+
+    return (
+      <details
+        key={index}
+        class="text-sm text-tertiary my-2 bg-muted rounded px-4 py-2 overflow-hidden"
+      >
+        <summary class="cursor-pointer text-xs">🧠 Step {index + 1}</summary>
+        <pre class="overflow-auto text-xs whitespace-pre-wrap mt-2 break-words">
+          {pretty}
+        </pre>
+      </details>
+    );
+  };
+
+  if (messages.length === 1) {
+    return (
+      <details class="text-sm text-tertiary my-2 max-w-[80%] overflow-hidden">
+        <summary class="cursor-pointer text-xs">
+          🧠 {isStreaming ? 'Reasoning…' : ''}
+        </summary>
+        <pre class="bg-muted rounded px-4 py-2 mt-2 overflow-auto text-xs whitespace-pre-wrap break-words">
+          {renderMessage(messages[0], 0).props.children[1].props.children}
+        </pre>
+      </details>
+    );
+  }
 
   return (
-    <details class="text-sm text-tertiary my-2">
-      <summary class="cursor-pointer text-xs">
-        🧠 {isStreaming ? 'Reasoning…' : ''}
-      </summary>
-      <pre class="bg-muted rounded px-4 py-2 mt-2 overflow-auto text-xs whitespace-pre-wrap">
-        {content}
-      </pre>
-    </details>
+    <div class="text-sm text-tertiary my-2 max-w-[80%]">
+      {messages.map(renderMessage)}
+    </div>
   );
 }
 
@@ -97,8 +119,7 @@ export function AziPanel({
       return 'user';
     if (msg instanceof ToolMessage || msg instanceof ToolMessageChunk)
       return 'tool';
-    if (msg instanceof AIMessage || msg instanceof AIMessageChunk)
-      return 'azi';
+    if (msg instanceof AIMessage || msg instanceof AIMessageChunk) return 'azi';
     return 'azi';
   };
 

@@ -44,6 +44,27 @@ import { RuntimeImpulse, RuntimeImpulseSources } from '../../types/RuntimeImpuls
 import { IntentStyleMap } from '../../../atomic/utils/getIntentStyles.ts';
 import { impulseSourceColorMap } from '../../../atomic/utils/impulseSourceColorMap.ts';
 
+export type AccountProfile = {
+  Name: string;
+  Email: string;
+  Username: string;
+  Password?: string; // write-only
+  AvatarUrl?: string;
+  Bio?: string;
+  Location?: string;
+  Website?: string;
+  Additional?: string; // <-- unify name with modal
+  CreatedAt?: string;
+  ID?: string;
+};
+
+export type TeamMembership = {
+  Lookup: string; // team id
+  Team: string; // team display name
+  Role: 'Owner' | 'Editor' | 'Viewer';
+  MemberSince: string; // friendly text
+};
+
 export class WorkspaceManager {
   protected currentScope: {
     Scope: NodeScopeTypes;
@@ -114,6 +135,131 @@ export class WorkspaceManager {
   }
 
   // === Hooks ===
+  public UseAppMenu() {
+  }
+
+  public UseAccountProfile(): {
+    profile: AccountProfile;
+    teams: TeamMembership[];
+    hasChanges: boolean;
+
+    // used by modal
+    setProfile: (next: Partial<AccountProfile>) => void;
+    setAvatarUrl: (url: string) => void;
+
+    updateTeamRole: (teamLookup: string, role: TeamMembership['Role']) => void;
+    leaveTeam: (teamLookup: string) => void;
+
+    save: () => Promise<void>;
+    deleteAccount: () => Promise<void>;
+    signOut: () => Promise<void>;
+  } {
+    // Seed mock profile (hydrate from API in real impl)
+    const initial: AccountProfile = {
+      Name: 'Jane Doe',
+      Email: 'jane.doe@factory.com',
+      Username: 'jane_d',
+      AvatarUrl: '',
+      Bio: '',
+      Location: '',
+      Website: '',
+      Additional: '',
+      CreatedAt: '2025-07-01',
+      ID: 'user_123',
+    };
+
+    const [profile, setProfileState] = useState<AccountProfile>(initial);
+    const [hasChanges, setHasChanges] = useState(false);
+
+    // Mock teams (swap to this.Team?.ListTeams?.() later)
+    const [teams, setTeams] = useState<TeamMembership[]>([
+      {
+        Lookup: 'a',
+        Team: 'Team A',
+        Role: 'Viewer',
+        MemberSince: '2 days ago',
+      },
+      {
+        Lookup: 'b',
+        Team: 'Team B',
+        Role: 'Editor',
+        MemberSince: '1 month ago',
+      },
+      {
+        Lookup: 'c',
+        Team: 'Team C',
+        Role: 'Owner',
+        MemberSince: '2 months ago',
+      },
+    ]);
+
+    // --- Updaters used by the modal
+    const setProfile = (next: Partial<AccountProfile>) => {
+      setProfileState((p) => ({ ...p, ...next }));
+      setHasChanges(true);
+    };
+
+    const setAvatarUrl = (url: string) => setProfile({ AvatarUrl: url });
+
+    const updateTeamRole = (
+      teamLookup: string,
+      role: TeamMembership['Role'],
+    ) => {
+      setTeams((prev) => prev.map((t) => (t.Lookup === teamLookup ? { ...t, Role: role } : t)));
+    };
+
+    const leaveTeam = (teamLookup: string) => {
+      // TODO: this.Team?.LeaveTeam?.(teamLookup)
+      setTeams((prev) => prev.filter((t) => t.Lookup !== teamLookup));
+    };
+
+    // --- Persistence (mock)
+    const save = async () => {
+      const { Password: _pw, ...persistable } = profile;
+      console.log('💾 [UseAccountProfile] saving profile →', persistable);
+
+      if (profile.Password) {
+        console.log('🔐 [UseAccountProfile] updating password (mock)…');
+        // await this.oiSvc.Users.UpdatePassword(profile.Password)
+      }
+
+      setHasChanges(false);
+      return Promise.resolve();
+    };
+
+    const signOut = async () => {
+      console.log('Signing out...');
+    };
+
+    const deleteAccount = async () => {
+      const ok1 = confirm('Permanently delete your account? There is no undo.');
+      const ok2 = ok1 &&
+        confirm(
+          'Workspaces owned solely by this account will be lost. Continue?',
+        );
+      if (!ok2) return;
+
+      // await this.oiSvc.Users.DeleteMyAccount()
+      console.warn('🗑️ [UseAccountProfile] account deleted (mock)');
+      location.assign('/'); // simulate sign-out
+    };
+
+    return {
+      profile,
+      teams,
+      hasChanges,
+
+      setProfile,
+      setAvatarUrl,
+
+      updateTeamRole,
+      leaveTeam,
+
+      save,
+      deleteAccount,
+      signOut,
+    };
+  }
 
   public UseAzi(circuitUrl?: string): {
     state: AziState;
@@ -672,8 +818,13 @@ export class WorkspaceManager {
   public UseWorkspaceSettings(): {
     currentWorkspace: WorkspaceSummary;
     teamMembers: TeamMember[];
-    inviteMember: (email: string, role: string) => void;
+    inviteMember: (
+      email: string,
+      role: TeamMember['Role'],
+      name?: string,
+    ) => void;
     removeMember: (email: string) => void;
+    updateMemberRole: (email: string, role: TeamMember['Role']) => void;
     update: (next: Partial<EaCEnterpriseDetails>) => void;
     save: () => Promise<void>;
     archive: () => void;
@@ -708,15 +859,16 @@ export class WorkspaceManager {
       return () => unsubscribe();
     }, []);
 
-    const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+    const [teamMembers, setTeamMembers] = useState<TeamMember[]>(
+      this.Team?.ListUsers?.() ?? [],
+    );
 
     useEffect(() => {
-      const members = this.Team?.ListUsers?.() ?? [
-        { Email: 'admin@factory.com', Role: 'Owner' },
-        { Email: 'engineer@factory.com', Role: 'Editor' },
-      ];
+      const unsubscribe = this.Team?.OnChange?.(() => {
+        setTeamMembers(this.Team.ListUsers());
+      });
 
-      setTeamMembers(members);
+      return () => unsubscribe?.();
     }, []);
 
     const [workspaces, setWorkspaces] = useState<WorkspaceSummary[]>([]);
@@ -760,15 +912,21 @@ export class WorkspaceManager {
       });
     };
 
-    const inviteMember = (email: string, role: string) => {
+    const inviteMember = (
+      email: string,
+      role: TeamMember['Role'],
+      name?: string,
+    ) => {
       if (!email) return;
-      this.Team?.InviteUser?.(email, role);
-      setTeamMembers((prev) => [...prev, { Email: email, Role: role }]);
+      this.Team?.InviteUser?.(email, role, name);
     };
 
     const removeMember = (email: string) => {
       this.Team?.RemoveUser?.(email);
-      setTeamMembers((prev) => prev.filter((m) => m.Email !== email));
+    };
+
+    const updateMemberRole = (email: string, role: TeamMember['Role']) => {
+      this.Team?.UpdateUserRole?.(email, role);
     };
 
     const switchToWorkspace = (_lookup: string) => {
@@ -784,6 +942,7 @@ export class WorkspaceManager {
       teamMembers,
       inviteMember,
       removeMember,
+      updateMemberRole,
       update,
       save,
       archive,

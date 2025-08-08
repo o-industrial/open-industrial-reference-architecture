@@ -27,15 +27,6 @@ export type EaCAzureDockerSimulatorDetails = EaCSimulatorDetails<'AzureDocker'> 
 export const EaCAzureDockerSimulatorDetailsSchema: z.ZodType<EaCAzureDockerSimulatorDetails> =
   EaCSimulatorDetailsSchema.extend({
     Type: z.literal('AzureDocker'),
-    DeviceCount: z.number().optional().describe('Number of simulated devices.'),
-    DevicePrefix: z
-      .string()
-      .optional()
-      .describe('Prefix for simulated device IDs.'),
-    DeviceIndexOffset: z
-      .number()
-      .optional()
-      .describe('Starting index for simulated device IDs.'),
     Variables: z
       .record(z.unknown())
       .optional()

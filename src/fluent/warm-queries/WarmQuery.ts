@@ -11,9 +11,9 @@ export function WarmQuery<
   TDeploy = unknown,
   TStats = unknown,
   TServices extends Record<string, unknown> = Record<string, unknown>,
-  TSteps extends StepInvokerMap = StepInvokerMap
+  TSteps extends StepInvokerMap = StepInvokerMap,
 >(
-  lookup: string
+  lookup: string,
 ): WarmQueryModuleBuilder<
   TAsCode,
   TOutput,
