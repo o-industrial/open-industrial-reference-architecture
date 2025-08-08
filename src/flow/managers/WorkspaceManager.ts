@@ -18,31 +18,37 @@ import {
   useRef,
   useState,
   XYPosition,
-} from '../.deps.ts';
+} from "../.deps.ts";
 
-import { FlowNodeData } from '../types/react/FlowNodeData.ts';
-import { GraphStateManager } from './GraphStateManager.ts';
-import { ImpulseStreamFilter, ImpulseStreamManager } from './ImpulseStreamManager.ts';
-import { InteractionManager } from './InteractionManager.ts';
-import { SelectionManager } from './SelectionManager.ts';
-import { AziManager, AziState } from './AziManager.ts';
-import { SimulatorLibraryManager } from './SimulatorLibraryManager.ts';
-import { EaCManager } from './EaCManager.ts';
-import { NodeScopeTypes } from '../types/graph/NodeScopeTypes.ts';
-import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
-import { HistoryManager } from './HistoryManager.ts';
-import { TeamManager } from './TeamManager.ts';
-import { NodeEventManager } from './NodeEventManager.ts';
-import { InspectorCommonProps } from '../types/nodes/InspectorCommonProps.ts';
-import { WorkspaceSummary } from '../types/WorkspaceSummary.ts';
-import { TeamMember } from '../types/TeamMember.ts';
-import { BreadcrumbPart } from '../types/BreadcrumbPart.ts';
-import { IntentTypes } from '../../types/IntentTypes.ts';
-import { EaCNodeCapabilityManager, NodePreset } from '../.exports.ts';
-import { OpenIndustrialAPIClient } from '../../api/clients/OpenIndustrialAPIClient.ts';
-import { RuntimeImpulse, RuntimeImpulseSources } from '../../types/RuntimeImpulse.ts';
-import { IntentStyleMap } from '../../../atomic/utils/getIntentStyles.ts';
-import { impulseSourceColorMap } from '../../../atomic/utils/impulseSourceColorMap.ts';
+import { FlowNodeData } from "../types/react/FlowNodeData.ts";
+import { GraphStateManager } from "./GraphStateManager.ts";
+import {
+  ImpulseStreamFilter,
+  ImpulseStreamManager,
+} from "./ImpulseStreamManager.ts";
+import { InteractionManager } from "./InteractionManager.ts";
+import { SelectionManager } from "./SelectionManager.ts";
+import { AziManager, AziState } from "./AziManager.ts";
+import { SimulatorLibraryManager } from "./SimulatorLibraryManager.ts";
+import { EaCManager } from "./EaCManager.ts";
+import { NodeScopeTypes } from "../types/graph/NodeScopeTypes.ts";
+import { EverythingAsCodeOIWorkspace } from "../../eac/EverythingAsCodeOIWorkspace.ts";
+import { HistoryManager } from "./HistoryManager.ts";
+import { TeamManager } from "./TeamManager.ts";
+import { NodeEventManager } from "./NodeEventManager.ts";
+import { InspectorCommonProps } from "../types/nodes/InspectorCommonProps.ts";
+import { WorkspaceSummary } from "../types/WorkspaceSummary.ts";
+import { TeamMember } from "../types/TeamMember.ts";
+import { BreadcrumbPart } from "../types/BreadcrumbPart.ts";
+import { IntentTypes } from "../../types/IntentTypes.ts";
+import { EaCNodeCapabilityManager, NodePreset } from "../.exports.ts";
+import { OpenIndustrialAPIClient } from "../../api/clients/OpenIndustrialAPIClient.ts";
+import {
+  RuntimeImpulse,
+  RuntimeImpulseSources,
+} from "../../types/RuntimeImpulse.ts";
+import { IntentStyleMap } from "../../../atomic/utils/getIntentStyles.ts";
+import { impulseSourceColorMap } from "../../../atomic/utils/impulseSourceColorMap.ts";
 
 export type AccountProfile = {
   Name: string;
@@ -61,7 +67,7 @@ export type AccountProfile = {
 export type TeamMembership = {
   Lookup: string; // team id
   Team: string; // team display name
-  Role: 'Owner' | 'Editor' | 'Viewer';
+  Role: "Owner" | "Editor" | "Viewer";
   MemberSince: string; // friendly text
 };
 
@@ -87,7 +93,7 @@ export class WorkspaceManager {
     eac: EverythingAsCodeOIWorkspace,
     protected oiSvc: OpenIndustrialAPIClient,
     capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>,
-    scope: NodeScopeTypes = 'workspace',
+    scope: NodeScopeTypes = "workspace",
     aziCircuitUrl: string,
     jwt?: string,
   ) {
@@ -126,7 +132,7 @@ export class WorkspaceManager {
 
     this.Interaction.BindEaCManager(this.EaC);
 
-    console.log('🚀 FlowManager initialized:', {
+    console.log("🚀 FlowManager initialized:", {
       scope: this.currentScope,
       nodes: this.Graph.GetNodes().length,
       edges: this.Graph.GetEdges().length,
@@ -135,8 +141,7 @@ export class WorkspaceManager {
 
   // === Hooks ===
 
-  public UseAppMenu() {
-  }
+  public UseAppMenu() {}
 
   public UseAccountProfile(): {
     profile: AccountProfile;
@@ -147,7 +152,7 @@ export class WorkspaceManager {
     setProfile: (next: Partial<AccountProfile>) => void;
     setAvatarUrl: (url: string) => void;
 
-    updateTeamRole: (teamLookup: string, role: TeamMembership['Role']) => void;
+    updateTeamRole: (teamLookup: string, role: TeamMembership["Role"]) => void;
     leaveTeam: (teamLookup: string) => void;
 
     save: () => Promise<void>;
@@ -156,16 +161,16 @@ export class WorkspaceManager {
   } {
     // Seed mock profile (hydrate from API in real impl)
     const initial: AccountProfile = {
-      Name: 'Jane Doe',
-      Email: 'jane.doe@factory.com',
-      Username: 'jane_d',
-      AvatarUrl: '',
-      Bio: '',
-      Location: '',
-      Website: '',
-      Additional: '',
-      CreatedAt: '2025-07-01',
-      ID: 'user_123',
+      Name: "Jane Doe",
+      Email: "jane.doe@factory.com",
+      Username: "jane_d",
+      AvatarUrl: "",
+      Bio: "",
+      Location: "",
+      Website: "",
+      Additional: "",
+      CreatedAt: "2025-07-01",
+      ID: "user_123",
     };
 
     const [profile, setProfileState] = useState<AccountProfile>(initial);
@@ -174,22 +179,22 @@ export class WorkspaceManager {
     // Mock teams (swap to this.Team?.ListTeams?.() later)
     const [teams, setTeams] = useState<TeamMembership[]>([
       {
-        Lookup: 'a',
-        Team: 'Team A',
-        Role: 'Viewer',
-        MemberSince: '2 days ago',
+        Lookup: "a",
+        Team: "Team A",
+        Role: "Viewer",
+        MemberSince: "2 days ago",
       },
       {
-        Lookup: 'b',
-        Team: 'Team B',
-        Role: 'Editor',
-        MemberSince: '1 month ago',
+        Lookup: "b",
+        Team: "Team B",
+        Role: "Editor",
+        MemberSince: "1 month ago",
       },
       {
-        Lookup: 'c',
-        Team: 'Team C',
-        Role: 'Owner',
-        MemberSince: '2 months ago',
+        Lookup: "c",
+        Team: "Team C",
+        Role: "Owner",
+        MemberSince: "2 months ago",
       },
     ]);
 
@@ -203,9 +208,11 @@ export class WorkspaceManager {
 
     const updateTeamRole = (
       teamLookup: string,
-      role: TeamMembership['Role'],
+      role: TeamMembership["Role"],
     ) => {
-      setTeams((prev) => prev.map((t) => (t.Lookup === teamLookup ? { ...t, Role: role } : t)));
+      setTeams((prev) =>
+        prev.map((t) => (t.Lookup === teamLookup ? { ...t, Role: role } : t)),
+      );
     };
 
     const leaveTeam = (teamLookup: string) => {
@@ -216,10 +223,10 @@ export class WorkspaceManager {
     // --- Persistence (mock)
     const save = async () => {
       const { Password: _pw, ...persistable } = profile;
-      console.log('💾 [UseAccountProfile] saving profile →', persistable);
+      console.log("💾 [UseAccountProfile] saving profile →", persistable);
 
       if (profile.Password) {
-        console.log('🔐 [UseAccountProfile] updating password (mock)…');
+        console.log("🔐 [UseAccountProfile] updating password (mock)…");
         // await this.oiSvc.Users.UpdatePassword(profile.Password)
       }
 
@@ -228,20 +235,21 @@ export class WorkspaceManager {
     };
 
     const signOut = async () => {
-      console.log('Signing out...');
+      console.log("Signing out...");
     };
 
     const deleteAccount = async () => {
-      const ok1 = confirm('Permanently delete your account? There is no undo.');
-      const ok2 = ok1 &&
+      const ok1 = confirm("Permanently delete your account? There is no undo.");
+      const ok2 =
+        ok1 &&
         confirm(
-          'Workspaces owned solely by this account will be lost. Continue?',
+          "Workspaces owned solely by this account will be lost. Continue?",
         );
       if (!ok2) return;
 
       // await this.oiSvc.Users.DeleteMyAccount()
-      console.warn('🗑️ [UseAccountProfile] account deleted (mock)');
-      location.assign('/'); // simulate sign-out
+      console.warn("🗑️ [UseAccountProfile] account deleted (mock)");
+      location.assign("/"); // simulate sign-out
     };
 
     return {
@@ -279,10 +287,10 @@ export class WorkspaceManager {
 
     const animateScroll = (container: HTMLDivElement) => {
       requestAnimationFrame(() => {
-        container.scrollTo({ top: container.scrollHeight, behavior: 'auto' });
+        container.scrollTo({ top: container.scrollHeight, behavior: "auto" });
 
         console.log(
-          '[UseAzi] ✅ Initial scroll to bottom:',
+          "[UseAzi] ✅ Initial scroll to bottom:",
           container.scrollHeight,
         );
       });
@@ -292,17 +300,17 @@ export class WorkspaceManager {
     useLayoutEffect(() => {
       const container = scrollRef.current;
       if (!container) {
-        console.log('[UseAzi] ❌ No scroll container');
+        console.log("[UseAzi] ❌ No scroll container");
         return;
       }
 
       if (hasScrolledInitially.current) {
-        console.log('[UseAzi] ⚠️ Already scrolled initially — skipping');
+        console.log("[UseAzi] ⚠️ Already scrolled initially — skipping");
         return;
       }
 
       if (state.Messages.length <= 1) {
-        console.log('[UseAzi] ⏳ No messages yet — waiting');
+        console.log("[UseAzi] ⏳ No messages yet — waiting");
         return;
       }
 
@@ -351,14 +359,14 @@ export class WorkspaceManager {
     const { currentScope, currentScopeData } = this.UseScopeSwitcher();
 
     const [pathParts, setPathParts] = useState<BreadcrumbPart[]>([
-      { label: 'Loading...', intentType: IntentTypes.Info },
-      { label: 'Workspace', intentType: IntentTypes.Primary },
+      { label: "Loading...", intentType: IntentTypes.Info },
+      { label: "Workspace", intentType: IntentTypes.Primary },
     ]);
 
     useEffect(() => {
-      const name = eac?.Details?.Name ?? 'Loading...';
+      const name = eac?.Details?.Name ?? "Loading...";
 
-      if (currentScope === 'workspace') {
+      if (currentScope === "workspace") {
         setPathParts([
           {
             label: `${name} (Workspace)`,
@@ -366,12 +374,13 @@ export class WorkspaceManager {
         ]);
       } else {
         const surfaceLookup = currentScopeData.Lookup!;
-        const surfaceName = eac.Surfaces?.[surfaceLookup]?.Details?.Name ?? 'Unknown Surface';
+        const surfaceName =
+          eac.Surfaces?.[surfaceLookup]?.Details?.Name ?? "Unknown Surface";
 
         setPathParts([
           {
             label: `${name} (Workspace)`,
-            onClick: () => this.SwitchToScope('workspace'),
+            onClick: () => this.SwitchToScope("workspace"),
           },
           {
             label: `${surfaceName} (Surface)`,
@@ -449,14 +458,14 @@ export class WorkspaceManager {
       const handleBeforeUnload = (e: BeforeUnloadEvent) => {
         if (this.History.HasUnsavedChanges()) {
           e.preventDefault();
-          e.returnValue = ''; // Required for Chrome
+          e.returnValue = ""; // Required for Chrome
         }
       };
 
-      addEventListener('beforeunload', handleBeforeUnload);
+      addEventListener("beforeunload", handleBeforeUnload);
 
       return () => {
-        removeEventListener('beforeunload', handleBeforeUnload);
+        removeEventListener("beforeunload", handleBeforeUnload);
       };
     }, []);
 
@@ -574,7 +583,8 @@ export class WorkspaceManager {
         return;
       }
 
-      const presetConfig = this.EaC.GetCapabilities().GetConfig(selected.id, selected.type!) ?? {};
+      const presetConfig =
+        this.EaC.GetCapabilities().GetConfig(selected.id, selected.type!) ?? {};
 
       setInspectorProps({
         config: presetConfig,
@@ -725,7 +735,8 @@ export class WorkspaceManager {
 
     useEffect(() => {
       const update = () => {
-        const node = this.Selection.GetSelectedNodes(this.Graph.GetNodes())[0] ?? null;
+        const node =
+          this.Selection.GetSelectedNodes(this.Graph.GetNodes())[0] ?? null;
         setSelected(node);
       };
 
@@ -782,7 +793,7 @@ export class WorkspaceManager {
           setPresets(capabilityMgr.GetPresets());
           setNodeTypes(capabilityMgr.GetRendererMap());
         } catch (err) {
-          console.warn('⚠️ EaC scopeMgr not ready yet in UseUIContext:', err);
+          console.warn("⚠️ EaC scopeMgr not ready yet in UseUIContext:", err);
           setPresets({});
           setNodeTypes({});
         }
@@ -808,11 +819,11 @@ export class WorkspaceManager {
     teamMembers: TeamMember[];
     inviteMember: (
       email: string,
-      role: TeamMember['Role'],
+      role: TeamMember["Role"],
       name?: string,
     ) => void;
     removeMember: (email: string) => void;
-    updateMemberRole: (email: string, role: TeamMember['Role']) => void;
+    updateMemberRole: (email: string, role: TeamMember["Role"]) => void;
     update: (next: Partial<EaCEnterpriseDetails>) => void;
     save: () => Promise<void>;
     archive: () => void;
@@ -827,6 +838,10 @@ export class WorkspaceManager {
       return {
         Lookup: eac.EnterpriseLookup!,
         Details: eac.Details!,
+        Views: 0,
+        Forks: 0,
+        UpdatedAt: eac.Details?.UpdatedAt ?? eac.Details?.CreatedAt,
+        Archived: false,
       };
     };
 
@@ -880,14 +895,14 @@ export class WorkspaceManager {
     const save = () => {
       this.Commit();
 
-      console.log('💾 Saved workspace details');
+      console.log("💾 Saved workspace details");
 
       return Promise.resolve();
       // this.ReloadPacks();
     };
 
     const archive = () => {
-      const name = current.Details.Name ?? 'this workspace';
+      const name = current.Details.Name ?? "this workspace";
 
       const confirmed = confirm(
         `Are you sure you want to archive ${name}? This will remove it from the current session.`,
@@ -902,7 +917,7 @@ export class WorkspaceManager {
 
     const inviteMember = (
       email: string,
-      role: TeamMember['Role'],
+      role: TeamMember["Role"],
       name?: string,
     ) => {
       if (!email) return;
@@ -913,7 +928,7 @@ export class WorkspaceManager {
       this.Team?.RemoveUser?.(email);
     };
 
-    const updateMemberRole = (email: string, role: TeamMember['Role']) => {
+    const updateMemberRole = (email: string, role: TeamMember["Role"]) => {
       this.Team?.UpdateUserRole?.(email, role);
     };
 
@@ -955,7 +970,7 @@ export class WorkspaceManager {
 
   public Fork(): void {
     const forked = this.History.ForkRuntime();
-    console.log('🌱 Forked runtime snapshot:', forked);
+    console.log("🌱 Forked runtime snapshot:", forked);
   }
 
   public HasUnsavedChanges(): boolean {
@@ -966,7 +981,7 @@ export class WorkspaceManager {
     const snapshot = this.History.RevertToLastCommit();
     if (snapshot) {
       this.EaC.ResetFromSnapshot(snapshot);
-      console.log('🔄 Reverted to last commit');
+      console.log("🔄 Reverted to last commit");
     }
   }
 
@@ -974,7 +989,7 @@ export class WorkspaceManager {
     const snapshot = this.History.Undo();
     if (snapshot) {
       this.EaC.ResetFromSnapshot(snapshot);
-      console.log('↩️ Undo successful');
+      console.log("↩️ Undo successful");
     }
   }
 
@@ -982,7 +997,7 @@ export class WorkspaceManager {
     const snapshot = this.History.Redo();
     if (snapshot) {
       this.EaC.ResetFromSnapshot(snapshot);
-      console.log('↪️ Redo successful');
+      console.log("↪️ Redo successful");
     }
   }
 
