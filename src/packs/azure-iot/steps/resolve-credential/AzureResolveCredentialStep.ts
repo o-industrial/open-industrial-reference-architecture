@@ -1,4 +1,4 @@
-import { DefaultAzureCredential } from 'npm:@azure/identity';
+import { DefaultAzureCredential } from 'npm:@azure/identity@4.10.1';
 import { Step } from '../../../../fluent/steps/Step.ts';
 import { StepModuleBuilder } from '../../../../fluent/steps/StepModuleBuilder.ts';
 import { ClientSecretCredential, ConfidentialClientApplication } from '../../.deps.ts';

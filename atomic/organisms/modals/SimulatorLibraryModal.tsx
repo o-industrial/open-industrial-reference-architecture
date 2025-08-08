@@ -125,7 +125,18 @@ export function SimulatorLibraryModal({
   );
 }
 
-SimulatorLibraryModal.Modal = (workspaceMgr: WorkspaceManager) => {
+export interface ModalController {
+  Modal: JSX.Element;
+  Hide: () => void;
+  IsOpen: () => boolean;
+  Show: () => void;
+}
+
+import type { ModalController } from '../types'; // adjust path
+
+SimulatorLibraryModal.Modal = (
+  workspaceMgr: WorkspaceManager
+): ModalController => {
   const [shown, setShow] = useState(false);
 
   return {
@@ -144,3 +155,4 @@ SimulatorLibraryModal.Modal = (workspaceMgr: WorkspaceManager) => {
     Show: () => setShow(true),
   };
 };
+

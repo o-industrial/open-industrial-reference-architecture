@@ -178,7 +178,16 @@ export function TeamManagementModal({
   );
 }
 
-TeamManagementModal.Modal = (workspaceMgr: WorkspaceManager) => {
+export interface ModalController {
+  Modal: JSX.Element;
+  Hide: () => void;
+  IsOpen: () => boolean;
+  Show: () => void;
+}
+
+TeamManagementModal.Modal = (
+  workspaceMgr: WorkspaceManager
+): ModalController => {
   const [shown, setShow] = useState(false);
 
   return {

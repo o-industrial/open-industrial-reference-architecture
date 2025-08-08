@@ -100,7 +100,16 @@ export function AccountProfileModal({
   );
 }
 
-AccountProfileModal.Modal = (workspaceMgr: WorkspaceManager) => {
+interface AccountProfileModalAPI {
+  Modal: JSX.Element;
+  Hide: () => void;
+  IsOpen: () => boolean;
+  Show: () => void;
+}
+
+AccountProfileModal.Modal = (
+  workspaceMgr: WorkspaceManager
+): AccountProfileModalAPI => {
   const [shown, setShow] = useState(false);
 
   return {

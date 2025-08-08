@@ -5,7 +5,8 @@ import { AzureResolveCredentialStep } from '../steps/resolve-credential/AzureRes
 import { WarmQueryModuleBuilder } from '../../../fluent/warm-queries/WarmQueryModuleBuilder.ts';
 import { KustoResponseDataSet } from 'npm:azure-kusto-data@6.0.2';
 
-export const AzureDataExplorerOutputSchema = z.any();
+
+export const AzureDataExplorerOutputSchema: z.ZodAny = z.any();
 
 export type AzureDataExplorerOutput = KustoResponseDataSet;
 //  z.infer<
