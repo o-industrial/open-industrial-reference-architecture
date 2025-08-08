@@ -41,7 +41,7 @@ export function LicenseCard({
       {...rest}
     >
       {featured && highlightLabel && (
-        <Badge class="absolute -top-5 left-3" intentType={IntentTypes.Primary}>
+        <Badge class="absolute top-5 left-3" intentType={IntentTypes.Primary}>
           {highlightLabel}
         </Badge>
       )}
