@@ -1,12 +1,12 @@
-import { JSX, classSet, IntentTypes } from '../.deps.ts';
+import { JSX, classSet, IntentTypes, ComponentChildren } from '../.deps.ts';
 import { Action, ActionStyleTypes, useEscapeKey } from '../.exports.ts';
 
 export type ModalProps = {
-  title?: string;
+  title?: ComponentChildren;
   onClose: () => void;
   fullscreen?: boolean;
   children: JSX.Element | JSX.Element[];
-} & JSX.HTMLAttributes<HTMLDivElement>;
+} & Omit<JSX.HTMLAttributes<HTMLDivElement>, 'title'>;
 
 export function Modal({
   title,
@@ -37,7 +37,7 @@ export function Modal({
       >
         {/* Header */}
         <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-700">
-          <h2 class="text-sm font-bold text-white uppercase tracking-wide">
+          <h2 class="text-sm font-bold text-white uppercase tracking-wide w-full">
             {title}
           </h2>
           <Action

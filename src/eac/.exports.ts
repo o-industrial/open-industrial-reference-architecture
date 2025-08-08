@@ -2,6 +2,7 @@ export * from './types/.exports.ts';
 export * from './EaCAgentAsCode.ts';
 export * from './EaCAgentDetails.ts';
 export * from './EaCAzureDockerSimulatorDetails.ts';
+export * from './EaCSharedSimulatorDetails.ts';
 export * from './EaCAzureIoTHubDataConnectionDetails.ts';
 export * from './EaCCompositeSchemaDetails.ts';
 export * from './EaCDataConnectionAsCode.ts';

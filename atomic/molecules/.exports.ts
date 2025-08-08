@@ -3,9 +3,11 @@ export * from './flows/.exports.ts';
 export * from './writing-devices/.exports.ts';
 
 export * from './AgreementCard.tsx'
+export * from './AppFrameBar.tsx'
 export * from './AziToolResponseCard.tsx'
 export * from './BreadcrumbBar.tsx'
 export * from './ConnectionManagementForm.tsx'
+export * from './FlyoutMenu.tsx'
 export * from './LinePreviewWithValue.tsx'
 export * from './Modal.tsx'
 export * from './MultiSelectCheckboxGroup.tsx'
