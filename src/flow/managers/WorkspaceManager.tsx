@@ -86,6 +86,7 @@ export class WorkspaceManager {
 
     Lookup?: string;
   };
+  protected Jwt: string;
 
   public Azi: AziManager;
   public EaC: EaCManager;
@@ -107,12 +108,12 @@ export class WorkspaceManager {
     jwt?: string,
   ) {
     this.currentScope = { Scope: scope };
-
     this.Azi = new AziManager({
       url: aziCircuitUrl,
       jwt,
       threadId: `workspace-${eac.EnterpriseLookup}`,
     });
+    this.Jwt = jwt ?? '';
 
     this.History = new HistoryManager();
     this.Selection = new SelectionManager();
@@ -503,7 +504,7 @@ export class WorkspaceManager {
     };
   }
 
-  public UseAzi(): {
+  public UseAzi(circuitUrl?: string): {
     state: AziState;
     isSending: boolean;
     send: (text: string) => Promise<void>;
@@ -514,6 +515,16 @@ export class WorkspaceManager {
   } {
     const [state, setState] = useState(this.Azi.GetState());
     const [isSending, setIsSending] = useState(this.Azi.IsSending());
+
+    if (circuitUrl) {
+      const eac = this.EaC.GetEaC();
+      const jwt = this.Jwt;
+      this.Azi = new AziManager({
+        url: circuitUrl,
+        jwt,
+        threadId: `workspace-${eac.EnterpriseLookup!}`,
+      });
+    }
 
     const scrollRef = useRef<HTMLDivElement>(null);
     const streamAnchorRef = useRef<HTMLElement | null>(null);
@@ -826,6 +837,8 @@ export class WorkspaceManager {
         onDelete: handleDeleteNode,
         onDetailsChanged: handleDetailsChanged,
         onToggleEnabled: handleToggleEnabled,
+        oiSvc: this.oiSvc,
+        workspaceMgr: this,
       });
     }, [
       selected,

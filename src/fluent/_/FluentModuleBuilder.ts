@@ -35,6 +35,9 @@ export abstract class FluentModuleBuilder<
   protected outputSchema?: ZodType<TOutput>;
   protected statsSchema?: ZodType<TStats>;
 
+  protected serviceInjectedFirst: boolean = false;
+  protected stepsInjectedFirst: boolean = false;
+
   protected servicesFactory?: (
     ctx: TContext,
     ioc: any,
@@ -147,6 +150,8 @@ export abstract class FluentModuleBuilder<
     >,
     TUsed & { Services: true }
   > {
+    if (!this.stepsInjectedFirst)
+      this.serviceInjectedFirst = true;
     this.servicesFactory = factory as any;
     return this as any;
   }
@@ -224,6 +229,8 @@ export abstract class FluentModuleBuilder<
     >,
     TUsed & { SubSteps: true }
   > {
+    if (!this.serviceInjectedFirst)
+      this.stepsInjectedFirst = true;
     this.stepFactory = factory;
     return this as any;
   }
@@ -269,6 +276,7 @@ export abstract class FluentModuleBuilder<
       stepFactory,
       verificationFactory,
       customRuntimeClass,
+      serviceInjectedFirst,
     } = this;
 
     const RuntimeBase = (customRuntimeClass?.() as new () => FluentRuntime<
@@ -291,6 +299,10 @@ export abstract class FluentModuleBuilder<
       >;
 
     const RuntimeImpl = class extends RuntimeBase {
+      protected override didInjectServicesFirst(): boolean {
+        return serviceInjectedFirst; 
+      }
+
       override async run(ctx: TContext): Promise<TOutput> {
         return await runFn!(ctx);
       }

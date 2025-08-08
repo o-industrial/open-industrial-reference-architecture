@@ -279,7 +279,7 @@ export class SurfaceWarmQueryNodeCapabilityManager
       Enabled: true,
     };
 
-    const details = { Name: id };
+    const details = { Name: id, ApiPath: id };
 
     return {
       WarmQueries: {
