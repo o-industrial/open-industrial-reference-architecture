@@ -49,18 +49,6 @@ import {
 } from "../../types/RuntimeImpulse.ts";
 import { IntentStyleMap } from "../../../atomic/utils/getIntentStyles.ts";
 import { impulseSourceColorMap } from "../../../atomic/utils/impulseSourceColorMap.ts";
-import {
-  AccountProfileModal,
-  BillingDetailsModal,
-  CurrentLicenseModal,
-  DataAPISuiteModal,
-  ManageWorkspacesModal,
-  SimulatorLibraryModal,
-  TeamManagementModal,
-  WarmQueryAPIsModal,
-  WorkspaceSettingsModal,
-} from "../../../atomic/organisms/modals/.exports.ts";
-import { MenuActionItem } from "../../../atomic/molecules/FlyoutMenu.tsx";
 
 export type AccountProfile = {
   Name: string;
