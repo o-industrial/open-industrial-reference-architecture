@@ -1,7 +1,7 @@
 // SurfaceWarmQueryModal.tsx
 import { TabbedPanel } from '../../../../../atomic/.exports.ts';
 import { marked } from 'npm:marked@15.0.1';
-import { useState } from 'preact/hooks';
+import { useState } from 'npm:preact@10.20.1/hooks';
 import { Action } from '../../../../../atomic/.exports.ts';
 import type { FunctionalComponent } from 'preact';
 import { AziPanel } from '../../../../../atomic/organisms/.exports.ts';
