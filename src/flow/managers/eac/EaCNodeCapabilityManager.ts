@@ -12,7 +12,7 @@ import { EaCNodeCapabilityContext } from '../../types/nodes/EaCNodeCapabilityCon
 import { EaCNodeCapabilityPatch } from '../../types/nodes/EaCNodeCapabilityPatch.ts';
 import { NodeEventRouter } from '../../types/nodes/NodeEventRouter.ts';
 import { NodePreset } from '../../types/react/NodePreset.ts';
-import { WorkspaceManager } from '../WorkspaceManager.ts';
+import { WorkspaceManager } from '../WorkspaceManager.tsx';
 
 /**
  * Abstract base class for managing scoped node capabilities in the EaC model.

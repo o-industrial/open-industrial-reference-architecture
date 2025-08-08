@@ -10,7 +10,7 @@ import { EaCNodeCapabilityPatch } from '../../types/nodes/EaCNodeCapabilityPatch
 
 import { EaCNodeCapabilityManager } from './EaCNodeCapabilityManager.ts';
 import { NodePreset } from '../../types/react/NodePreset.ts';
-import { WorkspaceManager } from '../WorkspaceManager.ts';
+import { WorkspaceManager } from '../WorkspaceManager.tsx';
 import { NodeEventRouter } from '../../types/nodes/NodeEventRouter.ts';
 import { EverythingAsCodeOIWorkspace } from '../../../eac/EverythingAsCodeOIWorkspace.ts';
 import { Position } from '../../../eac/types/Position.ts';
