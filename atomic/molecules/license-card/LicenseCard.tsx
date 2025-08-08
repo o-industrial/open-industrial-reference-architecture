@@ -30,7 +30,7 @@ export function LicenseCard({
     <div
       class={classSet(
         [
-          "group relative rounded-xl transition-all overflow-hidden",
+          "group relative rounded-xl transition-all overflow-visible",
           featured
             ? "p-[2px] bg-gradient-to-r from-neon-pink-500 via-neon-violet-500 to-neon-blue-500"
             : "border border-neutral-700 hover:border-neon-violet-500",
@@ -41,7 +41,7 @@ export function LicenseCard({
       {...rest}
     >
       {featured && highlightLabel && (
-        <Badge class="absolute -top-3 left-3" intentType={IntentTypes.Primary}>
+        <Badge class="absolute -top-5 left-3" intentType={IntentTypes.Primary}>
           {highlightLabel}
         </Badge>
       )}
