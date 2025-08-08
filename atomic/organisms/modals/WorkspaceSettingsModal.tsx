@@ -4,16 +4,16 @@ import {
   IntentTypes,
   useState,
   EaCEnterpriseDetails,
-} from "../../.deps.ts";
+} from '../../.deps.ts';
 import {
   Modal,
   TabbedPanel,
   Input,
   Action,
   ActionStyleTypes,
-} from "../../.exports.ts";
-import { TeamManagementModal } from "./TeamManagementModal.tsx";
-import { ManageWorkspacesModal } from "./ManageWorkspacesModal.tsx";
+} from '../../.exports.ts';
+import { TeamManagementModal } from './TeamManagementModal.tsx';
+import { ManageWorkspacesModal } from './ManageWorkspacesModal.tsx';
 
 type WorkspaceSettingsModalProps = {
   workspaceMgr: WorkspaceManager;
@@ -27,47 +27,28 @@ export function WorkspaceSettingsModal({
   const { currentWorkspace, update, save, archive, hasChanges } =
     workspaceMgr.UseWorkspaceSettings();
 
-  const [showTeamModal, setShowTeamModal] = useState(false);
-  const [showManageWsModal, setShowManageWsModal] = useState(false);
+  const { Modal: teamModal, Show: showTeamModal } =
+    TeamManagementModal.Modal(workspaceMgr);
+  const { Modal: mngWkspcsModal, Show: showMngWkspcs } =
+    ManageWorkspacesModal.Modal(workspaceMgr);
 
   const details: EaCEnterpriseDetails = currentWorkspace.Details;
 
   return (
     <>
       <Modal title="Workspace Settings" onClose={onClose}>
-        <TabbedPanel
-          direction="vertical"
-          tabs={[
-            {
-              key: "details",
-              label: "🛠️ Workspace Details",
-              content: (
-                <WorkspaceDetailsTab
-                  details={details}
-                  onUpdate={update}
-                  onSave={() => save().then()}
-                  onArchive={archive}
-                  hasChanges={hasChanges}
-                  onManageTeam={() => setShowTeamModal(true)}
-                  onManageWorkspaces={() => setShowManageWsModal(true)}
-                />
-              ),
-            },
-          ]}
+        <WorkspaceDetailsTab
+          details={details}
+          onUpdate={update}
+          onSave={() => save().then()}
+          onArchive={archive}
+          hasChanges={hasChanges}
+          onManageTeam={() => showTeamModal()}
+          onManageWorkspaces={() => showMngWkspcs()}
         />
       </Modal>
-      {showTeamModal && (
-        <TeamManagementModal
-          workspaceMgr={workspaceMgr}
-          onClose={() => setShowTeamModal(false)}
-        />
-      )}
-      {showManageWsModal && (
-        <ManageWorkspacesModal
-          workspaceMgr={workspaceMgr}
-          onClose={() => setShowManageWsModal(false)}
-        />
-      )}
+      {teamModal}
+      {mngWkspcsModal}
     </>
   );
 }
@@ -153,7 +134,7 @@ function WorkspaceDetailsTab({
           </Action>
           <Action
             onClick={() => {
-              if (confirm("Are you sure you want to archive this workspace?")) {
+              if (confirm('Are you sure you want to archive this workspace?')) {
                 onArchive();
               }
             }}

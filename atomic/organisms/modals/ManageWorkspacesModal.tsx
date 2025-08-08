@@ -190,3 +190,23 @@ export function ManageWorkspacesModal({
     </Modal>
   );
 }
+
+ManageWorkspacesModal.Modal = (workspaceMgr: WorkspaceManager) => {
+  const [shown, setShow] = useState(false);
+
+  return {
+    Modal: (
+      <>
+        {shown && (
+          <ManageWorkspacesModal
+            workspaceMgr={workspaceMgr}
+            onClose={() => setShow(false)}
+          />
+        )}
+      </>
+    ),
+    Hide: () => setShow(false),
+    IsOpen: () => shown,
+    Show: () => setShow(true),
+  };
+};
