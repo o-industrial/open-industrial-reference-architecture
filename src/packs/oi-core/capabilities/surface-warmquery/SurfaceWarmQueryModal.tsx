@@ -195,7 +195,7 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
             <AziPanel
               workspaceMgr={workspace}
               renderMessage={(msg) => marked.parse(msg) as string}
-              circuitUrl='/api/synaptic/circuits/event-logs'
+              circuitUrl='/api/synaptic/circuits/azi'
             />
           </div>
         </div>
