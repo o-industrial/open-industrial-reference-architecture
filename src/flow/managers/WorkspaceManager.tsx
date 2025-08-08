@@ -46,15 +46,21 @@ import { OpenIndustrialAPIClient } from '../../api/clients/OpenIndustrialAPIClie
 import {
   RuntimeImpulse,
   RuntimeImpulseSources,
-} from '../../types/RuntimeImpulse.ts';
-import { IntentStyleMap } from '../../../atomic/utils/getIntentStyles.ts';
-import { impulseSourceColorMap } from '../../../atomic/utils/impulseSourceColorMap.ts';
-import { WorkspaceSettingsModal } from '../../../atomic/organisms/modals/WorkspaceSettingsModal.tsx';
-import { TeamManagementModal } from '../../../atomic/organisms/modals/TeamManagementModal.tsx';
-import { SimulatorLibraryModal } from '../../../atomic/organisms/modals/SimulatorLibraryModal.tsx';
-import { ManageWorkspacesModal } from '../../../atomic/organisms/modals/ManageWorkspacesModal.tsx';
-import { AccountProfileModal } from '../../../atomic/organisms/modals/AccountProfileModal.tsx';
-import { MenuActionItem } from '../../../atomic/molecules/FlyoutMenu.tsx';
+} from "../../types/RuntimeImpulse.ts";
+import { IntentStyleMap } from "../../../atomic/utils/getIntentStyles.ts";
+import { impulseSourceColorMap } from "../../../atomic/utils/impulseSourceColorMap.ts";
+import {
+  AccountProfileModal,
+  BillingDetailsModal,
+  CurrentLicenseModal,
+  DataAPISuiteModal,
+  ManageWorkspacesModal,
+  SimulatorLibraryModal,
+  TeamManagementModal,
+  WarmQueryAPIsModal,
+  WorkspaceSettingsModal,
+} from "../../../atomic/organisms/modals/.exports.ts";
+import { MenuActionItem } from "../../../atomic/molecules/FlyoutMenu.tsx";
 
 export type AccountProfile = {
   Name: string;
@@ -147,186 +153,6 @@ export class WorkspaceManager {
   }
 
   // === Hooks ===
-  public UseAccountProfile(): {
-    profile: AccountProfile;
-    teams: TeamMembership[];
-    hasChanges: boolean;
-
-    // used by modal
-    setProfile: (next: Partial<AccountProfile>) => void;
-    setAvatarUrl: (url: string) => void;
-
-    updateTeamRole: (teamLookup: string, role: TeamMembership['Role']) => void;
-    leaveTeam: (teamLookup: string) => void;
-
-    save: () => Promise<void>;
-    deleteAccount: () => Promise<void>;
-    signOut: () => Promise<void>;
-  } {
-    // Seed mock profile (hydrate from API in real impl)
-    const initial: AccountProfile = {
-      Name: 'Jane Doe',
-      Email: 'jane.doe@factory.com',
-      Username: 'jane_d',
-      AvatarUrl: '',
-      Bio: '',
-      Location: '',
-      Website: '',
-      Additional: '',
-      CreatedAt: '2025-07-01',
-      ID: 'user_123',
-    };
-
-    const [profile, setProfileState] = useState<AccountProfile>(initial);
-    const [hasChanges, setHasChanges] = useState(false);
-
-    // Mock teams (swap to this.Team?.ListTeams?.() later)
-    const [teams, setTeams] = useState<TeamMembership[]>([
-      {
-        Lookup: 'a',
-        Team: 'Team A',
-        Role: 'Viewer',
-        MemberSince: '2 days ago',
-      },
-      {
-        Lookup: 'b',
-        Team: 'Team B',
-        Role: 'Editor',
-        MemberSince: '1 month ago',
-      },
-      {
-        Lookup: 'c',
-        Team: 'Team C',
-        Role: 'Owner',
-        MemberSince: '2 months ago',
-      },
-    ]);
-
-    // --- Updaters used by the modal
-    const setProfile = (next: Partial<AccountProfile>) => {
-      setProfileState((p) => ({ ...p, ...next }));
-      setHasChanges(true);
-    };
-
-    const setAvatarUrl = (url: string) => setProfile({ AvatarUrl: url });
-
-    const updateTeamRole = (
-      teamLookup: string,
-      role: TeamMembership['Role']
-    ) => {
-      setTeams((prev) =>
-        prev.map((t) => (t.Lookup === teamLookup ? { ...t, Role: role } : t))
-      );
-    };
-
-    const leaveTeam = (teamLookup: string) => {
-      // TODO(@mcgear): this.Team?.LeaveTeam?.(teamLookup)
-      setTeams((prev) => prev.filter((t) => t.Lookup !== teamLookup));
-    };
-
-    // --- Persistence (mock)
-    const save = async () => {
-      const { Password: _pw, ...persistable } = profile;
-      console.log('💾 [UseAccountProfile] saving profile →', persistable);
-
-      if (profile.Password) {
-        console.log('🔐 [UseAccountProfile] updating password (mock)…');
-        // await this.oiSvc.Users.UpdatePassword(profile.Password)
-      }
-
-      setHasChanges(false);
-      return await Promise.resolve();
-    };
-
-    const signOut = async () => {
-      await console.log('Signing out...');
-    };
-
-    const deleteAccount = async () => {
-      const ok1 = confirm('Permanently delete your account? There is no undo.');
-      const ok2 =
-        ok1 &&
-        confirm(
-          'Workspaces owned solely by this account will be lost. Continue?'
-        );
-      if (!ok2) return;
-
-      // await this.oiSvc.Users.DeleteMyAccount()
-      console.warn('🗑️ [UseAccountProfile] account deleted (mock)');
-      await location.assign('/'); // simulate sign-out
-    };
-
-    return {
-      profile,
-      teams,
-      hasChanges,
-
-      setProfile,
-      setAvatarUrl,
-
-      updateTeamRole,
-      leaveTeam,
-
-      save,
-      deleteAccount,
-      signOut,
-    };
-  }
-
-  public UseAppMenu() {
-    const { Modal: accProfModal, Show: showAccProf } =
-      AccountProfileModal.Modal(this);
-    const { Modal: mngWkspsModal, Show: showMngWksps } =
-      ManageWorkspacesModal.Modal(this);
-    const { Modal: simLibModal, Show: showSimLib } =
-      SimulatorLibraryModal.Modal(this);
-    const { Modal: teamMgmtModal, Show: showTeamMgmt } =
-      TeamManagementModal.Modal(this);
-    const { Modal: wkspSetsModal, Show: showWkspSets } =
-      WorkspaceSettingsModal.Modal(this);
-
-    const modals = (
-      <>
-        {simLibModal}
-        {accProfModal}
-        {mngWkspsModal}
-        {teamMgmtModal}
-        {wkspSetsModal}
-      </>
-    );
-
-    const handleMenu = (item: MenuActionItem) => {
-      console.log('menu', item);
-
-      switch (item.id) {
-        case 'workspace.settings': {
-          showWkspSets();
-          break;
-        }
-
-        case 'workspace.team': {
-          showTeamMgmt();
-          break;
-        }
-
-        case 'workspace.viewAll': {
-          showMngWksps();
-          break;
-        }
-      }
-    };
-
-    return {
-      handleMenu,
-      modals,
-      showWkspSets,
-      showTeamMgmt,
-      showSimLib,
-      showMngWksps,
-      showAccProf,
-    };
-  }
-
   public UseAzi(circuitUrl?: string): {
     state: AziState;
     isSending: boolean;
