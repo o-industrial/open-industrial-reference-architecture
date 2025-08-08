@@ -3,3 +3,7 @@ export * from "./SimulatorLibraryModal.tsx";
 export * from "./WorkspaceSettingsModal.tsx";
 export * from "./TeamManagementModal.tsx";
 export * from "./ManageWorkspacesModal.tsx";
+export * from "./WarmQueryAPIsModal.tsx";
+export * from "./DataAPISuiteModal.tsx";
+export * from "./BillingDetailsModal.tsx";
+export * from "./CurrentLicenseModal.tsx";
