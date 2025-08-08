@@ -30,8 +30,11 @@ export function LicenseCard({
     <div
       class={classSet(
         [
-          "relative flex flex-col rounded-xl border border-neutral-700 bg-neutral-900 p-6 shadow-md transition-all hover:shadow-lg hover:border-neon-violet-500",
-          featured ? "ring-1 ring-neon-violet-500" : "",
+          "group relative rounded-xl transition-all overflow-hidden",
+          featured
+            ? "p-[2px] bg-gradient-to-r from-neon-pink-500 via-neon-violet-500 to-neon-blue-500"
+            : "border border-neutral-700 hover:border-neon-violet-500",
+          isActive ? "ring-1 ring-neon-cyan-500" : "",
         ],
         { class: className },
       )}
@@ -43,7 +46,7 @@ export function LicenseCard({
         </Badge>
       )}
 
-      <div class="flex flex-col flex-1">
+      <div class="flex flex-col flex-1 rounded-xl bg-neutral-900 p-6 shadow-md transition-all group-hover:shadow-lg">
         <div>
           <h3 class="text-xl font-bold text-white text-center">{name}</h3>
           {description && (
@@ -61,7 +64,7 @@ export function LicenseCard({
         {features.length > 0 && (
           <ul class="flex-1 space-y-1">
             {features.map((f) => (
-              <li class="flex items-center text-sm text-white" key={f}>
+              <li class="flex items-center text-sm text-neutral-200" key={f}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
