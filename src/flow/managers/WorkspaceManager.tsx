@@ -273,6 +273,60 @@ export class WorkspaceManager {
     };
   }
 
+  public UseAppMenu() {
+    const { Modal: accProfModal, Show: showAccProf } =
+      AccountProfileModal.Modal(this);
+    const { Modal: mngWkspsModal, Show: showMngWksps } =
+      ManageWorkspacesModal.Modal(this);
+    const { Modal: simLibModal, Show: showSimLib } =
+      SimulatorLibraryModal.Modal(this);
+    const { Modal: teamMgmtModal, Show: showTeamMgmt } =
+      TeamManagementModal.Modal(this);
+    const { Modal: wkspSetsModal, Show: showWkspSets } =
+      WorkspaceSettingsModal.Modal(this);
+
+    const modals = (
+      <>
+        {simLibModal}
+        {accProfModal}
+        {mngWkspsModal}
+        {teamMgmtModal}
+        {wkspSetsModal}
+      </>
+    );
+
+    const handleMenu = (item: MenuActionItem) => {
+      console.log('menu', item);
+
+      switch (item.id) {
+        case 'workspace.settings': {
+          showWkspSets();
+          break;
+        }
+
+        case 'workspace.team': {
+          showTeamMgmt();
+          break;
+        }
+
+        case 'workspace.viewAll': {
+          showMngWksps();
+          break;
+        }
+      }
+    };
+
+    return {
+      handleMenu,
+      modals,
+      showWkspSets,
+      showTeamMgmt,
+      showSimLib,
+      showMngWksps,
+      showAccProf,
+    };
+  }
+
   public UseAzi(): {
     state: AziState;
     isSending: boolean;
@@ -394,60 +448,6 @@ export class WorkspaceManager {
     }, [eac?.Details?.Name, currentScope]);
 
     return pathParts;
-  }
-
-  public UseAppMenu() {
-    const { Modal: accProfModal, Show: showAccProf } =
-      AccountProfileModal.Modal(this);
-    const { Modal: mngWkspsModal, Show: showMngWksps } =
-      ManageWorkspacesModal.Modal(this);
-    const { Modal: simLibModal, Show: showSimLib } =
-      SimulatorLibraryModal.Modal(this);
-    const { Modal: teamMgmtModal, Show: showTeamMgmt } =
-      TeamManagementModal.Modal(this);
-    const { Modal: wkspSetsModal, Show: showWkspSets } =
-      WorkspaceSettingsModal.Modal(this);
-
-    const modals = (
-      <>
-        {simLibModal}
-        {accProfModal}
-        {mngWkspsModal}
-        {teamMgmtModal}
-        {wkspSetsModal}
-      </>
-    );
-
-    const handleMenu = (item: MenuActionItem) => {
-      console.log('menu', item);
-
-      switch (item.id) {
-        case 'workspace.settings': {
-          showWkspSets();
-          break;
-        }
-
-        case 'workspace.team': {
-          showTeamMgmt();
-          break;
-        }
-
-        case 'workspace.viewAll': {
-          showMngWksps();
-          break;
-        }
-      }
-    };
-
-    return {
-      handleMenu,
-      modals,
-      showWkspSets,
-      showTeamMgmt,
-      showSimLib,
-      showMngWksps,
-      showAccProf,
-    };
   }
 
   public UseEaC(): EverythingAsCodeOIWorkspace {
