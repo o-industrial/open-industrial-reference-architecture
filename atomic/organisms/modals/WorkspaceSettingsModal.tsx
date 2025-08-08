@@ -4,7 +4,6 @@ import {
   IntentTypes,
   useState,
   EaCEnterpriseDetails,
-  WorkspaceSummary,
 } from '../../.deps.ts';
 import {
   Modal,
@@ -12,9 +11,9 @@ import {
   Input,
   Action,
   ActionStyleTypes,
-  Badge,
 } from '../../.exports.ts';
 import { TeamManagementModal } from './TeamManagementModal.tsx';
+import { ManageWorkspacesModal } from './ManageWorkspacesModal.tsx';
 
 type WorkspaceSettingsModalProps = {
   workspaceMgr: WorkspaceManager;
@@ -25,60 +24,31 @@ export function WorkspaceSettingsModal({
   workspaceMgr,
   onClose,
 }: WorkspaceSettingsModalProps): JSX.Element {
-  const {
-    currentWorkspace,
-    update,
-    save,
-    archive,
-    hasChanges,
-    workspaces,
-    switchToWorkspace,
-  } = workspaceMgr.UseWorkspaceSettings();
+  const { currentWorkspace, update, save, archive, hasChanges } =
+    workspaceMgr.UseWorkspaceSettings();
 
-  const [showTeamModal, setShowTeamModal] = useState(false);
+  const { Modal: teamModal, Show: showTeamModal } =
+    TeamManagementModal.Modal(workspaceMgr);
+  const { Modal: mngWkspcsModal, Show: showMngWkspcs } =
+    ManageWorkspacesModal.Modal(workspaceMgr);
 
   const details: EaCEnterpriseDetails = currentWorkspace.Details;
 
   return (
     <>
       <Modal title="Workspace Settings" onClose={onClose}>
-        <TabbedPanel
-          direction="vertical"
-          tabs={[
-            {
-              key: 'details',
-              label: '🛠️ Workspace Details',
-              content: (
-                <WorkspaceDetailsTab
-                  details={details}
-                  onUpdate={update}
-                  onSave={() => save().then()}
-                  onArchive={archive}
-                  hasChanges={hasChanges}
-                  onManageTeam={() => setShowTeamModal(true)}
-                />
-              ),
-            },
-            {
-              key: 'switch',
-              label: '🔄 Switch Workspace',
-              content: (
-                <SwitchWorkspaceTab
-                  currentId={currentWorkspace.Lookup}
-                  workspaces={workspaces}
-                  onSwitch={switchToWorkspace}
-                />
-              ),
-            },
-          ]}
+        <WorkspaceDetailsTab
+          details={details}
+          onUpdate={update}
+          onSave={() => save().then()}
+          onArchive={archive}
+          hasChanges={hasChanges}
+          onManageTeam={() => showTeamModal()}
+          onManageWorkspaces={() => showMngWkspcs()}
         />
       </Modal>
-      {showTeamModal && (
-        <TeamManagementModal
-          workspaceMgr={workspaceMgr}
-          onClose={() => setShowTeamModal(false)}
-        />
-      )}
+      {teamModal}
+      {mngWkspcsModal}
     </>
   );
 }
@@ -110,6 +80,7 @@ function WorkspaceDetailsTab({
   onArchive,
   hasChanges,
   onManageTeam,
+  onManageWorkspaces,
 }: {
   details: EaCEnterpriseDetails;
   onUpdate: (next: Partial<EaCEnterpriseDetails>) => void;
@@ -117,6 +88,7 @@ function WorkspaceDetailsTab({
   onArchive: () => void;
   hasChanges: boolean;
   onManageTeam: () => void;
+  onManageWorkspaces: () => void;
 }) {
   return (
     <div class="space-y-4">
@@ -154,6 +126,13 @@ function WorkspaceDetailsTab({
             Manage Team Members
           </Action>
           <Action
+            intentType={IntentTypes.Primary}
+            styleType={ActionStyleTypes.Outline}
+            onClick={onManageWorkspaces}
+          >
+            Manage Workspaces
+          </Action>
+          <Action
             onClick={() => {
               if (confirm('Are you sure you want to archive this workspace?')) {
                 onArchive();
@@ -166,51 +145,6 @@ function WorkspaceDetailsTab({
           </Action>
         </div>
       </div>
-    </div>
-  );
-}
-
-function SwitchWorkspaceTab({
-  currentId,
-  workspaces,
-  onSwitch,
-}: {
-  currentId: string;
-  workspaces: WorkspaceSummary[];
-  onSwitch: (id: string) => void;
-}) {
-  const [filter, setFilter] = useState('');
-
-  const filtered = workspaces.filter((ws) =>
-    ws.Details.Name!.toLowerCase().includes(filter.toLowerCase())
-  );
-
-  return (
-    <div class="space-y-4">
-      <Input
-        placeholder="Filter workspaces..."
-        value={filter}
-        onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
-          setFilter((e.target as HTMLInputElement).value)
-        }
-      />
-
-      <div class="space-y-2">
-        {filtered.map((ws) => (
-          <div
-            class="p-2 border rounded hover:bg-neutral-800 cursor-pointer"
-            onClick={() => onSwitch(ws.Lookup)}
-          >
-            <div class="text-sm font-semibold">{ws.Details.Name}</div>
-            <div class="text-xs text-neutral-400">{ws.Details.Description}</div>
-            {ws.Lookup === currentId && <Badge>Current</Badge>}
-          </div>
-        ))}
-      </div>
-
-      <Action onClick={() => alert('Create new workspace TBD')} class="mt-4">
-        + Create New Workspace
-      </Action>
     </div>
   );
 }
