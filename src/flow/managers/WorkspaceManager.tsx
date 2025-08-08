@@ -3,10 +3,13 @@ import {
   Connection,
   Dispatch,
   EaCEnterpriseDetails,
+  EaCLicenseAsCode,
   EaCStatusProcessingTypes,
+  EaCUserLicense,
   EaCVertexDetails,
   Edge,
   EdgeChange,
+  JSX,
   merge,
   Node,
   NodeChange,
@@ -22,10 +25,7 @@ import {
 
 import { FlowNodeData } from '../types/react/FlowNodeData.ts';
 import { GraphStateManager } from './GraphStateManager.ts';
-import {
-  ImpulseStreamFilter,
-  ImpulseStreamManager,
-} from './ImpulseStreamManager.ts';
+import { ImpulseStreamFilter, ImpulseStreamManager } from './ImpulseStreamManager.ts';
 import { InteractionManager } from './InteractionManager.ts';
 import { SelectionManager } from './SelectionManager.ts';
 import { AziManager, AziState } from './AziManager.ts';
@@ -43,12 +43,21 @@ import { BreadcrumbPart } from '../types/BreadcrumbPart.ts';
 import { IntentTypes } from '../../types/IntentTypes.ts';
 import { EaCNodeCapabilityManager, NodePreset } from '../.exports.ts';
 import { OpenIndustrialAPIClient } from '../../api/clients/OpenIndustrialAPIClient.ts';
+import { RuntimeImpulse, RuntimeImpulseSources } from '../../types/RuntimeImpulse.ts';
+import { IntentStyleMap } from '../../../atomic/utils/getIntentStyles.ts';
+import { impulseSourceColorMap } from '../../../atomic/utils/impulseSourceColorMap.ts';
 import {
-  RuntimeImpulse,
-  RuntimeImpulseSources,
-} from "../../types/RuntimeImpulse.ts";
-import { IntentStyleMap } from "../../../atomic/utils/getIntentStyles.ts";
-import { impulseSourceColorMap } from "../../../atomic/utils/impulseSourceColorMap.ts";
+  AccountProfileModal,
+  BillingDetailsModal,
+  CurrentLicenseModal,
+  DataAPISuiteModal,
+  ManageWorkspacesModal,
+  SimulatorLibraryModal,
+  TeamManagementModal,
+  WarmQueryAPIsModal,
+  WorkspaceSettingsModal,
+} from '../../../atomic/organisms/modals/.exports.ts';
+import { MenuActionItem } from '../../../atomic/molecules/FlyoutMenu.tsx';
 
 export type AccountProfile = {
   Name: string;
@@ -96,7 +105,7 @@ export class WorkspaceManager {
     capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>,
     scope: NodeScopeTypes = 'workspace',
     aziCircuitUrl: string,
-    jwt?: string
+    jwt?: string,
   ) {
     this.currentScope = { Scope: scope };
     this.Azi = new AziManager({
@@ -119,7 +128,7 @@ export class WorkspaceManager {
     this.Graph = new GraphStateManager(
       this.Interaction,
       (id: string) => this.UseStats(id),
-      this.NodeEvents
+      this.NodeEvents,
     );
 
     this.EaC = new EaCManager(
@@ -128,7 +137,7 @@ export class WorkspaceManager {
       this.currentScope.Scope,
       this.Graph,
       this.History,
-      capabilitiesByScope
+      capabilitiesByScope,
     );
 
     this.Interaction.BindEaCManager(this.EaC);
@@ -141,6 +150,360 @@ export class WorkspaceManager {
   }
 
   // === Hooks ===
+
+  public UseAppMenu(): {
+    handleMenu: (item: MenuActionItem) => void;
+    modals: JSX.Element;
+    showWkspSets: () => void;
+    showTeamMgmt: () => void;
+    showSimLib: () => void;
+    showMngWksps: () => void;
+    showAccProf: () => void;
+    showWarmQuery: () => void;
+    showDataSuite: () => void;
+    showBilling: () => void;
+    showLicense: () => void;
+  } {
+    const { Modal: accProfModal, Show: showAccProf } = AccountProfileModal.Modal(this);
+    const { Modal: mngWkspsModal, Show: showMngWksps } = ManageWorkspacesModal.Modal(this);
+    const { Modal: simLibModal, Show: showSimLib } = SimulatorLibraryModal.Modal(this);
+    const { Modal: teamMgmtModal, Show: showTeamMgmt } = TeamManagementModal.Modal(this);
+    const { Modal: wkspSetsModal, Show: showWkspSets } = WorkspaceSettingsModal.Modal(this);
+    const { Modal: warmQueryModal, Show: showWarmQuery } = WarmQueryAPIsModal.Modal(this);
+    const { Modal: dataSuiteModal, Show: showDataSuite } = DataAPISuiteModal.Modal(this);
+    const { Modal: billingModal, Show: showBilling } = BillingDetailsModal.Modal(this);
+    const { Modal: licenseModal, Show: showLicense } = CurrentLicenseModal.Modal(this);
+
+    const modals = (
+      <>
+        {simLibModal}
+        {accProfModal}
+        {mngWkspsModal}
+        {teamMgmtModal}
+        {wkspSetsModal}
+        {warmQueryModal}
+        {dataSuiteModal}
+        {billingModal}
+        {licenseModal}
+      </>
+    );
+
+    const handleMenu = (item: MenuActionItem) => {
+      console.log('menu', item);
+
+      switch (item.id) {
+        case 'workspace.settings': {
+          showWkspSets();
+          break;
+        }
+
+        case 'workspace.team': {
+          showTeamMgmt();
+          break;
+        }
+
+        case 'workspace.viewAll': {
+          showMngWksps();
+          break;
+        }
+
+        case 'apis.warmQuery': {
+          showWarmQuery();
+          break;
+        }
+
+        case 'apis.dataSuite': {
+          showDataSuite();
+          break;
+        }
+
+        case 'billing.details': {
+          showBilling();
+          break;
+        }
+
+        case 'billing.license': {
+          showLicense();
+          break;
+        }
+      }
+    };
+
+    return {
+      handleMenu,
+      modals,
+      showWkspSets,
+      showTeamMgmt,
+      showSimLib,
+      showMngWksps,
+      showAccProf,
+      showWarmQuery,
+      showDataSuite,
+      showBilling,
+      showLicense,
+    };
+  }
+
+  public UseLicenses(): {
+    license?: EaCLicenseAsCode;
+    licLookup?: string;
+    userLicense?: EaCUserLicense;
+    stripePublishableKey?: string;
+    isMonthly: boolean;
+    activePlan?: string;
+    clientSecret?: string;
+    error: string;
+    loading: boolean;
+    activateMonthly: () => Promise<void>;
+    activatePlan: (planLookup: string, isMonthly: boolean) => Promise<void>;
+    setActivePlan: (lookup: string | undefined) => void;
+    setIsMonthly: (monthly: boolean) => void;
+  } {
+    const [license, setLicense] = useState<EaCLicenseAsCode | undefined>();
+    const [licLookup, setLicLookup] = useState<string | undefined>();
+    const [stripePublishableKey, setStripePublishableKey] = useState<
+      string | undefined
+    >();
+    const [userLicense] = useState<EaCUserLicense | undefined>(undefined);
+    const [isMonthly, setIsMonthly] = useState(true);
+    const [activePlan, setActivePlan] = useState<string | undefined>();
+    const [clientSecret, setClientSecret] = useState<string | undefined>();
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+      const eac = this.EaC.GetEaC();
+      const lookup = Object.keys(eac.Licenses ?? {})[0];
+
+      if (lookup) {
+        setLicLookup(lookup);
+        const lic = eac.Licenses![lookup];
+        setLicense(lic);
+        // deno-lint-ignore no-explicit-any
+        const details: any = lic.Details;
+        setStripePublishableKey(details?.PublishableKey);
+      }
+    }, []);
+
+    const activateMonthly = async () => {
+      const next = !isMonthly;
+      setIsMonthly(next);
+
+      if (activePlan) {
+        await activatePlan(activePlan, next);
+      }
+    };
+
+    const activatePlan = async (
+      planLookup: string,
+      monthly: boolean,
+    ): Promise<void> => {
+      if (!license || !licLookup) return;
+
+      const interval = monthly ? 'month' : 'year';
+
+      const plans = Object.keys(license.Plans)
+        .map((pl) => {
+          const plan = license.Plans[pl];
+
+          const prices = Object.keys(plan.Prices).map((pr) => {
+            const price = plan.Prices[pr];
+
+            return {
+              Lookup: `${pl}-${price.Details!.Interval}`,
+              PlanLookup: pl,
+              PriceLookup: pr,
+              Interval: price.Details!.Interval,
+            };
+          });
+
+          return prices;
+        })
+        .flatMap((p) => p);
+
+      const selected = plans.find(
+        (p) => p.Lookup === `${planLookup}-${interval}`,
+      );
+      if (!selected) return;
+
+      setLoading(true);
+      setError('');
+
+      try {
+        const resp = await fetch(
+          `/workspace/api/${licLookup}/licensing/subscribe`,
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              LicenseLookup: licLookup,
+              PlanLookup: planLookup,
+              PriceLookup: selected.PriceLookup,
+              SubscriptionID: '',
+            } as EaCUserLicense),
+          },
+        );
+
+        const licData = await resp.json();
+
+        if (licData?.Subscription) {
+          setClientSecret(
+            licData.Subscription.latest_invoice.payment_intent.client_secret,
+          );
+          setActivePlan(planLookup);
+        } else if (licData?.Error) {
+          setError(licData.Error);
+        }
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return {
+      license,
+      licLookup,
+      userLicense,
+      stripePublishableKey,
+      isMonthly,
+      activePlan,
+      clientSecret,
+      error,
+      loading,
+      activateMonthly,
+      activatePlan,
+      setActivePlan,
+      setIsMonthly,
+    };
+  }
+
+  public UseAccountProfile(): {
+    profile: AccountProfile;
+    teams: TeamMembership[];
+    hasChanges: boolean;
+
+    // used by modal
+    setProfile: (next: Partial<AccountProfile>) => void;
+    setAvatarUrl: (url: string) => void;
+
+    updateTeamRole: (teamLookup: string, role: TeamMembership['Role']) => void;
+    leaveTeam: (teamLookup: string) => void;
+
+    save: () => Promise<void>;
+    deleteAccount: () => Promise<void>;
+    signOut: () => Promise<void>;
+  } {
+    // Seed mock profile (hydrate from API in real impl)
+    const initial: AccountProfile = {
+      Name: 'Jane Doe',
+      Email: 'jane.doe@factory.com',
+      Username: 'jane_d',
+      AvatarUrl: '',
+      Bio: '',
+      Location: '',
+      Website: '',
+      Additional: '',
+      CreatedAt: '2025-07-01',
+      ID: 'user_123',
+    };
+
+    const [profile, setProfileState] = useState<AccountProfile>(initial);
+    const [hasChanges, setHasChanges] = useState(false);
+
+    // Mock teams (swap to this.Team?.ListTeams?.() later)
+    const [teams, setTeams] = useState<TeamMembership[]>([
+      {
+        Lookup: 'a',
+        Team: 'Team A',
+        Role: 'Viewer',
+        MemberSince: '2 days ago',
+      },
+      {
+        Lookup: 'b',
+        Team: 'Team B',
+        Role: 'Editor',
+        MemberSince: '1 month ago',
+      },
+      {
+        Lookup: 'c',
+        Team: 'Team C',
+        Role: 'Owner',
+        MemberSince: '2 months ago',
+      },
+    ]);
+
+    // --- Updaters used by the modal
+    const setProfile = (next: Partial<AccountProfile>) => {
+      setProfileState((p) => ({ ...p, ...next }));
+      setHasChanges(true);
+    };
+
+    const setAvatarUrl = (url: string) => setProfile({ AvatarUrl: url });
+
+    const updateTeamRole = (
+      teamLookup: string,
+      role: TeamMembership['Role'],
+    ) => {
+      setTeams((prev) => prev.map((t) => (t.Lookup === teamLookup ? { ...t, Role: role } : t)));
+    };
+
+    const leaveTeam = (teamLookup: string) => {
+      // TODO(AI): this.Team?.LeaveTeam?.(teamLookup)
+      setTeams((prev) => prev.filter((t) => t.Lookup !== teamLookup));
+    };
+
+    // --- Persistence (mock)
+    const save = () => {
+      const { Password: _pw, ...persistable } = profile;
+      console.log('💾 [UseAccountProfile] saving profile →', persistable);
+
+      if (profile.Password) {
+        console.log('🔐 [UseAccountProfile] updating password (mock)…');
+        // await this.oiSvc.Users.UpdatePassword(profile.Password)
+      }
+
+      setHasChanges(false);
+      return Promise.resolve();
+    };
+
+    const signOut = () => {
+      console.log('Signing out...');
+
+      return Promise.resolve();
+    };
+
+    const deleteAccount = () => {
+      const ok1 = confirm('Permanently delete your account? There is no undo.');
+      const ok2 = ok1 &&
+        confirm(
+          'Workspaces owned solely by this account will be lost. Continue?',
+        );
+      if (!ok2) return Promise.resolve();
+
+      // await this.oiSvc.Users.DeleteMyAccount()
+      console.warn('🗑️ [UseAccountProfile] account deleted (mock)');
+      location.assign('/'); // simulate sign-out
+
+      return Promise.resolve();
+    };
+
+    return {
+      profile,
+      teams,
+      hasChanges,
+
+      setProfile,
+      setAvatarUrl,
+
+      updateTeamRole,
+      leaveTeam,
+
+      save,
+      deleteAccount,
+      signOut,
+    };
+  }
+
   public UseAzi(circuitUrl?: string): {
     state: AziState;
     isSending: boolean;
@@ -173,7 +536,7 @@ export class WorkspaceManager {
 
         console.log(
           '[UseAzi] ✅ Initial scroll to bottom:',
-          container.scrollHeight
+          container.scrollHeight,
         );
       });
     };
@@ -256,8 +619,7 @@ export class WorkspaceManager {
         ]);
       } else {
         const surfaceLookup = currentScopeData.Lookup!;
-        const surfaceName =
-          eac.Surfaces?.[surfaceLookup]?.Details?.Name ?? 'Unknown Surface';
+        const surfaceName = eac.Surfaces?.[surfaceLookup]?.Details?.Name ?? 'Unknown Surface';
 
         setPathParts([
           {
@@ -319,7 +681,7 @@ export class WorkspaceManager {
     const [canUndo, setCanUndo] = useState(this.History.CanUndo());
     const [canRedo, setCanRedo] = useState(this.History.CanRedo());
     const [hasChanges, setHasChanges] = useState(
-      this.History.HasUnsavedChanges()
+      this.History.HasUnsavedChanges(),
     );
     const [version, setVersion] = useState(this.History.GetVersion());
 
@@ -424,7 +786,7 @@ export class WorkspaceManager {
           return merged;
         });
       },
-      [selectedId]
+      [selectedId],
     );
 
     const handleToggleEnabled = useCallback(
@@ -435,12 +797,12 @@ export class WorkspaceManager {
           });
 
           console.log(
-            `🟡 Toggled enabled state for node ${selectedId} → ${val}`
+            `🟡 Toggled enabled state for node ${selectedId} → ${val}`,
           );
           setEnabled(val);
         }
       },
-      [selectedId]
+      [selectedId],
     );
 
     const handleDeleteNode = useCallback(() => {
@@ -465,8 +827,7 @@ export class WorkspaceManager {
         return;
       }
 
-      const presetConfig =
-        this.EaC.GetCapabilities().GetConfig(selected.id, selected.type!) ?? {};
+      const presetConfig = this.EaC.GetCapabilities().GetConfig(selected.id, selected.type!) ?? {};
 
       setInspectorProps({
         config: presetConfig,
@@ -529,7 +890,7 @@ export class WorkspaceManager {
   public UseInteraction(): {
     handleDrop: (
       event: DragEvent,
-      toFlow: (point: XYPosition) => XYPosition
+      toFlow: (point: XYPosition) => XYPosition,
     ) => void;
     handleConnect: (params: Connection) => void;
     handleNodeClick: (_e: unknown, node: Node<FlowNodeData>) => void;
@@ -540,7 +901,7 @@ export class WorkspaceManager {
       (event: DragEvent, toFlow: (point: XYPosition) => XYPosition) => {
         this.Interaction.HandleDrop(event, this.Graph.GetNodes(), toFlow);
       },
-      []
+      [],
     );
 
     const handleConnect = useCallback((params: Connection) => {
@@ -553,21 +914,21 @@ export class WorkspaceManager {
       (_e: unknown, node: Node<FlowNodeData>) => {
         this.Selection.SelectNode(node.id);
       },
-      []
+      [],
     );
 
     const handleNodesChange = useCallback(
       (changes: NodeChange[], nodes: Node[]) => {
         this.Interaction.OnNodesChange(changes, nodes ?? this.Graph.GetNodes());
       },
-      []
+      [],
     );
 
     const handleEdgesChange = useCallback(
       (changes: EdgeChange[], edges: Edge[]) => {
         this.Interaction.OnEdgesChange(changes, edges ?? this.Graph.GetEdges());
       },
-      []
+      [],
     );
 
     return {
@@ -614,13 +975,12 @@ export class WorkspaceManager {
     setSelected: Dispatch<StateUpdater<Node<FlowNodeData> | null>>;
   } {
     const [selected, setSelected] = useState<Node<FlowNodeData> | null>(
-      this.Selection.GetSelectedNodes(this.Graph.GetNodes())[0] ?? null
+      this.Selection.GetSelectedNodes(this.Graph.GetNodes())[0] ?? null,
     );
 
     useEffect(() => {
       const update = () => {
-        const node =
-          this.Selection.GetSelectedNodes(this.Graph.GetNodes())[0] ?? null;
+        const node = this.Selection.GetSelectedNodes(this.Graph.GetNodes())[0] ?? null;
         setSelected(node);
       };
 
@@ -633,7 +993,7 @@ export class WorkspaceManager {
 
   public UseStats<TStats extends Record<string, unknown>>(
     id: string,
-    intervalMs = 100000
+    intervalMs = 100000,
   ): TStats | undefined {
     const [stats, setStats] = useState<TStats>({} as TStats);
 
@@ -667,7 +1027,7 @@ export class WorkspaceManager {
   } {
     const [presets, setPresets] = useState<Record<string, NodePreset>>({});
     const [nodeTypes, setNodeTypes] = useState<Record<string, ComponentType>>(
-      {}
+      {},
     );
 
     useEffect(() => {
@@ -704,7 +1064,7 @@ export class WorkspaceManager {
     inviteMember: (
       email: string,
       role: TeamMember['Role'],
-      name?: string
+      name?: string,
     ) => void;
     removeMember: (email: string) => void;
     updateMemberRole: (email: string, role: TeamMember['Role']) => void;
@@ -724,16 +1084,16 @@ export class WorkspaceManager {
         Details: eac.Details!,
         Views: 0,
         Forks: 0,
-        UpdatedAt: eac.Details?.UpdatedAt ?? eac.Details?.CreatedAt,
+        UpdatedAt: (eac.Details?.UpdatedAt ?? eac.Details?.CreatedAt) as string,
         Archived: false,
       };
     };
 
     const [current, setCurrent] = useState<WorkspaceSummary>(
-      getCurrentWorkspace()
+      getCurrentWorkspace(),
     );
     const [hasChanges, setHasChanges] = useState(
-      this.History.HasUnsavedChanges()
+      this.History.HasUnsavedChanges(),
     );
 
     useEffect(() => {
@@ -747,7 +1107,7 @@ export class WorkspaceManager {
     }, []);
 
     const [teamMembers, setTeamMembers] = useState<TeamMember[]>(
-      this.Team?.ListUsers?.() ?? []
+      this.Team?.ListUsers?.() ?? [],
     );
 
     useEffect(() => {
@@ -789,7 +1149,7 @@ export class WorkspaceManager {
       const name = current.Details.Name ?? 'this workspace';
 
       const confirmed = confirm(
-        `Are you sure you want to archive ${name}? This will remove it from the current session.`
+        `Are you sure you want to archive ${name}? This will remove it from the current session.`,
       );
 
       if (!confirmed) return;
@@ -802,7 +1162,7 @@ export class WorkspaceManager {
     const inviteMember = (
       email: string,
       role: TeamMember['Role'],
-      name?: string
+      name?: string,
     ) => {
       if (!email) return;
       this.Team?.InviteUser?.(email, role, name);
@@ -886,7 +1246,7 @@ export class WorkspaceManager {
   }
 
   public ReloadCapabilities(
-    capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>
+    capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>,
   ): void {
     this.EaC.LoadCapabilities(capabilitiesByScope);
 

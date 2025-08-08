@@ -125,16 +125,14 @@ export function SimulatorLibraryModal({
   );
 }
 
-export interface SimulatorLibraryModalAPI {
+SimulatorLibraryModal.Modal = (
+  workspaceMgr: WorkspaceManager
+): {
   Modal: JSX.Element;
   Hide: () => void;
   IsOpen: () => boolean;
   Show: () => void;
-}
-
-SimulatorLibraryModal.Modal = (
-  workspaceMgr: WorkspaceManager
-): SimulatorLibraryModalAPI => {
+} => {
   const [shown, setShow] = useState(false);
 
   return {

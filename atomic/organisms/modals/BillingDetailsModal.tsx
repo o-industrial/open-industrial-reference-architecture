@@ -1,5 +1,5 @@
-import { JSX, WorkspaceManager, useState } from "../../.deps.ts";
-import { Modal, Action, ActionStyleTypes } from "../../.exports.ts";
+import { JSX, WorkspaceManager, useState } from '../../.deps.ts';
+import { Modal, Action, ActionStyleTypes } from '../../.exports.ts';
 
 export type BillingDetailsModalProps = {
   workspaceMgr: WorkspaceManager;
@@ -18,7 +18,9 @@ export function BillingDetailsModal({
         {/* Subscription Summary */}
         <section>
           <h3 class="text-lg font-semibold mb-2">Subscription Summary</h3>
-          <p>Plan: <strong>Basic (placeholder)</strong></p>
+          <p>
+            Plan: <strong>Basic (placeholder)</strong>
+          </p>
           <p>Renewal Date: 2025-01-01</p>
           <p>Price: $0/mo</p>
           <p>Status: Active</p>
@@ -44,8 +46,12 @@ export function BillingDetailsModal({
                 <td class="p-2">$0.00</td>
                 <td class="p-2">Paid</td>
                 <td class="p-2 space-x-2">
-                  <Action styleType={ActionStyleTypes.Link} onClick={() => {}}>View Invoice</Action>
-                  <Action styleType={ActionStyleTypes.Link} onClick={() => {}}>Download Receipt</Action>
+                  <Action styleType={ActionStyleTypes.Link} onClick={() => {}}>
+                    View Invoice
+                  </Action>
+                  <Action styleType={ActionStyleTypes.Link} onClick={() => {}}>
+                    Download Receipt
+                  </Action>
                 </td>
               </tr>
             </tbody>
@@ -58,14 +64,24 @@ export function BillingDetailsModal({
   );
 }
 
-BillingDetailsModal.Modal = (workspaceMgr: WorkspaceManager) => {
+BillingDetailsModal.Modal = (
+  workspaceMgr: WorkspaceManager
+): {
+  Modal: JSX.Element;
+  Hide: () => void;
+  IsOpen: () => boolean;
+  Show: () => void;
+} => {
   const [shown, setShow] = useState(false);
 
   return {
     Modal: (
       <>
         {shown && (
-          <BillingDetailsModal workspaceMgr={workspaceMgr} onClose={() => setShow(false)} />
+          <BillingDetailsModal
+            workspaceMgr={workspaceMgr}
+            onClose={() => setShow(false)}
+          />
         )}
       </>
     ),

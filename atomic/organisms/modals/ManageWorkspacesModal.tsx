@@ -1,5 +1,5 @@
-import { JSX, WorkspaceManager, useState, IntentTypes } from "../../.deps.ts";
-import { Modal, Input, Action, ActionStyleTypes } from "../../.exports.ts";
+import { JSX, WorkspaceManager, useState, IntentTypes } from '../../.deps.ts';
+import { Modal, Input, Action, ActionStyleTypes } from '../../.exports.ts';
 
 export type ManageWorkspacesModalProps = {
   workspaceMgr: WorkspaceManager;
@@ -14,36 +14,36 @@ export function ManageWorkspacesModal({
     workspaceMgr.UseWorkspaceSettings();
 
   const [selected, setSelected] = useState<string[]>([]);
-  const [filter, setFilter] = useState("");
-  const [groupAction, setGroupAction] = useState("");
+  const [filter, setFilter] = useState('');
+  const [groupAction, setGroupAction] = useState('');
 
   const toggleSelect = (lookup: string) => {
     setSelected((prev) =>
       prev.includes(lookup)
         ? prev.filter((id) => id !== lookup)
-        : [...prev, lookup],
+        : [...prev, lookup]
     );
   };
 
   const handleGroupAction = () => {
     if (!groupAction || selected.length === 0) return;
-    alert(`${groupAction} [${selected.join(", ")}] not implemented`);
+    alert(`${groupAction} [${selected.join(', ')}] not implemented`);
   };
 
   const filtered = workspaces.filter((ws) =>
-    ws.Details.Name?.toLowerCase().includes(filter.toLowerCase()),
+    ws.Details.Name?.toLowerCase().includes(filter.toLowerCase())
   );
 
   const active = filtered.filter((ws) => !ws.Archived);
   const archived = filtered.filter((ws) => ws.Archived);
 
   const formatUpdated = (iso?: string) => {
-    if (!iso) return "";
+    if (!iso) return '';
     const diff = Date.now() - Date.parse(iso);
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (Number.isNaN(days) || days < 0) return "";
-    if (days === 0) return "today";
-    if (days === 1) return "1 day ago";
+    if (Number.isNaN(days) || days < 0) return '';
+    if (days === 0) return 'today';
+    if (days === 1) return '1 day ago';
     return `${days} days ago`;
   };
 
@@ -61,17 +61,19 @@ export function ManageWorkspacesModal({
           class="p-2 cursor-pointer"
           onClick={() => switchToWorkspace(ws.Lookup)}
         >
-          {ws.Details.Name ?? "Untitled"}
-          {ws.Lookup === currentWorkspace.Lookup && " (current)"}
+          {ws.Details.Name ?? 'Untitled'}
+          {ws.Lookup === currentWorkspace.Lookup && ' (current)'}
         </td>
         <td class="p-2 text-sm text-neutral-400">
-          {ws.Details.Description ?? ""}
+          {ws.Details.Description ?? ''}
         </td>
         <td class="p-2 text-center">{ws.Views ?? 0}</td>
         <td class="p-2 text-center">{ws.Forks ?? 0}</td>
         <td class="p-2 text-sm">
           {formatUpdated(
-            ws.UpdatedAt ?? ws.Details.UpdatedAt ?? ws.Details.CreatedAt,
+            (ws.UpdatedAt ??
+              ws.Details.UpdatedAt ??
+              ws.Details.CreatedAt) as string
           )}
         </td>
         <td class="p-2">
@@ -84,20 +86,20 @@ export function ManageWorkspacesModal({
             </Action>
             <Action
               styleType={ActionStyleTypes.Link}
-              onClick={() => alert("Fork not implemented")}
+              onClick={() => alert('Fork not implemented')}
             >
               Fork
             </Action>
             <Action
               styleType={ActionStyleTypes.Link}
-              onClick={() => alert("Archive not implemented")}
+              onClick={() => alert('Archive not implemented')}
             >
               Archive
             </Action>
             <Action
               styleType={ActionStyleTypes.Link}
               intentType={IntentTypes.Error}
-              onClick={() => alert("Delete not implemented")}
+              onClick={() => alert('Delete not implemented')}
             >
               Delete
             </Action>
@@ -178,7 +180,7 @@ export function ManageWorkspacesModal({
 
         <div class="flex justify-end gap-2 pt-4">
           <Action
-            onClick={() => alert("Create workspace not implemented")}
+            onClick={() => alert('Create workspace not implemented')}
             intentType={IntentTypes.Primary}
             styleType={ActionStyleTypes.Outline}
           >
@@ -191,7 +193,14 @@ export function ManageWorkspacesModal({
   );
 }
 
-ManageWorkspacesModal.Modal = (workspaceMgr: WorkspaceManager) => {
+ManageWorkspacesModal.Modal = (
+  workspaceMgr: WorkspaceManager
+): {
+  Modal: JSX.Element;
+  Hide: () => void;
+  IsOpen: () => boolean;
+  Show: () => void;
+} => {
   const [shown, setShow] = useState(false);
 
   return {

@@ -1,9 +1,4 @@
-import {
-  JSX,
-  WorkspaceManager,
-  IntentTypes,
-  useState,
-} from '../../.deps.ts';
+import { JSX, WorkspaceManager, IntentTypes, useState } from '../../.deps.ts';
 import {
   Modal,
   Input,
@@ -37,9 +32,7 @@ export function TeamManagementModal({
 
   const toggleSelected = (email: string) => {
     setSelected((prev) =>
-      prev.includes(email)
-        ? prev.filter((e) => e !== email)
-        : [...prev, email]
+      prev.includes(email) ? prev.filter((e) => e !== email) : [...prev, email]
     );
   };
 
@@ -95,9 +88,7 @@ export function TeamManagementModal({
                 checked={selected.includes(member.Email)}
                 onChange={() => toggleSelected(member.Email)}
               />
-              <div class="text-sm">
-                {member.Name ?? 'N/A'}
-              </div>
+              <div class="text-sm">{member.Name ?? 'N/A'}</div>
               <div class="text-sm">{member.Email}</div>
               <Select
                 value={member.Role}
@@ -107,7 +98,7 @@ export function TeamManagementModal({
                     (e.target as HTMLSelectElement).value as
                       | 'Owner'
                       | 'Editor'
-                      | 'Viewer',
+                      | 'Viewer'
                   )
                 }
               >
@@ -115,9 +106,7 @@ export function TeamManagementModal({
                 <option>Editor</option>
                 <option>Viewer</option>
               </Select>
-              <div class="text-sm">
-                {friendlyDate(member.Joined)}
-              </div>
+              <div class="text-sm">{friendlyDate(member.Joined)}</div>
               <Action
                 onClick={() => removeMember(member.Email)}
                 intentType={IntentTypes.Error}
@@ -152,8 +141,10 @@ export function TeamManagementModal({
               value={role}
               onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>
                 setRole(
-                  (e.target as HTMLSelectElement)
-                    .value as 'Owner' | 'Editor' | 'Viewer',
+                  (e.target as HTMLSelectElement).value as
+                    | 'Owner'
+                    | 'Editor'
+                    | 'Viewer'
                 )
               }
             >
@@ -178,16 +169,14 @@ export function TeamManagementModal({
   );
 }
 
-export interface TeamManagementModalAPI {
+TeamManagementModal.Modal = (
+  workspaceMgr: WorkspaceManager
+): {
   Modal: JSX.Element;
   Hide: () => void;
   IsOpen: () => boolean;
   Show: () => void;
-}
-
-TeamManagementModal.Modal = (
-  workspaceMgr: WorkspaceManager
-): TeamManagementModalAPI => {
+} => {
   const [shown, setShow] = useState(false);
 
   return {
