@@ -1,5 +1,5 @@
-import { JSX, WorkspaceManager, useState } from "../../.deps.ts";
-import { Modal, Action, ActionStyleTypes } from "../../.exports.ts";
+import { JSX, WorkspaceManager, useState } from '../../.deps.ts';
+import { Modal, Action, ActionStyleTypes } from '../../.exports.ts';
 
 export type DataAPISuiteModalProps = {
   workspaceMgr: WorkspaceManager;
@@ -44,7 +44,9 @@ export function DataAPISuiteModal({
               <code class="flex-1">api-key-placeholder</code>
               <Action
                 styleType={ActionStyleTypes.Outline}
-                onClick={() => navigator.clipboard.writeText("api-key-placeholder")}
+                onClick={() =>
+                  navigator.clipboard.writeText('api-key-placeholder')
+                }
               >
                 Copy Key
               </Action>
@@ -53,7 +55,9 @@ export function DataAPISuiteModal({
               <code class="flex-1">https://api.example.com</code>
               <Action
                 styleType={ActionStyleTypes.Outline}
-                onClick={() => navigator.clipboard.writeText("https://api.example.com")}
+                onClick={() =>
+                  navigator.clipboard.writeText('https://api.example.com')
+                }
               >
                 Copy URL
               </Action>
@@ -67,14 +71,24 @@ export function DataAPISuiteModal({
   );
 }
 
-DataAPISuiteModal.Modal = (workspaceMgr: WorkspaceManager) => {
+DataAPISuiteModal.Modal = (
+  workspaceMgr: WorkspaceManager
+): {
+  Modal: JSX.Element;
+  Hide: () => void;
+  IsOpen: () => boolean;
+  Show: () => void;
+} => {
   const [shown, setShow] = useState(false);
 
   return {
     Modal: (
       <>
         {shown && (
-          <DataAPISuiteModal workspaceMgr={workspaceMgr} onClose={() => setShow(false)} />
+          <DataAPISuiteModal
+            workspaceMgr={workspaceMgr}
+            onClose={() => setShow(false)}
+          />
         )}
       </>
     ),

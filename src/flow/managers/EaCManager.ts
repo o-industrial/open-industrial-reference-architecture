@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import {
   EaCEnterpriseDetails,
   EaCStatus,
@@ -9,32 +10,32 @@ import {
   Node,
   NodeChange,
   NullableArrayOrObject,
-} from "../.deps.ts";
+} from '../.deps.ts';
 
-import { HistoryManager } from "./HistoryManager.ts";
-import { GraphStateManager } from "./GraphStateManager.ts";
-import { FlowNodeData } from "../types/react/FlowNodeData.ts";
-import { SimulatorDefinition } from "./SimulatorLibraryManager.ts";
-import { FlowGraphNode } from "../types/graph/FlowGraphNode.ts";
-import { NodeScopeTypes } from "../types/graph/NodeScopeTypes.ts";
+import { HistoryManager } from './HistoryManager.ts';
+import { GraphStateManager } from './GraphStateManager.ts';
+import { FlowNodeData } from '../types/react/FlowNodeData.ts';
+import { SimulatorDefinition } from './SimulatorLibraryManager.ts';
+import { FlowGraphNode } from '../types/graph/FlowGraphNode.ts';
+import { NodeScopeTypes } from '../types/graph/NodeScopeTypes.ts';
 
-import { EaCDiffManager } from "./eac/EaCDiffManager.ts";
-import { EaCWorkspaceScopeManager } from "./eac/EaCWorkspaceScopeManager.ts";
-import { EaCScopeManager } from "./eac/EaCScopeManager.ts";
-import { EaCSurfaceScopeManager } from "./eac/EaCSurfaceScopeManager.ts";
-import { EaCProposalManager } from "./eac/EaCProposalManager.ts";
-import { EaCCapabilitiesManager } from "./eac/EaCCapabilitiesManager.ts";
-import { EaCNodeCapabilityManager } from "./eac/EaCNodeCapabilityManager.ts";
+import { EaCDiffManager } from './eac/EaCDiffManager.ts';
+import { EaCWorkspaceScopeManager } from './eac/EaCWorkspaceScopeManager.ts';
+import { EaCScopeManager } from './eac/EaCScopeManager.ts';
+import { EaCSurfaceScopeManager } from './eac/EaCSurfaceScopeManager.ts';
+import { EaCProposalManager } from './eac/EaCProposalManager.ts';
+import { EaCCapabilitiesManager } from './eac/EaCCapabilitiesManager.ts';
+import { EaCNodeCapabilityManager } from './eac/EaCNodeCapabilityManager.ts';
 
-import { ProposalOverlayMode } from "../types/graph/ProposalOverlayMode.ts";
-import { WorkspaceSummary } from "../types/WorkspaceSummary.ts";
-import { EaCFlowNodeMetadata } from "../../eac/EaCFlowNodeMetadata.ts";
-import { EaCHistorySnapshot } from "../../types/EaCHistorySnapshot.ts";
-import { Proposal } from "../../types/Proposal.ts";
-import { RecordKind } from "../../types/RecordKind.ts";
-import { EverythingAsCodeOIWorkspace } from "../../eac/EverythingAsCodeOIWorkspace.ts";
-import { OpenIndustrialAPIClient } from "../../api/clients/OpenIndustrialAPIClient.ts";
-import { Position } from "../../eac/types/Position.ts";
+import { ProposalOverlayMode } from '../types/graph/ProposalOverlayMode.ts';
+import { WorkspaceSummary } from '../types/WorkspaceSummary.ts';
+import { EaCFlowNodeMetadata } from '../../eac/EaCFlowNodeMetadata.ts';
+import { EaCHistorySnapshot } from '../../types/EaCHistorySnapshot.ts';
+import { Proposal } from '../../types/Proposal.ts';
+import { RecordKind } from '../../types/RecordKind.ts';
+import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
+import { OpenIndustrialAPIClient } from '../../api/clients/OpenIndustrialAPIClient.ts';
+import { Position } from '../../eac/types/Position.ts';
 
 /**
  * Top-level controller for managing the Everything-as-Code runtime state,
@@ -46,7 +47,7 @@ export class EaCManager {
   protected diff: EaCDiffManager;
   protected proposals: EaCProposalManager;
   protected scopeMgr!: EaCScopeManager;
-  protected overlayMode: ProposalOverlayMode = "pending";
+  protected overlayMode: ProposalOverlayMode = 'pending';
 
   // === New Pack Cache ===
 
@@ -89,14 +90,14 @@ export class EaCManager {
     );
 
     switch (scope) {
-      case "workspace":
+      case 'workspace':
         this.scopeMgr = new EaCWorkspaceScopeManager(
           this.graph,
           capabilities,
           () => this.GetEaC(),
         );
         break;
-      case "surface":
+      case 'surface':
         if (!lookup) {
           throw new Error(`Lookup must be defined for scope: ${scope}`);
         }
@@ -283,16 +284,15 @@ export class EaCManager {
   protected getEaCWithProposals(): EverythingAsCodeOIWorkspace {
     const base = jsonMapSetClone(this.eac);
 
-    if (!this.proposals || this.overlayMode === "none") return base;
+    if (!this.proposals || this.overlayMode === 'none') return base;
 
-    const overlays =
-      this.overlayMode === "pending"
-        ? this.proposals.GetPending()
-        : "ids" in this.overlayMode
-          ? this.overlayMode.ids
-              .map((id) => this.proposals.GetByID(id))
-              .filter((p): p is Proposal<RecordKind> => !!p)
-          : [];
+    const overlays = this.overlayMode === 'pending'
+      ? this.proposals.GetPending()
+      : 'ids' in this.overlayMode
+      ? this.overlayMode.ids
+        .map((id) => this.proposals.GetByID(id))
+        .filter((p): p is Proposal<RecordKind> => !!p)
+      : [];
 
     for (const proposal of overlays) {
       const patch = {

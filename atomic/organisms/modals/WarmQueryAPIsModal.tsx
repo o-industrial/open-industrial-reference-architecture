@@ -1,5 +1,5 @@
-import { JSX, WorkspaceManager, useState } from "../../.deps.ts";
-import { Modal } from "../../.exports.ts";
+import { JSX, WorkspaceManager, useState } from '../../.deps.ts';
+import { Modal } from '../../.exports.ts';
 
 export type WarmQueryAPIsModalProps = {
   workspaceMgr: WorkspaceManager;
@@ -19,14 +19,24 @@ export function WarmQueryAPIsModal({
   );
 }
 
-WarmQueryAPIsModal.Modal = (workspaceMgr: WorkspaceManager) => {
+WarmQueryAPIsModal.Modal = (
+  workspaceMgr: WorkspaceManager
+): {
+  Modal: JSX.Element;
+  Hide: () => void;
+  IsOpen: () => boolean;
+  Show: () => void;
+} => {
   const [shown, setShow] = useState(false);
 
   return {
     Modal: (
       <>
         {shown && (
-          <WarmQueryAPIsModal workspaceMgr={workspaceMgr} onClose={() => setShow(false)} />
+          <WarmQueryAPIsModal
+            workspaceMgr={workspaceMgr}
+            onClose={() => setShow(false)}
+          />
         )}
       </>
     ),

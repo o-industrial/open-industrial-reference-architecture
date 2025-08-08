@@ -47,11 +47,11 @@ export function SharedSimulator(
         }),
       };
     })
-    .Stats(async ({ EaC, Lookup }) => {
-      // TODO: query relay metrics storage for this (EnterpriseLookup, Lookup)
+    .Stats(({ EaC, Lookup }) => {
+      // TODO(AI): query relay metrics storage for this (EnterpriseLookup, Lookup)
       void EaC;
       void Lookup;
-      return { RoutesCount: 0 };
+      return Promise.resolve({ RoutesCount: 0 });
     })
     .Deploy(async ({ Steps, AsCode, EaC, Secrets, Lookup }) => {
       const { Source } = AsCode.Details!;
@@ -97,7 +97,7 @@ export function SharedSimulator(
       }
 
       // Ensure shared relay infra (Function App) exists once-per-env (idempotent)
-      // TODO: EnsureOrCreateFunctionApp('oi-shared-relay', ...)
+      // TODO(AI): EnsureOrCreateFunctionApp('oi-shared-relay', ...)
 
       const route = {
         Source: {
@@ -109,9 +109,9 @@ export function SharedSimulator(
       void route;
 
       // Persist routing registry so relay can reload
-      // TODO: KV.set(['SharedSimulator', EaC.EnterpriseLookup!, Lookup], route)
+      // TODO(AI): KV.set(['SharedSimulator', EaC.EnterpriseLookup!, Lookup], route)
 
-      // TODO: call relay /admin/reload
+      // TODO(AI): call relay /admin/reload
 
       return;
     }) as unknown as SimulatorModuleBuilder<

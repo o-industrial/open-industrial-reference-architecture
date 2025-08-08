@@ -53,7 +53,14 @@ export function WorkspaceSettingsModal({
   );
 }
 
-WorkspaceSettingsModal.Modal = (workspaceMgr: WorkspaceManager) => {
+WorkspaceSettingsModal.Modal = (
+  workspaceMgr: WorkspaceManager
+): {
+  Modal: JSX.Element;
+  Hide: () => void;
+  IsOpen: () => boolean;
+  Show: () => void;
+} => {
   const [shown, setShow] = useState(false);
 
   return {

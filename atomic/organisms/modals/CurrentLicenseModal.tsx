@@ -4,14 +4,14 @@ import {
   useEffect,
   useState,
   classSet,
-} from "../../.deps.ts";
+} from '../../.deps.ts';
 import {
   Modal,
   Action,
   ActionStyleTypes,
   LoadingIcon,
-} from "../../.exports.ts";
-import { loadStripe } from "npm:@stripe/stripe-js";
+} from '../../.exports.ts';
+import { loadStripe } from 'npm:@stripe/stripe-js@7.8.0';
 
 export type CurrentLicenseModalProps = {
   workspaceMgr: WorkspaceManager;
@@ -36,8 +36,9 @@ export function CurrentLicenseModal({
     setActivePlan,
   } = workspaceMgr.UseLicenses();
 
-  const [submit, setSubmit] =
-    useState<((e: SubmitEvent) => void) | undefined>();
+  const [submit, setSubmit] = useState<
+    ((e: SubmitEvent) => void) | undefined
+  >();
   const [payError, setPayError] = useState('');
 
   const plans = license
@@ -66,8 +67,8 @@ export function CurrentLicenseModal({
         .flatMap((p) => p)
     : [];
 
-  const intervalPlans = plans.filter((p) =>
-    p.Interval === (isMonthly ? 'month' : 'year')
+  const intervalPlans = plans.filter(
+    (p) => p.Interval === (isMonthly ? 'month' : 'year')
   );
 
   useEffect(() => {
@@ -139,12 +140,10 @@ export function CurrentLicenseModal({
         )}
 
         <div
-          class={classSet(
-            [
-              '-:grid -:px-8 -:gap-10 -:text-zinc-800 -:mt-10',
-              activePlan ? '-:lg:grid-cols-2' : '-:lg:grid-cols-2',
-            ],
-          )}
+          class={classSet([
+            '-:grid -:px-8 -:gap-10 -:text-zinc-800 -:mt-10',
+            activePlan ? '-:lg:grid-cols-2' : '-:lg:grid-cols-2',
+          ])}
         >
           {intervalPlans.map((plan) => (
             <>
@@ -208,7 +207,9 @@ export function CurrentLicenseModal({
                           class={classSet([
                             'w-full md:w-auto text-white font-bold m-1 py-2 px-4 rounded focus:outline-none shadow-lg',
                           ])}
-                          onClick={() => activatePlan(plan.PlanLookup, isMonthly)}
+                          onClick={() =>
+                            activatePlan(plan.PlanLookup, isMonthly)
+                          }
                         >
                           Get Started
                         </Action>
@@ -249,7 +250,14 @@ export function CurrentLicenseModal({
   );
 }
 
-CurrentLicenseModal.Modal = (workspaceMgr: WorkspaceManager) => {
+CurrentLicenseModal.Modal = (
+  workspaceMgr: WorkspaceManager
+): {
+  Modal: JSX.Element;
+  Hide: () => void;
+  IsOpen: () => boolean;
+  Show: () => void;
+} => {
   const [shown, setShow] = useState(false);
 
   return {
@@ -270,4 +278,3 @@ CurrentLicenseModal.Modal = (workspaceMgr: WorkspaceManager) => {
 };
 
 export default CurrentLicenseModal;
-
