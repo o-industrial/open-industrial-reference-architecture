@@ -22,10 +22,7 @@ import {
 
 import { FlowNodeData } from '../types/react/FlowNodeData.ts';
 import { GraphStateManager } from './GraphStateManager.ts';
-import {
-  ImpulseStreamFilter,
-  ImpulseStreamManager,
-} from './ImpulseStreamManager.ts';
+import { ImpulseStreamFilter, ImpulseStreamManager } from './ImpulseStreamManager.ts';
 import { InteractionManager } from './InteractionManager.ts';
 import { SelectionManager } from './SelectionManager.ts';
 import { AziManager, AziState } from './AziManager.ts';
@@ -43,10 +40,7 @@ import { BreadcrumbPart } from '../types/BreadcrumbPart.ts';
 import { IntentTypes } from '../../types/IntentTypes.ts';
 import { EaCNodeCapabilityManager, NodePreset } from '../.exports.ts';
 import { OpenIndustrialAPIClient } from '../../api/clients/OpenIndustrialAPIClient.ts';
-import {
-  RuntimeImpulse,
-  RuntimeImpulseSources,
-} from '../../types/RuntimeImpulse.ts';
+import { RuntimeImpulse, RuntimeImpulseSources } from '../../types/RuntimeImpulse.ts';
 import { IntentStyleMap } from '../../../atomic/utils/getIntentStyles.ts';
 import { impulseSourceColorMap } from '../../../atomic/utils/impulseSourceColorMap.ts';
 
@@ -56,6 +50,7 @@ export class WorkspaceManager {
 
     Lookup?: string;
   };
+  protected Jwt: string;
 
   public Azi: AziManager;
   public EaC: EaCManager;
@@ -74,15 +69,15 @@ export class WorkspaceManager {
     capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>,
     scope: NodeScopeTypes = 'workspace',
     aziCircuitUrl: string,
-    jwt?: string
+    jwt?: string,
   ) {
     this.currentScope = { Scope: scope };
-
     this.Azi = new AziManager({
       url: aziCircuitUrl,
       jwt,
       threadId: `workspace-${eac.EnterpriseLookup}`,
     });
+    this.Jwt = jwt ?? '';
 
     this.History = new HistoryManager();
     this.Selection = new SelectionManager();
@@ -97,7 +92,7 @@ export class WorkspaceManager {
     this.Graph = new GraphStateManager(
       this.Interaction,
       (id: string) => this.UseStats(id),
-      this.NodeEvents
+      this.NodeEvents,
     );
 
     this.EaC = new EaCManager(
@@ -106,7 +101,7 @@ export class WorkspaceManager {
       this.currentScope.Scope,
       this.Graph,
       this.History,
-      capabilitiesByScope
+      capabilitiesByScope,
     );
 
     this.Interaction.BindEaCManager(this.EaC);
@@ -120,7 +115,7 @@ export class WorkspaceManager {
 
   // === Hooks ===
 
-  public UseAzi(): {
+  public UseAzi(circuitUrl?: string): {
     state: AziState;
     isSending: boolean;
     send: (text: string) => Promise<void>;
@@ -132,6 +127,16 @@ export class WorkspaceManager {
     const [state, setState] = useState(this.Azi.GetState());
     const [isSending, setIsSending] = useState(this.Azi.IsSending());
 
+    if (circuitUrl) {
+      const eac = this.EaC.GetEaC();
+      const jwt = this.Jwt;
+      this.Azi = new AziManager({
+        url: circuitUrl,
+        jwt,
+        threadId: `workspace-${eac.EnterpriseLookup!}`,
+      });
+    }
+
     const scrollRef = useRef<HTMLDivElement>(null);
     const streamAnchorRef = useRef<HTMLElement | null>(null);
     const hasScrolledInitially = useRef(false);
@@ -142,7 +147,7 @@ export class WorkspaceManager {
 
         console.log(
           '[UseAzi] ✅ Initial scroll to bottom:',
-          container.scrollHeight
+          container.scrollHeight,
         );
       });
     };
@@ -225,8 +230,7 @@ export class WorkspaceManager {
         ]);
       } else {
         const surfaceLookup = currentScopeData.Lookup!;
-        const surfaceName =
-          eac.Surfaces?.[surfaceLookup]?.Details?.Name ?? 'Unknown Surface';
+        const surfaceName = eac.Surfaces?.[surfaceLookup]?.Details?.Name ?? 'Unknown Surface';
 
         setPathParts([
           {
@@ -288,7 +292,7 @@ export class WorkspaceManager {
     const [canUndo, setCanUndo] = useState(this.History.CanUndo());
     const [canRedo, setCanRedo] = useState(this.History.CanRedo());
     const [hasChanges, setHasChanges] = useState(
-      this.History.HasUnsavedChanges()
+      this.History.HasUnsavedChanges(),
     );
     const [version, setVersion] = useState(this.History.GetVersion());
 
@@ -393,7 +397,7 @@ export class WorkspaceManager {
           return merged;
         });
       },
-      [selectedId]
+      [selectedId],
     );
 
     const handleToggleEnabled = useCallback(
@@ -404,12 +408,12 @@ export class WorkspaceManager {
           });
 
           console.log(
-            `🟡 Toggled enabled state for node ${selectedId} → ${val}`
+            `🟡 Toggled enabled state for node ${selectedId} → ${val}`,
           );
           setEnabled(val);
         }
       },
-      [selectedId]
+      [selectedId],
     );
 
     const handleDeleteNode = useCallback(() => {
@@ -434,8 +438,7 @@ export class WorkspaceManager {
         return;
       }
 
-      const presetConfig =
-        this.EaC.GetCapabilities().GetConfig(selected.id, selected.type!) ?? {};
+      const presetConfig = this.EaC.GetCapabilities().GetConfig(selected.id, selected.type!) ?? {};
 
       setInspectorProps({
         config: presetConfig,
@@ -445,6 +448,8 @@ export class WorkspaceManager {
         onDelete: handleDeleteNode,
         onDetailsChanged: handleDetailsChanged,
         onToggleEnabled: handleToggleEnabled,
+        oiSvc: this.oiSvc,
+        workspaceMgr: this,
       });
     }, [
       selected,
@@ -496,7 +501,7 @@ export class WorkspaceManager {
   public UseInteraction(): {
     handleDrop: (
       event: DragEvent,
-      toFlow: (point: XYPosition) => XYPosition
+      toFlow: (point: XYPosition) => XYPosition,
     ) => void;
     handleConnect: (params: Connection) => void;
     handleNodeClick: (_e: unknown, node: Node<FlowNodeData>) => void;
@@ -507,7 +512,7 @@ export class WorkspaceManager {
       (event: DragEvent, toFlow: (point: XYPosition) => XYPosition) => {
         this.Interaction.HandleDrop(event, this.Graph.GetNodes(), toFlow);
       },
-      []
+      [],
     );
 
     const handleConnect = useCallback((params: Connection) => {
@@ -520,21 +525,21 @@ export class WorkspaceManager {
       (_e: unknown, node: Node<FlowNodeData>) => {
         this.Selection.SelectNode(node.id);
       },
-      []
+      [],
     );
 
     const handleNodesChange = useCallback(
       (changes: NodeChange[], nodes: Node[]) => {
         this.Interaction.OnNodesChange(changes, nodes ?? this.Graph.GetNodes());
       },
-      []
+      [],
     );
 
     const handleEdgesChange = useCallback(
       (changes: EdgeChange[], edges: Edge[]) => {
         this.Interaction.OnEdgesChange(changes, edges ?? this.Graph.GetEdges());
       },
-      []
+      [],
     );
 
     return {
@@ -581,13 +586,12 @@ export class WorkspaceManager {
     setSelected: Dispatch<StateUpdater<Node<FlowNodeData> | null>>;
   } {
     const [selected, setSelected] = useState<Node<FlowNodeData> | null>(
-      this.Selection.GetSelectedNodes(this.Graph.GetNodes())[0] ?? null
+      this.Selection.GetSelectedNodes(this.Graph.GetNodes())[0] ?? null,
     );
 
     useEffect(() => {
       const update = () => {
-        const node =
-          this.Selection.GetSelectedNodes(this.Graph.GetNodes())[0] ?? null;
+        const node = this.Selection.GetSelectedNodes(this.Graph.GetNodes())[0] ?? null;
         setSelected(node);
       };
 
@@ -600,7 +604,7 @@ export class WorkspaceManager {
 
   public UseStats<TStats extends Record<string, unknown>>(
     id: string,
-    intervalMs = 100000
+    intervalMs = 100000,
   ): TStats | undefined {
     const [stats, setStats] = useState<TStats>({} as TStats);
 
@@ -634,7 +638,7 @@ export class WorkspaceManager {
   } {
     const [presets, setPresets] = useState<Record<string, NodePreset>>({});
     const [nodeTypes, setNodeTypes] = useState<Record<string, ComponentType>>(
-      {}
+      {},
     );
 
     useEffect(() => {
@@ -688,10 +692,10 @@ export class WorkspaceManager {
     };
 
     const [current, setCurrent] = useState<WorkspaceSummary>(
-      getCurrentWorkspace()
+      getCurrentWorkspace(),
     );
     const [hasChanges, setHasChanges] = useState(
-      this.History.HasUnsavedChanges()
+      this.History.HasUnsavedChanges(),
     );
 
     useEffect(() => {
@@ -746,7 +750,7 @@ export class WorkspaceManager {
       const name = current.Details.Name ?? 'this workspace';
 
       const confirmed = confirm(
-        `Are you sure you want to archive ${name}? This will remove it from the current session.`
+        `Are you sure you want to archive ${name}? This will remove it from the current session.`,
       );
 
       if (!confirmed) return;
@@ -836,7 +840,7 @@ export class WorkspaceManager {
   }
 
   public ReloadCapabilities(
-    capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>
+    capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>,
   ): void {
     this.EaC.LoadCapabilities(capabilitiesByScope);
 

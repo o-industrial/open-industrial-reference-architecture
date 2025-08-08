@@ -1,3 +1,6 @@
+import { Result } from 'npm:postcss@8.4.35';
+import { DefaultAzureCredential } from 'npm:@azure/identity';
+import { TokenCredential } from '../../.deps.ts';
 import { Step } from '../../../../fluent/steps/Step.ts';
 import { StepModuleBuilder } from '../../../../fluent/steps/StepModuleBuilder.ts';
 import { ClientSecretCredential, ConfidentialClientApplication } from '../../.deps.ts';
@@ -79,6 +82,24 @@ export const AzureResolveCredentialStep: TStepBuilder = Step(
 
             if (!result?.accessToken) throw new Error('OBO resolution failed');
             return result.accessToken;
+          },
+        });
+      }
+
+      case 'kusto': {
+        return Promise.resolve({
+          resolveToken: async () => {
+            const realCred = new DefaultAzureCredential(); // create it INSIDE to avoid reuse
+
+            const tokenResponse = await realCred.getToken(
+              'https://fobd1-data-explorer.westus2.kusto.windows.net/.default',
+            );
+
+            if (!tokenResponse?.token) {
+              throw new Error('Failed to get token for Kusto.');
+            }
+
+            return tokenResponse.token;
           },
         });
       }

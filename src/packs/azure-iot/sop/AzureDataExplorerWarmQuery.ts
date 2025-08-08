@@ -1,10 +1,10 @@
-import { EaCWarmQueryAsCode, TokenCredential, z } from '../.deps.ts';
+import { EaCWarmQueryAsCode, TokenCredential, AccessToken, z } from '../.deps.ts';
 import { WarmQuery } from '../../../fluent/warm-queries/WarmQuery.ts';
 import { loadKustoClient } from '../../../utils/loadKustoClient.ts';
 import { AzureResolveCredentialStep } from '../steps/resolve-credential/AzureResolveCredentialStep.ts';
-import { AzureResolveCredentialInput } from '../steps/resolve-credential/AzureResolveCredentialInput.ts';
 import { WarmQueryModuleBuilder } from '../../../fluent/warm-queries/WarmQueryModuleBuilder.ts';
 import { KustoResponseDataSet } from 'npm:azure-kusto-data@6.0.2';
+import { DefaultAzureCredential } from 'npm:@azure/identity';
 
 export const AzureDataExplorerOutputSchema = z.any();
 
@@ -18,40 +18,54 @@ export type AzureDataExplorerOutput = KustoResponseDataSet;
  * using details embedded in the WarmQuery's AsCode metadata.
  */
 export function AzureDataExplorerWarmQuery(
-  lookup: string
+  lookup: string,
 ): WarmQueryModuleBuilder<
   EaCWarmQueryAsCode,
   AzureDataExplorerOutput,
   void,
   void
 > {
+  const cluster = 'fobd1-data-explorer'; // still hardcoded inline
+  const region = 'westus2';
+  const database = 'Telemetry';
+
   return WarmQuery(lookup)
-    // .OutputType(AzureDataExplorerOutputSchema)
+    .OutputType(AzureDataExplorerOutputSchema)
     .Steps(() => ({
       ResolveCredential: AzureResolveCredentialStep.Build(),
     }))
-    .Services(async (_ctx, { AsCode, Steps }) => {
-      const { CredentialStrategy } = AsCode.Details ?? {};
+    .Services(async (ctx) => {
+      const { AccessToken: initialToken } = await ctx.Steps.ResolveCredential({
+        Method: 'kusto',
+      });
 
-      const { AccessToken } = await Steps.ResolveCredential(
-        CredentialStrategy as AzureResolveCredentialInput
-      );
+      let cachedToken: string = initialToken;
+      let tokenExpiry: number = Date.now() + 50 * 60 * 1000; // assume 50min expiry window
 
       const Credential: TokenCredential = {
-        getToken: async () => ({
-          token: AccessToken,
-          expiresOnTimestamp: Date.now() + 60 * 60 * 1000,
-        }),
+        getToken: async (_scopes, _options): Promise<AccessToken> => {
+          const now = Date.now();
+
+          if (now >= tokenExpiry - 60_000) { // refresh if within 1 minute of expiry
+            const { AccessToken: newToken } = await ctx.Steps.ResolveCredential({
+              Method: 'kusto',
+            });
+
+            cachedToken = newToken;
+            tokenExpiry = Date.now() + 50 * 60 * 1000;
+          }
+
+          return {
+            token: cachedToken,
+            expiresOnTimestamp: tokenExpiry,
+          };
+        },
       };
 
       return { Credential };
     })
     .Run(async ({ AsCode, Services: { Credential } }) => {
       const query = AsCode.Details?.Query!;
-
-      const cluster = 'fobd1-data-explorer'; // still hardcoded inline
-      const region = 'westus2';
-      const database = 'Telemetry';
 
       const kustoClient = await loadKustoClient(cluster, region, Credential);
       kustoClient.ensureOpen();
@@ -60,9 +74,9 @@ export function AzureDataExplorerWarmQuery(
 
       return result;
     }) as unknown as WarmQueryModuleBuilder<
-    EaCWarmQueryAsCode,
-    AzureDataExplorerOutput,
-    void,
-    void
-  >;
+      EaCWarmQueryAsCode,
+      AzureDataExplorerOutput,
+      void,
+      void
+    >;
 }

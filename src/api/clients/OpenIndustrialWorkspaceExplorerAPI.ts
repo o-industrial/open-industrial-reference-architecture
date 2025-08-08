@@ -1,5 +1,5 @@
 import { AzureDataExplorerOutput } from '../../packs/azure-iot/sop/AzureDataExplorerWarmQuery.ts';
-import { EaCWarmQueryDetails } from '../.deps.ts';
+import { EaCWarmQueryAsCode, EaCWarmQueryDetails } from '../.deps.ts';
 import { ClientHelperBridge } from './ClientHelperBridge.ts';
 
 /**
@@ -61,4 +61,28 @@ export class OpenIndustrialWorkspaceExplorerAPI {
 
     return await this.bridge.json(res);
   }
+
+    /**
+   * List all warm queries.
+   *
+   * Requires the workspace to contain valid WarmQuerys.
+   *
+   * @returns The structured warm query definitions from the EaC.
+   */
+    public async ListWarmQueries(
+    ): Promise<EaCWarmQueryAsCode[]> {
+      const res = await fetch(
+        this.bridge.url(`/api/warm-queries`),
+        {
+          method: 'GET',
+          headers: this.bridge.headers(),
+        }
+      );
+  
+      if (!res.ok) {
+        throw new Error(`Warm queries list failed: ${res.status}`);
+      }
+  
+      return await this.bridge.json(res);
+    }
 }

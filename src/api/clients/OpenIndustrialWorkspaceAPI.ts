@@ -182,7 +182,7 @@ export class OpenIndustrialWorkspaceAPI {
     };
 
     // ✅ Validate runtime impulse
-    const isRuntimeImpulse = (obj: any): obj is RuntimeImpulse => {
+    const isRuntimeImpulse = (obj: RuntimeImpulse): obj is RuntimeImpulse => {
       const valid =
         obj &&
         typeof obj.Timestamp === 'string' &&

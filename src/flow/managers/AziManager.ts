@@ -4,7 +4,7 @@ import {
   type BaseMessage,
   HumanMessage,
   RemoteRunnable,
-  ToolMessage,
+  //ToolMessage,
 } from '../.deps.ts';
 
 export type AziInputs = {
@@ -74,7 +74,7 @@ export class AziManager {
       this.state.Messages.push(humanMsg, aiMsg);
       this.emit();
 
-      const toolStreams: Record<string, ToolMessage> = {};
+      //const toolStreams: Record<string, ToolMessage> = {};
 
       const events = await this.circuit.streamEvents(
         { Input: input, ...(extraInputs ?? {}) },

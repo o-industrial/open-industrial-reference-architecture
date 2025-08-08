@@ -26,6 +26,7 @@ type AziPanelProps = {
   onClose?: () => void;
   intentTypes?: Partial<Record<Role, IntentTypes>>;
   renderMessage?: (message: string) => string;
+  circuitUrl?: string;
 };
 
 function ReasoningBlock({
@@ -66,6 +67,7 @@ export function AziPanel({
     tool: IntentTypes.Tertiary,
   },
   renderMessage,
+  circuitUrl,
 }: AziPanelProps): JSX.Element {
   const {
     state,
@@ -74,7 +76,7 @@ export function AziPanel({
     peek,
     scrollRef,
     registerStreamAnchor,
-  } = workspaceMgr.UseAzi();
+  } = workspaceMgr.UseAzi(circuitUrl);
 
   // Initial peek when mounted
   useEffect(() => {
