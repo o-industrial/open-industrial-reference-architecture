@@ -83,7 +83,7 @@ export function WorkspaceSettingsModal({
   );
 }
 
-export interface ModalController {
+export interface WorkspaceSettingsModalAPI {
   Modal: JSX.Element;
   Hide: () => void;
   IsOpen: () => boolean;
@@ -92,7 +92,7 @@ export interface ModalController {
 
 WorkspaceSettingsModal.Modal = (
   workspaceMgr: WorkspaceManager
-): ModalController => {
+): WorkspaceSettingsModalAPI => {
   const [shown, setShow] = useState(false);
 
   return {

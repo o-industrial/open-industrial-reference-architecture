@@ -178,7 +178,7 @@ export function TeamManagementModal({
   );
 }
 
-export interface ModalController {
+export interface TeamManagementModalAPI {
   Modal: JSX.Element;
   Hide: () => void;
   IsOpen: () => boolean;
@@ -187,7 +187,7 @@ export interface ModalController {
 
 TeamManagementModal.Modal = (
   workspaceMgr: WorkspaceManager
-): ModalController => {
+): TeamManagementModalAPI => {
   const [shown, setShow] = useState(false);
 
   return {
