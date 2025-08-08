@@ -1,4 +1,4 @@
-import type { FunctionalComponent, JSX } from 'preact';
+import type { FunctionalComponent, JSX } from 'npm:preact@10.20.1';
 
 interface SurfaceWarmQueryModalQueryProps {
   query: string;

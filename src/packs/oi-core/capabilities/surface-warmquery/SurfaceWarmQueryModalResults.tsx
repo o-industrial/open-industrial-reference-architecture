@@ -1,4 +1,4 @@
-import type { FunctionalComponent } from 'preact';
+import type { FunctionalComponent } from 'npm:preact@10.20.1';
 import { useEffect, useState } from '../../.deps.ts';
 
 type Row = Record<string, unknown>;
