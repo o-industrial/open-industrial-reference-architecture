@@ -119,7 +119,7 @@ export function RuntimeWorkspaceDashboardTemplate({
             styleType={ActionStyleTypes.Icon}
             intentType={IntentTypes.Primary}
             onClick={() => setAziExpanded(!aziExpanded)}
-            class="-:absolute -:top-1 -:right-1 -:z-50"
+            class="-:absolute -:top-1 -:right-1 -:z-30"
           >
             {aziExpanded ? (
               <CloseIcon class="w-5 h-5" />
@@ -178,7 +178,7 @@ export function RuntimeWorkspaceDashboardTemplate({
             styleType={ActionStyleTypes.Icon}
             intentType={IntentTypes.Primary}
             onClick={() => setInspectorExpanded(!inspectorExpanded)}
-            class="-:absolute -:top-1 -:right-1 -:z-50"
+            class="-:absolute -:top-1 -:right-1 -:z-30"
           >
             {inspectorExpanded ? (
               <CloseIcon class="w-5 h-5" />
@@ -211,7 +211,7 @@ export function RuntimeWorkspaceDashboardTemplate({
             styleType={ActionStyleTypes.Icon}
             intentType={IntentTypes.Primary}
             onClick={() => setStreamExpanded(!streamExpanded)}
-            class="-:absolute -:top-1 -:right-1 -:z-50"
+            class="-:absolute -:top-1 -:right-1 -:z-30"
           >
             {streamExpanded ? <CloseIcon class="w-5 h-5" /> : '▲'}
           </Action>
@@ -240,7 +240,7 @@ export function RuntimeWorkspaceDashboardTemplate({
             styleType={ActionStyleTypes.Icon}
             intentType={IntentTypes.Primary}
             onClick={() => setTimelineExpanded(!timelineExpanded)}
-            class="-:absolute -:top-1 -:right-1 -:z-50"
+            class="-:absolute -:top-1 -:right-1 -:z-30"
           >
             {timelineExpanded ? <CloseIcon class="w-5 h-5" /> : '▲'}
           </Action>

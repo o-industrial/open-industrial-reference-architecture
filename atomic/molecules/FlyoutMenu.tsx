@@ -62,7 +62,7 @@ export function FlyoutMenu({
       ref={ref}
       role="menu"
       class={classSet([
-        '-:absolute -:z-100 -:min-w-44 -:bg-neutral-900 -:border -:border-neutral-800 -:rounded-md -:shadow-lg',
+        '-:absolute -:z-50 -:min-w-44 -:bg-neutral-900 -:border -:border-neutral-800 -:rounded-md -:shadow-lg',
         '-:py-1 -:text-sm',
         level === 0 ? '-:mt-2' : '-:ml-0',
       ])}

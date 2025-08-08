@@ -7,7 +7,7 @@ import { EaCSimulatorDetails, EaCSimulatorDetailsSchema } from './EaCSimulatorDe
  * This is the canonical container used to run the Azure IoT Device Telemetry Simulator:
  * https://learn.microsoft.com/en-us/samples/azure-samples/iot-telemetry-simulator/azure-iot-device-telemetry-simulator/
  */
-export type EaCAzureDockerSimulatorDetails = EaCSimulatorDetails<'AzureDocker'> & {
+export type EaCSharedSimulatorDetailsDetails = EaCSimulatorDetails<'AzureDocker'> & {
   /** JSON object defining variable values used in message templating. */
   Variables?: Record<string, unknown>;
 
@@ -22,9 +22,9 @@ export type EaCAzureDockerSimulatorDetails = EaCSimulatorDetails<'AzureDocker'> 
 };
 
 /**
- * Schema for EaCAzureDockerSimulatorDetails.
+ * Schema for EaCSharedSimulatorDetailsDetails.
  */
-export const EaCAzureDockerSimulatorDetailsSchema: z.ZodType<EaCAzureDockerSimulatorDetails> =
+export const EaCSharedSimulatorDetailsDetailsSchema: z.ZodType<EaCSharedSimulatorDetailsDetails> =
   EaCSimulatorDetailsSchema.extend({
     Type: z.literal('AzureDocker'),
     Variables: z
@@ -46,19 +46,19 @@ export const EaCAzureDockerSimulatorDetailsSchema: z.ZodType<EaCAzureDockerSimul
   }).describe('Schema for Azure Docker-hosted simulator instance.');
 
 /**
- * Type guard for EaCAzureDockerSimulatorDetails.
+ * Type guard for EaCSharedSimulatorDetailsDetails.
  */
-export function isEaCAzureDockerSimulatorDetails(
+export function isEaCSharedSimulatorDetailsDetails(
   details: unknown,
-): details is EaCAzureDockerSimulatorDetails {
-  return EaCAzureDockerSimulatorDetailsSchema.safeParse(details).success;
+): details is EaCSharedSimulatorDetailsDetails {
+  return EaCSharedSimulatorDetailsDetailsSchema.safeParse(details).success;
 }
 
 /**
- * Validates and parses an object as EaCAzureDockerSimulatorDetails.
+ * Validates and parses an object as EaCSharedSimulatorDetailsDetails.
  */
-export function parseEaCAzureDockerSimulatorDetails(
+export function parseEaCSharedSimulatorDetailsDetails(
   details: unknown,
-): EaCAzureDockerSimulatorDetails {
-  return EaCAzureDockerSimulatorDetailsSchema.parse(details);
+): EaCSharedSimulatorDetailsDetails {
+  return EaCSharedSimulatorDetailsDetailsSchema.parse(details);
 }
