@@ -1,5 +1,5 @@
 import { NodeEvent, NodeEventRouter } from '../../types/nodes/NodeEventRouter.ts';
-import { WorkspaceManager } from '../WorkspaceManager.ts';
+import { WorkspaceManager } from '../WorkspaceManager.tsx';
 
 export class SurfaceEventRouter implements NodeEventRouter {
   constructor(protected workspace: WorkspaceManager) {}

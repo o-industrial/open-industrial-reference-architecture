@@ -1,4 +1,4 @@
-import { WorkspaceManager } from './WorkspaceManager.ts';
+import { WorkspaceManager } from './WorkspaceManager.tsx';
 import { NodeEvent } from '../types/nodes/NodeEventRouter.ts';
 
 export class NodeEventManager {
