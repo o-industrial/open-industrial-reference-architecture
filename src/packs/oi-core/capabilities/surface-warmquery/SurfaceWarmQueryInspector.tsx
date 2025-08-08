@@ -83,8 +83,8 @@ export function SurfaceWarmQueryInspector({
           queryText={details.Query ?? ''}
           queryApiPath={details.ApiPath ?? ''}
           onClose={handleCloseModal}
-          onRun={handleRunQuery}
-          onSave={handleSaveQuery}
+          onRun={() => handleRunQuery(details.Query ?? '')}
+          onSave={() => handleSaveQuery(details.Name ?? '', details.ApiPath ?? '', details.Description ?? '', details.Query ?? '')}
         />
       )}
     </>
