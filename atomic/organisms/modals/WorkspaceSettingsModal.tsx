@@ -12,9 +12,9 @@ import {
   Input,
   Action,
   ActionStyleTypes,
-  Select,
   Badge,
 } from '../../.exports.ts';
+import { TeamManagementModal } from './TeamManagementModal.tsx';
 
 type WorkspaceSettingsModalProps = {
   workspaceMgr: WorkspaceManager;
@@ -27,9 +27,6 @@ export function WorkspaceSettingsModal({
 }: WorkspaceSettingsModalProps): JSX.Element {
   const {
     currentWorkspace,
-    teamMembers,
-    inviteMember,
-    removeMember,
     update,
     save,
     archive,
@@ -38,51 +35,51 @@ export function WorkspaceSettingsModal({
     switchToWorkspace,
   } = workspaceMgr.UseWorkspaceSettings();
 
+  const [showTeamModal, setShowTeamModal] = useState(false);
+
   const details: EaCEnterpriseDetails = currentWorkspace.Details;
 
   return (
-    <Modal title="Workspace Settings" onClose={onClose}>
-      <TabbedPanel
-        direction="vertical"
-        tabs={[
-          {
-            key: 'details',
-            label: '🛠️ Workspace Details',
-            content: (
-              <WorkspaceDetailsTab
-                details={details}
-                onUpdate={update}
-                onSave={() => save().then()}
-                onArchive={archive}
-                hasChanges={hasChanges}
-              />
-            ),
-          },
-          {
-            key: 'team',
-            label: '👥 Team Members',
-            content: (
-              <TeamMembersTab
-                teamMembers={teamMembers}
-                onInvite={inviteMember}
-                onRemove={removeMember}
-              />
-            ),
-          },
-          {
-            key: 'switch',
-            label: '🔄 Switch Workspace',
-            content: (
-              <SwitchWorkspaceTab
-                currentId={currentWorkspace.Lookup}
-                workspaces={workspaces}
-                onSwitch={switchToWorkspace}
-              />
-            ),
-          },
-        ]}
-      />
-    </Modal>
+    <>
+      <Modal title="Workspace Settings" onClose={onClose}>
+        <TabbedPanel
+          direction="vertical"
+          tabs={[
+            {
+              key: 'details',
+              label: '🛠️ Workspace Details',
+              content: (
+                <WorkspaceDetailsTab
+                  details={details}
+                  onUpdate={update}
+                  onSave={() => save().then()}
+                  onArchive={archive}
+                  hasChanges={hasChanges}
+                  onManageTeam={() => setShowTeamModal(true)}
+                />
+              ),
+            },
+            {
+              key: 'switch',
+              label: '🔄 Switch Workspace',
+              content: (
+                <SwitchWorkspaceTab
+                  currentId={currentWorkspace.Lookup}
+                  workspaces={workspaces}
+                  onSwitch={switchToWorkspace}
+                />
+              ),
+            },
+          ]}
+        />
+      </Modal>
+      {showTeamModal && (
+        <TeamManagementModal
+          workspaceMgr={workspaceMgr}
+          onClose={() => setShowTeamModal(false)}
+        />
+      )}
+    </>
   );
 }
 
@@ -112,12 +109,14 @@ function WorkspaceDetailsTab({
   onSave,
   onArchive,
   hasChanges,
+  onManageTeam,
 }: {
   details: EaCEnterpriseDetails;
   onUpdate: (next: Partial<EaCEnterpriseDetails>) => void;
   onSave: () => void;
   onArchive: () => void;
   hasChanges: boolean;
+  onManageTeam: () => void;
 }) {
   return (
     <div class="space-y-4">
@@ -142,84 +141,30 @@ function WorkspaceDetailsTab({
         <div>Workspace ID: {details.ID}</div>
       </div> */}
 
-      <div class="flex justify-between mt-4">
+      <div class="flex justify-between mt-4 gap-2">
         <Action onClick={onSave} disabled={!hasChanges}>
           Save Changes
         </Action>
-        <Action
-          onClick={() => {
-            if (confirm('Are you sure you want to archive this workspace?')) {
-              onArchive();
-            }
-          }}
-          intentType={IntentTypes.Error}
-          styleType={ActionStyleTypes.Outline}
-        >
-          🧊 Archive Workspace
-        </Action>
-      </div>
-    </div>
-  );
-}
-
-function TeamMembersTab({
-  teamMembers,
-  onInvite,
-  onRemove,
-}: {
-  teamMembers: { Email: string; Role: string }[];
-  onInvite: (email: string, role: string) => void;
-  onRemove: (email: string) => void;
-}) {
-  const [email, setEmail] = useState('');
-  const [role, setRole] = useState('Viewer');
-
-  return (
-    <div class="space-y-4">
-      <div class="text-sm text-neutral-300 font-medium">Current Members</div>
-      <div class="space-y-2">
-        {teamMembers.map((member) => (
-          <div class="flex justify-between items-center border p-2 rounded">
-            <div class="text-sm">{member.Email}</div>
-            <div class="flex items-center gap-2">
-              <Select value={member.Role} disabled>
-                <option>Owner</option>
-                <option>Editor</option>
-                <option>Viewer</option>
-              </Select>
-
-              <Action
-                onClick={() => onRemove(member.Email)}
-                intentType={IntentTypes.Error}
-                styleType={ActionStyleTypes.Icon}
-              >
-                ✖
-              </Action>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div class="text-sm text-neutral-300 font-medium pt-4">Invite Member</div>
-      <div class="flex items-center gap-2">
-        <Input
-          placeholder="Email"
-          value={email}
-          onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
-            setEmail((e.target as HTMLInputElement).value)
-          }
-        />
-        <Select
-          value={role}
-          onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>
-            setRole((e.target as HTMLSelectElement).value)
-          }
-        >
-          <option>Viewer</option>
-          <option>Editor</option>
-          <option>Owner</option>
-        </Select>
-        <Action onClick={() => onInvite(email, role)}>Invite</Action>
+        <div class="flex gap-2">
+          <Action
+            intentType={IntentTypes.Primary}
+            styleType={ActionStyleTypes.Outline}
+            onClick={onManageTeam}
+          >
+            Manage Team Members
+          </Action>
+          <Action
+            onClick={() => {
+              if (confirm('Are you sure you want to archive this workspace?')) {
+                onArchive();
+              }
+            }}
+            intentType={IntentTypes.Error}
+            styleType={ActionStyleTypes.Outline}
+          >
+            🧊 Archive Workspace
+          </Action>
+        </div>
       </div>
     </div>
   );
