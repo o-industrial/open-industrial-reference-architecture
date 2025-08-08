@@ -1,64 +1,39 @@
 import { z } from './.deps.ts';
 import { EaCSimulatorDetails, EaCSimulatorDetailsSchema } from './EaCSimulatorDetails.ts';
 
-/**
- * Represents an Azure Docker-hosted simulator instance.
- *
- * This is the canonical container used to run the Azure IoT Device Telemetry Simulator:
- * https://learn.microsoft.com/en-us/samples/azure-samples/iot-telemetry-simulator/azure-iot-device-telemetry-simulator/
- */
-export type EaCSharedSimulatorDetailsDetails = EaCSimulatorDetails<'AzureDocker'> & {
-  /** JSON object defining variable values used in message templating. */
-  Variables?: Record<string, unknown>;
+export type EaCSharedSimulatorDetails = EaCSimulatorDetails<'Shared'> & {
+  /** Source IoT Hub device that Node-RED is writing into */
+  Source: {
+    /** Canonical lookup of the data connection supplying the source IoT Hub */
+    DataConnectionLookup: string;
+    /** The deviceId in that IoT Hub that Node-RED uses */
+    DeviceID: string;
+  };
 
-  /** JSON object that serves as the telemetry message template. */
-  MessageTemplate?: Record<string, unknown>;
-
-  /** Delay between messages, in milliseconds. */
-  MessageIntervalMS?: number;
-
-  /** Total number of messages per device (0 = infinite). */
-  MessageCountPerDevice?: number;
+  /** Optional human note */
+  Note?: string;
 };
 
-/**
- * Schema for EaCSharedSimulatorDetailsDetails.
- */
-export const EaCSharedSimulatorDetailsDetailsSchema: z.ZodType<EaCSharedSimulatorDetailsDetails> =
+export const EaCSharedSimulatorDetailsSchema: z.ZodType<EaCSharedSimulatorDetails> =
   EaCSimulatorDetailsSchema.extend({
-    Type: z.literal('AzureDocker'),
-    Variables: z
-      .record(z.unknown())
-      .optional()
-      .describe('JSON object for variable overrides in templates.'),
-    MessageTemplate: z
-      .record(z.unknown())
-      .optional()
-      .describe('JSON object defining the telemetry message format.'),
-    MessageIntervalMS: z
-      .number()
-      .optional()
-      .describe('Delay between messages in milliseconds.'),
-    MessageCountPerDevice: z
-      .number()
-      .optional()
-      .describe('Number of messages to send per device (0 = infinite).'),
-  }).describe('Schema for Azure Docker-hosted simulator instance.');
+    Type: z.literal('Shared'),
+    Source: z.object({
+      DataConnectionLookup: z.string(),
+      DeviceID: z.string(),
+    }),
+    Note: z.string().optional(),
+  }).describe(
+    'Schema for a Shared (relay) simulator that fans out source device telemetry.',
+  );
 
-/**
- * Type guard for EaCSharedSimulatorDetailsDetails.
- */
-export function isEaCSharedSimulatorDetailsDetails(
+export function isEaCSharedSimulatorDetails(
   details: unknown,
-): details is EaCSharedSimulatorDetailsDetails {
-  return EaCSharedSimulatorDetailsDetailsSchema.safeParse(details).success;
+): details is EaCSharedSimulatorDetails {
+  return EaCSharedSimulatorDetailsSchema.safeParse(details).success;
 }
 
-/**
- * Validates and parses an object as EaCSharedSimulatorDetailsDetails.
- */
-export function parseEaCSharedSimulatorDetailsDetails(
+export function parseEaCSharedSimulatorDetails(
   details: unknown,
-): EaCSharedSimulatorDetailsDetails {
-  return EaCSharedSimulatorDetailsDetailsSchema.parse(details);
+): EaCSharedSimulatorDetails {
+  return EaCSharedSimulatorDetailsSchema.parse(details);
 }
