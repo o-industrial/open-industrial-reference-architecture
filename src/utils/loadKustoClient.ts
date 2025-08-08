@@ -30,5 +30,5 @@ export async function loadKustoClient(
     kustoClientCache[clusterUrl] = await new KustoClient(kcs);
   }
 
-  return kustoClientCache[clusterUrl];
+  return await kustoClientCache[clusterUrl];
 }

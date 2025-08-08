@@ -4,7 +4,6 @@ import { loadKustoClient } from '../../../utils/loadKustoClient.ts';
 import { AzureResolveCredentialStep } from '../steps/resolve-credential/AzureResolveCredentialStep.ts';
 import { WarmQueryModuleBuilder } from '../../../fluent/warm-queries/WarmQueryModuleBuilder.ts';
 import { KustoResponseDataSet } from 'npm:azure-kusto-data@6.0.2';
-import { DefaultAzureCredential } from 'npm:@azure/identity';
 
 export const AzureDataExplorerOutputSchema = z.any();
 
