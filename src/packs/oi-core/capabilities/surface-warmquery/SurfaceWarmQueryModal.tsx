@@ -8,15 +8,18 @@ import { AziPanel } from '../../../../../atomic/organisms/.exports.ts';
 import { SurfaceWarmQueryModalDetails } from './SurfaceWarmQueryModalDetails.tsx';
 import { SurfaceWarmQueryModalQuery } from './SurfaceWarmQueryModalQuery.tsx';
 import { SurfaceWarmQueryModalResults } from './SurfaceWarmQueryModalResults.tsx';
+import { WorkspaceManager } from '../../../../flow/.exports.ts';
+import { KustoResponseDataSet } from 'npm:azure-kusto-data@6.0.2';
 
 interface SurfaceWarmQueryModalProps {
+  workspace: WorkspaceManager;
   queryName: string;
   queryDescription: string;
   queryText: string;
   queryApiPath: string;
   onClose: () => void;
-  onRun: () => void;
-  onSave: (name: string, description: string, query: string) => void;
+  onRun: (query: string) => Promise<KustoResponseDataSet>;
+  onSave: (name: string, apiPath: string, description: string, query: string) => void;
 }
 
 export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalProps> = ({
@@ -54,9 +57,9 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
       name: string;
       data: Record<string, unknown>[];
     }
-    
-    const data =
-      result?.tables?.find((t: QueryTable) => t.name === 'PrimaryResult')?.data || [];
+
+    const table = result?.tables?.find((t) => t.name === 'PrimaryResult');
+    const data = (table && 'data' in table) ? (table as QueryTable).data : [];
     setQueryResults(data);
     setIsLoading(false);
   };
@@ -142,8 +145,8 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
               <TabbedPanel
                 class='mt-2'
                 tabs={tabData}
-                activeTab={activeTabKey}  
-                onTabChange={setActiveTabKey}              
+                activeTab={activeTabKey}
+                onTabChange={setActiveTabKey}
               />
             </div>
 

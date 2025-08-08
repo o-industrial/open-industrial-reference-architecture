@@ -37,7 +37,7 @@ export const SurfaceWarmQueryModalQuery: FunctionalComponent<SurfaceWarmQueryMod
             name='query'
             type='text'
             value={query}
-            onInput={(e) => onQueryChange(e.target.value)}
+            onInput={(e) => onQueryChange(e.currentTarget.value)}
             required
             maxLength={5000}
             placeholder='Enter query'

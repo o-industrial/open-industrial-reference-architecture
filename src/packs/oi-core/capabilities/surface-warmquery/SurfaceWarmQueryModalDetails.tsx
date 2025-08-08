@@ -82,7 +82,7 @@ export const SurfaceWarmQueryModalDetails: FunctionalComponent<SurfaceWarmQueryM
               name='queryName'
               type='text'
               value={queryName}
-              onInput={(e) => onQueryNameChange(e.target.value)}
+              onInput={(e) => onQueryNameChange(e.currentTarget.value)}
               required
               maxLength={25}
               placeholder='Enter the query name (max 25 characters)'
@@ -137,7 +137,7 @@ export const SurfaceWarmQueryModalDetails: FunctionalComponent<SurfaceWarmQueryM
             name='queryDescription'
             type='text'
             value={queryDescription}
-            onInput={(e) => onQueryDescriptionChange(e.target.value)}
+            onInput={(e) => onQueryDescriptionChange(e.currentTarget.value)}
             required
             maxLength={200}
             placeholder='Enter description'
