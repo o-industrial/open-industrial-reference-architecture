@@ -806,8 +806,13 @@ export class WorkspaceManager {
   public UseWorkspaceSettings(): {
     currentWorkspace: WorkspaceSummary;
     teamMembers: TeamMember[];
-    inviteMember: (email: string, role: string) => void;
+    inviteMember: (
+      email: string,
+      role: TeamMember['Role'],
+      name?: string,
+    ) => void;
     removeMember: (email: string) => void;
+    updateMemberRole: (email: string, role: TeamMember['Role']) => void;
     update: (next: Partial<EaCEnterpriseDetails>) => void;
     save: () => Promise<void>;
     archive: () => void;
@@ -842,15 +847,16 @@ export class WorkspaceManager {
       return () => unsubscribe();
     }, []);
 
-    const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+    const [teamMembers, setTeamMembers] = useState<TeamMember[]>(
+      this.Team?.ListUsers?.() ?? [],
+    );
 
     useEffect(() => {
-      const members = this.Team?.ListUsers?.() ?? [
-        { Email: 'admin@factory.com', Role: 'Owner' },
-        { Email: 'engineer@factory.com', Role: 'Editor' },
-      ];
+      const unsubscribe = this.Team?.OnChange?.(() => {
+        setTeamMembers(this.Team.ListUsers());
+      });
 
-      setTeamMembers(members);
+      return () => unsubscribe?.();
     }, []);
 
     const [workspaces, setWorkspaces] = useState<WorkspaceSummary[]>([]);
@@ -894,15 +900,21 @@ export class WorkspaceManager {
       });
     };
 
-    const inviteMember = (email: string, role: string) => {
+    const inviteMember = (
+      email: string,
+      role: TeamMember['Role'],
+      name?: string,
+    ) => {
       if (!email) return;
-      this.Team?.InviteUser?.(email, role);
-      setTeamMembers((prev) => [...prev, { Email: email, Role: role }]);
+      this.Team?.InviteUser?.(email, role, name);
     };
 
     const removeMember = (email: string) => {
       this.Team?.RemoveUser?.(email);
-      setTeamMembers((prev) => prev.filter((m) => m.Email !== email));
+    };
+
+    const updateMemberRole = (email: string, role: TeamMember['Role']) => {
+      this.Team?.UpdateUserRole?.(email, role);
     };
 
     const switchToWorkspace = (_lookup: string) => {
@@ -918,6 +930,7 @@ export class WorkspaceManager {
       teamMembers,
       inviteMember,
       removeMember,
+      updateMemberRole,
       update,
       save,
       archive,
