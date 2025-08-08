@@ -1,14 +1,14 @@
 import {
   EverythingAsCode,
   EverythingAsCodeLicensing,
-} from "../../../src/eac/.deps.ts";
+} from '../../../src/eac/.deps.ts';
 import {
   JSX,
   WorkspaceManager,
   useEffect,
   useState,
   classSet,
-} from "../../.deps.ts";
+} from '../../.deps.ts';
 import {
   Modal,
   Action,
@@ -16,8 +16,8 @@ import {
   LoadingIcon,
   ToggleCheckbox,
   LicenseCard,
-} from "../../.exports.ts";
-import { loadStripe } from "npm:@stripe/stripe-js@7.8.0";
+} from '../../.exports.ts';
+import { loadStripe } from 'npm:@stripe/stripe-js@7.8.0';
 
 export type CurrentLicenseModalProps = {
   eac: EverythingAsCode & EverythingAsCodeLicensing;
@@ -47,7 +47,7 @@ export function CurrentLicenseModal({
   const [submit, setSubmit] = useState<
     ((e: SubmitEvent) => void) | undefined
   >();
-  const [payError, setPayError] = useState("");
+  const [payError, setPayError] = useState('');
 
   const plans = license
     ? Object.keys(license.Plans)
@@ -63,8 +63,8 @@ export function CurrentLicenseModal({
               PriceLookup: priceLookup,
               Name: plan.Details!.Name!,
               Description: plan.Details!.Description!,
-              Amount: price.Value,
-              Interval: price.Details!.Interval,
+              Amount: price.Details!.Value,
+              Interval: price.Details!.Interval as 'month' | 'year',
               Featured: !!plan.Details!.Featured,
               Highlight: plan.Details!.Featured,
               Features: plan.Details!.Features,
@@ -77,7 +77,7 @@ export function CurrentLicenseModal({
     : [];
 
   const intervalPlans = plans.filter(
-    (p) => p.Interval === (isMonthly ? "month" : "year"),
+    (p) => p.Interval === (isMonthly ? 'month' : 'year')
   );
 
   useEffect(() => {
@@ -91,9 +91,9 @@ export function CurrentLicenseModal({
         appearance: {},
       });
 
-      const paymentElement = elements.create("payment");
+      const paymentElement = elements.create('payment');
 
-      paymentElement.mount("#payment-element");
+      paymentElement.mount('#payment-element');
 
       const returnUrl = new URL(location.pathname, location.origin);
 
@@ -108,7 +108,7 @@ export function CurrentLicenseModal({
         });
 
         if (error) {
-          setPayError(error.message ?? "");
+          setPayError(error.message ?? '');
         }
       });
     };
@@ -143,12 +143,12 @@ export function CurrentLicenseModal({
               styleType={ActionStyleTypes.Link | ActionStyleTypes.Rounded}
               onClick={() => setActivePlan(undefined)}
             >
-              Change License {">"}
+              Change License {'>'}
             </Action>
           </div>
         )}
 
-        <div class={classSet(["grid px-4 gap-6 mt-10 md:grid-cols-2"])}>
+        <div class={classSet(['grid px-4 gap-6 mt-10 md:grid-cols-2'])}>
           {intervalPlans
             .filter((p) => !activePlan || activePlan === p.PlanLookup)
             .map((plan) => (
@@ -180,7 +180,7 @@ export function CurrentLicenseModal({
                   id="submit"
                   type="submit"
                   class={classSet([
-                    "w-full md:w-auto text-white font-bold m-1 py-2 px-4 rounded focus:outline-none shadow-lg",
+                    'w-full md:w-auto text-white font-bold m-1 py-2 px-4 rounded focus:outline-none shadow-lg',
                   ])}
                 >
                   Subscribe
@@ -200,7 +200,7 @@ export function CurrentLicenseModal({
 
 CurrentLicenseModal.Modal = (
   eac: EverythingAsCode & EverythingAsCodeLicensing,
-  workspaceMgr: WorkspaceManager,
+  workspaceMgr: WorkspaceManager
 ): {
   Modal: JSX.Element;
   Hide: () => void;
