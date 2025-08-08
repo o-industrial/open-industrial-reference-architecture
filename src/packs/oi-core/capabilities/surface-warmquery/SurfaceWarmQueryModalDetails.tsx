@@ -17,14 +17,14 @@ export const SurfaceWarmQueryModalDetails: FunctionalComponent<SurfaceWarmQueryM
   onQueryDescriptionChange,
   onQueryApiPathChange,
 }) => {
-  const handleQueryApiPathChange = (e: any) => {
-    // Get the current input value
-    const inputValue = e.target.value;
-
-    // Regular expression to allow lowercase letters, numbers, and dashes only
+  const handleQueryApiPathChange = (
+    e: JSX.TargetedEvent<HTMLInputElement, Event>
+  ) => {
+    const inputValue = e.currentTarget.value;
+  
+    // Allow lowercase letters, numbers, and dashes only
     const filteredValue = inputValue.replace(/[^a-z0-9-]/g, '');
-
-    // Set the filtered value in state
+  
     onQueryApiPathChange(filteredValue);
   };
 

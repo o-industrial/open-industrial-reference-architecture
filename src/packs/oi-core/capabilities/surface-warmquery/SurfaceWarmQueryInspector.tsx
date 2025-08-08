@@ -5,7 +5,6 @@ import { InspectorCommonProps } from '../../../../flow/.exports.ts';
 import { SurfaceWarmQueryStats } from './SurfaceWarmQueryStats.tsx';
 import { EaCWarmQueryDetails } from '../../../../eac/.deps.ts';
 import { SurfaceWarmQueryModal } from './SurfaceWarmQueryModal.tsx';
-import { IotHubGatewayServiceAPIs } from 'npm:azure-iothub@1.16.5';
 
 type SurfaceWarmQueryInspectorProps = InspectorCommonProps<
   EaCWarmQueryDetails,
@@ -48,7 +47,7 @@ export function SurfaceWarmQueryInspector({
       Name: name,
       Query: query,
       Description: description,
-    } as any);
+    } as Partial<EaCWarmQueryDetails>);
     handleCloseModal();
   };
 

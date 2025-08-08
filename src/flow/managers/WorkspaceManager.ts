@@ -209,7 +209,7 @@ export class WorkspaceManager {
     };
 
     const leaveTeam = (teamLookup: string) => {
-      // TODO: this.Team?.LeaveTeam?.(teamLookup)
+      // TODO(@mcgear): this.Team?.LeaveTeam?.(teamLookup)
       setTeams((prev) => prev.filter((t) => t.Lookup !== teamLookup));
     };
 
@@ -224,11 +224,11 @@ export class WorkspaceManager {
       }
 
       setHasChanges(false);
-      return Promise.resolve();
+      return await Promise.resolve();
     };
 
     const signOut = async () => {
-      console.log('Signing out...');
+      await console.log('Signing out...');
     };
 
     const deleteAccount = async () => {
@@ -241,7 +241,7 @@ export class WorkspaceManager {
 
       // await this.oiSvc.Users.DeleteMyAccount()
       console.warn('🗑️ [UseAccountProfile] account deleted (mock)');
-      location.assign('/'); // simulate sign-out
+      await location.assign('/'); // simulate sign-out
     };
 
     return {

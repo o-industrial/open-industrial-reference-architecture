@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
 import { EaCStatus, EaCUserRecord } from '../.client.deps.ts';
 import { EaCHistorySnapshot } from '../../types/EaCHistorySnapshot.ts';
 import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';

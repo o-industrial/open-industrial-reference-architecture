@@ -2,7 +2,7 @@
 import { TabbedPanel } from '../../../../../atomic/.exports.ts';
 import { marked } from 'npm:marked@15.0.1';
 import { useState } from 'preact/hooks';
-import { Action, Input } from '../../../../../atomic/.exports.ts';
+import { Action } from '../../../../../atomic/.exports.ts';
 import type { FunctionalComponent } from 'preact';
 import { AziPanel } from '../../../../../atomic/organisms/.exports.ts';
 import { SurfaceWarmQueryModalDetails } from './SurfaceWarmQueryModalDetails.tsx';
@@ -34,10 +34,13 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
   const [queryDescription, setQueryDescription] = useState(initialDescription);
   const [query, setQuery] = useState(initialQuery);
   const [queryApiPath, setQueryApiPath] = useState(initialApiPath);
-  const [queryResults, setQueryResults] = useState<any[]>([]);
+  type QueryResultRow = Record<string, unknown>;
+  const [queryResults, setQueryResults] = useState<QueryResultRow[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState('');
   const [activeTabKey, setActiveTabKey] = useState('details');
+  setWorkspace(initialWorkspace);
+  setErrors('');
 
   const isSaveDisabled = !queryName || !query || !queryDescription || !queryApiPath || isLoading;
   const isRunDisabled = !query || isLoading;
@@ -47,7 +50,13 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
     setActiveTabKey('results');
     const result = await onRun(query);
     console.log(result);
-    const data = result?.tables?.find((t: any) => t.name === 'PrimaryResult')?.data || [];
+    interface QueryTable {
+      name: string;
+      data: Record<string, unknown>[];
+    }
+    
+    const data =
+      result?.tables?.find((t: QueryTable) => t.name === 'PrimaryResult')?.data || [];
     setQueryResults(data);
     setIsLoading(false);
   };
