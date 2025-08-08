@@ -14,6 +14,8 @@ import {
   Action,
   ActionStyleTypes,
   LoadingIcon,
+  ToggleCheckbox,
+  LicenseCard,
 } from '../../.exports.ts';
 import { loadStripe } from 'npm:@stripe/stripe-js@7.8.0';
 
@@ -61,9 +63,10 @@ export function CurrentLicenseModal({
               PriceLookup: priceLookup,
               Name: plan.Details!.Name!,
               Description: plan.Details!.Description!,
-              Amount: price.Value,
-              Interval: price.Details!.Interval,
-              Featured: plan.Details!.Featured,
+              Amount: price.Details!.Value,
+              Interval: price.Details!.Interval as 'month' | 'year',
+              Featured: !!plan.Details!.Featured,
+              Highlight: plan.Details!.Featured,
               Features: plan.Details!.Features,
             };
           });
@@ -126,10 +129,10 @@ export function CurrentLicenseModal({
       <div class="space-y-6 text-sm">
         <div class="flex flex-row max-w-sm mx-auto justify-center items-center">
           <span class="mx-4">Monthly</span>
-          <input
-            type="checkbox"
+          <ToggleCheckbox
             checked={!isMonthly}
-            onChange={() => activateMonthly()}
+            onToggle={() => activateMonthly()}
+            title="Toggle billing interval"
           />
           <span class="mx-4">Yearly</span>
         </div>
@@ -145,112 +148,51 @@ export function CurrentLicenseModal({
           </div>
         )}
 
-        <div
-          class={classSet([
-            '-:grid -:px-8 -:gap-10 -:text-zinc-800 -:mt-10',
-            activePlan ? '-:lg:grid-cols-2' : '-:lg:grid-cols-2',
-          ])}
-        >
-          {intervalPlans.map((plan) => (
-            <>
-              {(!activePlan || activePlan === plan.PlanLookup) && (
-                <div
+        <div class={classSet(['grid px-4 gap-6 mt-10 md:grid-cols-2'])}>
+          {intervalPlans
+            .filter((p) => !activePlan || activePlan === p.PlanLookup)
+            .map((plan) => (
+              <LicenseCard
+                key={plan.Lookup}
+                name={plan.Name}
+                description={plan.Description}
+                amount={plan.Amount}
+                interval={plan.Interval}
+                features={plan.Features}
+                featured={plan.Featured}
+                highlightLabel={plan.Highlight}
+                isActive={activePlan === plan.PlanLookup}
+                onSelect={() => activatePlan(plan.PlanLookup, isMonthly)}
+              />
+            ))}
+        </div>
+
+        {activePlan && clientSecret && (
+          <form id="payment-form" onSubmit={(e) => submit?.(e)} class="mt-8">
+            <div
+              id="payment-element"
+              class="p-4 rounded-md border border-neon-violet-500 bg-neutral-900"
+            ></div>
+
+            {!loading ? (
+              <div class="mt-8 flex flex-col">
+                <Action
+                  id="submit"
+                  type="submit"
                   class={classSet([
-                    'flex flex-col items-center p-8 rounded-lg shadow-lg max-w-sm relative',
-                    plan.Featured
-                      ? 'bg-gradient-to-br from-blue-100 via-orange-100 to-purple-100 border-8 border-orange-200'
-                      : 'bg-slate-100',
+                    'w-full md:w-auto text-white font-bold m-1 py-2 px-4 rounded focus:outline-none shadow-lg',
                   ])}
                 >
-                  {plan.Featured && (
-                    <>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        aria-hidden="true"
-                        class="w-20 h-20 absolute -top-11 -left-11 fill-red-400"
-                      >
-                        <path
-                          fill-rule="evenodd"
-                          d="M12.963 2.286a.75.75 0 00-1.071-.136 9.742 9.742 0 00-3.539 6.177A7.547 7.547 0 016.648 6.61a.75.75 0 00-1.152-.082A9 9 0 1015.68 4.534a7.46 7.46 0 01-2.717-2.248zM15.75 14.25a3.75 3.75 0 11-7.313-1.172c.628.465 1.35.81 2.133 1a5.99 5.99 0 011.925-3.545 3.75 3.75 0 013.255 3.717z"
-                          clip-rule="evenodd"
-                        ></path>
-                      </svg>
+                  Subscribe
+                </Action>
+              </div>
+            ) : (
+              <LoadingIcon class="w-20 h-20 text-neon-blue-500 animate-spin inline-block" />
+            )}
 
-                      <p class="mono text-sm absolute -top-4 bg-red-400 text-zinc-100 py-0.5 px-2 font-bold tracking-wider rounded text-uppercase">
-                        {plan.Featured}
-                      </p>
-                    </>
-                  )}
-
-                  <div>
-                    <h2 class="font-extrabold text-3xl text-center mb-2">
-                      {plan.Name}
-                    </h2>
-
-                    <p class="opacity-60 text-center">{plan.Description}</p>
-
-                    <div class="flex flex-col items-center my-8">
-                      <p class="font-extrabold text-4xl">${plan.Amount}</p>
-
-                      <p class="text-sm opacity-60">/{plan.Interval}</p>
-                    </div>
-                  </div>
-
-                  <div class="flex flex-col gap-1">
-                    {plan.Features &&
-                      plan.Features.map((feature) => (
-                        <p class="flex items-center text-sm">
-                          &#x1F5F8;
-                          <b class="ml-2">{feature}</b>
-                        </p>
-                      ))}
-
-                    {activePlan !== plan.PlanLookup && (
-                      <div class="flex justify-center mt-8">
-                        <Action
-                          class={classSet([
-                            'w-full md:w-auto text-white font-bold m-1 py-2 px-4 rounded focus:outline-none shadow-lg',
-                          ])}
-                          onClick={() =>
-                            activatePlan(plan.PlanLookup, isMonthly)
-                          }
-                        >
-                          Get Started
-                        </Action>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </>
-          ))}
-
-          {activePlan && clientSecret && (
-            <form id="payment-form" onSubmit={(e) => submit?.(e)}>
-              <div id="payment-element"></div>
-
-              {!loading ? (
-                <div class="mt-8 flex flex-col">
-                  <Action
-                    id="submit"
-                    type="submit"
-                    class={classSet([
-                      'w-full md:w-auto text-white font-bold m-1 py-2 px-4 rounded focus:outline-none shadow-lg',
-                    ])}
-                  >
-                    Subscribe
-                  </Action>
-                </div>
-              ) : (
-                <LoadingIcon class="w-20 h-20 text-blue-500 animate-spin inline-block" />
-              )}
-
-              <div>{hookError || payError}</div>
-            </form>
-          )}
-        </div>
+            <div>{hookError || payError}</div>
+          </form>
+        )}
       </div>
     </Modal>
   );
