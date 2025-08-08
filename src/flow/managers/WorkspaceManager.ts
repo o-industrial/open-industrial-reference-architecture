@@ -49,6 +49,18 @@ import {
 } from "../../types/RuntimeImpulse.ts";
 import { IntentStyleMap } from "../../../atomic/utils/getIntentStyles.ts";
 import { impulseSourceColorMap } from "../../../atomic/utils/impulseSourceColorMap.ts";
+import {
+  AccountProfileModal,
+  BillingDetailsModal,
+  CurrentLicenseModal,
+  DataAPISuiteModal,
+  ManageWorkspacesModal,
+  SimulatorLibraryModal,
+  TeamManagementModal,
+  WarmQueryAPIsModal,
+  WorkspaceSettingsModal,
+} from "../../../atomic/organisms/modals/.exports.ts";
+import { MenuActionItem } from "../../../atomic/molecules/FlyoutMenu.tsx";
 
 export type AccountProfile = {
   Name: string;
@@ -141,7 +153,95 @@ export class WorkspaceManager {
 
   // === Hooks ===
 
-  public UseAppMenu() {}
+  public UseAppMenu() {
+    const { Modal: accProfModal, Show: showAccProf } =
+      AccountProfileModal.Modal(this);
+    const { Modal: mngWkspsModal, Show: showMngWksps } =
+      ManageWorkspacesModal.Modal(this);
+    const { Modal: simLibModal, Show: showSimLib } =
+      SimulatorLibraryModal.Modal(this);
+    const { Modal: teamMgmtModal, Show: showTeamMgmt } =
+      TeamManagementModal.Modal(this);
+    const { Modal: wkspSetsModal, Show: showWkspSets } =
+      WorkspaceSettingsModal.Modal(this);
+    const { Modal: warmQueryModal, Show: showWarmQuery } =
+      WarmQueryAPIsModal.Modal(this);
+    const { Modal: dataSuiteModal, Show: showDataSuite } =
+      DataAPISuiteModal.Modal(this);
+    const { Modal: billingModal, Show: showBilling } =
+      BillingDetailsModal.Modal(this);
+    const { Modal: licenseModal, Show: showLicense } =
+      CurrentLicenseModal.Modal(this);
+
+    const modals = (
+      <>
+        {simLibModal}
+        {accProfModal}
+        {mngWkspsModal}
+        {teamMgmtModal}
+        {wkspSetsModal}
+        {warmQueryModal}
+        {dataSuiteModal}
+        {billingModal}
+        {licenseModal}
+      </>
+    );
+
+    const handleMenu = (item: MenuActionItem) => {
+      console.log("menu", item);
+
+      switch (item.id) {
+        case "workspace.settings": {
+          showWkspSets();
+          break;
+        }
+
+        case "workspace.team": {
+          showTeamMgmt();
+          break;
+        }
+
+        case "workspace.viewAll": {
+          showMngWksps();
+          break;
+        }
+
+        case "apis.warmQuery": {
+          showWarmQuery();
+          break;
+        }
+
+        case "apis.dataSuite": {
+          showDataSuite();
+          break;
+        }
+
+        case "billing.details": {
+          showBilling();
+          break;
+        }
+
+        case "billing.license": {
+          showLicense();
+          break;
+        }
+      }
+    };
+
+    return {
+      handleMenu,
+      modals,
+      showWkspSets,
+      showTeamMgmt,
+      showSimLib,
+      showMngWksps,
+      showAccProf,
+      showWarmQuery,
+      showDataSuite,
+      showBilling,
+      showLicense,
+    };
+  }
 
   public UseAccountProfile(): {
     profile: AccountProfile;
