@@ -1,7 +1,7 @@
 import {
   AccountProfile,
   TeamMembership,
-} from '../../../src/flow/managers/WorkspaceManager.ts';
+} from '../../../src/flow/managers/WorkspaceManager.tsx';
 import { JSX, IntentTypes, useState, WorkspaceManager } from '../../.deps.ts';
 import {
   Modal,
