@@ -63,7 +63,6 @@ import {
   WorkspaceSettingsModal,
 } from "../../../atomic/organisms/modals/.exports.ts";
 import { MenuActionItem } from "../../../atomic/molecules/FlyoutMenu.tsx";
-import { EaCLicenseAsCode, EaCUserLicense } from "@fathym/eac-licensing";
 
 export type AccountProfile = {
   Name: string;
