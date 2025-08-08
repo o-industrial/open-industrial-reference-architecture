@@ -124,3 +124,31 @@ export function SimulatorLibraryModal({
     </Modal>
   );
 }
+
+SimulatorLibraryModal.Modal = (
+  workspaceMgr: WorkspaceManager
+): {
+  Modal: JSX.Element;
+  Hide: () => void;
+  IsOpen: () => boolean;
+  Show: () => void;
+} => {
+  const [shown, setShow] = useState(false);
+
+  return {
+    Modal: (
+      <>
+        {shown && (
+          <SimulatorLibraryModal
+            workspaceMgr={workspaceMgr}
+            onClose={() => setShow(false)}
+          />
+        )}
+      </>
+    ),
+    Hide: () => setShow(false),
+    IsOpen: () => shown,
+    Show: () => setShow(true),
+  };
+};
+

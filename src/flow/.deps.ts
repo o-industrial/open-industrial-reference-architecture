@@ -7,7 +7,9 @@ export type {
 } from 'jsr:@fathym/eac@0.2.113';
 export { type EaCStatus, EaCStatusProcessingTypes } from 'jsr:@fathym/eac@0.2.113/steward/status';
 
-export type { ComponentType, RefObject } from 'npm:preact@10.20.1';
+export type { EaCLicenseAsCode, EaCUserLicense } from 'jsr:@fathym/eac-licensing@0.0.38';
+
+export type { ComponentType, JSX, RefObject } from 'npm:preact@10.20.1';
 export {
   type Dispatch,
   type StateUpdater,

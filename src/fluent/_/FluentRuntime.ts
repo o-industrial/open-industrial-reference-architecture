@@ -31,6 +31,7 @@ export abstract class FluentRuntime<
     TSteps
   >,
 > {
+
   // ✅ Optional zod schemas exposed for introspection
   public OutputSchema?: ZodType<TOutput>;
   public DeploySchema?: ZodType<TDeploy>;
@@ -106,6 +107,8 @@ export abstract class FluentRuntime<
 
   protected injectSteps?(ctx: TContext): Promise<TSteps>;
 
+  protected abstract didInjectServicesFirst(): boolean;
+
   protected injectVerifications?(
     ctx: TContext,
   ): Promise<VerificationInvokerMap<TContext>>;
@@ -116,13 +119,27 @@ export abstract class FluentRuntime<
   ): Promise<TContext> {
     const ctx = { ...base } as TContext;
 
-    if (typeof this.injectServices === 'function') {
-      const services = await this.injectServices(ctx, ioc!);
-      ctx.Services = { ...(ctx.Services ?? {}), ...services } as TServices;
+    const injectServices = async () => {
+      if (typeof this.injectServices === 'function') {
+        const services = await this.injectServices(ctx, ioc!);
+        ctx.Services = { ...(ctx.Services ?? {}), ...services } as TServices;
+      }
     }
 
-    if (typeof this.injectSteps === 'function') {
-      ctx.Steps = await this.injectSteps(ctx);
+    const injectSteps = async () => {
+      if (typeof this.injectSteps === 'function') {
+        ctx.Steps = await this.injectSteps(ctx);
+      }
+    }
+
+    if (this.didInjectServicesFirst()) {
+      await injectServices();
+
+      await injectSteps();
+    } else {
+      await injectSteps();
+      
+      await injectServices();
     }
 
     return ctx;
