@@ -1,4 +1,8 @@
 import {
+  EverythingAsCode,
+  EverythingAsCodeLicensing,
+} from '../../../src/eac/.deps.ts';
+import {
   JSX,
   WorkspaceManager,
   useEffect,
@@ -14,11 +18,13 @@ import {
 import { loadStripe } from 'npm:@stripe/stripe-js@7.8.0';
 
 export type CurrentLicenseModalProps = {
+  eac: EverythingAsCode & EverythingAsCodeLicensing;
   workspaceMgr: WorkspaceManager;
   onClose: () => void;
 };
 
 export function CurrentLicenseModal({
+  eac,
   workspaceMgr,
   onClose,
 }: CurrentLicenseModalProps): JSX.Element {
@@ -34,7 +40,7 @@ export function CurrentLicenseModal({
     activateMonthly,
     activatePlan,
     setActivePlan,
-  } = workspaceMgr.UseLicenses();
+  } = workspaceMgr.UseLicenses(eac);
 
   const [submit, setSubmit] = useState<
     ((e: SubmitEvent) => void) | undefined
@@ -251,6 +257,7 @@ export function CurrentLicenseModal({
 }
 
 CurrentLicenseModal.Modal = (
+  eac: EverythingAsCode & EverythingAsCodeLicensing,
   workspaceMgr: WorkspaceManager
 ): {
   Modal: JSX.Element;
@@ -265,6 +272,7 @@ CurrentLicenseModal.Modal = (
       <>
         {shown && (
           <CurrentLicenseModal
+            eac={eac}
             workspaceMgr={workspaceMgr}
             onClose={() => setShow(false)}
           />
