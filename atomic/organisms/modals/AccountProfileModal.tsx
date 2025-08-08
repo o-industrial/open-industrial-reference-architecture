@@ -100,6 +100,26 @@ export function AccountProfileModal({
   );
 }
 
+AccountProfileModal.Modal = (workspaceMgr: WorkspaceManager) => {
+  const [shown, setShow] = useState(false);
+
+  return {
+    Modal: (
+      <>
+        {shown && (
+          <AccountProfileModal
+            workspaceMgr={workspaceMgr}
+            onClose={() => setShow(false)}
+          />
+        )}
+      </>
+    ),
+    Hide: () => setShow(false),
+    IsOpen: () => shown,
+    Show: () => setShow(true),
+  };
+};
+
 function AccountInfoTab({
   profile,
   onUpdate,

@@ -8,6 +8,7 @@ import { MenuBar } from './MenuBar.tsx';
 export type AppFrameBarProps = {
   menus: MenuRoot[];
   onMenuOption: (item: MenuActionItem) => void;
+  onActivateClick?: () => void;
   onProfileClick?: () => void;
   onSettingsClick?: () => void;
   profileIntentType?: IntentTypes;
@@ -16,6 +17,7 @@ export type AppFrameBarProps = {
 export function AppFrameBar({
   menus,
   onMenuOption,
+  onActivateClick,
   onProfileClick,
   onSettingsClick,
   profileIntentType = IntentTypes.Info,
@@ -43,10 +45,10 @@ export function AppFrameBar({
 
       {/* ➡️ Right-aligned Profile Button */}
       <div class="-:ml-auto -:flex -:items-center -:gap-2">
-        {onSettingsClick && (
+        {onActivateClick && (
           <Action
             title="3 Days to Activate Workspace"
-            onClick={onSettingsClick}
+            onClick={onActivateClick}
             styleType={ActionStyleTypes.Outline | ActionStyleTypes.Thin}
             intentType={IntentTypes.Warning}
           >
@@ -54,7 +56,7 @@ export function AppFrameBar({
           </Action>
         )}
 
-        {/* {onSettingsClick && (
+        {onSettingsClick && (
           <Action
             title="Workspace Settings"
             onClick={onSettingsClick}
@@ -63,7 +65,7 @@ export function AppFrameBar({
           >
             <SettingsIcon class="w-4 h-4" />
           </Action>
-        )} */}
+        )}
 
         {onProfileClick && (
           <Action

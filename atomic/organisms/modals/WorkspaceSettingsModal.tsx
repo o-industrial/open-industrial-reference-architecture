@@ -86,6 +86,26 @@ export function WorkspaceSettingsModal({
   );
 }
 
+WorkspaceSettingsModal.Modal = (workspaceMgr: WorkspaceManager) => {
+  const [shown, setShow] = useState(false);
+
+  return {
+    Modal: (
+      <>
+        {shown && (
+          <WorkspaceSettingsModal
+            workspaceMgr={workspaceMgr}
+            onClose={() => setShow(false)}
+          />
+        )}
+      </>
+    ),
+    Hide: () => setShow(false),
+    IsOpen: () => shown,
+    Show: () => setShow(true),
+  };
+};
+
 function WorkspaceDetailsTab({
   details,
   onUpdate,
@@ -117,10 +137,10 @@ function WorkspaceDetailsTab({
         }
       />
 
-      <div class="text-xs text-neutral-400 space-y-1">
+      {/* <div class="text-xs text-neutral-400 space-y-1">
         <div>Created At: {details.CreatedAt}</div>
         <div>Workspace ID: {details.ID}</div>
-      </div>
+      </div> */}
 
       <div class="flex justify-between mt-4">
         <Action onClick={onSave} disabled={!hasChanges}>

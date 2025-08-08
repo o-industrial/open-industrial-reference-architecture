@@ -10,7 +10,7 @@ import { WorkspaceEnsureAzureResourceGroupStep } from '../steps/ensure-workspace
 import { shaHash } from '../../../utils/shaHash.ts';
 
 export function SharedSimulator(
-  lookup: string
+  lookup: string,
 ): SimulatorModuleBuilder<
   EaCSimulatorAsCode<EaCSharedSimulatorDetails>,
   void,
@@ -26,7 +26,7 @@ export function SharedSimulator(
   >(lookup)
     .DeployType(z.void())
     .StatsType(
-      z.object({ RoutesCount: z.number(), LastSeenUTC: z.string().optional() })
+      z.object({ RoutesCount: z.number(), LastSeenUTC: z.string().optional() }),
     )
     .Steps(async ({ Secrets }) => {
       const subId = (await Secrets.Get('AZURE_IOT_SUBSCRIPTION_ID'))!;
@@ -41,11 +41,10 @@ export function SharedSimulator(
           CredentialStrategy: credStrat,
           SubscriptionID: subId,
         }),
-        ResolveIoTHubConnectionString:
-          AzureResolveIoTHubConnectionStringStep.Build({
-            SubscriptionID: subId,
-            CredentialStrategy: credStrat,
-          }),
+        ResolveIoTHubConnectionString: AzureResolveIoTHubConnectionStringStep.Build({
+          SubscriptionID: subId,
+          CredentialStrategy: credStrat,
+        }),
       };
     })
     .Stats(async ({ EaC, Lookup }) => {
@@ -58,7 +57,7 @@ export function SharedSimulator(
       const { Source } = AsCode.Details!;
       const sourceConn = await Steps.ResolveIoTHubConnectionString({
         ResourceGroupName: await Secrets.GetRequired(
-          'AZURE_IOT_RESOURCE_GROUP'
+          'AZURE_IOT_RESOURCE_GROUP',
         ),
         KeyName: 'iothubowner',
       });
@@ -78,14 +77,14 @@ export function SharedSimulator(
         ) {
           const targetConn = await Steps.ResolveIoTHubConnectionString({
             ResourceGroupName: await Secrets.GetRequired(
-              'AZURE_IOT_RESOURCE_GROUP'
+              'AZURE_IOT_RESOURCE_GROUP',
             ),
             KeyName: 'iothubowner',
           });
 
           const targetDeviceId = await shaHash(
             EaC.EnterpriseLookup!,
-            dcDetails.DeviceID
+            dcDetails.DeviceID,
           );
 
           subscribers.push({
@@ -116,9 +115,9 @@ export function SharedSimulator(
 
       return;
     }) as unknown as SimulatorModuleBuilder<
-    EaCSimulatorAsCode<EaCSharedSimulatorDetails>,
-    void,
-    void,
-    { RoutesCount: number; LastSeenUTC?: string }
-  >;
+      EaCSimulatorAsCode<EaCSharedSimulatorDetails>,
+      void,
+      void,
+      { RoutesCount: number; LastSeenUTC?: string }
+    >;
 }
