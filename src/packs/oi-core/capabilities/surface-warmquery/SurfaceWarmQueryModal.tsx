@@ -3,7 +3,7 @@ import { TabbedPanel } from '../../../../../atomic/.exports.ts';
 import { marked } from 'npm:marked@15.0.1';
 import { useState } from 'npm:preact@10.20.1/hooks';
 import { Action } from '../../../../../atomic/.exports.ts';
-import type { FunctionalComponent } from 'preact';
+import type { FunctionalComponent } from 'npm:preact@10.20.1';
 import { AziPanel } from '../../../../../atomic/organisms/.exports.ts';
 import { SurfaceWarmQueryModalDetails } from './SurfaceWarmQueryModalDetails.tsx';
 import { SurfaceWarmQueryModalQuery } from './SurfaceWarmQueryModalQuery.tsx';
