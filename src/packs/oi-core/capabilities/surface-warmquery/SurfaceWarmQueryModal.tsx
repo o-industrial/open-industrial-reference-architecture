@@ -1,7 +1,7 @@
 // SurfaceWarmQueryModal.tsx
 import { TabbedPanel } from '../../../../../atomic/.exports.ts';
 import { marked } from 'npm:marked@15.0.1';
-import { useState } from 'npm:preact@10.20.1/hooks';
+import { useState, useEffect } from 'npm:preact@10.20.1/hooks';
 import { Action } from '../../../../../atomic/.exports.ts';
 import type { FunctionalComponent } from 'npm:preact@10.20.1';
 import { AziPanel } from '../../../../../atomic/organisms/.exports.ts';
@@ -42,8 +42,15 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState('');
   const [activeTabKey, setActiveTabKey] = useState('details');
-  setWorkspace(initialWorkspace);
-  setErrors('');
+  // If you truly need to sync when the prop changes:
+  useEffect(() => {
+    setWorkspace(initialWorkspace);
+  }, [initialWorkspace]);
+
+  // Only clear errors at a specific moment, not every render:
+  useEffect(() => {
+    setErrors('');
+  }, []);
 
   const isSaveDisabled = !queryName || !query || !queryDescription || !queryApiPath || isLoading;
   const isRunDisabled = !query || isLoading;

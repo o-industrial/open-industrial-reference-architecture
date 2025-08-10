@@ -113,20 +113,29 @@ export const SurfaceWarmQueryModalResults: FunctionalComponent<
               Results
             </label>
 
-            <a
-              title="Download CSV"
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                handleExportToCSV();
-              }}
-              class="inline-flex items-center gap-2 text-teal-400 hover:text-teal-300 focus:outline-none"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8zm4 18H6V4h7v5h5zm-8-1l2-4H9v-5h6v5l-2 4z" />
-              </svg>
-              <span class="text-sm">CSV</span>
-            </a>
+            {queryResults.length > 0
+              ? (
+                <a
+                  title='Download CSV'
+                  href='#'
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleExportToCSV();
+                  }}
+                  class='inline-flex items-center gap-2 text-teal-400 hover:text-teal-300 focus:outline-none'
+                >
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    class='w-4 h-4'
+                    viewBox='0 0 24 24'
+                    fill='currentColor'
+                  >
+                    <path d='M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8zm4 18H6V4h7v5h5zm-8-1l2-4H9v-5h6v5l-2 4z' />
+                  </svg>
+                  <span class='text-sm'>CSV</span>
+                </a>
+              )
+              : ''}
           </div>
 
           {isLoading ? (
