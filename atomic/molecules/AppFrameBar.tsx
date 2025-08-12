@@ -1,6 +1,6 @@
-import { GitCommitIcon } from '../../build/iconset/icons/GitCommitIcon.tsx';
 import { SettingsIcon } from '../../build/iconset/icons/SettingsIcon.tsx';
 import { UsersIcon } from '../../build/iconset/icons/UsersIcon.tsx';
+import { GitCommitIcon } from '../../build/iconset/icons/GitCommitIcon.tsx';
 import { JSX, classSet, IntentTypes } from '../.deps.ts';
 import { Action, ActionStyleTypes } from '../atoms/Action.tsx';
 import { MenuActionItem, MenuRoot } from './FlyoutMenu.tsx';
@@ -11,16 +11,22 @@ export type AppFrameBarProps = {
   onMenuOption: (item: MenuActionItem) => void;
   onActivateClick?: () => void;
   onCommitClick?: () => void;
+  commitBadgeState?: CommitBadgeState;
+  commitIconSrc?: string;
   onProfileClick?: () => void;
   onSettingsClick?: () => void;
   profileIntentType?: IntentTypes;
 };
+
+export type CommitBadgeState = 'error' | 'processing' | 'success';
 
 export function AppFrameBar({
   menus,
   onMenuOption,
   onActivateClick,
   onCommitClick,
+  commitBadgeState,
+  commitIconSrc,
   onProfileClick,
   onSettingsClick,
   profileIntentType = IntentTypes.Info,
@@ -77,7 +83,18 @@ export function AppFrameBar({
             styleType={ActionStyleTypes.Icon | ActionStyleTypes.Thin}
             intentType={IntentTypes.Primary}
           >
-            <GitCommitIcon class="w-4 h-4" />
+            <span class="-:relative -:block">
+              <GitCommitIcon src={commitIconSrc} class="-:w-4 -:h-4" />
+              {commitBadgeState === 'error' && (
+                <span class="-:absolute -:top-0 -:right-0 -:w-2 -:h-2 -:rounded-full -:bg-neon-red-500 -:translate-x-1/2 -:-translate-y-1/2" />
+              )}
+              {commitBadgeState === 'processing' && (
+                <span class="-:absolute -:top-0 -:right-0 -:w-2 -:h-2 -:rounded-full -:border-2 -:border-neon-blue-500 -:border-t-transparent -:animate-spin -:translate-x-1/2 -:-translate-y-1/2" />
+              )}
+              {commitBadgeState === 'success' && (
+                <span class="-:absolute -:top-0 -:right-0 -:text-green-500 -:text-[10px] -:translate-x-1/2 -:-translate-y-1/2">✓</span>
+              )}
+            </span>
           </Action>
         )}
 
