@@ -1,39 +1,39 @@
 /**
  * Descriptor defining metadata for an API endpoint.
  */
-export interface ApiEndpointDescriptor {
+export interface APIEndpointDescriptor {
   /**
    * HTTP method for the endpoint (e.g., GET, POST).
    */
-  method: string;
+  Method: string;
 
   /**
    * Path where the endpoint is exposed.
    */
-  path: string;
+  Path: string;
 
   /**
    * Flag indicating the endpoint uses Server-Sent Events.
    */
-  sse?: boolean;
+  SSE?: boolean;
 
   /**
    * Flag indicating the endpoint uses WebSockets.
    */
-  webSocket?: boolean;
+  WebSocket?: boolean;
 
   /**
    * Flag indicating the endpoint is a chat protocol.
    */
-  chat?: boolean;
+  Chat?: boolean;
 
   /**
    * Flag indicating the endpoint triggers a cold path.
    */
-  cold?: boolean;
+  Cold?: boolean;
 
   /**
    * Flag indicating the endpoint triggers a warm path.
    */
-  warm?: boolean;
+  Warm?: boolean;
 }
