@@ -14,6 +14,7 @@ import { WorkspaceManager } from '../WorkspaceManager.tsx';
 import { NodeEventRouter } from '../../types/nodes/NodeEventRouter.ts';
 import { EverythingAsCodeOIWorkspace } from '../../../eac/EverythingAsCodeOIWorkspace.ts';
 import { Position } from '../../../eac/types/Position.ts';
+import { APIEndpointDescriptor } from '../../../types/APIEndpointDescriptor.ts';
 
 /**
  * Pure registry and dispatcher for active node capability managers.
@@ -131,6 +132,13 @@ export class EaCCapabilitiesManager {
 
   public GetConfig(id: string, type: string): Record<string, unknown> {
     return this.GetCapabilityFor({ ID: id, Type: type })?.GetConfig(id) ?? {};
+  }
+
+  public GetAPIDescriptors(
+    node: FlowGraphNode,
+    context: EaCNodeCapabilityContext,
+  ): APIEndpointDescriptor[] {
+    return this.GetCapabilityFor(node)?.GetAPIDescriptors(node, context) ?? [];
   }
 
   public GetEventRouterForType(
