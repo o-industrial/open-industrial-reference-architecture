@@ -4,6 +4,7 @@ import {
   Dispatch,
   EaCEnterpriseDetails,
   EaCLicenseAsCode,
+  EaCStatus,
   EaCStatusProcessingTypes,
   EaCUserLicense,
   EaCVertexDetails,
@@ -171,6 +172,8 @@ export class WorkspaceManager {
     showDataSuite: () => void;
     showBilling: () => void;
     showLicense: () => void;
+    toggleCommitPanel: () => void;
+    selectCommit: (id: string | null) => void;
   } {
     const { Modal: accProfModal, Show: showAccProf } =
       AccountProfileModal.Modal(this);
@@ -190,6 +193,8 @@ export class WorkspaceManager {
       BillingDetailsModal.Modal(this);
     const { Modal: licenseModal, Show: showLicense } =
       CurrentLicenseModal.Modal(eac, this);
+
+    const { toggleCommitPanel, selectCommit } = this.UseCommits();
 
     const modals = (
       <>
@@ -258,6 +263,8 @@ export class WorkspaceManager {
       showDataSuite,
       showBilling,
       showLicense,
+      toggleCommitPanel,
+      selectCommit,
     };
   }
 
@@ -743,6 +750,66 @@ export class WorkspaceManager {
       commit: () => this.Commit(),
       revert: () => this.RevertToLastCommit(),
       fork: () => this.Fork(),
+    };
+  }
+
+  public UseCommits(): {
+    commits: EaCStatus[];
+    badgeState: 'error' | 'processing' | 'success';
+    showCommitPanel: boolean;
+    selectedCommitId: string | null;
+    toggleCommitPanel: () => void;
+    selectCommit: (id: string | null) => void;
+  } {
+    const [commits, setCommits] = useState<EaCStatus[]>([]);
+    const [badgeState, setBadgeState] = useState<
+      'error' | 'processing' | 'success'
+    >('success');
+    const [showCommitPanel, setShowCommitPanel] = useState(false);
+    const [selectedCommitId, setSelectedCommitId] = useState<string | null>(
+      null,
+    );
+
+    const load = useCallback(async () => {
+      try {
+        const listed = await this.ListCommits();
+        const statuses = await Promise.all(
+          listed.map((c) => this.GetCommitStatus(c.ID)),
+        );
+
+        setCommits(statuses);
+
+        const hasError = statuses.some(
+          (s) => s.Processing === EaCStatusProcessingTypes.ERROR,
+        );
+        const isProcessing = statuses.some(
+          (s) =>
+            s.Processing !== EaCStatusProcessingTypes.COMPLETE &&
+            s.Processing !== EaCStatusProcessingTypes.ERROR,
+        );
+
+        setBadgeState(hasError ? 'error' : isProcessing ? 'processing' : 'success');
+      } catch (_err) {
+        setBadgeState('error');
+      }
+    }, []);
+
+    useEffect(() => {
+      load();
+      const id = setInterval(load, 4000);
+      return () => clearInterval(id);
+    }, [load]);
+
+    const toggleCommitPanel = () => setShowCommitPanel((p) => !p);
+    const selectCommit = (id: string | null) => setSelectedCommitId(id);
+
+    return {
+      commits,
+      badgeState,
+      showCommitPanel,
+      selectedCommitId,
+      toggleCommitPanel,
+      selectCommit,
     };
   }
 
@@ -1265,6 +1332,16 @@ export class WorkspaceManager {
       this.EaC.ResetFromSnapshot(snapshot);
       console.log('↪️ Redo successful');
     }
+  }
+
+  public async ListCommits(): Promise<EaCStatus[]> {
+    // deno-lint-ignore no-explicit-any
+    return await (this.oiSvc.Workspaces as any).ListCommits();
+  }
+
+  public async GetCommitStatus(id: string): Promise<EaCStatus> {
+    // deno-lint-ignore no-explicit-any
+    return await (this.oiSvc.Workspaces as any).GetCommitStatus(id);
   }
 
   public ReloadCapabilities(
