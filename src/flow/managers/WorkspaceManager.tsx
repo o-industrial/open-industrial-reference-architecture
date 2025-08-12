@@ -767,28 +767,30 @@ export class WorkspaceManager {
     >('success');
     const [showCommitPanel, setShowCommitPanel] = useState(false);
     const [selectedCommitId, setSelectedCommitId] = useState<string | null>(
-      null,
+      null
     );
 
     const load = useCallback(async () => {
       try {
         const listed = await this.ListCommits();
         const statuses = await Promise.all(
-          listed.map((c) => this.GetCommitStatus(c.ID)),
+          listed.map((c) => this.GetCommitStatus(c.ID))
         );
 
         setCommits(statuses);
 
         const hasError = statuses.some(
-          (s) => s.Processing === EaCStatusProcessingTypes.ERROR,
+          (s) => s.Processing === EaCStatusProcessingTypes.ERROR
         );
         const isProcessing = statuses.some(
           (s) =>
             s.Processing !== EaCStatusProcessingTypes.COMPLETE &&
-            s.Processing !== EaCStatusProcessingTypes.ERROR,
+            s.Processing !== EaCStatusProcessingTypes.ERROR
         );
 
-        setBadgeState(hasError ? 'error' : isProcessing ? 'processing' : 'success');
+        setBadgeState(
+          hasError ? 'error' : isProcessing ? 'processing' : 'success'
+        );
       } catch (_err) {
         setBadgeState('error');
       }
@@ -1335,13 +1337,11 @@ export class WorkspaceManager {
   }
 
   public async ListCommits(): Promise<EaCStatus[]> {
-    // deno-lint-ignore no-explicit-any
-    return await (this.oiSvc.Workspaces as any).ListCommits();
+    return await this.oiSvc.Workspaces.ListCommitStatuses();
   }
 
   public async GetCommitStatus(id: string): Promise<EaCStatus> {
-    // deno-lint-ignore no-explicit-any
-    return await (this.oiSvc.Workspaces as any).GetCommitStatus(id);
+    return await this.oiSvc.Workspaces.GetCommitStatus(id);
   }
 
   public ReloadCapabilities(
