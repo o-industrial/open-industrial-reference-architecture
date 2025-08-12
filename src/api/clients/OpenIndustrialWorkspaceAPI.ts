@@ -51,6 +51,43 @@ export class OpenIndustrialWorkspaceAPI {
   }
 
   /**
+   * List the commit statuses for the current workspace.
+   */
+  public async ListCommitStatuses(): Promise<EaCStatus[]> {
+    const res = await fetch(this.bridge.url('/api/workspaces/commit/statuses'), {
+      method: 'GET',
+      headers: this.bridge.headers(),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to list commit statuses: ${res.status}`);
+    }
+
+    return await this.bridge.json(res);
+  }
+
+  /**
+   * Get the status for a specific commit in the current workspace.
+   *
+   * @param commitId - The ID of the commit to retrieve.
+   */
+  public async GetCommitStatus(commitId: string): Promise<EaCStatus> {
+    const res = await fetch(
+      this.bridge.url(`/api/workspaces/commit/status/${commitId}`),
+      {
+        method: 'GET',
+        headers: this.bridge.headers(),
+      },
+    );
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch commit status: ${res.status}`);
+    }
+
+    return await this.bridge.json(res);
+  }
+
+  /**
    * Create a new workspace from the given OpenIndustrial EaC configuration.
    */
   public async Create(
