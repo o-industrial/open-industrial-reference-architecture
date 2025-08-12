@@ -12,6 +12,7 @@ import {
   FlowGraphEdge,
   FlowGraphNode,
 } from '../../../../flow/.exports.ts';
+import { APIEndpointDescriptor } from '../../../../types/APIEndpointDescriptor.ts';
 import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import { ConnectionInspector } from './ConnectionInspector.tsx';
 import ConnectionNodeRenderer from './ConnectionNodeRenderer.tsx';
@@ -196,6 +197,31 @@ export class DataConnectionNodeCapabilityManager extends EaCNodeCapabilityManage
       Label: 'Connection',
       IconKey: 'connection',
     };
+  }
+
+  protected override getAPIDescriptors(
+    node: FlowGraphNode,
+    _ctx: EaCNodeCapabilityContext,
+  ): APIEndpointDescriptor[] {
+    const base = `/api/data/${node.ID}`;
+
+    return [
+      {
+        Method: 'GET',
+        Path: `${base}/cold`,
+        Handler: 'ColdExportController',
+        Cold: true,
+      } as APIEndpointDescriptor,
+      {
+        Method: 'POST',
+        Path: `${base}/warm`,
+        Handler: 'WarmQueryController',
+        Warm: true,
+      } as APIEndpointDescriptor,
+      { Method: 'GET', Path: `${base}/sse`, SSE: true } as APIEndpointDescriptor,
+      { Method: 'GET', Path: `${base}/ws`, WebSocket: true } as APIEndpointDescriptor,
+      { Method: 'POST', Path: `${base}/chat`, Chat: true } as APIEndpointDescriptor,
+    ];
   }
 
   protected override getRenderer() {
