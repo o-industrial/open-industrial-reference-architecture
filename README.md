@@ -1,6 +1,5 @@
 # open-industrial-reference-architecture
 
-<<<<<<< HEAD
 ## Commit Indicator and Flyout
 
 This reference architecture includes a commit indicator that reflects the health of
@@ -13,7 +12,6 @@ recent workspace commits. The indicator displays one of three states:
 Selecting the indicator opens a flyout panel that lists recent commits and their
 statuses. The panel automatically polls for updates every four seconds and the
 polling interval is cleared when the panel is unmounted to avoid memory leaks.
-=======
 ## Capability Managers and API Endpoints
 
 API endpoints for each node capability are defined by its capability manager. Implementations expose their HTTP interfaces by overriding the `getAPIDescriptors` hook, which is surfaced through the public `GetAPIDescriptors` method. Each returned [`APIEndpointDescriptor`](src/types/APIEndpointDescriptor.ts) describes an endpoint the runtime should register.
@@ -67,4 +65,3 @@ export class CounterNodeCapabilityManager
 }
 ```
 
->>>>>>> 30a27e97056c94e39fbfa1e80218676c1202626c
