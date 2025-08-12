@@ -167,7 +167,7 @@ export class WorkspaceManager {
     showBilling: () => void;
     showLicense: () => void;
     toggleCommitPanel: () => void;
-    selectCommit: (id: string | null) => void;
+    selectCommit: (id: string | undefined) => void;
   } {
     const { Modal: accProfModal, Show: showAccProf } = AccountProfileModal.Modal(this);
     const { Modal: mngWkspsModal, Show: showMngWksps } = ManageWorkspacesModal.Modal(this);
@@ -738,18 +738,18 @@ export class WorkspaceManager {
     commits: EaCStatus[];
     badgeState: 'error' | 'processing' | 'success';
     showCommitPanel: boolean;
-    selectedCommitId: string | null;
+    selectedCommitId: string | undefined;
     toggleCommitPanel: () => void;
-    selectCommit: (id: string | null) => void;
+    selectCommit: (id: string | undefined) => void;
   } {
     const [commits, setCommits] = useState<EaCStatus[]>([]);
     const [badgeState, setBadgeState] = useState<
       'error' | 'processing' | 'success'
     >('success');
     const [showCommitPanel, setShowCommitPanel] = useState(false);
-    const [selectedCommitId, setSelectedCommitId] = useState<string | null>(
-      null,
-    );
+    const [selectedCommitId, setSelectedCommitId] = useState<
+      string | undefined
+    >(undefined);
 
     const load = useCallback(async () => {
       try {
@@ -784,7 +784,7 @@ export class WorkspaceManager {
     }, [load]);
 
     const toggleCommitPanel = () => setShowCommitPanel((p) => !p);
-    const selectCommit = (id: string | null) => setSelectedCommitId(id);
+    const selectCommit = (id: string | undefined) => setSelectedCommitId(id);
 
     return {
       commits,
