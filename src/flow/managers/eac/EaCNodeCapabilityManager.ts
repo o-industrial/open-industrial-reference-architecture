@@ -4,6 +4,7 @@ import { OpenIndustrialAPIClient } from '../../../api/clients/OpenIndustrialAPIC
 import { EaCFlowNodeMetadata } from '../../../eac/EaCFlowNodeMetadata.ts';
 import { EverythingAsCodeOIWorkspace } from '../../../eac/EverythingAsCodeOIWorkspace.ts';
 import { Position } from '../../../eac/types/Position.ts';
+import { APIEndpointDescriptor } from '../../../types/APIEndpointDescriptor.ts';
 import { ComponentType, EaCVertexDetails, NullableArrayOrObject } from '../../.deps.ts';
 import { FlowGraphEdge } from '../../types/graph/FlowGraphEdge.ts';
 import { FlowGraphNode } from '../../types/graph/FlowGraphNode.ts';
@@ -149,6 +150,17 @@ export abstract class EaCNodeCapabilityManager<
   }
 
   /**
+   * Returns the API endpoint descriptors for this node type, if any.
+   * Subclasses should override `getAPIDescriptors` to provide descriptors.
+   */
+  public GetAPIDescriptors(
+    node: FlowGraphNode,
+    context: EaCNodeCapabilityContext,
+  ): APIEndpointDescriptor[] {
+    return this.getAPIDescriptors?.(node, context) ?? [];
+  }
+
+  /**
    * Returns the event router for this capability’s node type, if any.
    * Subclasses should override `getEventRouter` to provide scoped behavior.
    */
@@ -271,6 +283,14 @@ export abstract class EaCNodeCapabilityManager<
   ): Promise<Record<string, unknown>> {
     return await this.oiSvc.Stats.GetStats(type, id);
   }
+
+  /**
+   * Optional override to return API endpoint descriptors for this node type.
+   */
+  protected getAPIDescriptors?(
+    node: FlowGraphNode,
+    context: EaCNodeCapabilityContext,
+  ): APIEndpointDescriptor[];
 
   /**
    * Optional override to return the NodeEventRouter for this node type.

@@ -15,6 +15,7 @@ import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '.
 import SurfaceWarmQueryNodeRenderer from './SurfaceWarmQueryNodeRenderer.tsx';
 import { SurfaceWarmQueryStats } from './SurfaceWarmQueryStats.tsx';
 import { EverythingAsCodeOIWorkspace } from '../../../../eac/EverythingAsCodeOIWorkspace.ts';
+import { APIEndpointDescriptor } from '../../../../types/APIEndpointDescriptor.ts';
 
 // ✅ Compound node detail type
 type SurfaceWarmQueryNodeDetails = EaCWarmQueryDetails & SurfaceWarmQuerySettings;
@@ -348,6 +349,23 @@ export class SurfaceWarmQueryNodeCapabilityManager
 
   protected override getPreset() {
     return { Type: this.Type, Label: 'Warm Query', IconKey: 'warmQuery' };
+  }
+
+  protected override getAPIDescriptors(
+    node: FlowGraphNode,
+    context: EaCNodeCapabilityContext,
+  ): APIEndpointDescriptor[] {
+    const apiPath = context.GetEaC().WarmQueries?.[node.ID]?.Details?.ApiPath;
+
+    if (!apiPath) return [];
+
+    const cleanedPath = apiPath.replace(/^\/+/, '');
+    const base = `/api/warm/${cleanedPath}`;
+
+    return [
+      { Method: 'GET', Path: base, Warm: true } as APIEndpointDescriptor,
+      { Method: 'POST', Path: base, Warm: true } as APIEndpointDescriptor,
+    ];
   }
 
   protected override getRenderer() {

@@ -9,6 +9,8 @@ import {
   FlowGraphNode,
 } from '../../../../flow/.exports.ts';
 import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
+import { APIEndpointDescriptor } from '../../../../types/APIEndpointDescriptor.ts';
+import { DataConnectionNodeCapabilityManager } from '../connection/DataConnectionNodeCapabilityManager.ts';
 import { SurfaceConnectionInspector } from './SurfaceConnectionInspector.tsx';
 import SurfaceConnectionNodeRenderer from './SurfaceConnectionNodeRenderer.tsx';
 
@@ -196,6 +198,27 @@ export class SurfaceConnectionNodeCapabilityManager
       },
     };
   }
+
+  protected override getAPIDescriptors(
+    node: FlowGraphNode,
+    ctx: EaCNodeCapabilityContext,
+    ): APIEndpointDescriptor[] {
+    const [surfaceId, connId] = this.extractCompoundIDs(node);
+
+    const dcDescriptors = (
+      new DataConnectionNodeCapabilityManager() as unknown as {
+        getAPIDescriptors(
+          node: FlowGraphNode,
+          ctx: EaCNodeCapabilityContext,
+          ): APIEndpointDescriptor[];
+      }
+      ).getAPIDescriptors({ ...node, ID: connId }, ctx);
+
+      return dcDescriptors.map((desc) => ({
+        ...desc,
+        Path: `/api/surface/${surfaceId}${desc.Path.replace(/^\/api/, '')}`,
+      }));
+    }
 
   protected override getInspector() {
     return SurfaceConnectionInspector;
