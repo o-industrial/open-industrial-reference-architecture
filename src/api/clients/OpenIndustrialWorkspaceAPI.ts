@@ -73,7 +73,7 @@ export class OpenIndustrialWorkspaceAPI {
    */
   public async GetCommitStatus(commitId: string): Promise<EaCStatus> {
     const res = await fetch(
-      this.bridge.url(`/api/workspaces/commit/status/${commitId}`),
+      this.bridge.url(`/api/workspaces/commit/${commitId}/status`),
       {
         method: 'GET',
         headers: this.bridge.headers(),
