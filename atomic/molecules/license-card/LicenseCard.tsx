@@ -85,7 +85,7 @@ export function LicenseCard({
 
         <div class="mt-6 flex justify-center">
           <Action class="w-full" disabled={isActive} onClick={onSelect}>
-            {isActive ? "Selected" : "Get Started"}
+            {isActive ? "Selected" : "Subscribe Now"}
           </Action>
         </div>
       </div>
