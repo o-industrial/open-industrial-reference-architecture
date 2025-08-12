@@ -12,7 +12,7 @@ const kustoClientCache: Record<string, KustoClient> = {};
  * @param credential - An instance of TokenCredential to authenticate with.
  * @returns A cached or newly created KustoClient.
  */
-export function loadKustoClient(
+export async function loadKustoClient(
   cluster: string,
   region: string,
   credential: TokenCredential,
@@ -24,8 +24,8 @@ export function loadKustoClient(
       clusterUrl,
       credential,
     );
-    kustoClientCache[clusterUrl] = new KustoClient(kcs);
+    kustoClientCache[clusterUrl] = await new KustoClient(kcs);
   }
 
-  return Promise.resolve(kustoClientCache[clusterUrl]);
+  return await kustoClientCache[clusterUrl];
 }

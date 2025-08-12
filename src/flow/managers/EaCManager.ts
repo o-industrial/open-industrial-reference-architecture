@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import {
   EaCEnterpriseDetails,
   EaCStatus,
@@ -210,6 +211,10 @@ export class EaCManager {
     return workspaces.map((wkspc) => ({
       Lookup: wkspc.EnterpriseLookup,
       Details: { Name: wkspc.EnterpriseName },
+      Views: 0,
+      Forks: 0,
+      UpdatedAt: (wkspc as any).UpdatedAt ?? (wkspc as any).CreatedAt,
+      Archived: (wkspc as any).Archived ?? false,
     }));
   }
 

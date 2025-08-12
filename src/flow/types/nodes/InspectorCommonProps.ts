@@ -1,3 +1,5 @@
+import { WorkspaceManager } from '../../../../atomic/.deps.ts';
+import { OpenIndustrialAPIClient } from '../../../api/clients/OpenIndustrialAPIClient.ts';
 import { EaCVertexDetails } from '../../.deps.ts';
 
 export type InspectorCommonProps<
@@ -8,6 +10,8 @@ export type InspectorCommonProps<
   config?: TConfig;
   details: Partial<TDetails>;
   enabled: boolean;
+  oiSvc: OpenIndustrialAPIClient;
+  workspaceMgr: WorkspaceManager;
 
   useStats: () => TStats | undefined;
 

@@ -6,9 +6,21 @@ export class TeamManager {
   protected listeners: (() => void)[] = [];
 
   constructor(initialMembers?: TeamMember[]) {
+    const joined = new Date().toISOString();
+
     this.members = initialMembers ?? [
-      { Email: 'admin@factory.com', Role: 'Owner' },
-      { Email: 'engineer@factory.com', Role: 'Editor' },
+      {
+        Email: 'admin@factory.com',
+        Role: 'Owner',
+        Name: 'Admin',
+        Joined: joined,
+      },
+      {
+        Email: 'engineer@factory.com',
+        Role: 'Editor',
+        Name: 'Engineer',
+        Joined: joined,
+      },
     ];
   }
 
@@ -16,11 +28,29 @@ export class TeamManager {
     return [...this.members];
   }
 
-  public InviteUser(email: string, role: string = 'Viewer'): void {
+  public InviteUser(
+    email: string,
+    role: TeamMember['Role'] = 'Viewer',
+    name?: string,
+  ): void {
     if (!email || this.members.some((m) => m.Email === email)) return;
 
-    this.members.push({ Email: email, Role: role });
+    this.members.push({
+      Email: email,
+      Role: role,
+      Name: name,
+      Joined: new Date().toISOString(),
+    });
+
     this.emitChange();
+  }
+
+  public UpdateUserRole(email: string, role: TeamMember['Role']): void {
+    const member = this.members.find((m) => m.Email === email);
+    if (member && member.Role !== role) {
+      member.Role = role;
+      this.emitChange();
+    }
   }
 
   public RemoveUser(email: string): void {

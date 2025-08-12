@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
 import { EaCStatus, EaCUserRecord } from '../.client.deps.ts';
 import { EaCHistorySnapshot } from '../../types/EaCHistorySnapshot.ts';
 import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
@@ -46,6 +45,43 @@ export class OpenIndustrialWorkspaceAPI {
 
     if (!res.ok) {
       throw new Error(`Failed to commit workspace snapshot: ${res.status}`);
+    }
+
+    return await this.bridge.json(res);
+  }
+
+  /**
+   * List the commit statuses for the current workspace.
+   */
+  public async ListCommitStatuses(): Promise<EaCStatus[]> {
+    const res = await fetch(this.bridge.url('/api/workspaces/commit/statuses'), {
+      method: 'GET',
+      headers: this.bridge.headers(),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to list commit statuses: ${res.status}`);
+    }
+
+    return await this.bridge.json(res);
+  }
+
+  /**
+   * Get the status for a specific commit in the current workspace.
+   *
+   * @param commitId - The ID of the commit to retrieve.
+   */
+  public async GetCommitStatus(commitId: string): Promise<EaCStatus> {
+    const res = await fetch(
+      this.bridge.url(`/api/workspaces/commit/status/${commitId}`),
+      {
+        method: 'GET',
+        headers: this.bridge.headers(),
+      },
+    );
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch commit status: ${res.status}`);
     }
 
     return await this.bridge.json(res);
@@ -183,7 +219,7 @@ export class OpenIndustrialWorkspaceAPI {
     };
 
     // ✅ Validate runtime impulse
-    const isRuntimeImpulse = (obj: any): obj is RuntimeImpulse => {
+    const isRuntimeImpulse = (obj: RuntimeImpulse): obj is RuntimeImpulse => {
       const valid = obj &&
         typeof obj.Timestamp === 'string' &&
         typeof obj.Confidence === 'number' &&

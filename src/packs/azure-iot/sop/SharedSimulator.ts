@@ -10,7 +10,7 @@ import { WorkspaceEnsureAzureResourceGroupStep } from '../steps/ensure-workspace
 import { shaHash } from '../../../utils/shaHash.ts';
 
 export function SharedSimulator(
-  lookup: string
+  lookup: string,
 ): SimulatorModuleBuilder<
   EaCSimulatorAsCode<EaCSharedSimulatorDetails>,
   void,
@@ -26,7 +26,7 @@ export function SharedSimulator(
   >(lookup)
     .DeployType(z.void())
     .StatsType(
-      z.object({ RoutesCount: z.number(), LastSeenUTC: z.string().optional() })
+      z.object({ RoutesCount: z.number(), LastSeenUTC: z.string().optional() }),
     )
     .Steps(async ({ Secrets }) => {
       const subId = (await Secrets.Get('AZURE_IOT_SUBSCRIPTION_ID'))!;
@@ -41,24 +41,23 @@ export function SharedSimulator(
           CredentialStrategy: credStrat,
           SubscriptionID: subId,
         }),
-        ResolveIoTHubConnectionString:
-          AzureResolveIoTHubConnectionStringStep.Build({
-            SubscriptionID: subId,
-            CredentialStrategy: credStrat,
-          }),
+        ResolveIoTHubConnectionString: AzureResolveIoTHubConnectionStringStep.Build({
+          SubscriptionID: subId,
+          CredentialStrategy: credStrat,
+        }),
       };
     })
-    .Stats(async ({ EaC, Lookup }) => {
-      // TODO: query relay metrics storage for this (EnterpriseLookup, Lookup)
+    .Stats(({ EaC, Lookup }) => {
+      // TODO(AI): query relay metrics storage for this (EnterpriseLookup, Lookup)
       void EaC;
       void Lookup;
-      return { RoutesCount: 0 };
+      return Promise.resolve({ RoutesCount: 0 });
     })
     .Deploy(async ({ Steps, AsCode, EaC, Secrets, Lookup }) => {
       const { Source } = AsCode.Details!;
       const sourceConn = await Steps.ResolveIoTHubConnectionString({
         ResourceGroupName: await Secrets.GetRequired(
-          'AZURE_IOT_RESOURCE_GROUP'
+          'AZURE_IOT_RESOURCE_GROUP',
         ),
         KeyName: 'iothubowner',
       });
@@ -78,14 +77,14 @@ export function SharedSimulator(
         ) {
           const targetConn = await Steps.ResolveIoTHubConnectionString({
             ResourceGroupName: await Secrets.GetRequired(
-              'AZURE_IOT_RESOURCE_GROUP'
+              'AZURE_IOT_RESOURCE_GROUP',
             ),
             KeyName: 'iothubowner',
           });
 
           const targetDeviceId = await shaHash(
             EaC.EnterpriseLookup!,
-            dcDetails.DeviceID
+            dcDetails.DeviceID,
           );
 
           subscribers.push({
@@ -98,7 +97,7 @@ export function SharedSimulator(
       }
 
       // Ensure shared relay infra (Function App) exists once-per-env (idempotent)
-      // TODO: EnsureOrCreateFunctionApp('oi-shared-relay', ...)
+      // TODO(AI): EnsureOrCreateFunctionApp('oi-shared-relay', ...)
 
       const route = {
         Source: {
@@ -110,15 +109,15 @@ export function SharedSimulator(
       void route;
 
       // Persist routing registry so relay can reload
-      // TODO: KV.set(['SharedSimulator', EaC.EnterpriseLookup!, Lookup], route)
+      // TODO(AI): KV.set(['SharedSimulator', EaC.EnterpriseLookup!, Lookup], route)
 
-      // TODO: call relay /admin/reload
+      // TODO(AI): call relay /admin/reload
 
       return;
     }) as unknown as SimulatorModuleBuilder<
-    EaCSimulatorAsCode<EaCSharedSimulatorDetails>,
-    void,
-    void,
-    { RoutesCount: number; LastSeenUTC?: string }
-  >;
+      EaCSimulatorAsCode<EaCSharedSimulatorDetails>,
+      void,
+      void,
+      { RoutesCount: number; LastSeenUTC?: string }
+    >;
 }

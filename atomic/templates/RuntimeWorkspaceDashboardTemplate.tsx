@@ -12,6 +12,7 @@ export type RuntimeWorkspaceDashboardTemplateProps = {
   azi?: preact.ComponentChildren;
   breadcrumb?: preact.ComponentChildren;
   children?: preact.ComponentChildren;
+  commitStatus?: preact.ComponentChildren;
   inspector?: preact.ComponentChildren;
   modals?: preact.ComponentChildren;
   stream?: preact.ComponentChildren;
@@ -21,6 +22,7 @@ export type RuntimeWorkspaceDashboardTemplateProps = {
 export function RuntimeWorkspaceDashboardTemplate({
   appBar,
   azi,
+  commitStatus,
   children,
   inspector,
   stream,
@@ -31,6 +33,7 @@ export function RuntimeWorkspaceDashboardTemplate({
   const [inspectorExpanded, setInspectorExpanded] = useState(true);
   const [streamExpanded, setStreamExpanded] = useState(true);
   const [timelineExpanded, setTimelineExpanded] = useState(true);
+  const [showCommitPanel, setShowCommitPanel] = useState(false);
 
   const bottomBothCollapsed = !streamExpanded && !timelineExpanded;
 
@@ -248,6 +251,40 @@ export function RuntimeWorkspaceDashboardTemplate({
 
         {props.modals}
       </div>
+
+      {commitStatus && (
+        <>
+          {!showCommitPanel && (
+            <Action
+              title="Show Commit Status"
+              styleType={ActionStyleTypes.Icon}
+              intentType={IntentTypes.Primary}
+              onClick={() => setShowCommitPanel(true)}
+              class="-:absolute -:top-12 -:right-1 -:z-30"
+            >
+              <ExpandIcon class="w-5 h-5" />
+            </Action>
+          )}
+
+          <div
+            class={classSet([
+              '-:absolute -:top-0 -:right-0 -:h-full -:w-96 -:bg-neutral-900 -:border-l -:transition-transform -:duration-500',
+              showCommitPanel ? '-:translate-x-0' : '-:translate-x-full',
+            ])}
+          >
+            <Action
+              title="Hide Commit Status"
+              styleType={ActionStyleTypes.Icon}
+              intentType={IntentTypes.Primary}
+              onClick={() => setShowCommitPanel(false)}
+              class="-:absolute -:top-1 -:left-1 -:z-30"
+            >
+              <CloseIcon class="w-5 h-5" />
+            </Action>
+            <div class="-:h-full -:overflow-auto -:pt-8">{commitStatus}</div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

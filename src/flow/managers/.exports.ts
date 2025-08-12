@@ -9,4 +9,4 @@ export * from './NodeEventManager.ts';
 export * from './SelectionManager.ts';
 export * from './SimulatorLibraryManager.ts';
 export * from './TeamManager.ts';
-export * from './WorkspaceManager.ts';
+export * from './WorkspaceManager.tsx';

@@ -1,7 +1,7 @@
 import {
   AccountProfile,
   TeamMembership,
-} from '../../../src/flow/managers/WorkspaceManager.ts';
+} from '../../../src/flow/managers/WorkspaceManager.tsx';
 import { JSX, IntentTypes, useState, WorkspaceManager } from '../../.deps.ts';
 import {
   Modal,
@@ -99,6 +99,33 @@ export function AccountProfileModal({
     </Modal>
   );
 }
+
+AccountProfileModal.Modal = (
+  workspaceMgr: WorkspaceManager
+): {
+  Modal: JSX.Element;
+  Hide: () => void;
+  IsOpen: () => boolean;
+  Show: () => void;
+} => {
+  const [shown, setShow] = useState(false);
+
+  return {
+    Modal: (
+      <>
+        {shown && (
+          <AccountProfileModal
+            workspaceMgr={workspaceMgr}
+            onClose={() => setShow(false)}
+          />
+        )}
+      </>
+    ),
+    Hide: () => setShow(false),
+    IsOpen: () => shown,
+    Show: () => setShow(true),
+  };
+};
 
 function AccountInfoTab({
   profile,
