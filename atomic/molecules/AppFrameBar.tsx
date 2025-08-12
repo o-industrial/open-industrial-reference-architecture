@@ -1,3 +1,4 @@
+import { GitCommitIcon } from '../../build/iconset/icons/GitCommitIcon.tsx';
 import { SettingsIcon } from '../../build/iconset/icons/SettingsIcon.tsx';
 import { UsersIcon } from '../../build/iconset/icons/UsersIcon.tsx';
 import { JSX, classSet, IntentTypes } from '../.deps.ts';
@@ -9,6 +10,7 @@ export type AppFrameBarProps = {
   menus: MenuRoot[];
   onMenuOption: (item: MenuActionItem) => void;
   onActivateClick?: () => void;
+  onCommitClick?: () => void;
   onProfileClick?: () => void;
   onSettingsClick?: () => void;
   profileIntentType?: IntentTypes;
@@ -18,6 +20,7 @@ export function AppFrameBar({
   menus,
   onMenuOption,
   onActivateClick,
+  onCommitClick,
   onProfileClick,
   onSettingsClick,
   profileIntentType = IntentTypes.Info,
@@ -64,6 +67,17 @@ export function AppFrameBar({
             intentType={IntentTypes.Info}
           >
             <SettingsIcon class="w-4 h-4" />
+          </Action>
+        )}
+
+        {onCommitClick && (
+          <Action
+            title="Commit Workspace"
+            onClick={onCommitClick}
+            styleType={ActionStyleTypes.Icon | ActionStyleTypes.Thin}
+            intentType={IntentTypes.Primary}
+          >
+            <GitCommitIcon class="w-4 h-4" />
           </Action>
         )}
 
