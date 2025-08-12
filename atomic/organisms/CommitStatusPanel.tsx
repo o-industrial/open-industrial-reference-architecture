@@ -125,6 +125,10 @@ export function CommitStatusPanel({
                   isSelected ? 'bg-neutral-800' : '',
                 ])}
                 onClick={() => onSelectCommit(commit.ID)}
+                onDblClick={() => {
+                  onSelectCommit(commit.ID);
+                  location.href = `/workspace/commit/${commit.ID}`;
+                }}
               >
                 <CommitIcon
                   class={classSet(['w-4 h-4', statusColor(commit.Processing)])}
