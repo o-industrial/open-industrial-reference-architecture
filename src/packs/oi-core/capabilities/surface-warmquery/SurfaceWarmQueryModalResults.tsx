@@ -61,8 +61,9 @@ export const SurfaceWarmQueryModalResults: FunctionalComponent<
     .slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
     .map(flattenObject);
 
-  const columnHeaders: string[] =
-    paginatedResults.length > 0 ? Object.keys(paginatedResults[0]) : [];
+  const columnHeaders: string[] = paginatedResults.length > 0
+    ? Object.keys(paginatedResults[0])
+    : [];
 
   const handleExportToCSV = (): void => {
     if (!queryResults.length) return;
@@ -105,11 +106,11 @@ export const SurfaceWarmQueryModalResults: FunctionalComponent<
   };
 
   return (
-    <div class="pl-6 pr-6 pt-6 pb-0 rounded-sm">
+    <div class='pl-6 pr-6 pt-6 pb-0 rounded-sm'>
       <div>
         <div>
-          <div class="flex items-center justify-between mb-2">
-            <label class="flex items-center gap-2 text-neutral-900 dark:text-white font-semibold">
+          <div class='flex items-center justify-between mb-2'>
+            <label class='flex items-center gap-2 text-neutral-900 dark:text-white font-semibold'>
               Results
             </label>
 
@@ -138,63 +139,66 @@ export const SurfaceWarmQueryModalResults: FunctionalComponent<
               : ''}
           </div>
 
-          {isLoading ? (
-            <div class="flex items-center justify-center h-40">
-              <div class="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500 border-solid"></div>
-            </div>
-          ) : queryResults.length > 0 ? (
-            <div>
-              <table class="w-full table-auto border-collapse border border-gray-300 dark:border-gray-600">
-                <thead>
-                  <tr class="bg-gray-100 dark:bg-slate-700">
-                    {columnHeaders.map((header) => (
-                      <th
-                        key={header}
-                        class="border px-3 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-200"
-                      >
-                        {header}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedResults.map((row, rowIndex) => (
-                    <tr key={rowIndex} class="border-t">
+          {isLoading
+            ? (
+              <div class='flex items-center justify-center h-40'>
+                <div class='animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500 border-solid'>
+                </div>
+              </div>
+            )
+            : queryResults.length > 0
+            ? (
+              <div>
+                <table class='w-full table-auto border-collapse border border-gray-300 dark:border-gray-600'>
+                  <thead>
+                    <tr class='bg-gray-100 dark:bg-slate-700'>
                       {columnHeaders.map((header) => (
-                        <td key={header} class="border px-3 py-2 text-xs">
-                          {row[header] ?? ''}
-                        </td>
+                        <th
+                          key={header}
+                          class='border px-3 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-200'
+                        >
+                          {header}
+                        </th>
                       ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {paginatedResults.map((row, rowIndex) => (
+                      <tr key={rowIndex} class='border-t'>
+                        {columnHeaders.map((header) => (
+                          <td key={header} class='border px-3 py-2 text-xs'>
+                            {row[header] ?? ''}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
 
-              <div class="flex justify-center items-center mt-4 space-x-4">
-                <button
-                type="button"
-                  class="px-3 py-1 bg-gray-300 dark:bg-slate-700 text-sm rounded disabled:opacity-50"
-                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                  disabled={currentPage === 1}
-                >
-                  Prev
-                </button>
+                <div class='flex justify-center items-center mt-4 space-x-4'>
+                  <button
+                    type='button'
+                    class='px-3 py-1 bg-gray-300 dark:bg-slate-700 text-sm rounded disabled:opacity-50'
+                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Prev
+                  </button>
 
-                <span class="text-sm">Page {currentPage} of {Math.max(totalPages, 1)}</span>
+                  <span class='text-sm'>Page {currentPage} of {Math.max(totalPages, 1)}</span>
 
-                <button
-                type="button"
-                  class="px-3 py-1 bg-gray-300 dark:bg-slate-700 text-sm rounded disabled:opacity-50"
-                  onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                  disabled={currentPage === totalPages || totalPages === 0}
-                >
-                  Next
-                </button>
+                  <button
+                    type='button'
+                    class='px-3 py-1 bg-gray-300 dark:bg-slate-700 text-sm rounded disabled:opacity-50'
+                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                    disabled={currentPage === totalPages || totalPages === 0}
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <p class="text-gray-600 dark:text-gray-300 mb-6">No results to display.</p>
-          )}
+            )
+            : <p class='text-gray-600 dark:text-gray-300 mb-6'>No results to display.</p>}
         </div>
       </div>
     </div>

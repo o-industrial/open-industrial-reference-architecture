@@ -150,8 +150,9 @@ export abstract class FluentModuleBuilder<
     >,
     TUsed & { Services: true }
   > {
-    if (!this.stepsInjectedFirst)
+    if (!this.stepsInjectedFirst) {
       this.serviceInjectedFirst = true;
+    }
     this.servicesFactory = factory as any;
     return this as any;
   }
@@ -229,8 +230,9 @@ export abstract class FluentModuleBuilder<
     >,
     TUsed & { SubSteps: true }
   > {
-    if (!this.serviceInjectedFirst)
+    if (!this.serviceInjectedFirst) {
       this.stepsInjectedFirst = true;
+    }
     this.stepFactory = factory;
     return this as any;
   }
@@ -300,7 +302,7 @@ export abstract class FluentModuleBuilder<
 
     const RuntimeImpl = class extends RuntimeBase {
       protected override didInjectServicesFirst(): boolean {
-        return serviceInjectedFirst; 
+        return serviceInjectedFirst;
       }
 
       override async run(ctx: TContext): Promise<TOutput> {

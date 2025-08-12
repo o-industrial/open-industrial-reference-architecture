@@ -23,12 +23,12 @@ type CommitStatusPanelProps = {
 
 function classyPrint(value: unknown): JSX.Element {
   if (value === null) {
-    return <span class='text-neutral-400'>null</span>;
+    return <span class="text-neutral-400">null</span>;
   }
 
   if (Array.isArray(value)) {
     return (
-      <ul class='pl-4 space-y-1 list-disc'>
+      <ul class="pl-4 space-y-1 list-disc">
         {value.map((v, i) => (
           <li key={i}>{classyPrint(v)}</li>
         ))}
@@ -38,10 +38,10 @@ function classyPrint(value: unknown): JSX.Element {
 
   if (typeof value === 'object') {
     return (
-      <ul class='pl-4 space-y-1'>
+      <ul class="pl-4 space-y-1">
         {Object.entries(value as Record<string, unknown>).map(([k, v]) => (
           <li key={k}>
-            <span class='text-neutral-400'>{k}: </span>
+            <span class="text-neutral-400">{k}: </span>
             {classyPrint(v)}
           </li>
         ))}
@@ -49,7 +49,7 @@ function classyPrint(value: unknown): JSX.Element {
     );
   }
 
-  return <span class='text-neutral-300'>{String(value)}</span>;
+  return <span class="text-neutral-300">{String(value)}</span>;
 }
 
 export function CommitStatusPanel({
@@ -84,11 +84,11 @@ export function CommitStatusPanel({
         expanded ? 'w-[32rem]' : 'w-80',
       ])}
     >
-      <header class='flex items-center justify-between px-4 py-2 bg-neutral-800 border-b border-neutral-700'>
-        <h2 class='text-sm font-semibold tracking-wide text-white uppercase'>
+      <header class="flex items-center justify-between px-4 py-2 bg-neutral-800 border-b border-neutral-700">
+        <h2 class="text-sm font-semibold tracking-wide text-white uppercase">
           Commits
         </h2>
-        <div class='flex gap-2'>
+        <div class="flex gap-2">
           <Action
             styleType={ActionStyleTypes.Icon}
             intentType={IntentTypes.Primary}
@@ -96,40 +96,43 @@ export function CommitStatusPanel({
             onClick={() => setExpanded((e) => !e)}
           >
             <ExpandIcon
-              class={classSet(['w-5 h-5 transition-transform', expanded && 'rotate-180'])}
+              class={classSet([
+                'w-5 h-5 transition-transform',
+                expanded ? 'rotate-180' : '',
+              ])}
             />
           </Action>
           <Action
             styleType={ActionStyleTypes.Icon}
             intentType={IntentTypes.Primary}
-            title='Close'
+            title="Close"
             onClick={onClose}
           >
-            <CloseIcon class='w-5 h-5' />
+            <CloseIcon class="w-5 h-5" />
           </Action>
         </div>
       </header>
 
-      <ul class='flex-1 overflow-y-auto divide-y divide-neutral-800'>
+      <ul class="flex-1 overflow-y-auto divide-y divide-neutral-800">
         {sorted.map((commit) => {
           const isSelected = commit.ID === selectedCommitId;
 
           return (
-            <li key={commit.ID} class='text-xs text-white'>
+            <li key={commit.ID} class="text-xs text-white">
               <div
                 class={classSet([
                   'flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-neutral-800',
-                  isSelected && 'bg-neutral-800',
+                  isSelected ? 'bg-neutral-800' : '',
                 ])}
                 onClick={() => onSelectCommit(commit.ID)}
               >
                 <CommitIcon
                   class={classSet(['w-4 h-4', statusColor(commit.Processing)])}
                 />
-                <span class='font-mono truncate'>{commit.ID}</span>
+                <span class="font-mono truncate">{commit.ID}</span>
               </div>
               {isSelected && (
-                <div class='px-6 pb-2 text-neutral-300'>
+                <div class="px-6 pb-2 text-neutral-300">
                   {classyPrint(commit)}
                 </div>
               )}

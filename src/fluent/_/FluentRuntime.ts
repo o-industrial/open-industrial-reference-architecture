@@ -31,7 +31,6 @@ export abstract class FluentRuntime<
     TSteps
   >,
 > {
-
   // ✅ Optional zod schemas exposed for introspection
   public OutputSchema?: ZodType<TOutput>;
   public DeploySchema?: ZodType<TDeploy>;
@@ -124,13 +123,13 @@ export abstract class FluentRuntime<
         const services = await this.injectServices(ctx, ioc!);
         ctx.Services = { ...(ctx.Services ?? {}), ...services } as TServices;
       }
-    }
+    };
 
     const injectSteps = async () => {
       if (typeof this.injectSteps === 'function') {
         ctx.Steps = await this.injectSteps(ctx);
       }
-    }
+    };
 
     if (this.didInjectServicesFirst()) {
       await injectServices();
@@ -138,7 +137,7 @@ export abstract class FluentRuntime<
       await injectSteps();
     } else {
       await injectSteps();
-      
+
       await injectServices();
     }
 

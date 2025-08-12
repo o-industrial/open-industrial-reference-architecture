@@ -29,11 +29,11 @@ export function SurfaceWarmQueryInspector({
 
   const handleRunQuery = (query: string) => {
     console.log('Run query:', details.Query);
-     const results = oiSvc.Workspaces.Explorer.RunAdHocQuery({
-       ...details,
-       Query: query,
-     });
-     oiSvc.Workspaces.Get();
+    const results = oiSvc.Workspaces.Explorer.RunAdHocQuery({
+      ...details,
+      Query: query,
+    });
+    oiSvc.Workspaces.Get();
     //const results = oiSvc.Workspaces.Explorer.ListWarmQueries();
     //console.log(results);
     return results;

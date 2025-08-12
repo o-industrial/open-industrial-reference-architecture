@@ -220,8 +220,7 @@ export class OpenIndustrialWorkspaceAPI {
 
     // ✅ Validate runtime impulse
     const isRuntimeImpulse = (obj: RuntimeImpulse): obj is RuntimeImpulse => {
-      const valid =
-        obj &&
+      const valid = obj &&
         typeof obj.Timestamp === 'string' &&
         typeof obj.Confidence === 'number' &&
         typeof obj.Payload === 'object' &&
