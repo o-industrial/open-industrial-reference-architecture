@@ -15,6 +15,7 @@ import {
   SurfaceEventRouter,
   WorkspaceManager,
 } from '../../../../flow/.exports.ts';
+import { APIEndpointDescriptor } from '../../../../types/APIEndpointDescriptor.ts';
 import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import { SurfaceInspector } from './SurfaceInspector.tsx';
 import SurfaceNodeRenderer from './SurfaceNodeRenderer.tsx';
@@ -237,6 +238,42 @@ export class SurfaceNodeCapabilityManager extends EaCNodeCapabilityManager {
 
   protected override getPreset() {
     return { Type: this.Type, Label: 'Surface', IconKey: 'surface' };
+  }
+
+  protected override getAPIDescriptors(
+    node: FlowGraphNode,
+    ctx: EaCNodeCapabilityContext,
+  ): APIEndpointDescriptor[] {
+    const eac = ctx.GetEaC() as EverythingAsCodeOIWorkspace;
+
+    const surf = eac.Surfaces?.[node.ID];
+    if (!surf) return [];
+
+    const prefix = `/api/surface/${node.ID}`;
+    const descriptors: APIEndpointDescriptor[] = [];
+
+    // Gather endpoints for any attached data connections
+    for (const connId of Object.keys(surf.DataConnections ?? {})) {
+      const base = `${prefix}/data/${connId}`;
+
+      descriptors.push(
+        { Method: 'GET', Path: `${base}/cold`, Handler: 'ColdExportController', Cold: true } as APIEndpointDescriptor,
+        { Method: 'POST', Path: `${base}/warm`, Handler: 'WarmQueryController', Warm: true } as APIEndpointDescriptor,
+        { Method: 'GET', Path: `${base}/sse`, SSE: true } as APIEndpointDescriptor,
+        { Method: 'GET', Path: `${base}/ws`, WebSocket: true } as APIEndpointDescriptor,
+        { Method: 'POST', Path: `${base}/chat`, Chat: true } as APIEndpointDescriptor,
+      );
+    }
+
+    // Gather endpoints for any warm queries scoped to this surface
+    for (const wqId of Object.keys(surf.WarmQueries ?? {})) {
+      const path = `${prefix}/warm/${wqId}`;
+      descriptors.push(
+        { Method: 'POST', Path: path, Handler: 'WarmQueryController', Warm: true } as APIEndpointDescriptor,
+      );
+    }
+
+    return descriptors;
   }
 
   protected override getRenderer() {
