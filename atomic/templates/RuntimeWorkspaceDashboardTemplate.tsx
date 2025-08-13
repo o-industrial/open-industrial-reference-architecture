@@ -161,7 +161,32 @@ export function RuntimeWorkspaceDashboardTemplate({
           colSpan={inspectorColSpan}
           class="-:border-l -:bg-neutral-900 relative"
         >
-          {!commitStatus ? (
+          <div
+            class={classSet([
+              '-:transition-all -:duration-500 -:overflow-hidden -:h-full',
+              inspectorExpanded
+                ? '-:opacity-100 -:w-full'
+                : '-:opacity-30 -:w-0',
+            ])}
+          >
+            {inspector}
+          </div>
+          <Action
+            title={
+              inspectorExpanded ? 'Collapse Inspector' : 'Expand Inspector'
+            }
+            styleType={ActionStyleTypes.Icon}
+            intentType={IntentTypes.Primary}
+            onClick={() => setInspectorExpanded(!inspectorExpanded)}
+            class="-:absolute -:top-0 -:right-0 -:z-30"
+          >
+            {inspectorExpanded ? (
+              <CloseIcon class="w-5 h-5" />
+            ) : (
+              <ExpandIcon class="w-5 h-5" />
+            )}
+          </Action>
+          {/* {!commitStatus ? (
             <>
               <div
                 class={classSet([
@@ -191,7 +216,7 @@ export function RuntimeWorkspaceDashboardTemplate({
             </>
           ) : (
             commitStatus
-          )}
+          )} */}
         </PanelShell>
 
         {/* Stream Panel
@@ -255,14 +280,14 @@ export function RuntimeWorkspaceDashboardTemplate({
         {props.modals}
       </div>
 
-      {/* {commitStatus && (
+      {commitStatus && (
         <div
           class="-:absolute -:top-0 -:right-0 -:bottom-0 -:h-full -:z-50 -:w-96 -:bg-neutral-900 -:border-l -:border-neutral-800 -:shadow-lg -:-:bg-neutral-900 -:-:border-neutral-800"
           style="top: 40px;"
         >
           {commitStatus}
         </div>
-      )} */}
+      )}
     </div>
   );
 }
