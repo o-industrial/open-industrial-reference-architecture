@@ -62,14 +62,14 @@ export function CommitStatusPanel({
     return new Date(bDate).getTime() - new Date(aDate).getTime();
   });
 
-  const statusColor = (processing: EaCStatusProcessingTypes): string => {
+  const statusIntent = (processing: EaCStatusProcessingTypes) => {
     switch (processing) {
       case EaCStatusProcessingTypes.COMPLETE:
-        return 'text-green-500';
+        return IntentTypes.Secondary;
       case EaCStatusProcessingTypes.ERROR:
-        return 'text-red-500';
+        return IntentTypes.Error;
       default:
-        return 'text-blue-500';
+        return IntentTypes.Info;
     }
   };
 
@@ -108,12 +108,14 @@ export function CommitStatusPanel({
                   //   location.href = `/workspace/commit/${commit.ID}`;
                   // }}
                 >
-                  <CommitIcon
-                    class={classSet([
-                      'w-4 h-4',
-                      statusColor(commit.Processing),
-                    ])}
-                  />
+                  <Action
+                    title={commit.ID}
+                    styleType={ActionStyleTypes.Icon | ActionStyleTypes.Thin}
+                    intentType={statusIntent(commit.Processing)}
+                  >
+                    <CommitIcon class={classSet(['w-4 h-4', ,])} />
+                  </Action>
+
                   <span class="font-mono truncate">{commit.ID}</span>
                 </div>
                 {isSelected && (
