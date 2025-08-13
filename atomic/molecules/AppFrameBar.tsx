@@ -78,7 +78,15 @@ export function AppFrameBar({
           title="Commit Workspace"
           onClick={onCommitClick}
           styleType={ActionStyleTypes.Icon | ActionStyleTypes.Thin}
-          intentType={IntentTypes.Primary}
+          intentType={
+            commitBadgeState === 'error'
+              ? IntentTypes.Error
+              : commitBadgeState === 'processing'
+              ? IntentTypes.Info
+              : commitBadgeState === 'success'
+              ? IntentTypes.Secondary
+              : IntentTypes.None
+          }
         >
           <span class="-:relative -:block">
             <CommitIcon class="-:w-4 -:h-4" />
@@ -89,7 +97,9 @@ export function AppFrameBar({
               <span class="-:absolute -:top-0 -:right-0 -:w-2 -:h-2 -:rounded-full -:border-2 -:border-neon-blue-500 -:border-t-transparent -:animate-spin -:translate-x-1/2 -:-translate-y-1/2" />
             )}
             {commitBadgeState === 'success' && (
-              <span class="-:absolute -:top-0 -:right-0 -:text-green-500 -:text-[10px] -:translate-x-1/2 -:-translate-y-1/2">✓</span>
+              <span class="-:absolute -:top-0 -:right-0 -:text-green-500 -:text-[10px] -:translate-x-1/2 -:-translate-y-1/2">
+                ✓
+              </span>
             )}
           </span>
         </Action>
