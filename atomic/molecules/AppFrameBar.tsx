@@ -1,6 +1,6 @@
 import { SettingsIcon } from '../../build/iconset/icons/SettingsIcon.tsx';
 import { UsersIcon } from '../../build/iconset/icons/UsersIcon.tsx';
-import { GitCommitIcon } from '../../build/iconset/icons/GitCommitIcon.tsx';
+import { CommitIcon } from '../../build/iconset/icons/CommitIcon.tsx';
 import { JSX, classSet, IntentTypes } from '../.deps.ts';
 import { Action, ActionStyleTypes } from '../atoms/Action.tsx';
 import { MenuActionItem, MenuRoot } from './FlyoutMenu.tsx';
@@ -81,7 +81,7 @@ export function AppFrameBar({
           intentType={IntentTypes.Primary}
         >
           <span class="-:relative -:block">
-            <GitCommitIcon class="-:w-4 -:h-4" />
+            <CommitIcon class="-:w-4 -:h-4" />
             {commitBadgeState === 'error' && (
               <span class="-:absolute -:top-0 -:right-0 -:w-2 -:h-2 -:rounded-full -:bg-neon-red-500 -:translate-x-1/2 -:-translate-y-1/2" />
             )}
