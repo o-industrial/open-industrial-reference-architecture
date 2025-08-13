@@ -33,7 +33,6 @@ export function RuntimeWorkspaceDashboardTemplate({
   const [inspectorExpanded, setInspectorExpanded] = useState(true);
   const [streamExpanded, setStreamExpanded] = useState(true);
   const [timelineExpanded, setTimelineExpanded] = useState(true);
-  const [showCommitPanel, setShowCommitPanel] = useState(false);
 
   const bottomBothCollapsed = !streamExpanded && !timelineExpanded;
 
@@ -96,9 +95,7 @@ export function RuntimeWorkspaceDashboardTemplate({
       )}
 
       <div
-        class={classSet([
-          '-:grid -:h-full -:grid-cols-16 -:grid-rows-12',
-        ])}
+        class={classSet(['-:grid -:h-full -:grid-cols-16 -:grid-rows-12'])}
         {...props}
       >
         {/* Azi Panel */}
@@ -122,7 +119,7 @@ export function RuntimeWorkspaceDashboardTemplate({
             styleType={ActionStyleTypes.Icon}
             intentType={IntentTypes.Primary}
             onClick={() => setAziExpanded(!aziExpanded)}
-            class="-:absolute -:top-1 -:right-1 -:z-30"
+            class="-:absolute -:top-0 -:right-0 -:z-30"
           >
             {aziExpanded ? (
               <CloseIcon class="w-5 h-5" />
@@ -181,7 +178,7 @@ export function RuntimeWorkspaceDashboardTemplate({
             styleType={ActionStyleTypes.Icon}
             intentType={IntentTypes.Primary}
             onClick={() => setInspectorExpanded(!inspectorExpanded)}
-            class="-:absolute -:top-1 -:right-1 -:z-30"
+            class="-:absolute -:top-0 -:right-0 -:z-30"
           >
             {inspectorExpanded ? (
               <CloseIcon class="w-5 h-5" />
@@ -214,7 +211,7 @@ export function RuntimeWorkspaceDashboardTemplate({
             styleType={ActionStyleTypes.Icon}
             intentType={IntentTypes.Primary}
             onClick={() => setStreamExpanded(!streamExpanded)}
-            class="-:absolute -:top-1 -:right-1 -:z-30"
+            class="-:absolute -:top-0 -:right-0 -:z-30"
           >
             {streamExpanded ? <CloseIcon class="w-5 h-5" /> : '▲'}
           </Action>
@@ -243,7 +240,7 @@ export function RuntimeWorkspaceDashboardTemplate({
             styleType={ActionStyleTypes.Icon}
             intentType={IntentTypes.Primary}
             onClick={() => setTimelineExpanded(!timelineExpanded)}
-            class="-:absolute -:top-1 -:right-1 -:z-30"
+            class="-:absolute -:top-0 -:right-0 -:z-30"
           >
             {timelineExpanded ? <CloseIcon class="w-5 h-5" /> : '▲'}
           </Action>
@@ -253,37 +250,12 @@ export function RuntimeWorkspaceDashboardTemplate({
       </div>
 
       {commitStatus && (
-        <>
-          {!showCommitPanel && (
-            <Action
-              title="Show Commit Status"
-              styleType={ActionStyleTypes.Icon}
-              intentType={IntentTypes.Primary}
-              onClick={() => setShowCommitPanel(true)}
-              class="-:absolute -:top-12 -:right-1 -:z-30"
-            >
-              <ExpandIcon class="w-5 h-5" />
-            </Action>
-          )}
-
-          <div
-            class={classSet([
-              '-:absolute -:top-0 -:right-0 -:h-full -:w-96 -:bg-neutral-900 -:border-l -:transition-transform -:duration-500',
-              showCommitPanel ? '-:translate-x-0' : '-:translate-x-full',
-            ])}
-          >
-            <Action
-              title="Hide Commit Status"
-              styleType={ActionStyleTypes.Icon}
-              intentType={IntentTypes.Primary}
-              onClick={() => setShowCommitPanel(false)}
-              class="-:absolute -:top-1 -:left-1 -:z-30"
-            >
-              <CloseIcon class="w-5 h-5" />
-            </Action>
-            <div class="-:h-full -:overflow-auto -:pt-8">{commitStatus}</div>
-          </div>
-        </>
+        <div
+          class="-:absolute -:top-0 -:right-0 -:bottom-0 -:h-full -:z-50 -:w-96 -:bg-neutral-900 -:border-l -:border-neutral-800 -:shadow-lg -:-:bg-neutral-900 -:-:border-neutral-800"
+          style="top: 40px;"
+        >
+          {commitStatus}
+        </div>
       )}
     </div>
   );

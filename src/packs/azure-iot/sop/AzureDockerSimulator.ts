@@ -125,7 +125,11 @@ export function AzureDockerSimulator(
 
         const jobs: t[] = [];
 
-        for (const [dcLookup, dc] of Object.entries(EaC.DataConnections!)) {
+        for (
+          const [dcLookup, dc] of Object.entries(
+            EaC.DataConnections || {},
+          )
+        ) {
           const dcDetails = dc.Details ?? {};
 
           if (

@@ -166,8 +166,6 @@ export class WorkspaceManager {
     showDataSuite: () => void;
     showBilling: () => void;
     showLicense: () => void;
-    toggleCommitPanel: () => void;
-    selectCommit: (id: string | undefined) => void;
   } {
     const { Modal: accProfModal, Show: showAccProf } = AccountProfileModal.Modal(this);
     const { Modal: mngWkspsModal, Show: showMngWksps } = ManageWorkspacesModal.Modal(this);
@@ -178,8 +176,6 @@ export class WorkspaceManager {
     const { Modal: dataSuiteModal, Show: showDataSuite } = DataAPISuiteModal.Modal(this);
     const { Modal: billingModal, Show: showBilling } = BillingDetailsModal.Modal(this);
     const { Modal: licenseModal, Show: showLicense } = CurrentLicenseModal.Modal(eac, this);
-
-    const { toggleCommitPanel, selectCommit } = this.UseCommits();
 
     const modals = (
       <>
@@ -248,140 +244,6 @@ export class WorkspaceManager {
       showDataSuite,
       showBilling,
       showLicense,
-      toggleCommitPanel,
-      selectCommit,
-    };
-  }
-
-  public UseLicenses(parentEaC: EverythingAsCode & EverythingAsCodeLicensing): {
-    license?: EaCLicenseAsCode;
-    licLookup?: string;
-    userLicense?: EaCUserLicense;
-    stripePublishableKey?: string;
-    isMonthly: boolean;
-    activePlan?: string;
-    clientSecret?: string;
-    error: string;
-    loading: boolean;
-    activateMonthly: () => Promise<void>;
-    activatePlan: (planLookup: string, isMonthly: boolean) => Promise<void>;
-    setActivePlan: (lookup: string | undefined) => void;
-    setIsMonthly: (monthly: boolean) => void;
-  } {
-    const [license, setLicense] = useState<EaCLicenseAsCode | undefined>();
-    const [licLookup, setLicLookup] = useState<string | undefined>();
-    const [stripePublishableKey, setStripePublishableKey] = useState<
-      string | undefined
-    >();
-    const [userLicense] = useState<EaCUserLicense | undefined>(undefined);
-    const [isMonthly, setIsMonthly] = useState(true);
-    const [activePlan, setActivePlan] = useState<string | undefined>();
-    const [clientSecret, setClientSecret] = useState<string | undefined>();
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-      const lookup = Object.keys(parentEaC.Licenses ?? {})[0];
-
-      if (lookup) {
-        setLicLookup(lookup);
-        const lic = parentEaC.Licenses![lookup];
-        setLicense(lic);
-        // deno-lint-ignore no-explicit-any
-        const details: any = lic.Details;
-        setStripePublishableKey(details?.PublishableKey);
-      }
-    }, []);
-
-    const activateMonthly = async () => {
-      const next = !isMonthly;
-      setIsMonthly(next);
-
-      if (activePlan) {
-        await activatePlan(activePlan, next);
-      }
-    };
-
-    const activatePlan = async (
-      planLookup: string,
-      monthly: boolean,
-    ): Promise<void> => {
-      if (!license || !licLookup) return;
-
-      const interval = monthly ? 'month' : 'year';
-
-      const plans = Object.keys(license.Plans)
-        .map((pl) => {
-          const plan = license.Plans[pl];
-
-          const prices = Object.keys(plan.Prices).map((pr) => {
-            const price = plan.Prices[pr];
-
-            return {
-              Lookup: `${pl}-${price.Details!.Interval}`,
-              PlanLookup: pl,
-              PriceLookup: pr,
-              Interval: price.Details!.Interval,
-            };
-          });
-
-          return prices;
-        })
-        .flatMap((p) => p);
-
-      const selected = plans.find(
-        (p) => p.Lookup === `${planLookup}-${interval}`,
-      );
-      if (!selected) return;
-
-      setLoading(true);
-      setError('');
-
-      try {
-        const resp = await fetch(
-          `/workspace/api/${licLookup}/licensing/subscribe`,
-          {
-            method: 'POST',
-            body: JSON.stringify({
-              LicenseLookup: licLookup,
-              PlanLookup: planLookup,
-              PriceLookup: selected.PriceLookup,
-              SubscriptionID: '',
-            } as EaCUserLicense),
-          },
-        );
-
-        const licData = await resp.json();
-
-        if (licData?.Subscription) {
-          setClientSecret(
-            licData.Subscription.latest_invoice.payment_intent.client_secret,
-          );
-          setActivePlan(planLookup);
-        } else if (licData?.Error) {
-          setError(licData.Error);
-        }
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    return {
-      license,
-      licLookup,
-      userLicense,
-      stripePublishableKey,
-      isMonthly,
-      activePlan,
-      clientSecret,
-      error,
-      loading,
-      activateMonthly,
-      activatePlan,
-      setActivePlan,
-      setIsMonthly,
     };
   }
 
@@ -644,6 +506,79 @@ export class WorkspaceManager {
     return pathParts;
   }
 
+  public UseCommits(): {
+    commits: EaCStatus[];
+    badgeState: 'error' | 'processing' | 'success';
+    showCommitPanel: boolean;
+    selectedCommitId: string | undefined;
+    toggleCommitPanel: () => void;
+    selectCommit: (id: string | undefined) => void;
+  } {
+    const [commits, setCommits] = useState<EaCStatus[]>([]);
+    const [badgeState, setBadgeState] = useState<
+      'error' | 'processing' | 'success'
+    >('success');
+    const [showCommitPanel, setShowCommitPanel] = useState(false);
+    const [selectedCommitId, setSelectedCommitId] = useState<
+      string | undefined
+    >(undefined);
+
+    const load = useCallback(async () => {
+      try {
+        const listed = await this.ListCommits();
+        const statuses = await Promise.all(
+          listed.map((c) => this.GetCommitStatus(c.ID)),
+        );
+
+        setCommits(statuses);
+
+        const hasError = statuses.some(
+          (s) => s.Processing === EaCStatusProcessingTypes.ERROR,
+        );
+        const isProcessing = statuses.some(
+          (s) =>
+            s.Processing !== EaCStatusProcessingTypes.COMPLETE &&
+            s.Processing !== EaCStatusProcessingTypes.ERROR,
+        );
+
+        setBadgeState(
+          hasError ? 'error' : isProcessing ? 'processing' : 'success',
+        );
+      } catch (_err) {
+        setBadgeState('error');
+      }
+    }, []);
+
+    useEffect(() => {
+      load();
+      const id = setInterval(load, 4000);
+      return () => clearInterval(id);
+    }, [load]);
+
+    const toggleCommitPanel = () => {
+      setShowCommitPanel((p) => {
+        console.log(`Toggled to: ${!p}`);
+        return !p;
+      });
+    };
+    const selectCommit = (id: string | undefined) => {
+      if (id !== selectedCommitId) {
+        setSelectedCommitId(id);
+      } else {
+        setSelectedCommitId(undefined);
+      }
+    };
+
+    return {
+      commits,
+      badgeState,
+      showCommitPanel,
+      selectedCommitId,
+      toggleCommitPanel,
+      selectCommit,
+    };
+  }
+
   public UseEaC(): EverythingAsCodeOIWorkspace {
     const [eac, setEaC] = useState(this.EaC.GetEaC());
 
@@ -731,68 +666,6 @@ export class WorkspaceManager {
       commit: () => this.Commit(),
       revert: () => this.RevertToLastCommit(),
       fork: () => this.Fork(),
-    };
-  }
-
-  public UseCommits(): {
-    commits: EaCStatus[];
-    badgeState: 'error' | 'processing' | 'success';
-    showCommitPanel: boolean;
-    selectedCommitId: string | undefined;
-    toggleCommitPanel: () => void;
-    selectCommit: (id: string | undefined) => void;
-  } {
-    const [commits, setCommits] = useState<EaCStatus[]>([]);
-    const [badgeState, setBadgeState] = useState<
-      'error' | 'processing' | 'success'
-    >('success');
-    const [showCommitPanel, setShowCommitPanel] = useState(false);
-    const [selectedCommitId, setSelectedCommitId] = useState<
-      string | undefined
-    >(undefined);
-
-    const load = useCallback(async () => {
-      try {
-        const listed = await this.ListCommits();
-        const statuses = await Promise.all(
-          listed.map((c) => this.GetCommitStatus(c.ID)),
-        );
-
-        setCommits(statuses);
-
-        const hasError = statuses.some(
-          (s) => s.Processing === EaCStatusProcessingTypes.ERROR,
-        );
-        const isProcessing = statuses.some(
-          (s) =>
-            s.Processing !== EaCStatusProcessingTypes.COMPLETE &&
-            s.Processing !== EaCStatusProcessingTypes.ERROR,
-        );
-
-        setBadgeState(
-          hasError ? 'error' : isProcessing ? 'processing' : 'success',
-        );
-      } catch (_err) {
-        setBadgeState('error');
-      }
-    }, []);
-
-    useEffect(() => {
-      load();
-      const id = setInterval(load, 4000);
-      return () => clearInterval(id);
-    }, [load]);
-
-    const toggleCommitPanel = () => setShowCommitPanel((p) => !p);
-    const selectCommit = (id: string | undefined) => setSelectedCommitId(id);
-
-    return {
-      commits,
-      badgeState,
-      showCommitPanel,
-      selectedCommitId,
-      toggleCommitPanel,
-      selectCommit,
     };
   }
 
@@ -1007,6 +880,138 @@ export class WorkspaceManager {
       handleNodeClick,
       handleNodesChange,
       handleEdgesChange,
+    };
+  }
+
+  public UseLicenses(parentEaC: EverythingAsCode & EverythingAsCodeLicensing): {
+    license?: EaCLicenseAsCode;
+    licLookup?: string;
+    userLicense?: EaCUserLicense;
+    stripePublishableKey?: string;
+    isMonthly: boolean;
+    activePlan?: string;
+    clientSecret?: string;
+    error: string;
+    loading: boolean;
+    activateMonthly: () => Promise<void>;
+    activatePlan: (planLookup: string, isMonthly: boolean) => Promise<void>;
+    setActivePlan: (lookup: string | undefined) => void;
+    setIsMonthly: (monthly: boolean) => void;
+  } {
+    const [license, setLicense] = useState<EaCLicenseAsCode | undefined>();
+    const [licLookup, setLicLookup] = useState<string | undefined>();
+    const [stripePublishableKey, setStripePublishableKey] = useState<
+      string | undefined
+    >();
+    const [userLicense] = useState<EaCUserLicense | undefined>(undefined);
+    const [isMonthly, setIsMonthly] = useState(true);
+    const [activePlan, setActivePlan] = useState<string | undefined>();
+    const [clientSecret, setClientSecret] = useState<string | undefined>();
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+      const lookup = Object.keys(parentEaC.Licenses ?? {})[0];
+
+      if (lookup) {
+        setLicLookup(lookup);
+        const lic = parentEaC.Licenses![lookup];
+        setLicense(lic);
+        // deno-lint-ignore no-explicit-any
+        const details: any = lic.Details;
+        setStripePublishableKey(details?.PublishableKey);
+      }
+    }, []);
+
+    const activateMonthly = async () => {
+      const next = !isMonthly;
+      setIsMonthly(next);
+
+      if (activePlan) {
+        await activatePlan(activePlan, next);
+      }
+    };
+
+    const activatePlan = async (
+      planLookup: string,
+      monthly: boolean,
+    ): Promise<void> => {
+      if (!license || !licLookup) return;
+
+      const interval = monthly ? 'month' : 'year';
+
+      const plans = Object.keys(license.Plans)
+        .map((pl) => {
+          const plan = license.Plans[pl];
+
+          const prices = Object.keys(plan.Prices).map((pr) => {
+            const price = plan.Prices[pr];
+
+            return {
+              Lookup: `${pl}-${price.Details!.Interval}`,
+              PlanLookup: pl,
+              PriceLookup: pr,
+              Interval: price.Details!.Interval,
+            };
+          });
+
+          return prices;
+        })
+        .flatMap((p) => p);
+
+      const selected = plans.find(
+        (p) => p.Lookup === `${planLookup}-${interval}`,
+      );
+      if (!selected) return;
+
+      setLoading(true);
+      setError('');
+
+      try {
+        const resp = await fetch(
+          `/workspace/api/${licLookup}/licensing/subscribe`,
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              LicenseLookup: licLookup,
+              PlanLookup: planLookup,
+              PriceLookup: selected.PriceLookup,
+              SubscriptionID: '',
+            } as EaCUserLicense),
+          },
+        );
+
+        const licData = await resp.json();
+
+        if (licData?.Subscription) {
+          setClientSecret(
+            licData.Subscription.latest_invoice.payment_intent.client_secret,
+          );
+          setActivePlan(planLookup);
+        } else if (licData?.Error) {
+          setError(licData.Error);
+        }
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return {
+      license,
+      licLookup,
+      userLicense,
+      stripePublishableKey,
+      isMonthly,
+      activePlan,
+      clientSecret,
+      error,
+      loading,
+      activateMonthly,
+      activatePlan,
+      setActivePlan,
+      setIsMonthly,
     };
   }
 
