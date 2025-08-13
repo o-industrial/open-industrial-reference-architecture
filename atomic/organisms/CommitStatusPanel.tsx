@@ -1,10 +1,13 @@
 import {
   EaCStatus,
   EaCStatusProcessingTypes,
+  IntentTypes,
   JSX,
   classSet,
 } from '../.deps.ts';
 import {
+  Action,
+  ActionStyleTypes,
   CloseIcon,
   CommitIcon,
 } from '../.exports.ts';
@@ -71,12 +74,20 @@ export function CommitStatusPanel({
   };
 
   return (
-    <aside class="flex flex-col h-full w-80 bg-neutral-900 border-l border-neutral-800">
+    <aside class="flex flex-col h-full w-full bg-neutral-900 border-l border-neutral-800">
       <header class="flex items-center justify-between px-4 py-2 bg-neutral-800 border-b border-neutral-700">
-        <h2 class="text-sm font-semibold tracking-wide text-white uppercase">Commits</h2>
-        <button title="Close" onClick={onClose}>
+        <h2 class="text-sm font-semibold tracking-wide text-white uppercase">
+          Commits
+        </h2>
+        <Action
+          title="Close Commits"
+          styleType={ActionStyleTypes.Icon}
+          intentType={IntentTypes.Primary}
+          onClick={onClose}
+          class="-:absolute -:top-0 -:right-0 -:z-30"
+        >
           <CloseIcon class="w-5 h-5" />
-        </button>
+        </Action>
       </header>
 
       <div class="flex-1 overflow-y-auto">
@@ -92,13 +103,16 @@ export function CommitStatusPanel({
                     isSelected ? 'bg-neutral-800' : '',
                   ])}
                   onClick={() => onSelectCommit(commit.ID)}
-                  onDblClick={() => {
-                    onSelectCommit(commit.ID);
-                    location.href = `/workspace/commit/${commit.ID}`;
-                  }}
+                  // onDblClick={() => {
+                  //   onSelectCommit(commit.ID);
+                  //   location.href = `/workspace/commit/${commit.ID}`;
+                  // }}
                 >
                   <CommitIcon
-                    class={classSet(['w-4 h-4', statusColor(commit.Processing)])}
+                    class={classSet([
+                      'w-4 h-4',
+                      statusColor(commit.Processing),
+                    ])}
                   />
                   <span class="font-mono truncate">{commit.ID}</span>
                 </div>
