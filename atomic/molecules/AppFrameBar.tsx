@@ -12,7 +12,6 @@ export type AppFrameBarProps = {
   onActivateClick?: () => void;
   onCommitClick: () => void;
   commitBadgeState?: CommitBadgeState;
-  commitIconSrc?: string;
   onProfileClick?: () => void;
   onSettingsClick?: () => void;
   profileIntentType?: IntentTypes;
@@ -26,7 +25,6 @@ export function AppFrameBar({
   onActivateClick,
   onCommitClick,
   commitBadgeState,
-  commitIconSrc,
   onProfileClick,
   onSettingsClick,
   profileIntentType = IntentTypes.Info,
@@ -83,7 +81,7 @@ export function AppFrameBar({
           intentType={IntentTypes.Primary}
         >
           <span class="-:relative -:block">
-            <GitCommitIcon src={commitIconSrc} class="-:w-4 -:h-4" />
+            <GitCommitIcon class="-:w-4 -:h-4" />
             {commitBadgeState === 'error' && (
               <span class="-:absolute -:top-0 -:right-0 -:w-2 -:h-2 -:rounded-full -:bg-neon-red-500 -:translate-x-1/2 -:-translate-y-1/2" />
             )}
