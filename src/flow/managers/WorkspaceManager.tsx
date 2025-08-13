@@ -526,9 +526,10 @@ export class WorkspaceManager {
     const load = useCallback(async () => {
       try {
         const listed = await this.ListCommits();
-        const statuses = await Promise.all(
-          listed.map((c) => this.GetCommitStatus(c.ID)),
-        );
+        const statuses = listed;
+        // const statuses = await Promise.all(
+        //   listed.map((c) => this.GetCommitStatus(c.ID)),
+        // );
 
         setCommits(statuses);
 
