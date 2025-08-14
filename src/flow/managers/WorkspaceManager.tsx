@@ -436,12 +436,12 @@ export class WorkspaceManager {
             label: 'Current License',
             iconSrc: I.license,
           },
-          {
-            type: 'item',
-            id: 'billing.details',
-            label: 'Billing Details',
-            iconSrc: I.creditCard, /* or I.dollar */
-          },
+          // {
+          //   type: 'item',
+          //   id: 'billing.details',
+          //   label: 'Billing Details',
+          //   iconSrc: I.creditCard, /* or I.dollar */
+          // },
         ],
       },
     ];
