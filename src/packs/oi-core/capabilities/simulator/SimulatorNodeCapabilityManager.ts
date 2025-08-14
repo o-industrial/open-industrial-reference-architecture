@@ -149,7 +149,10 @@ export class SimulatorNodeCapabilityManager
       Simulators: {
         [id]: {
           Metadata: metadata,
-          Details: details,
+          Details: {
+            ...details,
+            Type: 'AzureDocker',
+          } as EaCAzureDockerSimulatorDetails,
         } as EaCSimulatorAsCode,
       },
     };
@@ -171,6 +174,14 @@ export class SimulatorNodeCapabilityManager
 
   protected override getInspector() {
     return SimulatorInspector;
+  }
+
+  protected override getPreset() {
+    return {
+      Type: this.Type,
+      Label: 'Simulator',
+      IconKey: 'simulator',
+    };
   }
 
   protected override getRenderer() {
