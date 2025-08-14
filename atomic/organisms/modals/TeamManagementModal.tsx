@@ -64,7 +64,7 @@ export function TeamManagementModal({
           <div class="text-sm text-neutral-300 font-medium">
             Current Members
           </div>
-          <Select
+          {/* <Select
             value={bulkRole}
             onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>
               handleBulkChange((e.target as HTMLSelectElement).value)
@@ -74,7 +74,7 @@ export function TeamManagementModal({
             <option value="Owner">Owner</option>
             <option value="Editor">Editor</option>
             <option value="Viewer">Viewer</option>
-          </Select>
+          </Select> */}
         </div>
 
         <div class="space-y-2 max-h-64 overflow-y-auto">
@@ -90,7 +90,7 @@ export function TeamManagementModal({
               />
               <div class="text-sm">{member.Name ?? 'N/A'}</div>
               <div class="text-sm">{member.Email}</div>
-              <Select
+              {/* <Select
                 value={member.Role}
                 onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>
                   updateMemberRole(
@@ -105,7 +105,7 @@ export function TeamManagementModal({
                 <option>Owner</option>
                 <option>Editor</option>
                 <option>Viewer</option>
-              </Select>
+              </Select> */}
               <div class="text-sm">{friendlyDate(member.Joined)}</div>
               <Action
                 onClick={() => removeMember(member.Email)}
@@ -137,7 +137,7 @@ export function TeamManagementModal({
                 setEmail((e.target as HTMLInputElement).value)
               }
             />
-            <Select
+            {/* <Select
               value={role}
               onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>
                 setRole(
@@ -151,13 +151,13 @@ export function TeamManagementModal({
               <option value="Viewer">Viewer</option>
               <option value="Editor">Editor</option>
               <option value="Owner">Owner</option>
-            </Select>
+            </Select> */}
             <Action
               onClick={() => {
                 inviteMember(email, role, name);
                 setName('');
                 setEmail('');
-                setRole('Viewer');
+                //setRole('Viewer');
               }}
             >
               Invite
