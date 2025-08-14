@@ -54,12 +54,12 @@ export function AppFrameBar({
       <div class="-:ml-auto -:flex -:items-center -:gap-2">
         {onActivateClick && (
           <Action
-            title="3 Days to Activate Workspace"
+            title="Activate to Deploy"
             onClick={onActivateClick}
             styleType={ActionStyleTypes.Outline | ActionStyleTypes.Thin}
             intentType={IntentTypes.Warning}
           >
-            3 Days to Activate Workspace
+            Activate to Deploy
           </Action>
         )}
 

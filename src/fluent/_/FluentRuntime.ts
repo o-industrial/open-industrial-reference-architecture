@@ -5,7 +5,7 @@ import type { EaCDetails, EaCVertexDetails } from '../types/.deps.ts';
 import type { StepInvokerMap } from '../steps/StepInvokerMap.ts';
 import type { VerificationInvokerMap } from '../types/VerificationInvokerMap.ts';
 import type { FluentContext } from '../types/FluentContext.ts';
-import type { Status } from 'jsr:@fathym/common@0.2.265';
+import type { Status } from 'jsr:@fathym/common@0.2.266';
 
 /**
  * Base class for any fluent-configured runtime, driven by `.AsCode` + enriched context.
