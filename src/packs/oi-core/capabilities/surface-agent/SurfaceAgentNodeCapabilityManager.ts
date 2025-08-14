@@ -304,9 +304,9 @@ export class SurfaceAgentNodeCapabilityManager
     return SurfaceAgentInspector;
   }
 
-  protected override getPreset() {
-    return { Type: this.Type, Label: 'Agent', IconKey: 'agent' };
-  }
+  // protected override getPreset() {
+  //   return { Type: this.Type, Label: 'Agent', IconKey: 'agent' };
+  // }
 
   protected override getRenderer() {
     return SurfaceAgentNodeCapabilityManager.renderer;

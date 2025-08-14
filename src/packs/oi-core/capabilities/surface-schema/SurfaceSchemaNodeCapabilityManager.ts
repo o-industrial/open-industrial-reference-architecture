@@ -330,9 +330,9 @@ export class SurfaceSchemaNodeCapabilityManager
     return SurfaceRootSchemaInspector;
   }
 
-  protected override getPreset() {
-    return { Type: this.Type, Label: 'Schema', IconKey: 'schema' };
-  }
+  // protected override getPreset() {
+  //   return { Type: this.Type, Label: 'Schema', IconKey: 'schema' };
+  // }
 
   protected override getRenderer() {
     return SurfaceSchemaNodeCapabilityManager.renderer;

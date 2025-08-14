@@ -16,6 +16,7 @@ import {
 import { AziPanelTemplate } from '../templates/AziPanelTemplate.tsx';
 import { AziChatInput } from '../molecules/azi/AziChatInput.tsx';
 import { AziChatMessage } from '../molecules/azi/AziChatMessage.tsx';
+import { AziManager } from '../../src/flow/managers/AziManager.ts';
 
 export const IsIsland = true;
 
@@ -23,10 +24,11 @@ type Role = 'user' | 'azi' | 'tool';
 
 type AziPanelProps = {
   workspaceMgr: WorkspaceManager;
+  aziMgr: AziManager;
   onClose?: () => void;
   intentTypes?: Partial<Record<Role, IntentTypes>>;
   renderMessage?: (message: string) => string;
-  circuitUrl?: string;
+  extraInputs?: Record<string, unknown>;
 };
 
 function ReasoningBlock({
@@ -89,7 +91,8 @@ export function AziPanel({
     tool: IntentTypes.Tertiary,
   },
   renderMessage,
-  circuitUrl,
+  aziMgr,
+  extraInputs,
 }: AziPanelProps): JSX.Element {
   const {
     state,
@@ -98,7 +101,7 @@ export function AziPanel({
     peek,
     scrollRef,
     registerStreamAnchor,
-  } = workspaceMgr.UseAzi(circuitUrl);
+  } = workspaceMgr.UseAzi(aziMgr);
 
   // Initial peek when mounted
   useEffect(() => {
@@ -183,7 +186,7 @@ export function AziPanel({
   return (
     <AziPanelTemplate
       onClose={onClose}
-      input={<AziChatInput onSend={send} disabled={isSending} />}
+      input={<AziChatInput onSend={send} extraInputs={} disabled={isSending} />}
     >
       <div ref={scrollRef} class="overflow-y-auto h-full">
         {renderedMessages}

@@ -3,12 +3,13 @@ import { SendIcon, Input, Action, ActionStyleTypes } from '../../.exports.ts';
 
 export type AziChatInputProps = {
   placeholder?: string;
-  onSend: (message: string) => Promise<void>; // ✅ now async
+  onSend: (message: string, extraInputs?: Record<string, unknown>) => Promise<void>; // ✅ now async
   disabled?: boolean;
   inputIntentType?: IntentTypes;
   actionIntentType?: IntentTypes;
   sendIcon?: JSX.Element;
   maxHeight?: number; // in pixels
+  extraInputs?: Record<string, unknown>;
 };
 
 export function AziChatInput({
@@ -19,6 +20,7 @@ export function AziChatInput({
   actionIntentType = IntentTypes.Primary,
   sendIcon = <SendIcon class="w-5 h-5" />,
   maxHeight = 200,
+  extraInputs = {}
 }: AziChatInputProps): JSX.Element {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -48,7 +50,7 @@ export function AziChatInput({
 
     setSending(true);
     try {
-      await onSend(trimmed);
+      await onSend(trimmed, extraInputs);
       setInput('');
     } finally {
       setSending(false);

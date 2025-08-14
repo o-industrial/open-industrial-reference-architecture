@@ -20,6 +20,7 @@ interface SurfaceWarmQueryModalProps {
   onClose: () => void;
   onRun: (query: string) => Promise<KustoResponseDataSet>;
   onSave: (name: string, apiPath: string, description: string, query: string) => void;
+  aziExtraInputs?: Record<string, unknown>;
 }
 
 export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalProps> = ({
@@ -31,6 +32,7 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
   onClose,
   onRun,
   onSave,
+  aziExtraInputs,
 }) => {
   const [workspace, setWorkspace] = useState(initialWorkspace);
   const [queryName, setQueryName] = useState(initialName);
@@ -202,7 +204,8 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
             <AziPanel
               workspaceMgr={workspace}
               renderMessage={(msg) => marked.parse(msg) as string}
-              circuitUrl='/api/synaptic/circuits/azi'
+              aziMgr={workspace.WarmQueryAzi}
+              extraInputs={aziExtraInputs}
             />
           </div>
         </div>
