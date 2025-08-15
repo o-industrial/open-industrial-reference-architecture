@@ -34,7 +34,7 @@ export {
   forwardRef,
   useRef,
 } from 'npm:preact@10.20.1/compat';
-export { useState, useEffect } from 'npm:preact@10.20.1/hooks';
+export { useState, useEffect, useCallback } from 'npm:preact@10.20.1/hooks';
 
 export {
   ReactFlow,

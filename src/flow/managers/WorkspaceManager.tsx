@@ -681,7 +681,6 @@ export class WorkspaceManager {
     };
 
     const send = async (text: string, extraInputs: Record<string, unknown>) => {
-      debugger;
       await aziMgr.Send(text, extraInputs);
       hasScrolledInitially.current = true;
       setIsSending(aziMgr.IsSending());
