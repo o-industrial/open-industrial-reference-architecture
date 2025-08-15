@@ -1214,12 +1214,13 @@ export class WorkspaceManager {
           setActivePlan(planLookup);
         } else if (licData?.Error) {
           setError(licData.Error);
+        } else {
+          location.reload();
         }
       } catch (err) {
         setError((err as Error).message);
       } finally {
-        // setLoading(false);
-        location.reload();
+        setLoading(false);
       }
     };
 
