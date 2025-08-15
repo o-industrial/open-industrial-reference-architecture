@@ -599,7 +599,10 @@ export class WorkspaceManager {
   public UseAzi(aziMgr: AziManager): {
     state: AziState;
     isSending: boolean;
-    send: (text: string, extraInputs?: Record<string, unknown>) => Promise<void>;
+    send: (
+      text: string,
+      extraInputs?: Record<string, unknown>,
+    ) => Promise<void>;
     peek: (inputs?: Record<string, unknown>) => Promise<void>;
     scrollRef: RefObject<HTMLDivElement>;
     registerStreamAnchor: (el: HTMLElement | null) => void;
@@ -659,7 +662,10 @@ export class WorkspaceManager {
       streamAnchorRef.current = el;
     };
 
-    const send = async (text: string, extraInputs?: Record<string, unknown>) => {
+    const send = async (
+      text: string,
+      extraInputs?: Record<string, unknown>,
+    ) => {
       await aziMgr.Send(text, extraInputs);
       hasScrolledInitially.current = true;
       setIsSending(aziMgr.IsSending());
@@ -1108,7 +1114,7 @@ export class WorkspaceManager {
     activePlan?: string;
     clientSecret?: string;
     error: string;
-    loading: boolean;
+    licenseLoading: boolean;
     activateMonthly: () => Promise<void>;
     activatePlan: (planLookup: string, isMonthly: boolean) => Promise<void>;
     setActivePlan: (lookup: string | undefined) => void;
@@ -1121,7 +1127,9 @@ export class WorkspaceManager {
     >();
     const [userLicense] = useState<EaCUserLicense | undefined>(undefined);
     const [isMonthly, setIsMonthly] = useState(true);
-    const [activePlan, setActivePlan] = useState<string | undefined>(this.userLicense?.PlanLookup);
+    const [activePlan, setActivePlan] = useState<string | undefined>(
+      this.userLicense?.PlanLookup,
+    );
     const [clientSecret, setClientSecret] = useState<string | undefined>();
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -1210,7 +1218,8 @@ export class WorkspaceManager {
       } catch (err) {
         setError((err as Error).message);
       } finally {
-        setLoading(false);
+        // setLoading(false);
+        location.reload();
       }
     };
 
@@ -1223,7 +1232,7 @@ export class WorkspaceManager {
       activePlan,
       clientSecret,
       error,
-      loading,
+      licenseLoading: loading,
       activateMonthly,
       activatePlan,
       setActivePlan,

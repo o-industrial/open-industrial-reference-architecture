@@ -19,6 +19,7 @@ import {
 } from '../../.exports.ts';
 import { loadStripe } from 'npm:@stripe/stripe-js@7.8.0';
 
+export const IsIsland = true;
 export type CurrentLicenseModalProps = {
   eac: EverythingAsCode & EverythingAsCodeLicensing;
   workspaceMgr: WorkspaceManager;
@@ -38,7 +39,7 @@ export function CurrentLicenseModal({
     activePlan,
     clientSecret,
     error: hookError,
-    loading,
+    licenseLoading,
     activateMonthly,
     activatePlan,
     setActivePlan,
@@ -155,6 +156,7 @@ export function CurrentLicenseModal({
               <LicenseCard
                 key={plan.Lookup}
                 name={plan.Name}
+                licenseLoading={licenseLoading}
                 description={plan.Description}
                 amount={plan.Amount}
                 interval={plan.Interval}
@@ -174,7 +176,7 @@ export function CurrentLicenseModal({
               class="p-4 rounded-md border border-neon-violet-500 bg-neutral-900"
             ></div>
 
-            {!loading ? (
+            {!licenseLoading ? (
               <div class="mt-8 flex flex-col">
                 <Action
                   id="submit"

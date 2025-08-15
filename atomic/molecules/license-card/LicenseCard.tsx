@@ -1,15 +1,16 @@
-import { JSX, classSet, IntentTypes } from "../../.deps.ts";
-import { Action, Badge } from "../../.exports.ts";
+import { JSX, classSet, IntentTypes } from '../../.deps.ts';
+import { Action, Badge, LoadingIcon } from '../../.exports.ts';
 
 export type LicenseCardProps = {
   name: string;
   description?: string;
   amount: number;
-  interval: "month" | "year";
+  interval: 'month' | 'year';
   features?: string[];
   featured?: boolean;
   highlightLabel?: string;
   isActive?: boolean;
+  licenseLoading: boolean;
   onSelect?: () => void;
 } & JSX.HTMLAttributes<HTMLDivElement>;
 
@@ -21,6 +22,7 @@ export function LicenseCard({
   features = [],
   featured = false,
   highlightLabel,
+  licenseLoading,
   isActive = false,
   onSelect,
   class: className,
@@ -30,13 +32,13 @@ export function LicenseCard({
     <div
       class={classSet(
         [
-          "group relative rounded-xl transition-all overflow-visible",
+          'group relative rounded-xl transition-all overflow-visible',
           featured
-            ? "p-[2px] bg-gradient-to-r from-neon-pink-500 via-neon-violet-500 to-neon-blue-500"
-            : "border border-neutral-700 hover:border-neon-violet-500",
-          isActive ? "ring-1 ring-neon-cyan-500" : "",
+            ? 'p-[2px] bg-gradient-to-r from-neon-pink-500 via-neon-violet-500 to-neon-blue-500'
+            : 'border border-neutral-700 hover:border-neon-violet-500',
+          isActive ? 'ring-1 ring-neon-cyan-500' : '',
         ],
-        { class: className },
+        { class: className }
       )}
       {...rest}
     >
@@ -84,9 +86,13 @@ export function LicenseCard({
         )}
 
         <div class="mt-6 flex justify-center">
-          <Action class="w-full" disabled={isActive} onClick={onSelect}>
-            {isActive ? "Selected" : "Subscribe Now"}
-          </Action>
+          {!licenseLoading ? (
+            <Action class="w-full" disabled={isActive} onClick={onSelect}>
+              {isActive ? 'Selected' : 'Subscribe Now'}
+            </Action>
+          ) : (
+            <LoadingIcon class="w-20 h-20 text-neon-blue-500 animate-spin inline-block" />
+          )}
         </div>
       </div>
     </div>
