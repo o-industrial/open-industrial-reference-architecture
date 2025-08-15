@@ -29,7 +29,7 @@ export function SurfaceWarmQueryInspector({
     WarmQueryLookup: lookup,
     SurfaceLookup: surfaceLookup,
   };
-  
+
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
 

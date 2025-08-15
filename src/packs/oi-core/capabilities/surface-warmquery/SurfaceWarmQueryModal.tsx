@@ -62,7 +62,7 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
       setQuery(state.DataQuery as string);
       setActiveTabKey('query');
     }
-  }
+  };
 
   const handleRunClick = async () => {
     setIsLoading(true);

@@ -122,7 +122,7 @@ export class WorkspaceManager {
     this.WarmQueryAzi = new AziManager({
       url: aziWarmQueryUrl,
       jwt,
-      threadId: `workspace-${eac.EnterpriseLookup}-warmquery`
+      threadId: `workspace-${eac.EnterpriseLookup}-warmquery`,
     });
     this.Jwt = jwt ?? '';
 
@@ -599,7 +599,7 @@ export class WorkspaceManager {
   public UseAzi(aziMgr: AziManager): {
     state: AziState;
     isSending: boolean;
-    send: (text: string) => Promise<void>;
+    send: (text: string, extraInputs?: Record<string, unknown>) => Promise<void>;
     peek: (inputs?: Record<string, unknown>) => Promise<void>;
     scrollRef: RefObject<HTMLDivElement>;
     registerStreamAnchor: (el: HTMLElement | null) => void;
@@ -659,7 +659,7 @@ export class WorkspaceManager {
       streamAnchorRef.current = el;
     };
 
-    const send = async (text: string, extraInputs: Record<string, unknown>) => {
+    const send = async (text: string, extraInputs?: Record<string, unknown>) => {
       await aziMgr.Send(text, extraInputs);
       hasScrolledInitially.current = true;
       setIsSending(aziMgr.IsSending());
