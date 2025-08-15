@@ -1208,14 +1208,16 @@ export class WorkspaceManager {
         const licData = await resp.json();
 
         if (licData?.Subscription) {
-          setClientSecret(
-            licData.Subscription.latest_invoice.payment_intent.client_secret,
-          );
+          if (licData.Subscription.latest_invoice.payment_intent) {
+            setClientSecret(
+              licData.Subscription.latest_invoice.payment_intent.client_secret,
+            );
+          } else {
+            location.reload();
+          }
           setActivePlan(planLookup);
         } else if (licData?.Error) {
           setError(licData.Error);
-        } else {
-          location.reload();
         }
       } catch (err) {
         setError((err as Error).message);
