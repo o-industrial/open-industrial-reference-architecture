@@ -101,6 +101,7 @@ export class WorkspaceManager {
   public Selection: SelectionManager;
   public Simulators: SimulatorLibraryManager;
   public Team: TeamManager;
+  public WarmQueryAzi: AziManager;
 
   constructor(
     eac: EverythingAsCodeOIWorkspace,
@@ -109,6 +110,7 @@ export class WorkspaceManager {
     capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>,
     scope: NodeScopeTypes = 'workspace',
     aziCircuitUrl: string,
+    aziWarmQueryUrl: string,
     jwt?: string,
   ) {
     this.currentScope = { Scope: scope };
@@ -116,6 +118,11 @@ export class WorkspaceManager {
       url: aziCircuitUrl,
       jwt,
       threadId: `workspace-${eac.EnterpriseLookup}`,
+    });
+    this.WarmQueryAzi = new AziManager({
+      url: aziWarmQueryUrl,
+      jwt,
+      threadId: `workspace-${eac.EnterpriseLookup}-warmquery`,
     });
     this.Jwt = jwt ?? '';
 
@@ -589,27 +596,17 @@ export class WorkspaceManager {
     };
   }
 
-  public UseAzi(circuitUrl?: string): {
+  public UseAzi(aziMgr: AziManager): {
     state: AziState;
     isSending: boolean;
-    send: (text: string) => Promise<void>;
+    send: (text: string, extraInputs?: Record<string, unknown>) => Promise<void>;
     peek: (inputs?: Record<string, unknown>) => Promise<void>;
     scrollRef: RefObject<HTMLDivElement>;
     registerStreamAnchor: (el: HTMLElement | null) => void;
     isAutoScrolling: boolean;
   } {
-    const [state, setState] = useState(this.Azi.GetState());
-    const [isSending, setIsSending] = useState(this.Azi.IsSending());
-
-    if (circuitUrl) {
-      const eac = this.EaC.GetEaC();
-      const jwt = this.Jwt;
-      this.Azi = new AziManager({
-        url: circuitUrl,
-        jwt,
-        threadId: `workspace-${eac.EnterpriseLookup!}`,
-      });
-    }
+    const [state, setState] = useState(aziMgr.GetState());
+    const [isSending, setIsSending] = useState(aziMgr.IsSending());
 
     const scrollRef = useRef<HTMLDivElement>(null);
     const streamAnchorRef = useRef<HTMLElement | null>(null);
@@ -650,27 +647,27 @@ export class WorkspaceManager {
     // === Keep state synced
     useEffect(() => {
       const update = () => {
-        setState(this.Azi.GetState());
-        setIsSending(this.Azi.IsSending());
+        setState(aziMgr.GetState());
+        setIsSending(aziMgr.IsSending());
 
         animateScroll(scrollRef.current!);
       };
-      return this.Azi.OnStateChanged(update);
+      return aziMgr.OnStateChanged(update);
     }, []);
 
     const registerStreamAnchor = (el: HTMLElement | null) => {
       streamAnchorRef.current = el;
     };
 
-    const send = async (text: string) => {
-      await this.Azi.Send(text);
+    const send = async (text: string, extraInputs?: Record<string, unknown>) => {
+      await aziMgr.Send(text, extraInputs);
       hasScrolledInitially.current = true;
-      setIsSending(this.Azi.IsSending());
+      setIsSending(aziMgr.IsSending());
     };
 
     const peek = async (inputs?: Record<string, unknown>) => {
-      await this.Azi.Peek(inputs);
-      setIsSending(this.Azi.IsSending());
+      await aziMgr.Peek(inputs);
+      setIsSending(aziMgr.IsSending());
     };
 
     return {

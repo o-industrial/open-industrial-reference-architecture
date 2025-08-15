@@ -8,7 +8,7 @@ import { AziPanel } from '../../../../../atomic/organisms/.exports.ts';
 import { SurfaceWarmQueryModalDetails } from './SurfaceWarmQueryModalDetails.tsx';
 import { SurfaceWarmQueryModalQuery } from './SurfaceWarmQueryModalQuery.tsx';
 import { SurfaceWarmQueryModalResults } from './SurfaceWarmQueryModalResults.tsx';
-import { WorkspaceManager } from '../../../../flow/.exports.ts';
+import { AziState, WorkspaceManager } from '../../../../flow/.exports.ts';
 import { KustoResponseDataSet } from 'npm:azure-kusto-data@6.0.2';
 
 interface SurfaceWarmQueryModalProps {
@@ -20,6 +20,7 @@ interface SurfaceWarmQueryModalProps {
   onClose: () => void;
   onRun: (query: string) => Promise<KustoResponseDataSet>;
   onSave: (name: string, apiPath: string, description: string, query: string) => void;
+  aziExtraInputs?: Record<string, unknown>;
 }
 
 export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalProps> = ({
@@ -31,6 +32,7 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
   onClose,
   onRun,
   onSave,
+  aziExtraInputs,
 }) => {
   const [workspace, setWorkspace] = useState(initialWorkspace);
   const [queryName, setQueryName] = useState(initialName);
@@ -54,6 +56,13 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
 
   const isSaveDisabled = !queryName || !query || !queryDescription || !queryApiPath || isLoading;
   const isRunDisabled = !query || isLoading;
+
+  const onAziSend = (state: AziState) => {
+    if (state && state.DataQuery && state.DataQuery != state.CurrentQuery) {
+      setQuery(state.DataQuery as string);
+      setActiveTabKey('query');
+    }
+  };
 
   const handleRunClick = async () => {
     setIsLoading(true);
@@ -201,8 +210,13 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
           <div class='w-1/3 border-l border-gray-700 pl-4 overflow-y-auto'>
             <AziPanel
               workspaceMgr={workspace}
+              onSend={onAziSend}
               renderMessage={(msg) => marked.parse(msg) as string}
-              circuitUrl='/api/synaptic/circuits/azi'
+              aziMgr={workspace.WarmQueryAzi}
+              extraInputs={{
+                ...aziExtraInputs,
+                CurrentQuery: query,
+              }}
             />
           </div>
         </div>

@@ -11,11 +11,13 @@ import {
   useEffect,
   useRef,
   useState,
+  useCallback,
 } from '../.deps.ts';
 
 import { AziPanelTemplate } from '../templates/AziPanelTemplate.tsx';
 import { AziChatInput } from '../molecules/azi/AziChatInput.tsx';
 import { AziChatMessage } from '../molecules/azi/AziChatMessage.tsx';
+import { AziManager, AziState } from '../../src/flow/managers/AziManager.ts';
 
 export const IsIsland = true;
 
@@ -23,10 +25,12 @@ type Role = 'user' | 'azi' | 'tool';
 
 type AziPanelProps = {
   workspaceMgr: WorkspaceManager;
+  aziMgr: AziManager;
   onClose?: () => void;
+  onSend?: (state: AziState) => void;
   intentTypes?: Partial<Record<Role, IntentTypes>>;
   renderMessage?: (message: string) => string;
-  circuitUrl?: string;
+  extraInputs?: Record<string, unknown>;
 };
 
 function ReasoningBlock({
@@ -83,13 +87,15 @@ function ReasoningBlock({
 export function AziPanel({
   workspaceMgr,
   onClose,
+  onSend,
   intentTypes = {
     user: IntentTypes.Secondary,
     azi: IntentTypes.Info,
     tool: IntentTypes.Tertiary,
   },
   renderMessage,
-  circuitUrl,
+  aziMgr,
+  extraInputs,
 }: AziPanelProps): JSX.Element {
   const {
     state,
@@ -98,19 +104,31 @@ export function AziPanel({
     peek,
     scrollRef,
     registerStreamAnchor,
-  } = workspaceMgr.UseAzi(circuitUrl);
-
+  } = workspaceMgr.UseAzi(aziMgr);
+  console.log(JSON.stringify(extraInputs, null, 2));
   // Initial peek when mounted
   useEffect(() => {
     console.log('[AziPanel] Initial peek()');
     peek();
   }, []);
 
+  const stateRef = useRef(state);
+  useEffect(() => { stateRef.current = state; }, [state]);
+
+  const wrappedSend = useCallback(
+    async (...args: Parameters<typeof send>) => {
+      const result = await send(...args);     // run the real send
+      onSend?.(stateRef.current);             // call your callback afterwards
+      return result;                          // preserve return value
+    },
+    [send, onSend]
+  );
+
   // On first load, trigger empty message to prompt stream
   useEffect(() => {
     if (state.Messages?.length === 0) {
       console.log('[AziPanel] No messages — sending empty message');
-      send('');
+      send('', extraInputs);
     }
   }, [state]);
 
@@ -183,7 +201,7 @@ export function AziPanel({
   return (
     <AziPanelTemplate
       onClose={onClose}
-      input={<AziChatInput onSend={send} disabled={isSending} />}
+      input={<AziChatInput onSend={wrappedSend} extraInputs={extraInputs} disabled={isSending} />}
     >
       <div ref={scrollRef} class="overflow-y-auto h-full">
         {renderedMessages}
