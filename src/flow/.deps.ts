@@ -37,6 +37,6 @@ export {
   HumanMessage,
   type MessageFieldWithRole,
   ToolMessage,
-} from 'npm:@langchain/core@0.3.42/messages';
-export type { StringPromptValue } from 'npm:@langchain/core@0.3.42/prompt_values';
-export { RemoteRunnable } from 'npm:@langchain/core@0.3.42/runnables/remote';
+} from 'npm:@langchain/core@0.3.71/messages';
+export type { StringPromptValue } from 'npm:@langchain/core@0.3.71/prompt_values';
+export { RemoteRunnable } from 'npm:@langchain/core@0.3.71/runnables/remote';

@@ -56,4 +56,4 @@ export {
   ToolMessage,
   ToolMessageChunk,
   BaseMessage,
-} from 'npm:@langchain/core@0.3.42/messages';
+} from 'npm:@langchain/core@0.3.71/messages';
