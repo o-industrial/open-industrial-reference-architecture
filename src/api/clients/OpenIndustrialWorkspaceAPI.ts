@@ -69,12 +69,12 @@ export class OpenIndustrialWorkspaceAPI {
   /**
    * List the team users for the current workspace.
    */
-    public async ListUsers(): Promise<EaCStatus[]> {
-    const res = await fetch(this.bridge.url('/api/workspaces/teams'), {
+    public async ListUsers(): Promise<EaCUserRecord[]> {
+    const res = await fetch(this.bridge.url('/api/workspaces/teams/list'), {
       method: 'GET',
       headers: this.bridge.headers(),
     });
-
+    
     if (!res.ok) {
       throw new Error(`Failed to list team users: ${res.status}`);
     }
@@ -86,12 +86,12 @@ export class OpenIndustrialWorkspaceAPI {
    * Invite new user to current workspace
    */
   public async InviteUser(
-    eac: EverythingAsCodeOIWorkspace,
+    userRecord: EaCUserRecord,
   ): Promise<{ EnterpriseLookup: string; CommitID: string }> {
     const res = await fetch(this.bridge.url('/api/workspaces/teams/invite'), {
       method: 'POST',
       headers: this.bridge.headers(),
-      body: JSON.stringify(eac),
+      body: JSON.stringify(userRecord),
     });
 
     if (!res.ok) {

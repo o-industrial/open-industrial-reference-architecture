@@ -122,7 +122,6 @@ export class WorkspaceManager {
     this.History = new HistoryManager();
     this.Selection = new SelectionManager();
     this.Simulators = new SimulatorLibraryManager();
-    this.Team = new TeamManager();
 
     this.NodeEvents = new NodeEventManager(this);
 
@@ -144,6 +143,8 @@ export class WorkspaceManager {
       capabilitiesByScope,
     );
 
+    this.Team = new TeamManager(this.oiSvc, this.EaC);
+    
     this.Interaction.BindEaCManager(this.EaC);
 
     console.log('🚀 FlowManager initialized:', {
