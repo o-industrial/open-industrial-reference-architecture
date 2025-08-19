@@ -9,6 +9,7 @@ export * from "./BreadcrumbBar.tsx";
 export * from "./ConnectionManagementForm.tsx";
 export * from "./FlyoutMenu.tsx";
 export * from "./LinePreviewWithValue.tsx";
+export * from "./MetricCard.tsx";
 export * from "./Modal.tsx";
 export * from "./MultiSelectCheckboxGroup.tsx";
 export * from "./NodePresetItem.tsx";
