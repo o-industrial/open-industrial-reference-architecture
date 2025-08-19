@@ -1,3 +1,4 @@
+export * from './AdminPageTemplate.tsx';
 export * from './AziPanelTemplate.tsx';
 export * from './AziRespondsPanelTemplate.tsx';
 export * from './FlowPanelTemplate.tsx';

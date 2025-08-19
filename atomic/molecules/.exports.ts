@@ -17,4 +17,5 @@ export * from "./SummaryRowWithAction.tsx";
 export * from "./SurfaceConnectionManagementForm.tsx";
 export * from "./SurfaceManagementForm.tsx";
 export * from "./TabbedPanel.tsx";
+export * from "./NavItem.tsx";
 export * from "./license-card/LicenseCard.tsx";
