@@ -1,3 +1,4 @@
+import { ConsoleHandler } from 'jsr:@std/log@0.224.14/console-handler';
 import {
   EverythingAsCode,
   EverythingAsCodeLicensing,

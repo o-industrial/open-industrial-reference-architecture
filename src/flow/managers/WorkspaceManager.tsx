@@ -61,20 +61,8 @@ import {
 } from '../../../atomic/organisms/modals/.exports.ts';
 import { MenuActionItem, MenuRoot } from '../../../atomic/molecules/FlyoutMenu.tsx';
 import { EverythingAsCodeLicensing } from '../../eac/.deps.ts';
-
-export type AccountProfile = {
-  Name: string;
-  Email: string;
-  Username: string;
-  Password?: string; // write-only
-  AvatarUrl?: string;
-  Bio?: string;
-  Location?: string;
-  Website?: string;
-  Additional?: string; // <-- unify name with modal
-  CreatedAt?: string;
-  ID?: string;
-};
+import { EaCUserRecord } from 'jsr:@fathym/eac@0.2.116';
+import { AccountProfile } from '../../types/AccountProfile.ts';
 
 export type TeamMembership = {
   Lookup: string; // team id
@@ -105,6 +93,7 @@ export class WorkspaceManager {
 
   constructor(
     eac: EverythingAsCodeOIWorkspace,
+    protected user: EaCUserRecord,
     protected userLicense: EaCUserLicense | undefined,
     protected oiSvc: OpenIndustrialAPIClient,
     capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>,
@@ -476,7 +465,6 @@ export class WorkspaceManager {
 
     // used by modal
     setProfile: (next: Partial<AccountProfile>) => void;
-    setAvatarUrl: (url: string) => void;
 
     updateTeamRole: (teamLookup: string, role: TeamMembership['Role']) => void;
     leaveTeam: (teamLookup: string) => void;
@@ -485,18 +473,11 @@ export class WorkspaceManager {
     deleteAccount: () => Promise<void>;
     signOut: () => Promise<void>;
   } {
-    // Seed mock profile (hydrate from API in real impl)
     const initial: AccountProfile = {
+      Username: this.user.Username,
       Name: 'Jane Doe',
-      Email: 'jane.doe@factory.com',
-      Username: 'jane_d',
-      AvatarUrl: '',
       Bio: '',
-      Location: '',
-      Website: '',
       Additional: '',
-      CreatedAt: '2025-07-01',
-      ID: 'user_123',
     };
 
     const [profile, setProfileState] = useState<AccountProfile>(initial);
@@ -530,8 +511,6 @@ export class WorkspaceManager {
       setHasChanges(true);
     };
 
-    const setAvatarUrl = (url: string) => setProfile({ AvatarUrl: url });
-
     const updateTeamRole = (
       teamLookup: string,
       role: TeamMembership['Role'],
@@ -546,13 +525,7 @@ export class WorkspaceManager {
 
     // --- Persistence (mock)
     const save = () => {
-      const { Password: _pw, ...persistable } = profile;
-      console.log('💾 [UseAccountProfile] saving profile →', persistable);
-
-      if (profile.Password) {
-        console.log('🔐 [UseAccountProfile] updating password (mock)…');
-        // await this.oiSvc.Users.UpdatePassword(profile.Password)
-      }
+      // await this.oiSvc.Users.UpdateProfile(profile)
 
       setHasChanges(false);
       return Promise.resolve();
@@ -585,7 +558,6 @@ export class WorkspaceManager {
       hasChanges,
 
       setProfile,
-      setAvatarUrl,
 
       updateTeamRole,
       leaveTeam,
