@@ -12,3 +12,5 @@ export { FlowPanel } from './FlowPanel.tsx';
 export * from './InspectorPanel.tsx';
 export * from './StreamPanel.tsx';
 export * from './TimelinePanel.tsx';
+export * from './ResourceStatusList.tsx';
+export * from './LineChart.tsx';
