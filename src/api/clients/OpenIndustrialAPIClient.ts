@@ -4,6 +4,7 @@ import { OpenIndustrialWorkspaceAPI } from './OpenIndustrialWorkspaceAPI.ts';
 import { OpenIndustrialProposalAPI } from './OpenIndustrialProposalAPI.ts';
 import { ClientHelperBridge } from './ClientHelperBridge.ts';
 import { OpenIndustrialStatsAPI } from './OpenIndustrialStatsAPI.ts';
+import { OpenIndustrialUserAPI } from './OpenIndustrialUserAPI.ts';
 
 /**
  * The main OpenIndustrial client for interacting with all runtime APIs.
@@ -49,6 +50,11 @@ export class OpenIndustrialAPIClient extends EaCBaseClient {
   public readonly Stats: OpenIndustrialStatsAPI;
 
   /**
+   * Subclient for managing the current user's account (profile and account actions).
+   */
+  public readonly Users: OpenIndustrialUserAPI;
+
+  /**
    * Constructs a new OpenIndustrialAPIClient and initializes all subclients.
    *
    * @param baseUrl - The root API URL for OpenIndustrial (e.g. https://api.openindustrial.dev)
@@ -63,6 +69,7 @@ export class OpenIndustrialAPIClient extends EaCBaseClient {
     this.Connections = new OpenIndustrialConnectionAPI(bridge);
     this.Proposals = new OpenIndustrialProposalAPI(bridge);
     this.Stats = new OpenIndustrialStatsAPI(bridge);
+    this.Users = new OpenIndustrialUserAPI(bridge);
   }
 
   /**

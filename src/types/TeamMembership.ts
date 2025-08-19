@@ -1,4 +1,3 @@
-
 export type TeamMembership = {
   Lookup: string; // team id
   Team: string; // team display name
