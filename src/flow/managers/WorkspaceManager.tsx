@@ -837,6 +837,7 @@ export class WorkspaceManager {
     undo: () => void;
     redo: () => void;
     commit: () => Promise<void>;
+    deploy: () => Promise<void>;
     revert: () => void;
     fork: () => void;
   } {
@@ -883,6 +884,7 @@ export class WorkspaceManager {
       undo: () => this.Undo(),
       redo: () => this.Redo(),
       commit: () => this.Commit(),
+      deploy: () => this.Deploy(),
       revert: () => this.RevertToLastCommit(),
       fork: () => this.Fork(),
     };
@@ -1512,6 +1514,14 @@ export class WorkspaceManager {
 
     if (status.Processing === EaCStatusProcessingTypes.COMPLETE) {
       this.History.Commit();
+    }
+  }
+
+  public async Deploy(): Promise<void> {
+    const status = await this.EaC.Deploy();
+
+    if (status.Processing === EaCStatusProcessingTypes.COMPLETE) {
+      location.reload();
     }
   }
 
