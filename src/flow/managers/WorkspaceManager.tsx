@@ -61,7 +61,6 @@ import {
 } from '../../../atomic/organisms/modals/.exports.ts';
 import { MenuActionItem, MenuRoot } from '../../../atomic/molecules/FlyoutMenu.tsx';
 import { EverythingAsCodeLicensing } from '../../eac/.deps.ts';
-import { EaCUserRecord } from 'jsr:@fathym/eac@0.2.116';
 import { AccountProfile } from '../../types/AccountProfile.ts';
 
 export class WorkspaceManager {
@@ -86,7 +85,7 @@ export class WorkspaceManager {
 
   constructor(
     eac: EverythingAsCodeOIWorkspace,
-    protected user: EaCUserRecord,
+    protected username: string,
     protected userLicense: EaCUserLicense | undefined,
     protected oiSvc: OpenIndustrialAPIClient,
     capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>,
@@ -462,7 +461,7 @@ export class WorkspaceManager {
     signOut: () => Promise<void>;
   } {
     const initial: AccountProfile = {
-      Username: this.user.Username,
+      Username: this.username,
       Name: '',
       Bio: '',
       Additional: '',
