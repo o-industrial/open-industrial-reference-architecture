@@ -18,6 +18,6 @@ export {
   EverythingAsCodeCloudsSchema,
 } from 'jsr:@fathym/eac-azure@0.0.102';
 
-export { type EverythingAsCodeLicensing } from 'jsr:@fathym/eac-licensing@0.0.42';
+export { type EverythingAsCodeLicensing } from 'jsr:@fathym/eac-licensing@0.0.46';
 
 export type { JSONSchema7 } from 'npm:jsonschema7@0.8.0';
