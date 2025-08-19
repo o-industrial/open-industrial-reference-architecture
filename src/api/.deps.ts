@@ -5,7 +5,7 @@ export type { EaCCommitResponse } from 'jsr:@fathym/eac@0.2.116/steward';
 export { EaCBaseClient } from 'jsr:@fathym/eac@0.2.116/steward/clients';
 export type { EaCStatus } from 'jsr:@fathym/eac@0.2.116/steward/status';
 
-export type { EaCWarmQueryAsCode, EaCWarmQueryDetails } from 'jsr:@fathym/eac-azure@0.0.97';
+export type { EaCWarmQueryAsCode, EaCWarmQueryDetails } from 'jsr:@fathym/eac-azure@0.0.102';
 
 export {
   type Codec,
