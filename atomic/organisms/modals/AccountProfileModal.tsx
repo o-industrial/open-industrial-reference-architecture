@@ -1,5 +1,5 @@
-import { TeamMembership } from '../../../src/flow/managers/WorkspaceManager.tsx';
 import { AccountProfile } from '../../../src/types/AccountProfile.ts';
+import { TeamMembership } from '../../../src/types/TeamMembership.ts';
 import { JSX, IntentTypes, useState, WorkspaceManager } from '../../.deps.ts';
 import {
   Modal,
@@ -25,10 +25,10 @@ export function AccountProfileModal({
     setProfile,
     hasChanges,
     save,
-    teams,
-    updateTeamRole,
-    leaveTeam,
-    deleteAccount,
+    // teams,
+    // updateTeamRole,
+    // leaveTeam,
+    // deleteAccount,
     signOut,
   } = workspaceMgr.UseAccountProfile();
 
