@@ -30,10 +30,10 @@ export class TeamManager {
     ];
   }
 
-  public async ListUsers(): TeamMember[] {
+  public async ListUsers(): Promise<EaCUserRecord[]> {
     const users = await this.oiSvc.Workspaces.ListUsers()
     
-    return [...this.members];
+    return users;
   }
 
   public async InviteUser(
