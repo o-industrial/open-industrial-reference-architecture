@@ -1,3 +1,4 @@
+export * from './admin/.exports.ts';
 export * from './eac/.exports.ts';
 export * from './node-events/.exports.ts';
 export * from './AziManager.ts';

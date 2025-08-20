@@ -2,6 +2,7 @@ export * from "./azi/.exports.ts";
 export * from "./flows/.exports.ts";
 export * from "./writing-devices/.exports.ts";
 
+export * from "./AdminNav.tsx";
 export * from "./AgreementCard.tsx";
 export * from "./AppFrameBar.tsx";
 export * from "./AziToolResponseCard.tsx";
