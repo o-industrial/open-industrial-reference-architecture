@@ -1,4 +1,4 @@
-import { JSX, useState, classSet, IntentTypes } from '../.deps.ts';
+import { JSX, useState, classSet, IntentTypes, useEffect } from '../.deps.ts';
 import {
   PanelShell,
   Action,
@@ -12,6 +12,7 @@ export type RuntimeWorkspaceDashboardTemplateProps = {
   azi?: preact.ComponentChildren;
   breadcrumb?: preact.ComponentChildren;
   children?: preact.ComponentChildren;
+  commitFlyover?: boolean;
   commitStatus?: preact.ComponentChildren;
   inspector?: preact.ComponentChildren;
   modals?: preact.ComponentChildren;
@@ -22,6 +23,7 @@ export type RuntimeWorkspaceDashboardTemplateProps = {
 export function RuntimeWorkspaceDashboardTemplate({
   appBar,
   azi,
+  commitFlyover,
   commitStatus,
   children,
   inspector,
@@ -71,6 +73,12 @@ export function RuntimeWorkspaceDashboardTemplate({
     : streamExpanded
     ? streamColSpan + 1
     : 2;
+
+  useEffect(() => {
+    if (commitStatus) {
+      setInspectorExpanded(true);
+    }
+  }, [commitStatus]);
 
   return (
     <div
@@ -161,32 +169,7 @@ export function RuntimeWorkspaceDashboardTemplate({
           colSpan={inspectorColSpan}
           class="-:border-l -:bg-neutral-900 relative"
         >
-          <div
-            class={classSet([
-              '-:transition-all -:duration-500 -:overflow-hidden -:h-full',
-              inspectorExpanded
-                ? '-:opacity-100 -:w-full'
-                : '-:opacity-30 -:w-0',
-            ])}
-          >
-            {inspector}
-          </div>
-          <Action
-            title={
-              inspectorExpanded ? 'Collapse Inspector' : 'Expand Inspector'
-            }
-            styleType={ActionStyleTypes.Icon}
-            intentType={IntentTypes.Primary}
-            onClick={() => setInspectorExpanded(!inspectorExpanded)}
-            class="-:absolute -:top-0 -:right-0 -:z-30"
-          >
-            {inspectorExpanded ? (
-              <CloseIcon class="w-5 h-5" />
-            ) : (
-              <ExpandIcon class="w-5 h-5" />
-            )}
-          </Action>
-          {/* {!commitStatus ? (
+          {commitFlyover || !commitStatus ? (
             <>
               <div
                 class={classSet([
@@ -214,9 +197,11 @@ export function RuntimeWorkspaceDashboardTemplate({
                 )}
               </Action>
             </>
-          ) : (
+          ) : !commitFlyover ? (
             commitStatus
-          )} */}
+          ) : (
+            <></>
+          )}
         </PanelShell>
 
         {/* Stream Panel
@@ -280,7 +265,7 @@ export function RuntimeWorkspaceDashboardTemplate({
         {props.modals}
       </div>
 
-      {commitStatus && (
+      {commitFlyover && commitStatus && (
         <div
           class="-:absolute -:top-0 -:right-0 -:bottom-0 -:h-full -:z-50 -:w-96 -:bg-neutral-900 -:border-l -:border-neutral-800 -:shadow-lg -:-:bg-neutral-900 -:-:border-neutral-800"
           style="top: 40px;"

@@ -12,6 +12,8 @@ type SurfaceWarmQueryInspectorProps = InspectorCommonProps<
 >;
 
 export function SurfaceWarmQueryInspector({
+  lookup,
+  surfaceLookup,
   details,
   enabled,
   useStats,
@@ -23,6 +25,10 @@ export function SurfaceWarmQueryInspector({
 }: SurfaceWarmQueryInspectorProps) {
   const stats = useStats();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const aziExtraInputs: Record<string, unknown> = {
+    WarmQueryLookup: lookup,
+    SurfaceLookup: surfaceLookup,
+  };
 
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
@@ -85,6 +91,7 @@ export function SurfaceWarmQueryInspector({
           onClose={handleCloseModal}
           onRun={(q) => handleRunQuery(q)}
           onSave={(name, apiPath, desc, query) => handleSaveQuery(name, apiPath, desc, query)}
+          aziExtraInputs={aziExtraInputs}
         />
       )}
     </>

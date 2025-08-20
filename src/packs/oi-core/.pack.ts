@@ -20,9 +20,9 @@ export default Pack().Capabilities(async (ioc) => {
       new SurfaceWarmQueryNodeCapabilityManager(oiSvc),
     ],
     workspace: [
+      new SimulatorNodeCapabilityManager(oiSvc),
       new DataConnectionNodeCapabilityManager(oiSvc),
       new SurfaceNodeCapabilityManager(oiSvc),
-      new SimulatorNodeCapabilityManager(oiSvc),
     ],
   };
 }) as PackModuleBuilder;

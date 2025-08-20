@@ -8,5 +8,5 @@ export {
   DFSFileHandler,
   LocalDFSFileHandler,
   type LocalDFSFileHandlerDetails,
-} from 'jsr:@fathym/common@0.2.265/dfs';
+} from 'jsr:@fathym/common@0.2.266/dfs';
 export { IoCContainer } from 'jsr:@fathym/ioc@0.0.14';

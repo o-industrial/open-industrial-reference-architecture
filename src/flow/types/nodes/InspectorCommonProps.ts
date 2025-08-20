@@ -10,7 +10,9 @@ export type InspectorCommonProps<
   config?: TConfig;
   details: Partial<TDetails>;
   enabled: boolean;
+  lookup: string;
   oiSvc: OpenIndustrialAPIClient;
+  surfaceLookup?: string;
   workspaceMgr: WorkspaceManager;
 
   useStats: () => TStats | undefined;

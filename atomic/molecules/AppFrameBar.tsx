@@ -7,10 +7,12 @@ import { MenuActionItem, MenuRoot } from './FlyoutMenu.tsx';
 import { MenuBar } from './MenuBar.tsx';
 
 export type AppFrameBarProps = {
+  hasWorkspaceChanges: boolean;
   menus: MenuRoot[];
   onMenuOption: (item: MenuActionItem) => void;
   onActivateClick?: () => void;
   onCommitClick: () => void;
+  onDeployClick?: () => void;
   commitBadgeState?: CommitBadgeState;
   onProfileClick?: () => void;
   onSettingsClick?: () => void;
@@ -20,10 +22,12 @@ export type AppFrameBarProps = {
 export type CommitBadgeState = 'error' | 'processing' | 'success';
 
 export function AppFrameBar({
+  hasWorkspaceChanges,
   menus,
   onMenuOption,
   onActivateClick,
   onCommitClick,
+  onDeployClick,
   commitBadgeState,
   onProfileClick,
   onSettingsClick,
@@ -54,12 +58,26 @@ export function AppFrameBar({
       <div class="-:ml-auto -:flex -:items-center -:gap-2">
         {onActivateClick && (
           <Action
-            title="3 Days to Activate Workspace"
+            title="Activate to Deploy"
             onClick={onActivateClick}
             styleType={ActionStyleTypes.Outline | ActionStyleTypes.Thin}
             intentType={IntentTypes.Warning}
           >
-            3 Days to Activate Workspace
+            Activate to Deploy
+          </Action>
+        )}
+
+        {onDeployClick && (
+          <Action
+            title="Deploy"
+            onClick={onDeployClick}
+            styleType={ActionStyleTypes.Outline | ActionStyleTypes.Thin}
+            intentType={
+              hasWorkspaceChanges ? IntentTypes.None : IntentTypes.Primary
+            }
+            disabled={hasWorkspaceChanges}
+          >
+            Deploy
           </Action>
         )}
 

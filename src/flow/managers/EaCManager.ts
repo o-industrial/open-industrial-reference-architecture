@@ -206,6 +206,12 @@ export class EaCManager {
     return status;
   }
 
+  public async Deploy(): Promise<EaCStatus> {
+    const status = await this.oiSvc.Workspaces.Deploy();
+    console.log(`✅ Runtime deployed: CommitID ${status.ID}`);
+    return status;
+  }
+
   public async List(): Promise<WorkspaceSummary[]> {
     const workspaces = await this.oiSvc.Workspaces.ListForUser();
     return workspaces.map((wkspc) => ({

@@ -56,9 +56,9 @@ function FlowPanelInner({
   return (
     <FlowPanelTemplate
       bank={<FlowPanelBank presets={presets} />}
-      systemControls={
-        <SystemControls onOpenSimulatorLibrary={onShowSimulatorLibrary} />
-      }
+      // systemControls={
+      //   <SystemControls onOpenSimulatorLibrary={onShowSimulatorLibrary} />
+      // }
       managementControls={
         <ManagementControls
           hasChanges={history.hasChanges}

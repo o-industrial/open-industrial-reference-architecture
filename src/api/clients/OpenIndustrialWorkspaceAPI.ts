@@ -51,13 +51,33 @@ export class OpenIndustrialWorkspaceAPI {
   }
 
   /**
+   * Commit a snapshot of runtime memory (e.g. agent execution history).
+   */
+  public async Deploy(): Promise<EaCStatus> {
+    const res = await fetch(this.bridge.url('/api/workspaces/commit/deploy'), {
+      method: 'POST',
+      headers: this.bridge.headers(),
+      body: JSON.stringify({}),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to deploy workspace: ${res.status}`);
+    }
+
+    return await this.bridge.json(res);
+  }
+
+  /**
    * List the commit statuses for the current workspace.
    */
   public async ListCommitStatuses(): Promise<EaCStatus[]> {
-    const res = await fetch(this.bridge.url('/api/workspaces/commit/statuses'), {
-      method: 'GET',
-      headers: this.bridge.headers(),
-    });
+    const res = await fetch(
+      this.bridge.url('/api/workspaces/commit/statuses'),
+      {
+        method: 'GET',
+        headers: this.bridge.headers(),
+      },
+    );
 
     if (!res.ok) {
       throw new Error(`Failed to list commit statuses: ${res.status}`);

@@ -61,27 +61,7 @@ import {
 } from '../../../atomic/organisms/modals/.exports.ts';
 import { MenuActionItem, MenuRoot } from '../../../atomic/molecules/FlyoutMenu.tsx';
 import { EverythingAsCodeLicensing } from '../../eac/.deps.ts';
-
-export type AccountProfile = {
-  Name: string;
-  Email: string;
-  Username: string;
-  Password?: string; // write-only
-  AvatarUrl?: string;
-  Bio?: string;
-  Location?: string;
-  Website?: string;
-  Additional?: string; // <-- unify name with modal
-  CreatedAt?: string;
-  ID?: string;
-};
-
-export type TeamMembership = {
-  Lookup: string; // team id
-  Team: string; // team display name
-  Role: 'Owner' | 'Editor' | 'Viewer';
-  MemberSince: string; // friendly text
-};
+import { AccountProfile } from '../../types/AccountProfile.ts';
 
 export class WorkspaceManager {
   protected currentScope: {
@@ -101,14 +81,17 @@ export class WorkspaceManager {
   public Selection: SelectionManager;
   public Simulators: SimulatorLibraryManager;
   public Team: TeamManager;
+  public WarmQueryAzi: AziManager;
 
   constructor(
     eac: EverythingAsCodeOIWorkspace,
+    protected username: string,
     protected userLicense: EaCUserLicense | undefined,
     protected oiSvc: OpenIndustrialAPIClient,
     capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>,
     scope: NodeScopeTypes = 'workspace',
     aziCircuitUrl: string,
+    aziWarmQueryUrl: string,
     jwt?: string,
   ) {
     this.currentScope = { Scope: scope };
@@ -116,6 +99,11 @@ export class WorkspaceManager {
       url: aziCircuitUrl,
       jwt,
       threadId: `workspace-${eac.EnterpriseLookup}`,
+    });
+    this.WarmQueryAzi = new AziManager({
+      url: aziWarmQueryUrl,
+      jwt,
+      threadId: `workspace-${eac.EnterpriseLookup}-warmquery`,
     });
     this.Jwt = jwt ?? '';
 
@@ -437,12 +425,12 @@ export class WorkspaceManager {
             label: 'Current License',
             iconSrc: I.license,
           },
-          {
-            type: 'item',
-            id: 'billing.details',
-            label: 'Billing Details',
-            iconSrc: I.creditCard, /* or I.dollar */
-          },
+          // {
+          //   type: 'item',
+          //   id: 'billing.details',
+          //   label: 'Billing Details',
+          //   iconSrc: I.creditCard, /* or I.dollar */
+          // },
         ],
       },
     ];
@@ -465,58 +453,23 @@ export class WorkspaceManager {
 
   public UseAccountProfile(): {
     profile: AccountProfile;
-    teams: TeamMembership[];
     hasChanges: boolean;
 
-    // used by modal
     setProfile: (next: Partial<AccountProfile>) => void;
-    setAvatarUrl: (url: string) => void;
-
-    updateTeamRole: (teamLookup: string, role: TeamMembership['Role']) => void;
-    leaveTeam: (teamLookup: string) => void;
 
     save: () => Promise<void>;
     deleteAccount: () => Promise<void>;
     signOut: () => Promise<void>;
   } {
-    // Seed mock profile (hydrate from API in real impl)
     const initial: AccountProfile = {
-      Name: 'Jane Doe',
-      Email: 'jane.doe@factory.com',
-      Username: 'jane_d',
-      AvatarUrl: '',
+      Username: this.username,
+      Name: '',
       Bio: '',
-      Location: '',
-      Website: '',
       Additional: '',
-      CreatedAt: '2025-07-01',
-      ID: 'user_123',
     };
 
     const [profile, setProfileState] = useState<AccountProfile>(initial);
     const [hasChanges, setHasChanges] = useState(false);
-
-    // Mock teams (swap to this.Team?.ListTeams?.() later)
-    const [teams, setTeams] = useState<TeamMembership[]>([
-      {
-        Lookup: 'a',
-        Team: 'Team A',
-        Role: 'Viewer',
-        MemberSince: '2 days ago',
-      },
-      {
-        Lookup: 'b',
-        Team: 'Team B',
-        Role: 'Editor',
-        MemberSince: '1 month ago',
-      },
-      {
-        Lookup: 'c',
-        Team: 'Team C',
-        Role: 'Owner',
-        MemberSince: '2 months ago',
-      },
-    ]);
 
     // --- Updaters used by the modal
     const setProfile = (next: Partial<AccountProfile>) => {
@@ -524,41 +477,34 @@ export class WorkspaceManager {
       setHasChanges(true);
     };
 
-    const setAvatarUrl = (url: string) => setProfile({ AvatarUrl: url });
+    // --- Load profile from backend once on mount
+    useEffect(() => {
+      const get = async () => {
+        try {
+          const accountProfile = await this.oiSvc.Users.GetProfile();
+          setProfileState(accountProfile);
+          setHasChanges(false);
+        } catch (err) {
+          console.error('Failed to load account profile', err);
+        }
+      };
 
-    const updateTeamRole = (
-      teamLookup: string,
-      role: TeamMembership['Role'],
-    ) => {
-      setTeams((prev) => prev.map((t) => (t.Lookup === teamLookup ? { ...t, Role: role } : t)));
-    };
+      get();
+    }, []);
 
-    const leaveTeam = (teamLookup: string) => {
-      // TODO(AI): this.Team?.LeaveTeam?.(teamLookup)
-      setTeams((prev) => prev.filter((t) => t.Lookup !== teamLookup));
-    };
-
-    // --- Persistence (mock)
-    const save = () => {
-      const { Password: _pw, ...persistable } = profile;
-      console.log('💾 [UseAccountProfile] saving profile →', persistable);
-
-      if (profile.Password) {
-        console.log('🔐 [UseAccountProfile] updating password (mock)…');
-        // await this.oiSvc.Users.UpdatePassword(profile.Password)
-      }
-
+    // --- Persistence
+    const save = async () => {
+      await this.oiSvc.Users.UpdateProfile(profile);
       setHasChanges(false);
-      return Promise.resolve();
     };
 
     const signOut = () => {
       console.log('Signing out...');
-
+      location.assign('/'); // Simulate signout
       return Promise.resolve();
     };
 
-    const deleteAccount = () => {
+    const deleteAccount = async () => {
       const ok1 = confirm('Permanently delete your account? There is no undo.');
       const ok2 = ok1 &&
         confirm(
@@ -566,23 +512,18 @@ export class WorkspaceManager {
         );
       if (!ok2) return Promise.resolve();
 
-      // await this.oiSvc.Users.DeleteMyAccount()
-      console.warn('🗑️ [UseAccountProfile] account deleted (mock)');
-      location.assign('/'); // simulate sign-out
+      await this.oiSvc.Users.DeleteAccount();
 
-      return Promise.resolve();
+      console.warn('🗑️ [UseAccountProfile] account deleted');
+
+      await signOut();
     };
 
     return {
       profile,
-      teams,
       hasChanges,
 
       setProfile,
-      setAvatarUrl,
-
-      updateTeamRole,
-      leaveTeam,
 
       save,
       deleteAccount,
@@ -590,27 +531,20 @@ export class WorkspaceManager {
     };
   }
 
-  public UseAzi(circuitUrl?: string): {
+  public UseAzi(aziMgr: AziManager): {
     state: AziState;
     isSending: boolean;
-    send: (text: string) => Promise<void>;
+    send: (
+      text: string,
+      extraInputs?: Record<string, unknown>,
+    ) => Promise<void>;
     peek: (inputs?: Record<string, unknown>) => Promise<void>;
     scrollRef: RefObject<HTMLDivElement>;
     registerStreamAnchor: (el: HTMLElement | null) => void;
     isAutoScrolling: boolean;
   } {
-    const [state, setState] = useState(this.Azi.GetState());
-    const [isSending, setIsSending] = useState(this.Azi.IsSending());
-
-    if (circuitUrl) {
-      const eac = this.EaC.GetEaC();
-      const jwt = this.Jwt;
-      this.Azi = new AziManager({
-        url: circuitUrl,
-        jwt,
-        threadId: `workspace-${eac.EnterpriseLookup!}`,
-      });
-    }
+    const [state, setState] = useState(aziMgr.GetState());
+    const [isSending, setIsSending] = useState(aziMgr.IsSending());
 
     const scrollRef = useRef<HTMLDivElement>(null);
     const streamAnchorRef = useRef<HTMLElement | null>(null);
@@ -651,27 +585,30 @@ export class WorkspaceManager {
     // === Keep state synced
     useEffect(() => {
       const update = () => {
-        setState(this.Azi.GetState());
-        setIsSending(this.Azi.IsSending());
+        setState(aziMgr.GetState());
+        setIsSending(aziMgr.IsSending());
 
         animateScroll(scrollRef.current!);
       };
-      return this.Azi.OnStateChanged(update);
+      return aziMgr.OnStateChanged(update);
     }, []);
 
     const registerStreamAnchor = (el: HTMLElement | null) => {
       streamAnchorRef.current = el;
     };
 
-    const send = async (text: string) => {
-      await this.Azi.Send(text);
+    const send = async (
+      text: string,
+      extraInputs?: Record<string, unknown>,
+    ) => {
+      await aziMgr.Send(text, extraInputs);
       hasScrolledInitially.current = true;
-      setIsSending(this.Azi.IsSending());
+      setIsSending(aziMgr.IsSending());
     };
 
     const peek = async (inputs?: Record<string, unknown>) => {
-      await this.Azi.Peek(inputs);
-      setIsSending(this.Azi.IsSending());
+      await aziMgr.Peek(inputs);
+      setIsSending(aziMgr.IsSending());
     };
 
     return {
@@ -835,6 +772,7 @@ export class WorkspaceManager {
     undo: () => void;
     redo: () => void;
     commit: () => Promise<void>;
+    deploy: () => Promise<void>;
     revert: () => void;
     fork: () => void;
   } {
@@ -881,6 +819,7 @@ export class WorkspaceManager {
       undo: () => this.Undo(),
       redo: () => this.Redo(),
       commit: () => this.Commit(),
+      deploy: () => this.Deploy(),
       revert: () => this.RevertToLastCommit(),
       fork: () => this.Fork(),
     };
@@ -923,6 +862,7 @@ export class WorkspaceManager {
     selectedId: string | undefined;
     inspectorProps: InspectorCommonProps | undefined;
   } {
+    const { currentScopeData } = this.UseScopeSwitcher();
     const { selected } = this.UseSelection();
     const selectedId = selected?.id;
 
@@ -990,6 +930,8 @@ export class WorkspaceManager {
       const presetConfig = this.EaC.GetCapabilities().GetConfig(selected.id, selected.type!) ?? {};
 
       setInspectorProps({
+        lookup: selectedId!,
+        surfaceLookup: currentScopeData.Lookup!,
         config: presetConfig,
         details,
         enabled,
@@ -1109,7 +1051,7 @@ export class WorkspaceManager {
     activePlan?: string;
     clientSecret?: string;
     error: string;
-    loading: boolean;
+    licenseLoading: boolean;
     activateMonthly: () => Promise<void>;
     activatePlan: (planLookup: string, isMonthly: boolean) => Promise<void>;
     setActivePlan: (lookup: string | undefined) => void;
@@ -1122,7 +1064,9 @@ export class WorkspaceManager {
     >();
     const [userLicense] = useState<EaCUserLicense | undefined>(undefined);
     const [isMonthly, setIsMonthly] = useState(true);
-    const [activePlan, setActivePlan] = useState<string | undefined>();
+    const [activePlan, setActivePlan] = useState<string | undefined>(
+      this.userLicense?.PlanLookup,
+    );
     const [clientSecret, setClientSecret] = useState<string | undefined>();
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -1201,9 +1145,13 @@ export class WorkspaceManager {
         const licData = await resp.json();
 
         if (licData?.Subscription) {
-          setClientSecret(
-            licData.Subscription.latest_invoice.payment_intent.client_secret,
-          );
+          if (licData.Subscription.latest_invoice.payment_intent) {
+            setClientSecret(
+              licData.Subscription.latest_invoice.payment_intent.client_secret,
+            );
+          } else {
+            location.reload();
+          }
           setActivePlan(planLookup);
         } else if (licData?.Error) {
           setError(licData.Error);
@@ -1224,7 +1172,7 @@ export class WorkspaceManager {
       activePlan,
       clientSecret,
       error,
-      loading,
+      licenseLoading: loading,
       activateMonthly,
       activatePlan,
       setActivePlan,
@@ -1501,6 +1449,14 @@ export class WorkspaceManager {
 
     if (status.Processing === EaCStatusProcessingTypes.COMPLETE) {
       this.History.Commit();
+    }
+  }
+
+  public async Deploy(): Promise<void> {
+    const status = await this.EaC.Deploy();
+
+    if (status.Processing === EaCStatusProcessingTypes.COMPLETE) {
+      location.reload();
     }
   }
 
