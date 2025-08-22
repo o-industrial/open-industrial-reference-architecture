@@ -1,19 +1,8 @@
 import { JSX } from '../.deps.ts';
 
-/**
- * AdminDashboardTemplate
- *
- * A simple two‑column layout for the Open Industrial admin experience.
- * It renders a top application bar, a persistent side navigation column,
- * and a scrollable main content area.  Use this template to compose
- * admin pages that require a common layout structure.
- */
 export type AdminDashboardTemplateProps = {
-  /** Optional app bar component (renders at the top of the page). */
   appBar?: preact.ComponentChildren;
-  /** Optional navigation component (renders on the left side). */
   nav?: preact.ComponentChildren;
-  /** Main page content (renders in the remaining area). */
   children?: preact.ComponentChildren;
 } & JSX.HTMLAttributes<HTMLDivElement>;
 
@@ -24,18 +13,25 @@ export function AdminDashboardTemplate({
   ...props
 }: AdminDashboardTemplateProps): JSX.Element {
   return (
-    <div {...props} class="-:-:flex -:-:flex-col -:-:min-h-screen">
-      {/* Top bar */}
-      {appBar && <div>{appBar}</div>}
-      <div class="-:-:flex -:-:flex-1">
-        {/* Side navigation */}
+    <div
+      {...props}
+      class="-:-:flex -:-:flex-col -:-:min-h-screen -:-:bg-slate-950 -:-:text-slate-100"
+    >
+      {appBar && <div class="-:-:z-40">{appBar}</div>}
+
+      <div class="-:-:flex -:-:flex-1 -:-:min-h-0">
         {nav && (
-          <aside class="-:-:w-64 -:-:border-r -:-:border-slate-700 -:-:bg-slate-900">
-            {nav}
+          <aside class="-:-:w-64 -:-:flex-shrink-0 -:-:border-r -:-:border-slate-700 -:-:bg-slate-900 -:-:min-h-0">
+            {/* make the nav scroll independently and stick under the app bar */}
+            <div class="-:-:sticky -:-:top-0 h-full -:-:overflow-y-auto">
+              {nav}
+            </div>
           </aside>
         )}
-        {/* Main content area */}
-        <main class="-:-:flex-1 -:-:overflow-auto -:-:p-4">{children}</main>
+
+        <main class="-:-:flex-1 -:-:overflow-auto -:-:p-4">
+          {children}
+        </main>
       </div>
     </div>
   );
