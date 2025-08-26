@@ -5,6 +5,7 @@ import { OpenIndustrialProposalAPI } from './OpenIndustrialProposalAPI.ts';
 import { ClientHelperBridge } from './ClientHelperBridge.ts';
 import { OpenIndustrialStatsAPI } from './OpenIndustrialStatsAPI.ts';
 import { OpenIndustrialUserAPI } from './OpenIndustrialUserAPI.ts';
+import { OpenIndustrialAdminAPI } from './OpenIndustrialAdminAPI.ts';
 
 /**
  * The main OpenIndustrial client for interacting with all runtime APIs.
@@ -13,6 +14,8 @@ import { OpenIndustrialUserAPI } from './OpenIndustrialUserAPI.ts';
  * Each subclient uses a common internal bridge for safely executing HTTP requests.
  */
 export class OpenIndustrialAPIClient extends EaCBaseClient {
+  public readonly Admin: OpenIndustrialAdminAPI;
+
   /**
    * Subclient for managing lifecycle and memory operations for OpenIndustrial workspaces.
    *
@@ -65,11 +68,12 @@ export class OpenIndustrialAPIClient extends EaCBaseClient {
 
     const bridge = this.createClientBridge();
 
-    this.Workspaces = new OpenIndustrialWorkspaceAPI(bridge);
+    this.Admin = new OpenIndustrialAdminAPI(bridge);
     this.Connections = new OpenIndustrialConnectionAPI(bridge);
     this.Proposals = new OpenIndustrialProposalAPI(bridge);
     this.Stats = new OpenIndustrialStatsAPI(bridge);
     this.Users = new OpenIndustrialUserAPI(bridge);
+    this.Workspaces = new OpenIndustrialWorkspaceAPI(bridge);
   }
 
   /**

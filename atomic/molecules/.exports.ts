@@ -8,6 +8,7 @@ export * from "./AppFrameBar.tsx";
 export * from "./AziToolResponseCard.tsx";
 export * from "./BreadcrumbBar.tsx";
 export * from "./ConnectionManagementForm.tsx";
+export * from "./EnterpriseList.tsx";
 export * from "./FlyoutMenu.tsx";
 export * from "./LinePreviewWithValue.tsx";
 export * from "./Modal.tsx";

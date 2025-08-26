@@ -17,7 +17,7 @@ export { IntentTypes, type IngestOption } from '../src/types/.exports.ts';
 
 export { classSet, IS_BROWSER } from 'jsr:@fathym/atomic@0.0.184';
 
-export type { EaCEnterpriseDetails } from 'jsr:@fathym/eac@0.2.116';
+export type { EaCEnterpriseDetails, EverythingAsCode } from 'jsr:@fathym/eac@0.2.116';
 export {
   type EaCStatus,
   EaCStatusProcessingTypes,

@@ -1,19 +1,9 @@
-// deno-lint-ignore-file require-await
+// src/flow/managers/admin/AdminManager.ts
 import { EaCUserRecord } from 'jsr:@fathym/eac@0.2.116';
 import { OpenIndustrialAPIClient } from '../../../api/clients/OpenIndustrialAPIClient.ts';
-import { EaCEnterpriseDetails, EaCUserLicense } from '../../.deps.ts';
+import { EaCUserLicense } from '../../.deps.ts';
+import { EverythingAsCodeOIWorkspace } from '../../../eac/EverythingAsCodeOIWorkspace.ts';
 
-/**
- * AdminManager
- *
- * Lightweight controller for loading and managing administrative data across the
- * Open Industrial platform.  This class encapsulates the API client and exposes
- * helper methods for fetching enterprise, user, license, and other runtime
- * metrics.  Additional methods should be added as new admin pages require
- * backend data.  At present, most methods return placeholder values – replace
- * these implementations with calls to the appropriate API endpoints when they
- * become available.
- */
 export class AdminManager {
   protected oiSvc: OpenIndustrialAPIClient;
   protected userLicense: EaCUserLicense | undefined;
@@ -24,41 +14,45 @@ export class AdminManager {
   }
 
   /**
-   * Retrieve a summary of high‑level admin metrics such as the number of active
-   * enterprises and users, along with an Enterprise Growth Index (EGI) value.
-   *
-   * TODO: Replace placeholder logic with real API calls when endpoints are available.
+   * Retrieve a summary of high‑level admin metrics.  This implementation
+   * calls the new admin API to count the number of enterprises and users.
+   * Replace the user count logic with a real endpoint once it is available.
    */
-  public async getDashboardSummary(): Promise<{
+  public async GetDashboardSummary(): Promise<{
     enterprises: number;
     users: number;
     egi: number;
   }> {
-    // 🚧 Placeholder implementation – hardcoded values.
-    // Once the admin APIs expose endpoints for counting enterprises and users,
-    // call those endpoints here via this.oiSvc and return their results.
+    const enterprises = await this.ListWorkspaces();
+    // TODO(mcgear): call a future admin/users API; for now return zero.
+    const users: number = 0;
+
+    // Example Enterprise Growth Index (EGI) – compute or fetch as needed.
+    const egi = enterprises.length; // placeholder logic
+
     return {
-      enterprises: 0,
-      users: 0,
-      egi: 0,
+      enterprises: enterprises.length,
+      users,
+      egi,
     };
   }
 
   /**
-   * Placeholder for loading a list of enterprises.  Replace with an API call to
-   * fetch enterprises from the backend when available.
+   * Load a list of enterprises from the admin API.  Accepts an optional search
+   * query to filter by name.
    */
-  public async listEnterprises(): Promise<EaCEnterpriseDetails[]> {
-    // 🚧 TODO: Implement by calling the admin/enterprise API when available.
-    return [];
+  public async ListWorkspaces(
+    search?: string,
+  ): Promise<EverythingAsCodeOIWorkspace[]> {
+    return await this.oiSvc.Admin.ListWorkspaces(search);
   }
 
   /**
-   * Placeholder for loading all users across enterprises.  Replace with an API call
-   * to fetch users from the backend when available.
+   * Placeholder for listing users.  When a users API becomes available,
+   * call that here (e.g. this.oiSvc.Admin.ListUsers()).
    */
-  public async listUsers(): Promise<EaCUserRecord[]> {
-    // 🚧 TODO: Implement by calling the admin/users API when available.
-    return [];
+  public ListUsers(): Promise<EaCUserRecord[]> {
+    // TODO(mcgear): implement via admin/users endpoint once available.
+    return Promise.resolve([]);
   }
 }
