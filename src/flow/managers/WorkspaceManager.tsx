@@ -62,6 +62,7 @@ import {
 import { MenuActionItem, MenuRoot } from '../../../atomic/molecules/FlyoutMenu.tsx';
 import { EverythingAsCodeLicensing } from '../../eac/.deps.ts';
 import { AccountProfile } from '../../types/AccountProfile.ts';
+import { EaCUserRecord } from '../../api/.client.deps.ts';
 
 export class WorkspaceManager {
   protected currentScope: {
@@ -1300,7 +1301,7 @@ export class WorkspaceManager {
 
   public UseWorkspaceSettings(): {
     currentWorkspace: WorkspaceSummary;
-    teamMembers: TeamMember[];
+    teamMembers: EaCUserRecord[];
     inviteMember: (
       email: string,
       role: TeamMember['Role'],
@@ -1346,17 +1347,44 @@ export class WorkspaceManager {
       return () => unsubscribe();
     }, []);
 
-    const [teamMembers, setTeamMembers] = useState<TeamMember[]>(
-      this.Team?.ListUsers?.() ?? [],
-    );
+    const [teamMembers, setTeamMembers] = useState<EaCUserRecord[]>([]);
 
+    // Load initial users on mount and whenever the TeamManager instance changes.
+    useEffect(() => {
+      let cancelled = false;
+
+      (async () => {
+        try {
+          const users = await this.Team?.ListUsers?.();
+          if (!cancelled) setTeamMembers(users ?? []);
+        } catch (err) {
+          console.error('Failed to load team members', err);
+          if (!cancelled) setTeamMembers([]); // fallback
+        }
+      })();
+
+      return () => {
+        cancelled = true;
+      };
+    }, [this.Team]);
+
+    
+    // Keep teamMembers in sync with TeamManager changes.
     useEffect(() => {
       const unsubscribe = this.Team?.OnChange?.(() => {
-        setTeamMembers(this.Team.ListUsers());
+        // Run the async call inside the sync callback.
+        (async () => {
+          try {
+            const users = await this.Team.ListUsers();
+            setTeamMembers(users ?? []);
+          } catch (err) {
+            console.error('Failed to refresh team members', err);
+          }
+        })();
       });
 
       return () => unsubscribe?.();
-    }, []);
+    }, [this.Team]);
 
     const [workspaces, setWorkspaces] = useState<WorkspaceSummary[]>([]);
 

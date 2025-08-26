@@ -81,15 +81,15 @@ export function TeamManagementModal({
           {teamMembers.map((member) => (
             <div
               class="grid grid-cols-[auto_1fr_1fr_auto_auto_auto] items-center gap-2 border p-2 rounded"
-              key={member.Email}
+              key={member.Username}
             >
               <input
                 type="checkbox"
-                checked={selected.includes(member.Email)}
-                onChange={() => toggleSelected(member.Email)}
+                checked={selected.includes(member.Username)}
+                onChange={() => toggleSelected(member.Username)}
               />
-              <div class="text-sm">{member.Name ?? 'N/A'}</div>
-              <div class="text-sm">{member.Email}</div>
+              <div class="text-sm">{member.Username ?? 'N/A'}</div>
+              <div class="text-sm">{member.Username}</div>
               {/* <Select
                 value={member.Role}
                 onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>
@@ -108,7 +108,7 @@ export function TeamManagementModal({
               </Select> */}
               <div class="text-sm">{friendlyDate(member.Joined)}</div>
               <Action
-                onClick={() => removeMember(member.Email)}
+                onClick={() => removeMember(member.Username)}
                 intentType={IntentTypes.Error}
                 styleType={ActionStyleTypes.Icon}
               >
