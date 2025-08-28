@@ -133,7 +133,7 @@ export class WorkspaceManager {
     );
 
     this.Team = new TeamManager(this.oiSvc, this.EaC);
-    
+
     this.Interaction.BindEaCManager(this.EaC);
 
     console.log('🚀 FlowManager initialized:', {
@@ -1368,7 +1368,6 @@ export class WorkspaceManager {
       };
     }, [this.Team]);
 
-    
     // Keep teamMembers in sync with TeamManager changes.
     useEffect(() => {
       const unsubscribe = this.Team?.OnChange?.(() => {

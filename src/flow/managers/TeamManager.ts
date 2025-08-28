@@ -11,7 +11,8 @@ export class TeamManager {
   constructor(
     protected oiSvc: OpenIndustrialAPIClient,
     protected eac: EaCManager,
-    initialMembers?: TeamMember[]) {
+    initialMembers?: TeamMember[],
+  ) {
     const joined = new Date().toISOString();
 
     this.members = initialMembers ?? [
@@ -31,8 +32,8 @@ export class TeamManager {
   }
 
   public async ListUsers(): Promise<EaCUserRecord[]> {
-    const users = await this.oiSvc.Workspaces.ListUsers()
-    
+    const users = await this.oiSvc.Workspaces.ListUsers();
+
     return users;
   }
 
@@ -42,26 +43,25 @@ export class TeamManager {
     name?: string,
   ): Promise<void> {
     if (!email || this.members.some((m) => m.Email === email)) return;
-    
 
     const userEac = this.eac.GetEaC();
 
     const userRecord: EaCUserRecord = {
-      EnterpriseLookup: userEac.EnterpriseLookup ?? "",
-      EnterpriseName: userEac.Details?.Name ?? "",   
+      EnterpriseLookup: userEac.EnterpriseLookup ?? '',
+      EnterpriseName: userEac.Details?.Name ?? '',
       Owner: false,
-      ParentEnterpriseLookup: userEac.ParentEnterpriseLookup ?? "",
+      ParentEnterpriseLookup: userEac.ParentEnterpriseLookup ?? '',
       Username: email,
-    }
+    };
 
-    const inviteResult = await this.oiSvc.Workspaces.InviteUser(userRecord)
+    const _inviteResult = await this.oiSvc.Workspaces.InviteUser(userRecord);
 
     this.members.push({
       Email: email,
       Role: role,
       Name: name,
       Joined: new Date().toISOString(),
-    }); 
+    });
 
     this.emitChange();
   }

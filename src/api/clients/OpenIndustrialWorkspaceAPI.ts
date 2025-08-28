@@ -89,12 +89,12 @@ export class OpenIndustrialWorkspaceAPI {
   /**
    * List the team users for the current workspace.
    */
-    public async ListUsers(): Promise<EaCUserRecord[]> {
+  public async ListUsers(): Promise<EaCUserRecord[]> {
     const res = await fetch(this.bridge.url('/api/workspaces/teams/list'), {
       method: 'GET',
       headers: this.bridge.headers(),
     });
-    
+
     if (!res.ok) {
       throw new Error(`Failed to list team users: ${res.status}`);
     }
