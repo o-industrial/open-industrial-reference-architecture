@@ -64,7 +64,7 @@ export function TeamManagementModal({
           <div class="text-sm text-neutral-300 font-medium">
             Current Members
           </div>
-          <Select
+          {/* <Select
             value={bulkRole}
             onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>
               handleBulkChange((e.target as HTMLSelectElement).value)
@@ -74,23 +74,23 @@ export function TeamManagementModal({
             <option value="Owner">Owner</option>
             <option value="Editor">Editor</option>
             <option value="Viewer">Viewer</option>
-          </Select>
+          </Select> */}
         </div>
 
         <div class="space-y-2 max-h-64 overflow-y-auto">
           {teamMembers.map((member) => (
             <div
               class="grid grid-cols-[auto_1fr_1fr_auto_auto_auto] items-center gap-2 border p-2 rounded"
-              key={member.Email}
+              key={member.Username}
             >
               <input
                 type="checkbox"
-                checked={selected.includes(member.Email)}
-                onChange={() => toggleSelected(member.Email)}
+                checked={selected.includes(member.Username)}
+                onChange={() => toggleSelected(member.Username)}
               />
-              <div class="text-sm">{member.Name ?? 'N/A'}</div>
-              <div class="text-sm">{member.Email}</div>
-              <Select
+              <div class="text-sm">{member.Username ?? 'N/A'}</div>
+              <div class="text-sm">{member.Username}</div>
+              {/* <Select
                 value={member.Role}
                 onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>
                   updateMemberRole(
@@ -105,10 +105,10 @@ export function TeamManagementModal({
                 <option>Owner</option>
                 <option>Editor</option>
                 <option>Viewer</option>
-              </Select>
+              </Select> */}
               <div class="text-sm">{friendlyDate(member.Joined)}</div>
               <Action
-                onClick={() => removeMember(member.Email)}
+                onClick={() => removeMember(member.Username)}
                 intentType={IntentTypes.Error}
                 styleType={ActionStyleTypes.Icon}
               >
@@ -137,7 +137,7 @@ export function TeamManagementModal({
                 setEmail((e.target as HTMLInputElement).value)
               }
             />
-            <Select
+            {/* <Select
               value={role}
               onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>
                 setRole(
@@ -151,13 +151,13 @@ export function TeamManagementModal({
               <option value="Viewer">Viewer</option>
               <option value="Editor">Editor</option>
               <option value="Owner">Owner</option>
-            </Select>
+            </Select> */}
             <Action
               onClick={() => {
                 inviteMember(email, role, name);
                 setName('');
                 setEmail('');
-                setRole('Viewer');
+                //setRole('Viewer');
               }}
             >
               Invite
