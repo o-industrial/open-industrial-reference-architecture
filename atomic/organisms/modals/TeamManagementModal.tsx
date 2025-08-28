@@ -106,7 +106,7 @@ export function TeamManagementModal({
                 <option>Editor</option>
                 <option>Viewer</option>
               </Select> */}
-              <div class="text-sm">{friendlyDate(member.Joined)}</div>
+              {/* <div class="text-sm">{friendlyDate(member.Joined)}</div> */}
               <Action
                 onClick={() => removeMember(member.Username)}
                 intentType={IntentTypes.Error}
