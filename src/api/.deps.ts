@@ -1,11 +1,11 @@
 export { merge } from 'jsr:@fathym/common@0.2.266/merge';
 
-export type { EaCRuntimeHandler } from 'jsr:@fathym/eac@0.2.116/runtime/pipelines';
-export type { EaCCommitResponse } from 'jsr:@fathym/eac@0.2.116/steward';
-export { EaCBaseClient } from 'jsr:@fathym/eac@0.2.116/steward/clients';
-export type { EaCStatus } from 'jsr:@fathym/eac@0.2.116/steward/status';
+export type { EaCRuntimeHandler } from 'jsr:@fathym/eac@0.2.119/runtime/pipelines';
+export type { EaCCommitResponse } from 'jsr:@fathym/eac@0.2.119/steward';
+export { EaCBaseClient } from 'jsr:@fathym/eac@0.2.119/steward/clients';
+export type { EaCStatus } from 'jsr:@fathym/eac@0.2.119/steward/status';
 
-export type { EaCWarmQueryAsCode, EaCWarmQueryDetails } from 'jsr:@fathym/eac-azure@0.0.102';
+export type { EaCWarmQueryAsCode, EaCWarmQueryDetails } from 'jsr:@fathym/eac-azure@0.0.105';
 
 export {
   type Codec,

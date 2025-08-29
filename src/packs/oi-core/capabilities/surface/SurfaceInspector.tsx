@@ -12,22 +12,6 @@ type SurfaceInspectorProps = InspectorCommonProps<
   SurfaceStats
 >;
 
-function SurfaceAnalyticsTab() {
-  return (
-    <p class='text-sm text-neutral-300'>
-      📈 Surface-level analytics will appear here.
-    </p>
-  );
-}
-
-function SurfaceStreamTab() {
-  return (
-    <p class='text-sm text-neutral-300'>
-      📡 Impulses received and routed on this surface.
-    </p>
-  );
-}
-
 export function SurfaceInspector({
   details,
   enabled,
@@ -61,16 +45,16 @@ export function SurfaceInspector({
               />
             ),
           },
-          {
-            key: 'analytics',
-            label: 'Analytics',
-            content: <SurfaceAnalyticsTab />,
-          },
-          {
-            key: 'stream',
-            label: 'Impulse Stream',
-            content: <SurfaceStreamTab />,
-          },
+          // {
+          //   key: 'analytics',
+          //   label: 'Analytics',
+          //   content: <SurfaceAnalyticsTab />,
+          // },
+          // {
+          //   key: 'stream',
+          //   label: 'Impulse Stream',
+          //   content: <SurfaceStreamTab />,
+          // },
         ]}
       />
     </InspectorBase>

@@ -17,11 +17,11 @@ export { IntentTypes, type IngestOption } from '../src/types/.exports.ts';
 
 export { classSet, IS_BROWSER } from 'jsr:@fathym/atomic@0.0.184';
 
-export type { EaCEnterpriseDetails } from 'jsr:@fathym/eac@0.2.116';
+export type { EaCEnterpriseDetails, EverythingAsCode } from 'jsr:@fathym/eac@0.2.119';
 export {
   type EaCStatus,
   EaCStatusProcessingTypes,
-} from 'jsr:@fathym/eac@0.2.116/steward/status';
+} from 'jsr:@fathym/eac@0.2.119/steward/status';
 
 export {
   type JSX,
@@ -34,7 +34,12 @@ export {
   forwardRef,
   useRef,
 } from 'npm:preact@10.20.1/compat';
-export { useState, useEffect, useCallback } from 'npm:preact@10.20.1/hooks';
+export {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from 'npm:preact@10.20.1/hooks';
 
 export {
   ReactFlow,

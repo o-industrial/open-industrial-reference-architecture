@@ -145,7 +145,7 @@ export function AzureDockerSimulator(
 
             const deviceId = await shaHash(
               EaC.EnterpriseLookup!,
-              dcDetails.DeviceID,
+              SimulatorLookup,
             );
 
             jobs.push({
