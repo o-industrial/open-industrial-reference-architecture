@@ -13,9 +13,6 @@ export type EaCAzureIoTHubDataConnectionDetails = {
   // /** The full connection string used to access the Azure IoT Hub. */
   // ConnectionString: string;
 
-  /** The name of the device to route messages for. */
-  DeviceID: string;
-
   /** Whether the device is setup as an Azure IoT Edge device or not. */
   IsIoTEdge?: boolean;
 

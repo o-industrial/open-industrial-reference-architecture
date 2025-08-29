@@ -149,8 +149,9 @@ export class GraphStateManager {
         onDoubleClick: () => {
           this.interaction.OnNodeDoubleClick(id);
         },
-        onNodeEvent: (evt) => {
-          this.nodeEvents.Emit(n.Type, { ...evt, NodeID: id });
+        onNodeEvent: (_evt) => {
+          // this.interaction.OnNodeDoubleClick(id);
+          // this.nodeEvents.Emit(n.Type, { ...evt, NodeID: id });
         },
       };
 

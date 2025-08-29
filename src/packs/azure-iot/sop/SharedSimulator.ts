@@ -53,7 +53,7 @@ export function SharedSimulator(
       void Lookup;
       return Promise.resolve({ RoutesCount: 0 });
     })
-    .Deploy(async ({ Steps, AsCode, EaC, Secrets, Lookup }) => {
+    .Deploy(async ({ Steps, AsCode, EaC, Secrets, Lookup: SimulatorLookup }) => {
       const { Source } = AsCode.Details!;
       const sourceConn = await Steps.ResolveIoTHubConnectionString({
         ResourceGroupName: await Secrets.GetRequired(
@@ -72,7 +72,7 @@ export function SharedSimulator(
       for (const [dcLookup, dc] of Object.entries(EaC.DataConnections ?? {})) {
         const dcDetails = dc.Details ?? {};
         if (
-          dc.SimulatorLookup === Lookup &&
+          dc.SimulatorLookup === SimulatorLookup &&
           isEaCAzureIoTHubDataConnectionDetails(dcDetails)
         ) {
           const targetConn = await Steps.ResolveIoTHubConnectionString({
@@ -84,7 +84,7 @@ export function SharedSimulator(
 
           const targetDeviceId = await shaHash(
             EaC.EnterpriseLookup!,
-            dcDetails.DeviceID,
+            SimulatorLookup,
           );
 
           subscribers.push({

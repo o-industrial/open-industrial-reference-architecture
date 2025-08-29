@@ -12,6 +12,7 @@ import { EaCAzureIoTHubDataConnectionDetails } from '../../../eac/EaCAzureIoTHub
 import { EaCDataConnectionAsCode } from '../../../eac/EaCDataConnectionAsCode.ts';
 import { DataConnection } from '../../../fluent/connections/DataConnection.ts';
 import { DataConnectionModuleBuilder } from '../../../fluent/connections/DataConnectionModuleBuilder.ts';
+import { shaHash } from '../../../utils/shaHash.ts';
 
 export function AzureIoTHubDataConnection(
   lookup: string,
@@ -55,26 +56,28 @@ export function AzureIoTHubDataConnection(
         }
       },
     }))
-    .Stats(async ({ Steps, AsCode }) => {
+    .Stats(async ({ Steps, AsCode, EaC, Lookup: SimulatorLookup }) => {
+      const deviceId = await shaHash(EaC.EnterpriseLookup!, SimulatorLookup);
+
       return await Steps.IoTStats({
-        DeviceID: AsCode.Details!.DeviceID!,
+        DeviceID: deviceId,
         SubscriptionID: AsCode.Details!.SubscriptionID!,
         ResourceGroupName: AsCode.Details!.ResourceGroupName!,
         IoTHubName: AsCode.Details!.IoTHubName!,
       });
     })
-    .Deploy(async ({ Steps, AsCode, Lookup, EaC }) => {
-      const deviceId = AsCode.Details!.DeviceID!;
+    .Deploy(async ({ Steps, AsCode, Lookup: SimulatorLookup, EaC }) => {
+      const deviceId = await shaHash(EaC.EnterpriseLookup!, SimulatorLookup);
+
       const isIoTEdge = AsCode.Details!.IsIoTEdge ?? false;
       const workspaceLookup = EaC.EnterpriseLookup!;
-      const dataConnectionLookup = Lookup;
 
       const iot = await Steps.IoT({
         WorkspaceLookup: workspaceLookup,
         Devices: {
           [deviceId]: {
             IsIoTEdge: isIoTEdge,
-            DataConnectionLookup: dataConnectionLookup,
+            DataConnectionLookup: SimulatorLookup,
           },
         },
       });
