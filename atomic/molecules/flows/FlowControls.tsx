@@ -24,7 +24,7 @@ export function FlowControls({
   resetIntent = IntentTypes.None,
   fitIntent = IntentTypes.None,
   mapIntent = IntentTypes.Tertiary,
-  showMap = true,
+  showMap = false,
   onToggleMap,
 }: FlowControlsProps): JSX.Element {
   const { zoomIn, zoomOut, fitView, setViewport } = useReactFlow();

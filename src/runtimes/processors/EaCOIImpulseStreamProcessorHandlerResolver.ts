@@ -32,6 +32,7 @@ type ImpulseRuntime = {
 
 export const EaCOIImpulseStreamProcessorHandlerResolver: ProcessorHandlerResolver = {
   async Resolve(_ioc, appProcCfg, _eac): Promise<EaCRuntimeHandler> {
+    debugger;
     const logger = await getPackageLogger(import.meta);
     const proc = appProcCfg.Application.Processor;
 

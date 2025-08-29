@@ -35,7 +35,6 @@ export const EaCAzureIoTHubDataConnectionDetailsSchema: z.ZodObject<
     {
       Type: z.ZodLiteral<'AzureIoTHub'>;
       // ConnectionString: z.ZodString;
-      DeviceID: z.ZodString;
       IsIoTEdge: z.ZodOptional<z.ZodBoolean>;
       IoTHubName: z.ZodOptional<z.ZodString>;
       ResourceGroupName: z.ZodOptional<z.ZodString>;
@@ -45,7 +44,7 @@ export const EaCAzureIoTHubDataConnectionDetailsSchema: z.ZodObject<
 > = EaCDataConnectionDetailsSchema.extend({
   Type: z.literal('AzureIoTHub'),
   // ConnectionString: z.string().describe('Azure IoT Hub connection string.'),
-  DeviceID: z.string().describe('Target device identifier in IoT Hub.'),
+  Name: z.string().describe('Target device identifier in IoT Hub.'),
   IsIoTEdge: z
     .boolean()
     .optional()
