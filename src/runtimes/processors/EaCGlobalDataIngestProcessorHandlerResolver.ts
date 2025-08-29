@@ -28,6 +28,7 @@ export const EaCGlobalDataIngestProcessorHandlerResolver: ProcessorHandlerResolv
     appProcCfg: EaCApplicationProcessorConfig,
     _eac,
   ): Promise<EaCRuntimeHandler> {
+    debugger;
     const logger = await getPackageLogger(import.meta);
     const proc = appProcCfg.Application.Processor;
 

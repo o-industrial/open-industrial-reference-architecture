@@ -55,6 +55,7 @@ export const AzureIoTHubDeviceStep: TStepBuilder = Step(
     };
   })
   .Run(async (input, ctx) => {
+    debugger;
     const { WorkspaceLookup, Devices } = input;
     const { Registry } = ctx.Services!;
 
