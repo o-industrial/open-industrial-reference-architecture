@@ -317,7 +317,8 @@ export class OpenIndustrialWorkspaceAPI {
     };
 
     socket.onerror = (err) => {
-      console.error('[StreamImpulses] ❌ WebSocket error:', err);
+      console.error('[StreamImpulses] ❌ WebSocket error:');
+      console.error(err);
     };
 
     socket.onclose = (evt) => {

@@ -95,14 +95,19 @@ function streamImpulses(
 
     logger.info('[ImpulseStream] 🔌 WebSocket upgrade complete');
 
-    return await handleImpulseStreamConnection({
-      req,
-      impulseRuntimeCache,
-      logger,
-      workspace,
-      surfaceFilter,
-      schemaFilter,
-    });
+    try {
+      return await handleImpulseStreamConnection({
+        req,
+        impulseRuntimeCache,
+        logger,
+        workspace,
+        surfaceFilter,
+        schemaFilter,
+      });
+    } catch (err) {
+      logger.error('[ImpulseStream] unhandled error in stream handler:', err);
+      return new Response('Internal Server Error', { status: 500 });
+    }
   }) as EaCRuntimeHandler;
 }
 
@@ -372,15 +377,18 @@ async function handleImpulseStreamConnection({
 
   const runtime = await impulseRuntimeCache.get(cacheKey)!;
 
-  async function shutdown() {
+  function shutdown() {
     if (closed) return;
     closed = true;
     socketReady = false;
     impulseQueue.length = 0;
     logger.info('[WS] 🔻 Shutting down stream connection');
+    // Remove this socket’s listener; internal refCount will stop consumer when zero
     unsub?.();
-    await runtime.Close();
-    impulseRuntimeCache.delete(cacheKey);
+    // Do not call runtime.Close() here. Let refCount manage stopping.
+    // Do not delete the runtime from cache unless you want to force a re‑initialisation.
+
+    return Promise.resolve();
   }
 
   socket.onopen = () => {
@@ -416,9 +424,16 @@ async function handleImpulseStreamConnection({
     shutdown();
   };
 
-  socket.onerror = async (err) => {
+  socket.onerror = async (evt: Event | ErrorEvent) => {
+    const errEvt = evt as ErrorEvent;
     logger.error('[WS] ❌ WebSocket error:');
-    logger.error(err);
+    logger.error({
+      message: errEvt.message,
+      error: errEvt.error, // This holds the underlying Error (e.g. Unexpected EOF)
+      filename: errEvt.filename,
+      lineno: errEvt.lineno,
+      colno: errEvt.colno,
+    });
     await shutdown();
   };
 
