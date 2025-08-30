@@ -31,7 +31,7 @@ export async function createEphemeralConsumer(
 
   const consumer = await js.consumers.get(stream, consumerName);
   const abort = new AbortController();
-  const messages = await consumer.consume({ signal: abort.signal });
+  const messages = await consumer.consume();
 
   (async () => {
     for await (const msg of messages) {

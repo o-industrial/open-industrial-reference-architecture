@@ -54,7 +54,7 @@ type TStepBuilder = StepModuleBuilder<
 
 export const WorkspaceEnsureAzureResourceGroupStep: TStepBuilder = Step(
   'Azure Resource Group Ensure (SDK)',
-  'Ensures the resource group for a workspace exists using Azure SDK'
+  'Ensures the resource group for a workspace exists using Azure SDK',
 )
   .Input(WorkspaceEnsureAzureResourceGroupInputSchema)
   .Output(WorkspaceEnsureAzureResourceGroupOutputSchema)
@@ -68,7 +68,7 @@ export const WorkspaceEnsureAzureResourceGroupStep: TStepBuilder = Step(
     const credential = {
       getToken: async () => {
         const { AccessToken } = await ctx.Steps!.ResolveCredential(
-          CredentialStrategy
+          CredentialStrategy,
         );
 
         return {
@@ -80,7 +80,7 @@ export const WorkspaceEnsureAzureResourceGroupStep: TStepBuilder = Step(
 
     const ResourceClient = new ResourceManagementClient(
       credential as any,
-      SubscriptionID
+      SubscriptionID,
     );
 
     return { ResourceClient };

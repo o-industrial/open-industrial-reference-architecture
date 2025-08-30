@@ -73,7 +73,7 @@ type TStepBuilder = StepModuleBuilder<
 
 export const AzureContainerAppJobDeployStep: TStepBuilder = Step(
   'Azure Container App Job Deploy (SDK)',
-  'Deploys a container app job using Azure SDK'
+  'Deploys a container app job using Azure SDK',
 )
   .Input(AzureContainerAppJobDeployInputSchema)
   .Output(AzureContainerAppJobDeployOutputSchema)
@@ -87,7 +87,7 @@ export const AzureContainerAppJobDeployStep: TStepBuilder = Step(
     const credential = {
       getToken: async () => {
         const { AccessToken } = await ctx.Steps!.ResolveCredential(
-          CredentialStrategy
+          CredentialStrategy,
         );
 
         return {
@@ -99,7 +99,7 @@ export const AzureContainerAppJobDeployStep: TStepBuilder = Step(
 
     const ContainerAppClient = new ContainerAppsAPIClient(
       credential as any,
-      SubscriptionID
+      SubscriptionID,
     );
 
     return { ContainerAppClient };
@@ -123,7 +123,7 @@ export const AzureContainerAppJobDeployStep: TStepBuilder = Step(
     try {
       await ContainerAppClient.managedEnvironments.get(
         ResourceGroupName,
-        AppEnvironmentName
+        AppEnvironmentName,
       );
     } catch (err: any) {
       if (err.statusCode === 404) {
@@ -165,11 +165,11 @@ export const AzureContainerAppJobDeployStep: TStepBuilder = Step(
             //   //   },
             //   // ],
             // },
-          } as ManagedEnvironment
+          } as ManagedEnvironment,
         );
       } else {
         throw new Error(
-          `Failed to check or create managed environment: ${err.message}`
+          `Failed to check or create managed environment: ${err.message}`,
         );
       }
     }
@@ -178,7 +178,8 @@ export const AzureContainerAppJobDeployStep: TStepBuilder = Step(
     const containerApp: ContainerApp = {
       location,
       tags: AppTags,
-      managedEnvironmentId: `/subscriptions/${SubscriptionID}/resourceGroups/${ResourceGroupName}/providers/Microsoft.App/managedEnvironments/${AppEnvironmentName}`,
+      managedEnvironmentId:
+        `/subscriptions/${SubscriptionID}/resourceGroups/${ResourceGroupName}/providers/Microsoft.App/managedEnvironments/${AppEnvironmentName}`,
       configuration: {
         activeRevisionsMode: 'Multiple',
       },
@@ -191,7 +192,7 @@ export const AzureContainerAppJobDeployStep: TStepBuilder = Step(
               ([name, value]) => ({
                 name,
                 value,
-              })
+              }),
             ),
             resources: {
               cpu: 0.25,
@@ -206,12 +207,11 @@ export const AzureContainerAppJobDeployStep: TStepBuilder = Step(
       },
     };
 
-    const result =
-      await ContainerAppClient.containerApps.beginCreateOrUpdateAndWait(
-        ResourceGroupName,
-        AppName,
-        containerApp
-      );
+    const result = await ContainerAppClient.containerApps.beginCreateOrUpdateAndWait(
+      ResourceGroupName,
+      AppName,
+      containerApp,
+    );
 
     return {
       AppName,

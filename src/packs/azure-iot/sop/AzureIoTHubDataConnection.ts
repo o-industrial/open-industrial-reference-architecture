@@ -12,7 +12,6 @@ import { EaCAzureIoTHubDataConnectionDetails } from '../../../eac/EaCAzureIoTHub
 import { EaCDataConnectionAsCode } from '../../../eac/EaCDataConnectionAsCode.ts';
 import { DataConnection } from '../../../fluent/connections/DataConnection.ts';
 import { DataConnectionModuleBuilder } from '../../../fluent/connections/DataConnectionModuleBuilder.ts';
-import { shaHash } from '../../../utils/shaHash.ts';
 
 export function AzureIoTHubDataConnection(
   lookup: string,
@@ -56,7 +55,7 @@ export function AzureIoTHubDataConnection(
         }
       },
     }))
-    .Stats(async ({ Steps, AsCode, EaC, Lookup: SimulatorLookup }) => {
+    .Stats(async ({ Steps, AsCode }) => {
       return await Steps.IoTStats({
         DeviceID: AsCode.Details!.Name!,
         SubscriptionID: AsCode.Details!.SubscriptionID!,
