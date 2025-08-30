@@ -358,8 +358,8 @@ async function handleImpulseStreamConnection({
   let closed = false;
   let socketReady = false;
   const impulseQueue: RuntimeImpulse[] = [];
-  const HEARTBEAT_INTERVAL_MS = 30000;
-  let heartbeatInterval: number | undefined;
+  const HEARTBEAT_TIMEOUT_MS = 30000;
+  let heartbeatTimer: number | undefined;
   let awaitingPong = false;
 
   const flushQueue = () => {
@@ -424,8 +424,9 @@ async function handleImpulseStreamConnection({
     closed = true;
     socketReady = false;
     impulseQueue.length = 0;
-    if (heartbeatInterval) {
-      clearInterval(heartbeatInterval);
+    if (heartbeatTimer) {
+      clearTimeout(heartbeatTimer);
+      heartbeatTimer = undefined;
     }
     logger.info('[WS] 🔻 Shutting down stream connection');
     // Remove this socket’s listener; internal refCount will stop consumer when zero
@@ -435,6 +436,30 @@ async function handleImpulseStreamConnection({
 
     return Promise.resolve();
   }
+
+  const scheduleHeartbeat = () => {
+    heartbeatTimer = setTimeout(() => {
+      if (awaitingPong) {
+        logger.warn('[WS] 💔 No pong received - closing socket');
+        try {
+          socket.close(1000, 'heartbeat timeout');
+        } catch (err) {
+          logger.error('[WS] ❌ Error closing socket after missing pong:', err);
+        }
+        shutdown();
+        return;
+      }
+      try {
+        awaitingPong = true;
+        socket.send(
+          JSON.stringify({ type: 'ping', ts: new Date().toISOString() }),
+        );
+      } catch (err) {
+        logger.error('[WS] ❌ Failed to send ping:', err);
+      }
+      scheduleHeartbeat();
+    }, HEARTBEAT_TIMEOUT_MS);
+  };
 
   socket.onopen = () => {
     if (socketReady) {
@@ -456,26 +481,7 @@ async function handleImpulseStreamConnection({
         JSON.stringify({ status: 'connected', ts: new Date().toISOString() }),
       );
       flushQueue();
-      heartbeatInterval = setInterval(() => {
-        if (awaitingPong) {
-          logger.warn('[WS] 💔 No pong received - closing socket');
-          try {
-            socket.close(1000, 'heartbeat timeout');
-          } catch (err) {
-            logger.error('[WS] ❌ Error closing socket after missing pong:', err);
-          }
-          shutdown();
-          return;
-        }
-        try {
-          awaitingPong = true;
-          socket.send(
-            JSON.stringify({ type: 'ping', ts: new Date().toISOString() }),
-          );
-        } catch (err) {
-          logger.error('[WS] ❌ Failed to send ping:', err);
-        }
-      }, HEARTBEAT_INTERVAL_MS);
+      scheduleHeartbeat();
     }, 0);
   };
 
@@ -494,6 +500,10 @@ async function handleImpulseStreamConnection({
         msg === 'pong';
       if (isPong) {
         awaitingPong = false;
+        if (!closed) {
+          if (heartbeatTimer) clearTimeout(heartbeatTimer);
+          scheduleHeartbeat();
+        }
         logger.debug('[WS] 💓 Pong received');
         return;
       }
