@@ -296,10 +296,8 @@ export class OpenIndustrialWorkspaceAPI {
       for (const msg of messageQueue) {
         socket.send(msg);
       }
-      messageQueue.length = 0;
 
-      // (Optional) Send greeting or subscription request here
-      // send(JSON.stringify({ type: 'subscribe', ts: Date.now() }));
+      messageQueue.length = 0;
     };
 
     socket.onmessage = (event) => {

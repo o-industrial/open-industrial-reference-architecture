@@ -38,7 +38,7 @@ function FlowPanelInner({
   workspaceMgr,
   onShowSimulatorLibrary,
 }: FlowPanelProps): JSX.Element {
-  const [showMap, setShowMap] = useState(true);
+  const [showMap, setShowMap] = useState(false);
   const { screenToFlowPosition } = useReactFlow();
 
   const { nodes, edges } = workspaceMgr.UseGraphView();
