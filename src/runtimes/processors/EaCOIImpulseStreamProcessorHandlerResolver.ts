@@ -218,6 +218,19 @@ async function createImpulseRuntime({
     eac = await oiSvc.Workspaces.Get();
   };
 
+  let refreshTimer: number | undefined;
+
+  const scheduleEaCRefresh = () => {
+    if (refreshTimer) {
+      return;
+    }
+
+    refreshTimer = setTimeout(async () => {
+      refreshTimer = undefined;
+      await loadEaC();
+    }, 5000);
+  };
+
   await loadEaC();
 
   let stop: () => void;
@@ -245,7 +258,7 @@ async function createImpulseRuntime({
 
           listeners.forEach((cb) => cb(impulse));
 
-          loadEaC();
+          scheduleEaCRefresh();
         } catch (err) {
           logger.warn('[ImpulseStream] ⚠️ Failed to parse impulse', err);
         }
