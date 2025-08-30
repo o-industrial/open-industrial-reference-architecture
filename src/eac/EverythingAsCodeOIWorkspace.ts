@@ -4,6 +4,7 @@ import {
   EverythingAsCodeApplications,
   EverythingAsCodeClouds,
   EverythingAsCodeCloudsSchema,
+  EverythingAsCodeIdentity,
   EverythingAsCodeLicensing,
   z,
 } from './.deps.ts';
@@ -89,6 +90,7 @@ export type EverythingAsCodeOIWorkspace =
   & EverythingAsCode
   & EverythingAsCodeClouds
   & EverythingAsCodeApplications
+  & EverythingAsCodeIdentity
   & EverythingAsCodeLicensing;
 
 export type EverythingAsCodeOIWorkspaceSchema = z.ZodObject<

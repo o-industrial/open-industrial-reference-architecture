@@ -305,8 +305,7 @@ export class OpenIndustrialWorkspaceAPI {
       const msg = typeof event.data === 'string' ? event.data : '';
       try {
         const parsed = JSON.parse(msg);
-        const isPing =
-          parsed && typeof parsed === 'object' && 'type' in parsed &&
+        const isPing = parsed && typeof parsed === 'object' && 'type' in parsed &&
           (parsed as { type: string }).type === 'ping';
         if (isPing) {
           console.debug('[StreamImpulses] 💓 Ping received - sending pong');

@@ -489,9 +489,8 @@ async function handleImpulseStreamConnection({
       } catch {
         parsed = undefined;
       }
-      const isPong =
-        (typeof parsed === 'object' && parsed !== null &&
-          'type' in parsed && (parsed as { type: string }).type === 'pong') ||
+      const isPong = (typeof parsed === 'object' && parsed !== null &&
+        'type' in parsed && (parsed as { type: string }).type === 'pong') ||
         msg === 'pong';
       if (isPong) {
         awaitingPong = false;
