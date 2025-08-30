@@ -404,7 +404,17 @@ async function handleImpulseStreamConnection({
 
   const cacheKey = `${workspace}::${surfaceFilter ?? '*'}`;
 
-  const runtime = await impulseRuntimeCache.get(cacheKey)!;
+  const runtimePromise = impulseRuntimeCache.get(cacheKey);
+  if (!runtimePromise) {
+    logger.error(`[WS] ❌ No impulse runtime found for cache key: ${cacheKey}`);
+    try {
+      socket.close(1011, 'runtime unavailable');
+    } catch (err) {
+      logger.error('[WS] ❌ Error closing socket after missing runtime:', err);
+    }
+    return new Response('Service Unavailable', { status: 503 });
+  }
+  const runtime = await runtimePromise;
 
   function shutdown() {
     if (closed) return;
