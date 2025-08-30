@@ -358,6 +358,9 @@ async function handleImpulseStreamConnection({
   let closed = false;
   let socketReady = false;
   const impulseQueue: RuntimeImpulse[] = [];
+  const HEARTBEAT_INTERVAL_MS = 30000;
+  let heartbeatInterval: number | undefined;
+  let awaitingPong = false;
 
   const flushQueue = () => {
     logger.debug(`[WS] 🚚 Flushing ${impulseQueue.length} queued impulses`);
@@ -421,6 +424,9 @@ async function handleImpulseStreamConnection({
     closed = true;
     socketReady = false;
     impulseQueue.length = 0;
+    if (heartbeatInterval) {
+      clearInterval(heartbeatInterval);
+    }
     logger.info('[WS] 🔻 Shutting down stream connection');
     // Remove this socket’s listener; internal refCount will stop consumer when zero
     unsub?.();
@@ -450,11 +456,51 @@ async function handleImpulseStreamConnection({
         JSON.stringify({ status: 'connected', ts: new Date().toISOString() }),
       );
       flushQueue();
+      heartbeatInterval = setInterval(() => {
+        if (awaitingPong) {
+          logger.warn('[WS] 💔 No pong received - closing socket');
+          try {
+            socket.close(1000, 'heartbeat timeout');
+          } catch (err) {
+            logger.error('[WS] ❌ Error closing socket after missing pong:', err);
+          }
+          shutdown();
+          return;
+        }
+        try {
+          awaitingPong = true;
+          socket.send(
+            JSON.stringify({ type: 'ping', ts: new Date().toISOString() }),
+          );
+        } catch (err) {
+          logger.error('[WS] ❌ Failed to send ping:', err);
+        }
+      }, HEARTBEAT_INTERVAL_MS);
     }, 0);
   };
 
   socket.onmessage = (event) => {
     logger.info('[WS-Only] 📥 Received message:', event.data);
+    try {
+      const msg = typeof event.data === 'string' ? event.data : '';
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(msg);
+      } catch {
+        parsed = undefined;
+      }
+      const isPong =
+        (typeof parsed === 'object' && parsed !== null &&
+          'type' in parsed && (parsed as { type: string }).type === 'pong') ||
+        msg === 'pong';
+      if (isPong) {
+        awaitingPong = false;
+        logger.debug('[WS] 💓 Pong received');
+        return;
+      }
+    } catch (err) {
+      logger.error('[WS] ❌ Error processing message:', err);
+    }
     socket.send(JSON.stringify({ echo: event.data }));
   };
 

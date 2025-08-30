@@ -302,13 +302,29 @@ export class OpenIndustrialWorkspaceAPI {
 
     socket.onmessage = (event) => {
       console.debug('[StreamImpulses] 📥 Raw message:', event.data);
+      const msg = typeof event.data === 'string' ? event.data : '';
       try {
-        const parsed = JSON.parse(event.data);
+        const parsed = JSON.parse(msg);
+        const isPing =
+          parsed && typeof parsed === 'object' && 'type' in parsed &&
+          (parsed as { type: string }).type === 'ping';
+        if (isPing) {
+          console.debug('[StreamImpulses] 💓 Ping received - sending pong');
+          _send(
+            JSON.stringify({ type: 'pong', ts: new Date().toISOString() }),
+          );
+          return;
+        }
         if (isRuntimeImpulse(parsed)) {
           console.debug('[StreamImpulses] ✅ Parsed RuntimeImpulse');
           onImpulse(parsed);
         }
       } catch (err) {
+        if (msg === 'ping') {
+          console.debug('[StreamImpulses] 💓 Ping received - sending pong');
+          _send('pong');
+          return;
+        }
         console.error('[StreamImpulses] ❌ Parse error:', err);
         console.debug('Raw data:', event.data);
       }
