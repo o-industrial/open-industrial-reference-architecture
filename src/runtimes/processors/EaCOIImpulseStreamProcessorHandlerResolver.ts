@@ -228,41 +228,56 @@ async function createImpulseRuntime({
   };
 
   await loadEaC();
-
   debugger;
-  const { stop } = await createEphemeralConsumer(
-    JetStream,
-    jsm,
-    stream,
-    subject,
-    ({ subject, data, headers }) => {
-      try {
-        logger.debug('[ImpulseStream] 📥 Impulse received', { subject });
-        const impulse: RuntimeImpulse = JSON.parse(SC.decode(data));
 
-        if (!validateImpulseAgainstEaC(impulse, eac)) {
-          logger.warn('[WS] ❌ Impulse failed EaC validation');
-          return;
+  let stop: () => void;
+  let running = false;
+
+  const startConsumer = async () => {
+    const consumer = await createEphemeralConsumer(
+      JetStream,
+      jsm,
+      stream,
+      subject,
+      ({ subject, data, headers }) => {
+        try {
+          logger.debug('[ImpulseStream] 📥 Impulse received', { subject });
+          const impulse: RuntimeImpulse = JSON.parse(SC.decode(data));
+
+          if (!validateImpulseAgainstEaC(impulse, eac)) {
+            logger.warn('[WS] ❌ Impulse failed EaC validation');
+            return;
+          }
+
+          headers?.forEach((val, key) => {
+            impulse.Headers[key] = val;
+          });
+
+          listeners.forEach((cb) => cb(impulse));
+
+          loadEaC();
+        } catch (err) {
+          logger.warn('[ImpulseStream] ⚠️ Failed to parse impulse', err);
         }
-
-        headers?.forEach((val, key) => {
-          impulse.Headers[key] = val;
-        });
-
-        listeners.forEach((cb) => cb(impulse));
-
-        loadEaC();
-      } catch (err) {
-        logger.warn('[ImpulseStream] ⚠️ Failed to parse impulse', err);
+      },
+      {
+        deliver_policy: DeliverPolicy.StartTime,
+        opt_start_time: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
       }
-    },
-    {
-      deliver_policy: DeliverPolicy.StartTime,
-      opt_start_time: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-    }
-  );
+    );
 
-  let closed = false;
+    stop = consumer.stop;
+    running = true;
+  };
+
+  const restart = () => {
+    if (!running) {
+      startConsumer();
+    }
+  };
+
+  await startConsumer();
+
   let refCount = 0;
 
   return {
@@ -270,13 +285,14 @@ async function createImpulseRuntime({
       logger.info('[ImpulseStream] 🔗 Listener added');
       listeners.add(cb);
       refCount++;
+      restart();
       return () => {
         if (!listeners.has(cb)) return;
         listeners.delete(cb);
         refCount = Math.max(0, refCount - 1);
         logger.info('[ImpulseStream] ❌ Listener removed');
-        if (refCount <= 0 && !closed) {
-          closed = true;
+        if (refCount <= 0 && running) {
+          running = false;
           try {
             stop();
           } catch (err) {
@@ -287,8 +303,8 @@ async function createImpulseRuntime({
       };
     },
     Close: () => {
-      if (closed) return;
-      closed = true;
+      if (!running) return;
+      running = false;
       try {
         stop();
       } catch (err) {
