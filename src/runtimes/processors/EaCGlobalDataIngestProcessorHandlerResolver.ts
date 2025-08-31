@@ -37,6 +37,23 @@ export const EaCGlobalDataIngestProcessorHandlerResolver: ProcessorHandlerResolv
       );
     }
 
+    const requiredOptions: Record<string, unknown> = {
+      EventHubName: proc.EventHubName,
+      EventHubConsumerConnectionString: proc.EventHubConsumerConnectionString,
+      IoTHubConnectionString: proc.IoTHubConnectionString,
+      NATSServer: proc.NATSServer,
+      NATSToken: proc.NATSToken,
+    };
+
+    for (const [key, value] of Object.entries(requiredOptions)) {
+      if (!value) {
+        const msg =
+          `Missing required processor option '${key}'. Please verify your EaCGlobalDataIngestProcessor configuration.`;
+        logger.error(msg);
+        throw new Error(msg);
+      }
+    }
+
     logger.info(
       `🔧 Starting global data ingest from Event Hub: ${proc.EventHubName}`,
     );
@@ -81,6 +98,12 @@ async function startEventHubConsumer(
   const client = new EventHubConsumerClient(
     consumerGroup,
     proc.EventHubConsumerConnectionString,
+    {
+      webSocketOptions: {},
+      amqpConnectionOptions: {
+        idleTimeoutInMs: 60_000,
+      },
+    },
   );
 
   const js = nc.jetstream(); // ✅ JetStream client for deduplication
@@ -90,8 +113,8 @@ async function startEventHubConsumer(
 
   const initializedStreams = new Set<string>();
 
-  client.subscribe({
-    async processEvents(events) {
+  const handlers = {
+    async processEvents(events: any[]) {
       for (const evt of events) {
         const deviceId = evt.systemProperties?.['iothub-connection-device-id'];
         const payload = evt.body;
@@ -127,11 +150,29 @@ async function startEventHubConsumer(
         }
       }
     },
-    processError(err) {
+    processError(err: unknown) {
       logger.error('❌ EventHub processing error:', err);
       return Promise.resolve();
     },
-  });
+  };
+
+  let attempt = 0;
+  const maxAttempts = 3;
+  while (true) {
+    try {
+      client.subscribe(handlers);
+      break;
+    } catch (err) {
+      attempt++;
+      logger.error('❌ EventHub subscribe error:', err);
+      if (attempt > maxAttempts) {
+        throw err;
+      }
+      const backoff = 2 ** attempt * 1_000;
+      logger.warn(`🔁 Retrying Event Hub subscribe in ${backoff}ms...`);
+      await new Promise((resolve) => setTimeout(resolve, backoff));
+    }
+  }
 }
 
 async function forwardEventToJetStream(
