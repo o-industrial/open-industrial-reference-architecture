@@ -12,7 +12,7 @@ export async function createEphemeralConsumer(
     headers?: Headers;
   }) => void,
   consumerConfig?: Partial<ConsumerConfig>,
-): Promise<{ stop: () => void }> {
+): Promise<{ stop: () => void; delete: () => Promise<void> }> {
   stream = sanitizeStreamName(stream);
 
   try {
@@ -54,5 +54,6 @@ export async function createEphemeralConsumer(
 
   return {
     stop: () => abort.abort(),
+    delete: () => jsm.consumers.delete(stream, consumerName),
   };
 }
