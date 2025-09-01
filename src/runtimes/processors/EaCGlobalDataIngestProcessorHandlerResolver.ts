@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { buildRuntimeImpulseForSubject } from '../../utils/buildRuntimeImpulseForSubject.ts';
 import { ensureWorkspaceJetStreamBuilder } from '../../utils/ensureWorkspaceJetStream.ts';
 import {
@@ -98,12 +99,12 @@ async function startEventHubConsumer(
   const client = new EventHubConsumerClient(
     consumerGroup,
     proc.EventHubConsumerConnectionString,
-    {
-      webSocketOptions: {},
-      amqpConnectionOptions: {
-        idleTimeoutInMs: 60_000,
-      },
-    },
+    // {
+    //   webSocketOptions: {},
+    //   amqpConnectionOptions: {
+    //     idleTimeoutInMs: 60_000,
+    //   },
+    // },
   );
 
   const js = nc.jetstream(); // ✅ JetStream client for deduplication
