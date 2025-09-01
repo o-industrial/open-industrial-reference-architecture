@@ -105,7 +105,8 @@ function streamImpulses(
         schemaFilter,
       });
     } catch (err) {
-      logger.error('[ImpulseStream] unhandled error in stream handler:', err);
+      logger.error('[ImpulseStream] unhandled error in stream handler:');
+      logger.error(err);
       return new Response('Internal Server Error', { status: 500 });
     }
   }) as EaCRuntimeHandler;
