@@ -278,9 +278,9 @@ async function createImpulseRuntime({
         } catch (err) {
           logger.warn('[ImpulseStream] ⚠️ Error stopping consumer', err);
         }
-        consumer.delete().catch((err) =>
-          logger.warn('[ImpulseStream] ⚠️ Error deleting consumer', err)
-        );
+        // consumer
+        //   .delete()
+        //   .catch((err) => logger.warn('[ImpulseStream] ⚠️ Error deleting consumer', err));
       };
     },
     Close: () => {
@@ -369,20 +369,23 @@ async function handleImpulseStreamConnection({
   }
   const runtime = await runtimePromise;
 
-  async function shutdown() {
-    if (closed) return;
-    closed = true;
-    if (heartbeatTimer) {
-      clearTimeout(heartbeatTimer);
-      heartbeatTimer = undefined;
+  function shutdown() {
+    if (!closed) {
+      closed = true;
+      if (heartbeatTimer) {
+        clearTimeout(heartbeatTimer);
+        heartbeatTimer = undefined;
+      }
+      logger.info('[WS] 🔻 Shutting down stream connection');
+      // Remove this socket’s listener; consumer will be stopped and deleted
+      try {
+        unsub?.();
+      } catch (err) {
+        logger.error('[WS] ❌ Error removing listener:', err);
+      }
     }
-    logger.info('[WS] 🔻 Shutting down stream connection');
-    // Remove this socket’s listener; consumer will be stopped and deleted
-    try {
-      unsub?.();
-    } catch (err) {
-      logger.error('[WS] ❌ Error removing listener:', err);
-    }
+
+    return Promise.resolve();
   }
 
   const scheduleHeartbeat = () => {
@@ -419,7 +422,10 @@ async function handleImpulseStreamConnection({
       try {
         socket.close(1011, 'listener error');
       } catch (closeErr) {
-        logger.error('[WS] ❌ Error closing socket after listener failure:', closeErr);
+        logger.error(
+          '[WS] ❌ Error closing socket after listener failure:',
+          closeErr,
+        );
       }
       await shutdown();
       return;
@@ -441,8 +447,10 @@ async function handleImpulseStreamConnection({
       } catch {
         parsed = undefined;
       }
-      const isPong = (typeof parsed === 'object' && parsed !== null &&
-        'type' in parsed && (parsed as { type: string }).type === 'pong') ||
+      const isPong = (typeof parsed === 'object' &&
+        parsed !== null &&
+        'type' in parsed &&
+        (parsed as { type: string }).type === 'pong') ||
         msg === 'pong';
       if (isPong) {
         awaitingPong = false;

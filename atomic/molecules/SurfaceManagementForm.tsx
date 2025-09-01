@@ -1,14 +1,18 @@
-import { EaCSurfaceDetails, JSX } from '../.deps.ts';
+import { EaCSurfaceDetails, IntentTypes, JSX } from '../.deps.ts';
+import { Action, ActionStyleTypes } from '../atoms/Action.tsx';
 import { Input } from '../atoms/forms/Input.tsx';
 
 type Props = {
   details: Partial<EaCSurfaceDetails>;
   onChange: (next: Partial<EaCSurfaceDetails>) => void;
+  onManage?: () => void;
 };
 
 export function SurfaceManagementForm({
   details,
   onChange,
+  onManage,
+
 }: Props): JSX.Element {
   const handleLabelInput = (e: JSX.TargetedEvent<HTMLInputElement, Event>) => {
     onChange({ Name: e.currentTarget.value });
@@ -21,6 +25,18 @@ export function SurfaceManagementForm({
         value={details.Name ?? ''}
         onInput={handleLabelInput}
       />
+
+      <Action
+        title="Manage Surface"
+        styleType={ActionStyleTypes.Icon}
+        intentType={IntentTypes.Info}
+        onClick={() => onManage?.()}
+      >
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none">
+          <path d="M9 18V5l12-2v13" stroke="currentColor" stroke-width="2" />
+          <path d="M3 6v13l12 2V8" stroke="currentColor" stroke-width="2" />
+        </svg>
+      </Action>
     </div>
   );
 }

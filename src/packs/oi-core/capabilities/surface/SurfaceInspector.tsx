@@ -14,10 +14,12 @@ type SurfaceInspectorProps = InspectorCommonProps<
 
 export function SurfaceInspector({
   details,
+  lookup: surfaceLookup,
   enabled,
   useStats,
   onDelete,
   onDetailsChanged,
+  onNodeEvent,
   onToggleEnabled,
 }: SurfaceInspectorProps) {
   const stats = useStats();
@@ -42,6 +44,7 @@ export function SurfaceInspector({
               <SurfaceManagementForm
                 details={details}
                 onChange={onDetailsChanged}
+                onManage={() => onNodeEvent?.({ Type: 'manage', NodeID: surfaceLookup })}
               />
             ),
           },

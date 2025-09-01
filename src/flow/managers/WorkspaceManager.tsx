@@ -917,6 +917,10 @@ export class WorkspaceManager {
       [selectedId],
     );
 
+    const handleNodeEvent = useCallback(() => {
+      this.NodeEvents.Emit('surface', { Type: 'manage', NodeID: selectedId! });
+    }, [selectedId]);
+
     const handleDeleteNode = useCallback(() => {
       if (!selectedId) return;
 
@@ -950,6 +954,7 @@ export class WorkspaceManager {
         useStats: selected.data?.useStats ?? (() => undefined),
         onDelete: handleDeleteNode,
         onDetailsChanged: handleDetailsChanged,
+        onNodeEvent: handleNodeEvent,
         onToggleEnabled: handleToggleEnabled,
         oiSvc: this.oiSvc,
         workspaceMgr: this,
