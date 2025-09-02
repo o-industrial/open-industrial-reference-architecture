@@ -145,7 +145,7 @@ export function AzureDockerSimulator(
 
             const deviceId = await shaHash(
               EaC.EnterpriseLookup!,
-              dcDetails.DeviceID,
+              dc.Details!.Name!,
             );
 
             jobs.push({
@@ -153,7 +153,10 @@ export function AzureDockerSimulator(
               AppEnvironmentName: AppEnvironmentName,
               AppName: ApplicationName,
               Image: 'mcr.microsoft.com/oss/azure-samples/azureiot-telemetrysimulator:latest',
-              Tags: {
+              AppEnvironmentTags: {
+                WorkspaceLookup: EaC.EnterpriseLookup!,
+              },
+              AppTags: {
                 WorkspaceLookup: EaC.EnterpriseLookup!,
                 SimulatorLookup: SimulatorLookup,
                 DataConnectionLookup: dcLookup,

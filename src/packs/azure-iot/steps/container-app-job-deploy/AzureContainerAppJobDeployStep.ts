@@ -19,14 +19,16 @@ export const AzureContainerAppJobDeployInputSchema: z.ZodObject<{
   Image: z.ZodString;
   EnvironmentVariables: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
   ResourceGroupName: z.ZodString;
-  Tags: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
+  AppEnvironmentTags: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
+  AppTags: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
 }> = z.object({
   AppEnvironmentName: z.string(),
   AppName: z.string(),
   Image: z.string(),
   EnvironmentVariables: z.record(z.string()).optional(),
   ResourceGroupName: z.string(),
-  Tags: z.record(z.string()).optional(),
+  AppEnvironmentTags: z.record(z.string()).optional(),
+  AppTags: z.record(z.string()).optional(),
 });
 
 export type AzureContainerAppJobDeployInput = z.infer<
@@ -109,7 +111,8 @@ export const AzureContainerAppJobDeployStep: TStepBuilder = Step(
       Image,
       EnvironmentVariables,
       ResourceGroupName,
-      Tags,
+      AppEnvironmentTags,
+      AppTags,
     } = input;
 
     const { SubscriptionID } = ctx.Options!;
@@ -137,6 +140,7 @@ export const AzureContainerAppJobDeployStep: TStepBuilder = Step(
                 workloadProfileType: 'Consumption',
               },
             ],
+            tags: AppEnvironmentTags,
             // properties: {
             //   // appLogsConfiguration: {
             //   //   // destination: 'log-analytics',
@@ -173,7 +177,7 @@ export const AzureContainerAppJobDeployStep: TStepBuilder = Step(
     // --- Deploy Container App ---
     const containerApp: ContainerApp = {
       location,
-      tags: Tags,
+      tags: AppTags,
       managedEnvironmentId:
         `/subscriptions/${SubscriptionID}/resourceGroups/${ResourceGroupName}/providers/Microsoft.App/managedEnvironments/${AppEnvironmentName}`,
       configuration: {

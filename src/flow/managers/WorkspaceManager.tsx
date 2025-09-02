@@ -62,6 +62,7 @@ import {
 import { MenuActionItem, MenuRoot } from '../../../atomic/molecules/FlyoutMenu.tsx';
 import { EverythingAsCodeLicensing } from '../../eac/.deps.ts';
 import { AccountProfile } from '../../types/AccountProfile.ts';
+import { EaCUserRecord } from '../../api/.client.deps.ts';
 
 export class WorkspaceManager {
   protected currentScope: {
@@ -109,7 +110,6 @@ export class WorkspaceManager {
     this.History = new HistoryManager();
     this.Selection = new SelectionManager();
     this.Simulators = new SimulatorLibraryManager();
-    this.Team = new TeamManager();
 
     this.NodeEvents = new NodeEventManager(this);
 
@@ -130,6 +130,8 @@ export class WorkspaceManager {
       this.History,
       capabilitiesByScope,
     );
+
+    this.Team = new TeamManager(this.oiSvc, this.EaC);
 
     this.Interaction.BindEaCManager(this.EaC);
 
@@ -770,6 +772,7 @@ export class WorkspaceManager {
     canUndo: boolean;
     canRedo: boolean;
     hasChanges: boolean;
+    isDeploying: boolean;
     version: number;
     undo: () => void;
     redo: () => void;
@@ -780,6 +783,7 @@ export class WorkspaceManager {
   } {
     const [canUndo, setCanUndo] = useState(this.History.CanUndo());
     const [canRedo, setCanRedo] = useState(this.History.CanRedo());
+    const [isDeploying, setIsDeploying] = useState(false);
     const [hasChanges, setHasChanges] = useState(
       this.History.HasUnsavedChanges(),
     );
@@ -817,11 +821,20 @@ export class WorkspaceManager {
       canUndo,
       canRedo,
       hasChanges,
+      isDeploying,
       version,
       undo: () => this.Undo(),
       redo: () => this.Redo(),
       commit: () => this.Commit(),
-      deploy: () => this.Deploy(),
+      deploy: async () => {
+        setIsDeploying(true);
+
+        const result = await this.Deploy();
+
+        setTimeout(() => setIsDeploying(false), 0);
+
+        return result;
+      },
       revert: () => this.RevertToLastCommit(),
       fork: () => this.Fork(),
     };
@@ -907,6 +920,10 @@ export class WorkspaceManager {
       [selectedId],
     );
 
+    const handleNodeEvent = useCallback(() => {
+      this.NodeEvents.Emit('surface', { Type: 'manage', NodeID: selectedId! });
+    }, [selectedId]);
+
     const handleDeleteNode = useCallback(() => {
       if (!selectedId) return;
 
@@ -940,6 +957,7 @@ export class WorkspaceManager {
         useStats: selected.data?.useStats ?? (() => undefined),
         onDelete: handleDeleteNode,
         onDetailsChanged: handleDetailsChanged,
+        onNodeEvent: handleNodeEvent,
         onToggleEnabled: handleToggleEnabled,
         oiSvc: this.oiSvc,
         workspaceMgr: this,
@@ -1302,7 +1320,7 @@ export class WorkspaceManager {
 
   public UseWorkspaceSettings(): {
     currentWorkspace: WorkspaceSummary;
-    teamMembers: TeamMember[];
+    teamMembers: EaCUserRecord[];
     inviteMember: (
       email: string,
       role: TeamMember['Role'],
@@ -1348,17 +1366,43 @@ export class WorkspaceManager {
       return () => unsubscribe();
     }, []);
 
-    const [teamMembers, setTeamMembers] = useState<TeamMember[]>(
-      this.Team?.ListUsers?.() ?? [],
-    );
+    const [teamMembers, setTeamMembers] = useState<EaCUserRecord[]>([]);
 
+    // Load initial users on mount and whenever the TeamManager instance changes.
+    useEffect(() => {
+      let cancelled = false;
+
+      (async () => {
+        try {
+          const users = await this.Team?.ListUsers?.();
+          if (!cancelled) setTeamMembers(users ?? []);
+        } catch (err) {
+          console.error('Failed to load team members', err);
+          if (!cancelled) setTeamMembers([]); // fallback
+        }
+      })();
+
+      return () => {
+        cancelled = true;
+      };
+    }, [this.Team]);
+
+    // Keep teamMembers in sync with TeamManager changes.
     useEffect(() => {
       const unsubscribe = this.Team?.OnChange?.(() => {
-        setTeamMembers(this.Team.ListUsers());
+        // Run the async call inside the sync callback.
+        (async () => {
+          try {
+            const users = await this.Team.ListUsers();
+            setTeamMembers(users ?? []);
+          } catch (err) {
+            console.error('Failed to refresh team members', err);
+          }
+        })();
       });
 
       return () => unsubscribe?.();
-    }, []);
+    }, [this.Team]);
 
     const [workspaces, setWorkspaces] = useState<WorkspaceSummary[]>([]);
 

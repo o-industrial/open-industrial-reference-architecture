@@ -26,7 +26,9 @@ import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspa
 import { OpenIndustrialAPIClient } from '../../api/clients/OpenIndustrialAPIClient.ts';
 
 type ImpulseRuntime = {
-  AddWebSocketListener: (cb: (impulse: RuntimeImpulse) => void) => () => void;
+  AddWebSocketListener: (
+    cb: (impulse: RuntimeImpulse) => void,
+  ) => Promise<() => void>;
   Close: () => MaybeAsync<void>;
 };
 
@@ -95,14 +97,20 @@ function streamImpulses(
 
     logger.info('[ImpulseStream] 🔌 WebSocket upgrade complete');
 
-    return await handleImpulseStreamConnection({
-      req,
-      impulseRuntimeCache,
-      logger,
-      workspace,
-      surfaceFilter,
-      schemaFilter,
-    });
+    try {
+      return await handleImpulseStreamConnection({
+        req,
+        impulseRuntimeCache,
+        logger,
+        workspace,
+        surfaceFilter,
+        schemaFilter,
+      });
+    } catch (err) {
+      logger.error('[ImpulseStream] unhandled error in stream handler:');
+      logger.error(err);
+      return new Response('Internal Server Error', { status: 500 });
+    }
   }) as EaCRuntimeHandler;
 }
 
@@ -179,7 +187,6 @@ async function createImpulseRuntime({
   logger: Logger;
   jwt: string;
 }): Promise<ImpulseRuntime> {
-  const listeners = new Set<(imp: RuntimeImpulse) => void>();
   const subject = buildNATSSubject(workspace, surfaceFilter);
   const stream = `workspace.${workspace}${surfaceFilter ? `.surface.${surfaceFilter}` : ''}`;
 
@@ -203,7 +210,7 @@ async function createImpulseRuntime({
     await ensureWorkspaceJetStreamBuilder(jsm, workspace, jsmDefaults, false);
   }
 
-  logger.info('[ImpulseStream] ✅ Stream ensured, creating consumer');
+  logger.info('[ImpulseStream] ✅ Stream ensured');
 
   let eac: EverythingAsCodeOIWorkspace;
 
@@ -213,72 +220,70 @@ async function createImpulseRuntime({
     eac = await oiSvc.Workspaces.Get();
   };
 
+  let refreshTimer: number | undefined;
+
+  const scheduleEaCRefresh = () => {
+    if (refreshTimer) {
+      return;
+    }
+
+    refreshTimer = setTimeout(async () => {
+      refreshTimer = undefined;
+      await loadEaC();
+    }, 5000);
+  };
+
   await loadEaC();
 
-  const { stop } = await createEphemeralConsumer(
-    JetStream,
-    jsm,
-    stream,
-    subject,
-    ({ subject, data, headers }) => {
-      try {
-        logger.debug('[ImpulseStream] 📥 Impulse received', { subject });
-        const impulse: RuntimeImpulse = JSON.parse(SC.decode(data));
-
-        if (!validateImpulseAgainstEaC(impulse, eac)) {
-          logger.warn('[WS] ❌ Impulse failed EaC validation');
-          return;
-        }
-
-        headers?.forEach((val, key) => {
-          impulse.Headers[key] = val;
-        });
-
-        listeners.forEach((cb) => cb(impulse));
-
-        loadEaC();
-      } catch (err) {
-        logger.warn('[ImpulseStream] ⚠️ Failed to parse impulse', err);
-      }
-    },
-    {
-      deliver_policy: DeliverPolicy.StartTime,
-      opt_start_time: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-    },
-  );
-
-  let closed = false;
-  let refCount = 0;
-
   return {
-    AddWebSocketListener: (cb) => {
+    AddWebSocketListener: async (cb) => {
       logger.info('[ImpulseStream] 🔗 Listener added');
-      listeners.add(cb);
-      refCount++;
-      return () => {
-        if (!listeners.has(cb)) return;
-        listeners.delete(cb);
-        refCount = Math.max(0, refCount - 1);
-        logger.info('[ImpulseStream] ❌ Listener removed');
-        if (refCount <= 0 && !closed) {
-          closed = true;
+      const connectedAt = new Date();
+      const consumer = await createEphemeralConsumer(
+        JetStream,
+        jsm,
+        stream,
+        subject,
+        ({ subject, data, headers }) => {
           try {
-            stop();
+            logger.debug('[ImpulseStream] 📥 Impulse received', { subject });
+            const impulse: RuntimeImpulse = JSON.parse(SC.decode(data));
+
+            if (!validateImpulseAgainstEaC(impulse, eac)) {
+              logger.warn('[WS] ❌ Impulse failed EaC validation');
+              return;
+            }
+
+            headers?.forEach((val, key) => {
+              impulse.Headers[key] = val;
+            });
+
+            cb(impulse);
+
+            scheduleEaCRefresh();
           } catch (err) {
-            logger.warn('[ImpulseStream] ⚠️ Error stopping consumer', err);
+            logger.warn('[ImpulseStream] ⚠️ Failed to parse impulse', err);
           }
-          logger.info('[ImpulseStream] 🛑 Consumer stopped');
+        },
+        {
+          deliver_policy: DeliverPolicy.StartTime,
+          opt_start_time: connectedAt.toISOString(),
+        },
+      );
+
+      return () => {
+        logger.info('[ImpulseStream] ❌ Listener removed');
+        try {
+          consumer.stop();
+        } catch (err) {
+          logger.warn('[ImpulseStream] ⚠️ Error stopping consumer', err);
         }
+        // consumer
+        //   .delete()
+        //   .catch((err) => logger.warn('[ImpulseStream] ⚠️ Error deleting consumer', err));
       };
     },
     Close: () => {
-      if (closed) return;
-      closed = true;
-      try {
-        stop();
-      } catch (err) {
-        logger.warn('[ImpulseStream] ⚠️ Error stopping consumer', err);
-      }
       logger.info('[ImpulseStream] 🔒 Runtime closed');
     },
   };
@@ -322,26 +327,9 @@ async function handleImpulseStreamConnection({
 
   let unsub: () => void;
   let closed = false;
-  let socketReady = false;
-  const impulseQueue: RuntimeImpulse[] = [];
-
-  const flushQueue = () => {
-    logger.debug(`[WS] 🚚 Flushing ${impulseQueue.length} queued impulses`);
-    while (
-      socketReady &&
-      socket.readyState === WebSocket.OPEN &&
-      impulseQueue.length > 0
-    ) {
-      const imp = impulseQueue.shift();
-      if (imp) {
-        try {
-          socket.send(JSON.stringify(imp));
-        } catch (err) {
-          logger.error('[WS] ❌ Failed to send impulse:', err);
-        }
-      }
-    }
-  };
+  const HEARTBEAT_TIMEOUT_MS = 30000;
+  let heartbeatTimer: number | undefined;
+  let awaitingPong = false;
 
   const listener = (impulse: RuntimeImpulse) => {
     logger.debug(`[WS] 🎯 Impulse received by listener: ${impulse.Subject}`);
@@ -351,7 +339,7 @@ async function handleImpulseStreamConnection({
       return;
     }
 
-    if (socketReady && socket.readyState === WebSocket.OPEN) {
+    if (socket.readyState === WebSocket.OPEN) {
       logger.debug(
         `[WS] ✅ Sending impulse to open socket: ${impulse.Subject}`,
       );
@@ -362,63 +350,138 @@ async function handleImpulseStreamConnection({
       }
     } else {
       logger.warn(
-        `[WS] ⏳ Socket not open — queueing impulse: ${impulse.Subject}`,
+        `[WS] ⚠️ Socket not open — dropping impulse: ${impulse.Subject}`,
       );
-      impulseQueue.push(impulse);
     }
   };
 
   const cacheKey = `${workspace}::${surfaceFilter ?? '*'}`;
 
-  const runtime = await impulseRuntimeCache.get(cacheKey)!;
+  const runtimePromise = impulseRuntimeCache.get(cacheKey);
+  if (!runtimePromise) {
+    logger.error(`[WS] ❌ No impulse runtime found for cache key: ${cacheKey}`);
+    try {
+      socket.close(1011, 'runtime unavailable');
+    } catch (err) {
+      logger.error('[WS] ❌ Error closing socket after missing runtime:', err);
+    }
+    return new Response('Service Unavailable', { status: 503 });
+  }
+  const runtime = await runtimePromise;
 
-  async function shutdown() {
-    if (closed) return;
-    closed = true;
-    socketReady = false;
-    impulseQueue.length = 0;
-    logger.info('[WS] 🔻 Shutting down stream connection');
-    unsub?.();
-    await runtime.Close();
-    impulseRuntimeCache.delete(cacheKey);
+  function shutdown() {
+    if (!closed) {
+      closed = true;
+      if (heartbeatTimer) {
+        clearTimeout(heartbeatTimer);
+        heartbeatTimer = undefined;
+      }
+      logger.info('[WS] 🔻 Shutting down stream connection');
+      // Remove this socket’s listener; consumer will be stopped and deleted
+      try {
+        unsub?.();
+      } catch (err) {
+        logger.error('[WS] ❌ Error removing listener:', err);
+      }
+    }
+
+    return Promise.resolve();
   }
 
-  socket.onopen = () => {
-    if (socketReady) {
-      logger.warn('[WS] 🚨 Socket already marked as ready — duplicate onopen?');
+  const scheduleHeartbeat = () => {
+    heartbeatTimer = setTimeout(() => {
+      if (awaitingPong) {
+        logger.warn('[WS] 💔 No pong received - closing socket');
+        try {
+          socket.close(1000, 'heartbeat timeout');
+        } catch (err) {
+          logger.error('[WS] ❌ Error closing socket after missing pong:', err);
+        }
+        shutdown();
+        return;
+      }
+      try {
+        awaitingPong = true;
+        socket.send(
+          JSON.stringify({ type: 'ping', ts: new Date().toISOString() }),
+        );
+      } catch (err) {
+        logger.error('[WS] ❌ Failed to send ping:', err);
+      }
+      scheduleHeartbeat();
+    }, HEARTBEAT_TIMEOUT_MS);
+  };
+
+  socket.onopen = async () => {
+    logger.info(`[WS] ✅ WebSocket opened: workspace=${workspace}`);
+
+    try {
+      unsub = await runtime.AddWebSocketListener(listener);
+    } catch (err) {
+      logger.error('[WS] ❌ Failed to create consumer:', err);
+      try {
+        socket.close(1011, 'listener error');
+      } catch (closeErr) {
+        logger.error(
+          '[WS] ❌ Error closing socket after listener failure:',
+          closeErr,
+        );
+      }
+      await shutdown();
       return;
     }
 
-    logger.info(`[WS] ✅ WebSocket opened: workspace=${workspace}`);
-    socketReady = true;
-
-    if (!unsub) {
-      unsub = runtime.AddWebSocketListener(listener);
-    } else {
-      logger.warn('[WS] ⚠️ Listener already attached — skipping');
-    }
-
-    setTimeout(() => {
-      socket.send(
-        JSON.stringify({ status: 'connected', ts: new Date().toISOString() }),
-      );
-      flushQueue();
-    }, 0);
+    socket.send(
+      JSON.stringify({ status: 'connected', ts: new Date().toISOString() }),
+    );
+    scheduleHeartbeat();
   };
 
   socket.onmessage = (event) => {
     logger.info('[WS-Only] 📥 Received message:', event.data);
+    try {
+      const msg = typeof event.data === 'string' ? event.data : '';
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(msg);
+      } catch {
+        parsed = undefined;
+      }
+      const isPong = (typeof parsed === 'object' &&
+        parsed !== null &&
+        'type' in parsed &&
+        (parsed as { type: string }).type === 'pong') ||
+        msg === 'pong';
+      if (isPong) {
+        awaitingPong = false;
+        if (!closed) {
+          if (heartbeatTimer) clearTimeout(heartbeatTimer);
+          scheduleHeartbeat();
+        }
+        logger.debug('[WS] 💓 Pong received');
+        return;
+      }
+    } catch (err) {
+      logger.error('[WS] ❌ Error processing message:', err);
+    }
     socket.send(JSON.stringify({ echo: event.data }));
   };
 
-  socket.onclose = (event) => {
+  socket.onclose = async (event) => {
     logger.warn('[WS] 🔻 WebSocket closed:', event.reason || '(no reason)');
-    shutdown();
+    await shutdown();
   };
 
-  socket.onerror = async (err) => {
+  socket.onerror = async (evt: Event | ErrorEvent) => {
+    const errEvt = evt as ErrorEvent;
     logger.error('[WS] ❌ WebSocket error:');
-    logger.error(err);
+    logger.error({
+      message: errEvt.message,
+      error: errEvt.error, // This holds the underlying Error (e.g. Unexpected EOF)
+      filename: errEvt.filename,
+      lineno: errEvt.lineno,
+      colno: errEvt.colno,
+    });
     await shutdown();
   };
 

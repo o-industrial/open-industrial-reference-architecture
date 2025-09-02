@@ -87,6 +87,40 @@ export class OpenIndustrialWorkspaceAPI {
   }
 
   /**
+   * List the team users for the current workspace.
+   */
+  public async ListUsers(): Promise<EaCUserRecord[]> {
+    const res = await fetch(this.bridge.url('/api/workspaces/teams/list'), {
+      method: 'GET',
+      headers: this.bridge.headers(),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to list team users: ${res.status}`);
+    }
+
+    return await this.bridge.json(res);
+  }
+
+  /**
+   * Invite new user to current workspace
+   */
+  public async InviteUser(
+    userRecord: EaCUserRecord,
+  ): Promise<{ EnterpriseLookup: string; CommitID: string }> {
+    const res = await fetch(this.bridge.url('/api/workspaces/teams/invite'), {
+      method: 'POST',
+      headers: this.bridge.headers(),
+      body: JSON.stringify(userRecord),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to invite user: ${res.status}`);
+    }
+
+    return await this.bridge.json(res);
+  }
+  /**
    * Get the status for a specific commit in the current workspace.
    *
    * @param commitId - The ID of the commit to retrieve.
@@ -262,28 +296,42 @@ export class OpenIndustrialWorkspaceAPI {
       for (const msg of messageQueue) {
         socket.send(msg);
       }
-      messageQueue.length = 0;
 
-      // (Optional) Send greeting or subscription request here
-      // send(JSON.stringify({ type: 'subscribe', ts: Date.now() }));
+      messageQueue.length = 0;
     };
 
     socket.onmessage = (event) => {
       console.debug('[StreamImpulses] 📥 Raw message:', event.data);
+      const msg = typeof event.data === 'string' ? event.data : '';
       try {
-        const parsed = JSON.parse(event.data);
+        const parsed = JSON.parse(msg);
+        const isPing = parsed && typeof parsed === 'object' && 'type' in parsed &&
+          (parsed as { type: string }).type === 'ping';
+        if (isPing) {
+          console.debug('[StreamImpulses] 💓 Ping received - sending pong');
+          _send(
+            JSON.stringify({ type: 'pong', ts: new Date().toISOString() }),
+          );
+          return;
+        }
         if (isRuntimeImpulse(parsed)) {
           console.debug('[StreamImpulses] ✅ Parsed RuntimeImpulse');
           onImpulse(parsed);
         }
       } catch (err) {
+        if (msg === 'ping') {
+          console.debug('[StreamImpulses] 💓 Ping received - sending pong');
+          _send('pong');
+          return;
+        }
         console.error('[StreamImpulses] ❌ Parse error:', err);
         console.debug('Raw data:', event.data);
       }
     };
 
     socket.onerror = (err) => {
-      console.error('[StreamImpulses] ❌ WebSocket error:', err);
+      console.error('[StreamImpulses] ❌ WebSocket error:');
+      console.error(err);
     };
 
     socket.onclose = (evt) => {

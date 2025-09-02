@@ -1,11 +1,18 @@
 import { TeamMember } from '../types/TeamMember.ts';
+import { OpenIndustrialAPIClient } from '../../api/clients/OpenIndustrialAPIClient.ts';
+import { EaCUserRecord } from '../../api/.client.deps.ts';
+import { EaCManager } from './EaCManager.ts';
 
 export class TeamManager {
   protected members: TeamMember[] = [];
 
   protected listeners: (() => void)[] = [];
 
-  constructor(initialMembers?: TeamMember[]) {
+  constructor(
+    protected oiSvc: OpenIndustrialAPIClient,
+    protected eac: EaCManager,
+    initialMembers?: TeamMember[],
+  ) {
     const joined = new Date().toISOString();
 
     this.members = initialMembers ?? [
@@ -24,16 +31,30 @@ export class TeamManager {
     ];
   }
 
-  public ListUsers(): TeamMember[] {
-    return [...this.members];
+  public async ListUsers(): Promise<EaCUserRecord[]> {
+    const users = await this.oiSvc.Workspaces.ListUsers();
+
+    return users;
   }
 
-  public InviteUser(
+  public async InviteUser(
     email: string,
     role: TeamMember['Role'] = 'Viewer',
     name?: string,
-  ): void {
+  ): Promise<void> {
     if (!email || this.members.some((m) => m.Email === email)) return;
+
+    const userEac = this.eac.GetEaC();
+
+    const userRecord: EaCUserRecord = {
+      EnterpriseLookup: userEac.EnterpriseLookup ?? '',
+      EnterpriseName: userEac.Details?.Name ?? '',
+      Owner: false,
+      ParentEnterpriseLookup: userEac.ParentEnterpriseLookup ?? '',
+      Username: email,
+    };
+
+    const _inviteResult = await this.oiSvc.Workspaces.InviteUser(userRecord);
 
     this.members.push({
       Email: email,

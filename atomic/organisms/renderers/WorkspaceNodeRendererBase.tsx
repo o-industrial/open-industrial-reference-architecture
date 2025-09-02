@@ -73,7 +73,8 @@ export function WorkspaceNodeRendererBase({
       clickTimer = null;
     } else {
       clickTimer = setTimeout(() => {
-        setState('expanded');
+        // setState('expanded');
+        onDoubleClick?.();
         clickTimer = null;
       }, 250);
     }

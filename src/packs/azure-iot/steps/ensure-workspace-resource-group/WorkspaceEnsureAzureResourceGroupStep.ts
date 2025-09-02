@@ -95,6 +95,9 @@ export const WorkspaceEnsureAzureResourceGroupStep: TStepBuilder = Step(
 
     await ResourceClient.resourceGroups.createOrUpdate(ResourceGroupName, {
       location,
+      tags: {
+        WorkspaceLookup,
+      },
     });
 
     return { ResourceGroupName };

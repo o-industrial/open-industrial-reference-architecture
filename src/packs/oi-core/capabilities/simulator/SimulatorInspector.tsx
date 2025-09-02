@@ -1,6 +1,7 @@
-import { InspectorBase, NodeStatTile, TabbedPanel } from '../../../../../atomic/.exports.ts';
-import { EaCSimulatorDetails } from '../../../../eac/EaCSimulatorDetails.ts';
+import { InspectorBase, TabbedPanel } from '../../../../../atomic/.exports.ts';
+import { EaCAzureDockerSimulatorDetails } from '../../../../eac/EaCAzureDockerSimulatorDetails.ts';
 import { InspectorCommonProps } from '../../../../flow/.exports.ts';
+import { SimulatorManagementForm } from '../../../../../atomic/molecules/SimulatorManagementForm.tsx';
 
 type SimulatorStats = {
   impulseRates?: number[];
@@ -10,44 +11,19 @@ type SimulatorStats = {
 };
 
 type SimulatorInspectorProps = InspectorCommonProps<
-  EaCSimulatorDetails,
+  EaCAzureDockerSimulatorDetails,
   SimulatorStats
 >;
-
-function SimulatorAnalyticsTab({ stats }: { stats?: SimulatorStats }) {
-  const {
-    instanceCount = 0,
-    avgStartupMs = 0,
-    lastDeploymentAt = '—',
-  } = stats ?? {};
-
-  return (
-    <div class='grid grid-cols-3 gap-2 mt-2'>
-      <NodeStatTile label='Instances' value={instanceCount} />
-      <NodeStatTile label='Startup Time' value={`${avgStartupMs}ms`} />
-      <NodeStatTile label='Last Deploy' value={lastDeploymentAt} />
-    </div>
-  );
-}
-
-function SimulatorStreamTab() {
-  return (
-    <p class='text-sm text-neutral-300'>
-      📡 Incoming data and deployment logs will appear here.
-    </p>
-  );
-}
 
 export function SimulatorInspector({
   details,
   enabled,
   useStats,
   onDelete,
-  onDetailsChanged: _onDetailsChanged,
+  onDetailsChanged,
   onToggleEnabled,
 }: SimulatorInspectorProps) {
   const stats = useStats();
-
   return (
     <InspectorBase
       iconKey='simulator'
@@ -65,20 +41,11 @@ export function SimulatorInspector({
             key: 'settings',
             label: 'Settings',
             content: (
-              <div class='text-sm text-neutral-300'>
-                ⚙️ Simulator configuration form coming soon.
-              </div>
+              <SimulatorManagementForm
+                details={details as EaCAzureDockerSimulatorDetails}
+                onChange={onDetailsChanged}
+              />
             ),
-          },
-          {
-            key: 'analytics',
-            label: 'Analytics',
-            content: <SimulatorAnalyticsTab stats={stats} />,
-          },
-          {
-            key: 'stream',
-            label: 'Logs / Stream',
-            content: <SimulatorStreamTab />,
           },
         ]}
       />

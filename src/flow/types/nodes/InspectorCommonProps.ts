@@ -1,11 +1,13 @@
+import { EaCVertexDetails } from '../../.deps.ts';
 import { WorkspaceManager } from '../../../../atomic/.deps.ts';
 import { OpenIndustrialAPIClient } from '../../../api/clients/OpenIndustrialAPIClient.ts';
-import { EaCVertexDetails } from '../../.deps.ts';
+import { BaseNodeEvent } from '../react/BaseNodeEvent.ts';
 
 export type InspectorCommonProps<
   TDetails extends EaCVertexDetails = EaCVertexDetails,
   TStats extends Record<string, unknown> = Record<string, unknown>,
   TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TEvent extends BaseNodeEvent = BaseNodeEvent,
 > = {
   config?: TConfig;
   details: Partial<TDetails>;
@@ -19,5 +21,8 @@ export type InspectorCommonProps<
 
   onDelete: () => void;
   onDetailsChanged: (next: Partial<TDetails>) => void;
+
+  onNodeEvent?: (event: TEvent) => void;
+
   onToggleEnabled: (enabled: boolean) => void;
 };

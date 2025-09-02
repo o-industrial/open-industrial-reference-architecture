@@ -21,6 +21,12 @@ type TStepBuilder = StepModuleBuilder<
   AzureIoTHubDeviceOptions
 >;
 
+type DeviceDescription = {
+  deviceId: string;
+  capabilities: { iotEdge: boolean };
+  tags: { WorkspaceLookup: string; DataConnectionLookup?: string };
+};
+
 export const AzureIoTHubDeviceStep: TStepBuilder = Step(
   'Azure IoT Hub Device Provisioning',
   'Adds devices to an Azure IoT Hub and updates tags if needed',
@@ -57,12 +63,6 @@ export const AzureIoTHubDeviceStep: TStepBuilder = Step(
   .Run(async (input, ctx) => {
     const { WorkspaceLookup, Devices } = input;
     const { Registry } = ctx.Services!;
-
-    type DeviceDescription = {
-      deviceId: string;
-      capabilities: { iotEdge: boolean };
-      tags: { WorkspaceLookup: string; DataConnectionLookup?: string };
-    };
 
     const toAdd: DeviceDescription[] = [];
     const toUpdate: {

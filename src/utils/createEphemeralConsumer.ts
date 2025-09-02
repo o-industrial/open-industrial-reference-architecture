@@ -23,18 +23,15 @@ export async function createEphemeralConsumer(
     throw new Error(`[ImpulseStream] Stream not found: ${stream}`);
   }
 
-  const consumerName = `impulse-${crypto.randomUUID()}`;
-
-  await jsm.consumers.add(stream, {
-    name: consumerName,
+  const { name: consumerName } = await jsm.consumers.add(stream, {
     ack_policy: AckPolicy.None,
     filter_subject: subject,
     ...(consumerConfig || {}),
   });
 
   const consumer = await js.consumers.get(stream, consumerName);
-  const messages = await consumer.consume();
   const abort = new AbortController();
+  const messages = await consumer.consume();
 
   (async () => {
     for await (const msg of messages) {
@@ -56,8 +53,7 @@ export async function createEphemeralConsumer(
   })();
 
   return {
-    stop: () => {
-      abort.abort();
-    },
+    stop: () => abort.abort(),
+    // delete: () => jsm.consumers.delete(stream, consumerName),
   };
 }

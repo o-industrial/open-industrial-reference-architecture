@@ -5,10 +5,12 @@ import { JSX, classSet, IntentTypes } from '../.deps.ts';
 import { Action, ActionStyleTypes } from '../atoms/Action.tsx';
 import { MenuActionItem, MenuRoot } from './FlyoutMenu.tsx';
 import { MenuBar } from './MenuBar.tsx';
+import { LoadingIcon } from '../../build/iconset/icons/LoadingIcon.tsx';
 
 export type AppFrameBarProps = {
   hasWorkspaceChanges: boolean;
   menus: MenuRoot[];
+  isDeploying: boolean;
   onMenuOption: (item: MenuActionItem) => void;
   onActivateClick?: () => void;
   onCommitClick: () => void;
@@ -23,6 +25,7 @@ export type CommitBadgeState = 'error' | 'processing' | 'success';
 
 export function AppFrameBar({
   hasWorkspaceChanges,
+  isDeploying,
   menus,
   onMenuOption,
   onActivateClick,
@@ -67,19 +70,22 @@ export function AppFrameBar({
           </Action>
         )}
 
-        {onDeployClick && (
-          <Action
-            title="Deploy"
-            onClick={onDeployClick}
-            styleType={ActionStyleTypes.Outline | ActionStyleTypes.Thin}
-            intentType={
-              hasWorkspaceChanges ? IntentTypes.None : IntentTypes.Primary
-            }
-            disabled={hasWorkspaceChanges}
-          >
-            Deploy
-          </Action>
-        )}
+        {onDeployClick &&
+          (isDeploying ? (
+            <LoadingIcon class="w-4 h-4 animate-spin" />
+          ) : (
+            <Action
+              title="Deploy"
+              onClick={onDeployClick}
+              styleType={ActionStyleTypes.Outline | ActionStyleTypes.Thin}
+              intentType={
+                hasWorkspaceChanges ? IntentTypes.None : IntentTypes.Primary
+              }
+              disabled={hasWorkspaceChanges}
+            >
+              Deploy
+            </Action>
+          ))}
 
         {onSettingsClick && (
           <Action

@@ -39,16 +39,9 @@ export function ConnectionManagementForm({
     <div class="space-y-4 pt-2">
       {/* Label */}
       <Input
-        label="Connection Label"
+        label="Connection ID"
         value={details.Name ?? ''}
         onInput={handleStringChange('Name')}
-      />
-
-      {/* Device ID */}
-      <Input
-        label="Device ID"
-        value={details.DeviceID ?? ''}
-        onInput={handleStringChange('DeviceID')}
       />
 
       {/* Is IoT Edge Device */}
