@@ -18,6 +18,7 @@ import { AziPanelTemplate } from '../templates/AziPanelTemplate.tsx';
 import { AziChatInput } from '../molecules/azi/AziChatInput.tsx';
 import { AziChatMessage } from '../molecules/azi/AziChatMessage.tsx';
 import { AziManager, AziState } from '../../src/flow/managers/AziManager.ts';
+import { string } from 'jsr:@fathym/common@0.2.266/third-party/zod';
 
 export const IsIsland = true;
 
@@ -27,10 +28,12 @@ type AziPanelProps = {
   workspaceMgr: WorkspaceManager;
   aziMgr: AziManager;
   onClose?: () => void;
-  onSend?: (state: AziState) => void;
+  onStartSend?: (state: AziState) => void;
+  onFinishSend?: (state: AziState) => void;
   intentTypes?: Partial<Record<Role, IntentTypes>>;
   renderMessage?: (message: string) => string;
   extraInputs?: Record<string, unknown>;
+  elementId?: string;
 };
 
 function ReasoningBlock({
@@ -87,7 +90,8 @@ function ReasoningBlock({
 export function AziPanel({
   workspaceMgr,
   onClose,
-  onSend,
+  onStartSend,
+  onFinishSend,
   intentTypes = {
     user: IntentTypes.Secondary,
     azi: IntentTypes.Info,
@@ -105,7 +109,7 @@ export function AziPanel({
     scrollRef,
     registerStreamAnchor,
   } = workspaceMgr.UseAzi(aziMgr);
-  console.log(JSON.stringify(extraInputs, null, 2));
+
   // Initial peek when mounted
   useEffect(() => {
     console.log('[AziPanel] Initial peek()');
@@ -117,11 +121,12 @@ export function AziPanel({
 
   const wrappedSend = useCallback(
     async (...args: Parameters<typeof send>) => {
+      onStartSend?.(stateRef.current);
       const result = await send(...args);     // run the real send
-      onSend?.(stateRef.current);             // call your callback afterwards
+      onFinishSend?.(stateRef.current);             // call your callback afterwards
       return result;                          // preserve return value
     },
-    [send, onSend]
+    [send, onStartSend, onFinishSend]
   );
 
   // On first load, trigger empty message to prompt stream

@@ -106,101 +106,94 @@ export const SurfaceWarmQueryModalResults: FunctionalComponent<
   };
 
   return (
-    <div class='pl-6 pr-6 pt-6 pb-0 rounded-sm'>
-      <div>
-        <div>
-          <div class='flex items-center justify-between mb-2'>
-            <label class='flex items-center gap-2 text-neutral-900 dark:text-white font-semibold'>
-              Results
-            </label>
+    <div class='pl-6 pr-6 pt-6 pb-0 rounded-sm h-full flex flex-col min-h-0'>
+      {/* Header */}
+      <div class='flex items-center justify-between mb-2'>
+        <label class='flex items-center gap-2 text-neutral-900 dark:text-white font-semibold'>
+          Results
+        </label>
 
-            {queryResults.length > 0
-              ? (
-                <a
-                  title='Download CSV'
-                  href='#'
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleExportToCSV();
-                  }}
-                  class='inline-flex items-center gap-2 text-teal-400 hover:text-teal-300 focus:outline-none'
-                >
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    class='w-4 h-4'
-                    viewBox='0 0 24 24'
-                    fill='currentColor'
-                  >
-                    <path d='M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8zm4 18H6V4h7v5h5zm-8-1l2-4H9v-5h6v5l-2 4z' />
-                  </svg>
-                  <span class='text-sm'>CSV</span>
-                </a>
-              )
-              : ''}
+        {queryResults.length > 0 && (
+          <a
+            title='Download CSV'
+            href='#'
+            onClick={(e) => {
+              e.preventDefault();
+              handleExportToCSV();
+            }}
+            class='inline-flex items-center gap-2 text-teal-400 hover:text-teal-300 focus:outline-none'
+          >
+            {/* ...icon... */}
+            <span class='text-sm'>CSV</span>
+          </a>
+        )}
+      </div>
+
+      {isLoading
+        ? (
+          <div class='flex items-center justify-center h-40'>
+            <div class='animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500 border-solid' />
           </div>
-
-          {isLoading
-            ? (
-              <div class='flex items-center justify-center h-40'>
-                <div class='animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500 border-solid'>
-                </div>
-              </div>
-            )
-            : queryResults.length > 0
-            ? (
-              <div>
-                <table class='w-full table-auto border-collapse border border-gray-300 dark:border-gray-600'>
-                  <thead>
-                    <tr class='bg-gray-100 dark:bg-slate-700'>
-                      {columnHeaders.map((header) => (
-                        <th
-                          key={header}
-                          class='border px-3 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-200'
-                        >
-                          {header}
-                        </th>
+        )
+        : queryResults.length > 0
+        ? (
+          <>
+            {/* SCROLL AREA */}
+            <div class='flex-1 min-h-0 overflow-y-auto overflow-x-auto rounded border border-gray-300 dark:border-gray-600 mb-2'>
+              <table class='w-full table-auto border-collapse border-spacing-0'>
+                <thead>
+                  <tr class='bg-gray-100 dark:bg-slate-700'>
+                    {columnHeaders.map((h) => (
+                      <th
+                        key={h}
+                        class='border px-3 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-200 whitespace-nowrap'
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedResults.map((row, i) => (
+                    <tr key={i} class='border-t'>
+                      {columnHeaders.map((h) => (
+                        <td class='border px-3 py-2 text-xs whitespace-nowrap'>
+                          {row[h] ?? ''}
+                        </td>
                       ))}
                     </tr>
-                  </thead>
-                  <tbody>
-                    {paginatedResults.map((row, rowIndex) => (
-                      <tr key={rowIndex} class='border-t'>
-                        {columnHeaders.map((header) => (
-                          <td key={header} class='border px-3 py-2 text-xs'>
-                            {row[header] ?? ''}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-                <div class='flex justify-center items-center mt-4 space-x-4'>
-                  <button
-                    type='button'
-                    class='px-3 py-1 bg-gray-300 dark:bg-slate-700 text-sm rounded disabled:opacity-50'
-                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                    disabled={currentPage === 1}
-                  >
-                    Prev
-                  </button>
+            {/* NON-SCROLLING PAGER */}
+            <div class='flex justify-center items-center mt-2 px-1 gap-3'>
+              <button
+                type='button'
+                class='px-3 py-1 bg-gray-300 dark:bg-slate-700 text-sm rounded disabled:opacity-50'
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Prev
+              </button>
 
-                  <span class='text-sm'>Page {currentPage} of {Math.max(totalPages, 1)}</span>
+              <span class='text-sm whitespace-nowrap'>
+                Page {currentPage} of {Math.max(totalPages, 1)}
+              </span>
 
-                  <button
-                    type='button'
-                    class='px-3 py-1 bg-gray-300 dark:bg-slate-700 text-sm rounded disabled:opacity-50'
-                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                    disabled={currentPage === totalPages || totalPages === 0}
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            )
-            : <p class='text-gray-600 dark:text-gray-300 mb-6'>No results to display.</p>}
-        </div>
-      </div>
+              <button
+                type='button'
+                class='px-3 py-1 bg-gray-300 dark:bg-slate-700 text-sm rounded disabled:opacity-50'
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages || totalPages === 0}
+              >
+                Next
+              </button>
+            </div>
+          </>
+        )
+        : <p class='text-gray-600 dark:text-gray-300 mb-6'>No results to display.</p>}
     </div>
   );
 };
