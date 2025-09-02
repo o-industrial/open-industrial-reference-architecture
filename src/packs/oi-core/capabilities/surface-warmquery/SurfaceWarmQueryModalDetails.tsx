@@ -19,28 +19,32 @@ export const SurfaceWarmQueryModalDetails: FunctionalComponent<SurfaceWarmQueryM
     onQueryDescriptionChange,
     onQueryApiPathChange,
   }) => {
+    type InputLike = HTMLInputElement | HTMLTextAreaElement;
+    type InputEvt = JSX.TargetedInputEvent<InputLike>;
+    type KbEvt = JSX.TargetedKeyboardEvent<HTMLInputElement>;
+
     const handleQueryNameChange = (
-      e: string | JSX.TargetedEvent<HTMLInputElement, Event>,
+      e: string | InputEvt,
     ) => {
       const inputValue = typeof e === 'string' ? e : e.currentTarget.value;
 
       if (inputValue.length == 0) {
-        document.getElementById('queryName').style.borderColor = 'red';
-        if (!document.getElementById('saveWrap').title.includes('Query Name Required')) {
-          document.getElementById('saveWrap').title =
-            document.getElementById('saveWrap').title == ''
+        document.getElementById('queryName')!.style.borderColor = 'red';
+        if (!document.getElementById('saveWrap')!.title.includes('Query Name Required')) {
+          document.getElementById('saveWrap')!.title =
+            document.getElementById('saveWrap')!.title == ''
               ? 'Query Name Required'
-              : document.getElementById('saveWrap').title + '\nQuery Name Required';
+              : document.getElementById('saveWrap')!.title + '\nQuery Name Required';
         }
       } else {
-        document.getElementById('queryName').style.borderColor = '';
-        document.getElementById('saveWrap').title = document.getElementById('saveWrap').title
+        document.getElementById('queryName')!.style.borderColor = '';
+        document.getElementById('saveWrap')!.title = document.getElementById('saveWrap')!.title
           .replace('\nQuery Name Required', '').replace('Query Name Required', '');
       }
       onQueryNameChange(inputValue);
     };
     const handleQueryApiPathChange = (
-      e: string | JSX.TargetedEvent<HTMLInputElement, Event>,
+      e: string | InputEvt,
     ) => {
       const inputValue = typeof e === 'string' ? e : e.currentTarget.value;
 
@@ -48,22 +52,22 @@ export const SurfaceWarmQueryModalDetails: FunctionalComponent<SurfaceWarmQueryM
       const filteredValue = inputValue.replace(/[^a-z0-9-]/g, '');
 
       if (filteredValue.length == 0) {
-        document.getElementById('queryApiPath').style.borderColor = 'red';
-        if (!document.getElementById('saveWrap').title.includes('Query API Path Required')) {
-          document.getElementById('saveWrap').title =
-            document.getElementById('saveWrap').title == ''
+        document.getElementById('queryApiPath')!.style.borderColor = 'red';
+        if (!document.getElementById('saveWrap')!.title.includes('Query API Path Required')) {
+          document.getElementById('saveWrap')!.title =
+            document.getElementById('saveWrap')!.title == ''
               ? 'Query API Path Required'
-              : document.getElementById('saveWrap').title + '\nQuery Api Path Required';
+              : document.getElementById('saveWrap')!.title + '\nQuery Api Path Required';
         }
       } else {
-        document.getElementById('queryApiPath').style.borderColor = '';
-        document.getElementById('saveWrap').title = document.getElementById('saveWrap').title
+        document.getElementById('queryApiPath')!.style.borderColor = '';
+        document.getElementById('saveWrap')!.title = document.getElementById('saveWrap')!.title
           .replace('\nQuery API Path Required', '').replace('Query API Path Required', '');
       }
       onQueryApiPathChange(filteredValue);
     };
 
-    const handleQueryApiPathKeyDown = (e: KeyboardEvent) => {
+    const handleQueryApiPathKeyDown = (e: KbEvt) => {
       const validKeys = /^[a-z0-9-]$/;
 
       // Allow navigation and editing keys
@@ -89,21 +93,21 @@ export const SurfaceWarmQueryModalDetails: FunctionalComponent<SurfaceWarmQueryM
     };
 
     const handleQueryDescriptionChange = (
-      e: string | JSX.TargetedEvent<HTMLInputElement, Event>,
+      e: string | InputEvt,
     ) => {
       const inputValue = typeof e === 'string' ? e : e.currentTarget.value;
 
       if (inputValue.length == 0) {
-        document.getElementById('queryDescription').style.borderColor = 'red';
-        if (!document.getElementById('saveWrap').title.includes('Query Description Required')) {
-          document.getElementById('saveWrap').title =
-            document.getElementById('saveWrap').title == ''
+        document.getElementById('queryDescription')!.style.borderColor = 'red';
+        if (!document.getElementById('saveWrap')!.title.includes('Query Description Required')) {
+          document.getElementById('saveWrap')!.title =
+            document.getElementById('saveWrap')!.title == ''
               ? 'Query Description Required'
-              : document.getElementById('saveWrap').title + '\nQuery Description Required';
+              : document.getElementById('saveWrap')!.title + '\nQuery Description Required';
         }
       } else {
-        document.getElementById('queryDescription').style.borderColor = '';
-        document.getElementById('saveWrap').title = document.getElementById('saveWrap').title
+        document.getElementById('queryDescription')!.style.borderColor = '';
+        document.getElementById('saveWrap')!.title = document.getElementById('saveWrap')!.title
           .replace('\nQuery Description Required', '').replace('Query Description Required', '');
       }
       onQueryDescriptionChange(inputValue);

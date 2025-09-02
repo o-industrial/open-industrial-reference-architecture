@@ -1,3 +1,5 @@
+// deno-lint-ignore-file no-explicit-any
+
 // SurfaceWarmQueryModal.tsx
 import { TabbedPanel } from '../../../../../atomic/.exports.ts';
 import { marked } from 'npm:marked@15.0.1';
@@ -67,7 +69,7 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
     }
   };
 
-  const onAziStartSend = (state: AziState) => {
+  const onAziStartSend = () => {
     setIsLoading(true);
     setActiveTabKey('query');
     setErrors('> Azi Thinking...');
@@ -125,7 +127,7 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
     setSaveErrors(errs);
     if (errs.length === 0) {
       // allow onSave to be sync or async
-      onSave(queryName, queryApiPath, queryDescription, query);
+      await onSave(queryName, queryApiPath, queryDescription, query);
       setSaveSuccess('Warm Query saved successfully.');
     }
   };

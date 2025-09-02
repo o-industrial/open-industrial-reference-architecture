@@ -14,6 +14,9 @@ export const SurfaceWarmQueryModalQuery: FunctionalComponent<SurfaceWarmQueryMod
   errors,
   isLoading = false,
 }) => {
+  type InputLike = HTMLInputElement | HTMLTextAreaElement;
+  type InputEvt = JSX.TargetedInputEvent<InputLike>;
+
   const Icon = ({ children }: { children: JSX.Element | JSX.Element[] }) => (
     <svg
       class='w-6 h-6 text-neon-yellow-500 dark:text-neon-yellow-300'
@@ -24,26 +27,27 @@ export const SurfaceWarmQueryModalQuery: FunctionalComponent<SurfaceWarmQueryMod
     </svg>
   );
   const handleQueryChange = (
-    e: string | JSX.TargetedEvent<HTMLInputElement, Event>,
+    e: string | InputEvt,
   ) => {
     const inputValue = typeof e === 'string' ? e : e.currentTarget.value;
 
     if (inputValue.length == 0) {
-      document.getElementById('query').style.borderColor = 'red';
-      if (!document.getElementById('saveWrap').title.includes('Query Required')) {
-        document.getElementById('saveWrap').title = document.getElementById('saveWrap').title == ''
-          ? 'Query Required'
-          : document.getElementById('saveWrap').title + '\nQuery Required';
+      document.getElementById('query')!.style.borderColor = 'red';
+      if (!document.getElementById('saveWrap')!.title.includes('Query Required')) {
+        document.getElementById('saveWrap')!.title =
+          document.getElementById('saveWrap')!.title == ''
+            ? 'Query Required'
+            : document.getElementById('saveWrap')!.title + '\nQuery Required';
       }
-      document.getElementById('runWrap').title = 'Query Required';
+      document.getElementById('runWrap')!.title = 'Query Required';
     } else {
-      document.getElementById('query').style.borderColor = '';
-      document.getElementById('saveWrap').title = document.getElementById('saveWrap').title
+      document.getElementById('query')!.style.borderColor = '';
+      document.getElementById('saveWrap')!.title = document.getElementById('saveWrap')!.title
         .replace(
           '\nQuery Required',
           '',
         ).replace('Query Required', '');
-      document.getElementById('runWrap').title = '';
+      document.getElementById('runWrap')!.title = '';
     }
     onQueryChange(inputValue);
   };

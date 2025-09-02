@@ -105,7 +105,7 @@ export class WorkspaceManager {
       threadId: `workspace-${eac.EnterpriseLookup}`,
     });
     this.Jwt = jwt ?? '';
-    this.EnterpriseLookup = eac.EnterpriseLookup;
+    this.EnterpriseLookup = eac.EnterpriseLookup! as string;
 
     this.History = new HistoryManager();
     this.Selection = new SelectionManager();
@@ -143,9 +143,13 @@ export class WorkspaceManager {
   }
 
   // === Hooks ===
-  public CreateWarmQueryAziIfNotExist(warmQueryLookup: string, ) {
+  public CreateWarmQueryAziIfNotExist(warmQueryLookup: string) {
     const threadId = `workspace-${this.EnterpriseLookup}-warmquery-${warmQueryLookup}`;
-    this.WarmQueryAzis[warmQueryLookup] ??= new AziManager({ url: this.AziWarmQueryCircuitUrl, jwt: this.Jwt, threadId: threadId });
+    this.WarmQueryAzis[warmQueryLookup] ??= new AziManager({
+      url: this.AziWarmQueryCircuitUrl,
+      jwt: this.Jwt,
+      threadId: threadId,
+    });
   }
 
   public UseAppMenu(eac: EverythingAsCode & EverythingAsCodeLicensing): {
