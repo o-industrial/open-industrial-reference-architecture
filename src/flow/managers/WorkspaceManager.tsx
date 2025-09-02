@@ -70,6 +70,8 @@ export class WorkspaceManager {
     Lookup?: string;
   };
   protected Jwt: string;
+  protected EnterpriseLookup: string;
+  protected AziWarmQueryCircuitUrl: string;
 
   public Azi: AziManager;
   public EaC: EaCManager;
@@ -81,7 +83,7 @@ export class WorkspaceManager {
   public Selection: SelectionManager;
   public Simulators: SimulatorLibraryManager;
   public Team: TeamManager;
-  public WarmQueryAzi: AziManager;
+  public WarmQueryAzis: Record<string, AziManager> = Object.create(null);
 
   constructor(
     eac: EverythingAsCodeOIWorkspace,
@@ -91,21 +93,18 @@ export class WorkspaceManager {
     capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>,
     scope: NodeScopeTypes = 'workspace',
     aziCircuitUrl: string,
-    aziWarmQueryUrl: string,
+    aziWarmQueryCircuitUrl: string,
     jwt?: string,
   ) {
     this.currentScope = { Scope: scope };
+    this.AziWarmQueryCircuitUrl = aziWarmQueryCircuitUrl;
     this.Azi = new AziManager({
       url: aziCircuitUrl,
       jwt,
       threadId: `workspace-${eac.EnterpriseLookup}`,
     });
-    this.WarmQueryAzi = new AziManager({
-      url: aziWarmQueryUrl,
-      jwt,
-      threadId: `workspace-${eac.EnterpriseLookup}-warmquery`,
-    });
     this.Jwt = jwt ?? '';
+    this.EnterpriseLookup = eac.EnterpriseLookup;
 
     this.History = new HistoryManager();
     this.Selection = new SelectionManager();
@@ -142,6 +141,10 @@ export class WorkspaceManager {
   }
 
   // === Hooks ===
+  public CreateWarmQueryAziIfNotExist(warmQueryLookup: string, ) {
+    const threadId = `workspace-${this.EnterpriseLookup}-warmquery-${warmQueryLookup}`;
+    this.WarmQueryAzis[warmQueryLookup] ??= new AziManager({ url: this.AziWarmQueryCircuitUrl, jwt: this.Jwt, threadId: threadId });
+  }
 
   public UseAppMenu(eac: EverythingAsCode & EverythingAsCodeLicensing): {
     handleMenu: (item: MenuActionItem) => void;

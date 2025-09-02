@@ -1,7 +1,7 @@
 // SurfaceWarmQueryModal.tsx
 import { TabbedPanel } from '../../../../../atomic/.exports.ts';
 import { marked } from 'npm:marked@15.0.1';
-import { useEffect, useState } from 'npm:preact@10.20.1/hooks';
+import { useEffect, useRef, useState } from 'npm:preact@10.20.1/hooks';
 import { Action } from '../../../../../atomic/.exports.ts';
 import type { FunctionalComponent } from 'npm:preact@10.20.1';
 import { AziPanel } from '../../../../../atomic/organisms/.exports.ts';
@@ -12,6 +12,7 @@ import { AziState, WorkspaceManager } from '../../../../flow/.exports.ts';
 import { KustoResponseDataSet } from 'npm:azure-kusto-data@6.0.2';
 
 interface SurfaceWarmQueryModalProps {
+  eac: any;
   workspace: WorkspaceManager;
   queryName: string;
   queryDescription: string;
@@ -21,10 +22,12 @@ interface SurfaceWarmQueryModalProps {
   onRun: (query: string) => Promise<KustoResponseDataSet>;
   onSave: (name: string, apiPath: string, description: string, query: string) => void;
   aziExtraInputs?: Record<string, unknown>;
+  warmQueryLookup: string;
 }
 
 export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalProps> = ({
-  workspace: initialWorkspace,
+  eac: eac,
+  workspace: workspace,
   queryName: initialName,
   queryDescription: initialDescription,
   queryText: initialQuery,
@@ -33,8 +36,8 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
   onRun,
   onSave,
   aziExtraInputs,
+  warmQueryLookup,
 }) => {
-  const [workspace, setWorkspace] = useState(initialWorkspace);
   const [queryName, setQueryName] = useState(initialName);
   const [queryDescription, setQueryDescription] = useState(initialDescription);
   const [query, setQuery] = useState(initialQuery);
@@ -42,43 +45,130 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
   type QueryResultRow = Record<string, unknown>;
   const [queryResults, setQueryResults] = useState<QueryResultRow[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState('');
   const [activeTabKey, setActiveTabKey] = useState('details');
-  // If you truly need to sync when the prop changes:
-  useEffect(() => {
-    setWorkspace(initialWorkspace);
-  }, [initialWorkspace]);
-
-  // Only clear errors at a specific moment, not every render:
-  useEffect(() => {
-    setErrors('');
-  }, []);
+  const [errors, setErrors] = useState('');
+  const [saveErrors, setSaveErrors] = useState<string[]>([]);
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  const [saveSuccessVisible, setSaveSuccessVisible] = useState(false);
 
   const isSaveDisabled = !queryName || !query || !queryDescription || !queryApiPath || isLoading;
   const isRunDisabled = !query || isLoading;
 
-  const onAziSend = (state: AziState) => {
+  const onAziFinishSend = (state: AziState) => {
+    setIsLoading(false);
+    setErrors('> Azi Responded');
     if (state && state.DataQuery && state.DataQuery != state.CurrentQuery) {
       setQuery(state.DataQuery as string);
       setActiveTabKey('query');
     }
+    if (state && state.Error) {
+      const newErrors = '> Azi Responded' + '\n> ERROR: ' + state.Error;
+      setErrors(newErrors);
+    }
+  };
+
+  const onAziStartSend = (state: AziState) => {
+    setIsLoading(true);
+    setActiveTabKey('query');
+    setErrors('> Azi Thinking...');
   };
 
   const handleRunClick = async () => {
+    setActiveTabKey('query');
+    setErrors('> Executing Query...');
     setIsLoading(true);
-    setActiveTabKey('results');
     const result = await onRun(query);
-    console.log(result);
     interface QueryTable {
       name: string;
       data: Record<string, unknown>[];
     }
 
-    const table = result?.tables?.find((t) => t.name === 'PrimaryResult');
-    const data = (table && 'data' in table) ? (table as QueryTable).data : [];
-    setQueryResults(data);
+    if ((result as any).HasError) {
+      const errTxt = (result as any).Messages.Error;
+      setErrors(`> ERROR: ${errTxt}`);
+      setActiveTabKey('query');
+    } else {
+      setErrors('> Query Executed Successfully');
+      const table = result?.tables?.find((t) => t.name === 'PrimaryResult');
+      const data = (table && 'data' in table) ? (table as QueryTable).data : [];
+      setQueryResults(data);
+      setActiveTabKey('results');
+    }
     setIsLoading(false);
   };
+
+  const norm = (s?: string) => (s ?? '').trim().toLowerCase();
+
+  const handleSaveClick = async () => {
+    setSaveErrors([]);
+    const errs: string[] = [];
+    const currentLookup = warmQueryLookup;
+    for (const [lookup, entry] of Object.entries(eac.WarmQueries ?? {})) {
+      if (lookup === currentLookup) continue;
+      const d = (entry as any).Details ?? {};
+      if (norm(d.Name) === norm(queryName)) {
+        errs.push(
+          `A Warm Query with the name of '${queryName}' already exists in this Workspace`,
+        );
+      }
+    }
+    for (const [lookup, entry] of Object.entries(eac.WarmQueries ?? {})) {
+      if (lookup === currentLookup) continue;
+      const d = (entry as any).Details ?? {};
+      if (norm(d.ApiPath) === norm(queryApiPath)) {
+        errs.push(
+          `A Warm Query with the API path of '${queryApiPath}' already exists in this Workspace`,
+        );
+      }
+    }
+
+    setSaveErrors(errs);
+    if (errs.length === 0) {
+      // allow onSave to be sync or async
+      onSave(queryName, queryApiPath, queryDescription, query);
+      setSaveSuccess('Warm Query saved successfully.');
+    }
+  };
+
+  const didInitTabs = useRef(false);
+  useEffect(() => {
+    if (didInitTabs.current) return;
+    didInitTabs.current = true;
+
+    // Start on details (you already default to 'details', but set again to be explicit)
+    setActiveTabKey('details');
+
+    let raf1 = 0;
+    let raf2 = 0;
+
+    // Next frame: go to query
+    raf1 = requestAnimationFrame(() => {
+      setActiveTabKey('query');
+      // Next frame after that: back to details
+      raf2 = requestAnimationFrame(() => {
+        setActiveTabKey('details');
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!saveSuccess) return;
+    // show immediately
+    setSaveSuccessVisible(true);
+    // start fade ~0.5s before removal
+    const fade = setTimeout(() => setSaveSuccessVisible(false), 4_500);
+    // remove node after transition completes
+    const clear = setTimeout(() => setSaveSuccess(null), 5_000);
+    return () => {
+      clearTimeout(fade);
+      clearTimeout(clear);
+    };
+  }, [saveSuccess]);
 
   const tabData = [
     {
@@ -123,6 +213,7 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
           query={query}
           onQueryChange={setQuery}
           errors={errors}
+          isLoading={isLoading}
         />
       ),
     },
@@ -151,21 +242,55 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
 
   return (
     <div class='fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[100]'>
-      <div class='bg-black border border-gray-300 dark:border-gray-700 text-white rounded-lg shadow-2xl w-11/12 max-w-[1200px] max-h-[90vh] p-4 overflow-hidden'>
+      <div
+        class='bg-black border border-gray-300 dark:border-gray-700 text-white rounded-lg shadow-2xl w-11/12 max-w-[1200px] p-4 overflow-hidden'
+        style='max-height: min(100vh, calc(90vh + 20px));'
+      >
         <h3 class='text-xl font-bold text-white mb-2'>Query: {queryName}</h3>
-        <div class='flex flex-row h-[80vh] gap-4'>
+        <div class='flex flex-row gap-4' style='height: calc(80vh + 20px);'>
           {/* Left Side: Tabs and Buttons */}
-          <div class='w-2/3 flex flex-col overflow-hidden pr-2'>
+          <div class='w-2/3 flex flex-col overflow-hidden pr-2 min-h-0'>
             {/* Tabs Section */}
-            <div class='flex-grow overflow-y-visible bg-black rounded-md p-4'>
+            <div class='flex-grow min-h-0 overflow-hidden bg-black rounded-md p-4'>
               <TabbedPanel
-                class='mt-2'
+                class='mt-2 h-full min-h-0'
                 tabs={tabData}
                 activeTab={activeTabKey}
                 onTabChange={setActiveTabKey}
               />
             </div>
 
+            {saveErrors.length > 0
+              ? (
+                <div
+                  id='saveErrors'
+                  class={`mt-3 rounded-md px-3.5 py-3
+                  bg-neutral-900/90 backdrop-blur-[2px]
+                  ring-1 ring-emerald-500/55 shadow-[0_0_16px_rgba(16,185,129,0.28)]
+                  text-emerald-300
+                  transition-opacity duration-500
+                  w-4/5 mx-auto`}
+                  style='margin:8px;text-align:center;color:red;'
+                >
+                  {saveErrors[0]}
+                </div>
+              )
+              : <div></div>}
+            {saveSuccess && (
+              <div
+                id='saveSuccess'
+                class={`mt-3 rounded-md px-3.5 py-3
+            bg-neutral-900/90 backdrop-blur-[2px]
+            ring-1 ring-emerald-500/55 shadow-[0_0_16px_rgba(16,185,129,0.28)]
+            text-emerald-300
+            transition-opacity duration-500
+            w-4/5 mx-auto
+            ${saveSuccessVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                style='margin:8px;text-align:center;color:green;'
+              >
+                {saveSuccess}
+              </div>
+            )}
             {/* Buttons at the bottom */}
             <div class='mt-0 flex justify-between'>
               <Action
@@ -173,35 +298,40 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
                 onClick={onClose}
                 class='bg-gray-600 hover:bg-gray-700 text-white'
               >
-                Cancel
+                Close
               </Action>
 
               <div class='flex space-x-4'>
-                <Action
-                  type='button'
-                  onClick={handleRunClick}
-                  disabled={isRunDisabled}
-                  class={`font-bold py-2 px-4 rounded ${
-                    isRunDisabled
-                      ? 'bg-gray-500 cursor-not-allowed opacity-50'
-                      : 'bg-teal-600 hover:bg-teal-700'
-                  } text-white`}
-                >
-                  Run Query
-                </Action>
-
-                <Action
-                  type='button'
-                  disabled={isSaveDisabled}
-                  onClick={() => onSave(queryName, queryApiPath, queryDescription, query)}
-                  class={`font-bold py-2 px-4 rounded ${
-                    isSaveDisabled
-                      ? 'bg-gray-500 cursor-not-allowed opacity-50'
-                      : 'bg-teal-600 hover:bg-teal-700'
-                  } text-white`}
-                >
-                  Save Query
-                </Action>
+                <div id='runWrap' tabIndex={0} aria-disabled='true'>
+                  <Action
+                    type='button'
+                    id='run'
+                    onClick={handleRunClick}
+                    disabled={isRunDisabled}
+                    class={`font-bold py-2 px-4 rounded ${
+                      isRunDisabled
+                        ? 'bg-gray-500 cursor-not-allowed opacity-50'
+                        : 'bg-teal-600 hover:bg-teal-700'
+                    } text-white`}
+                  >
+                    Run Query
+                  </Action>
+                </div>
+                <div id='saveWrap' tabIndex={0} aria-disabled='true'>
+                  <Action
+                    type='button'
+                    id='save'
+                    disabled={isSaveDisabled}
+                    onClick={handleSaveClick}
+                    class={`font-bold py-2 px-4 rounded ${
+                      isSaveDisabled
+                        ? 'bg-gray-500 cursor-not-allowed opacity-50'
+                        : 'bg-teal-600 hover:bg-teal-700'
+                    } text-white`}
+                  >
+                    Save Query
+                  </Action>
+                </div>
               </div>
             </div>
           </div>
@@ -210,9 +340,10 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
           <div class='w-1/3 border-l border-gray-700 pl-4 overflow-y-auto'>
             <AziPanel
               workspaceMgr={workspace}
-              onSend={onAziSend}
+              onStartSend={onAziStartSend}
+              onFinishSend={onAziFinishSend}
               renderMessage={(msg) => marked.parse(msg) as string}
-              aziMgr={workspace.WarmQueryAzi}
+              aziMgr={workspace.WarmQueryAzis[warmQueryLookup]}
               extraInputs={{
                 ...aziExtraInputs,
                 CurrentQuery: query,

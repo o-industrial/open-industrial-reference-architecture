@@ -1,7 +1,7 @@
 // SurfaceWarmQueryInspector.tsx
-import { useState } from 'npm:preact@10.20.1/hooks';
+import { useEffect, useMemo, useState } from 'npm:preact@10.20.1/hooks';
 import { Action, InspectorBase, NodeStatTile } from '../../../../../atomic/.exports.ts';
-import { InspectorCommonProps } from '../../../../flow/.exports.ts';
+import { AziManager, InspectorCommonProps } from '../../../../flow/.exports.ts';
 import { SurfaceWarmQueryStats } from './SurfaceWarmQueryStats.tsx';
 import { EaCWarmQueryDetails } from '../../../../eac/.deps.ts';
 import { SurfaceWarmQueryModal } from './SurfaceWarmQueryModal.tsx';
@@ -25,10 +25,14 @@ export function SurfaceWarmQueryInspector({
 }: SurfaceWarmQueryInspectorProps) {
   const stats = useStats();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const aziExtraInputs: Record<string, unknown> = {
+  const eac = workspaceMgr.EaC.GetEaC();
+
+  workspaceMgr.CreateWarmQueryAziIfNotExist(lookup);
+
+  const aziExtraInputs = useMemo(() => ({
     WarmQueryLookup: lookup,
     SurfaceLookup: surfaceLookup,
-  };
+  }), [lookup, surfaceLookup]);
 
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
@@ -39,9 +43,7 @@ export function SurfaceWarmQueryInspector({
       ...details,
       Query: query,
     });
-    oiSvc.Workspaces.Get();
-    //const results = oiSvc.Workspaces.Explorer.ListWarmQueries();
-    //console.log(results);
+
     return results;
   };
 
@@ -54,7 +56,6 @@ export function SurfaceWarmQueryInspector({
       Query: query,
       Description: description,
     } as Partial<EaCWarmQueryDetails>);
-    handleCloseModal();
   };
 
   return (
@@ -83,6 +84,7 @@ export function SurfaceWarmQueryInspector({
 
       {isModalOpen && (
         <SurfaceWarmQueryModal
+          eac={eac}
           workspace={workspaceMgr}
           queryName={details.Name ?? ''}
           queryDescription={details.Description ?? ''}
@@ -92,6 +94,7 @@ export function SurfaceWarmQueryInspector({
           onRun={(q) => handleRunQuery(q)}
           onSave={(name, apiPath, desc, query) => handleSaveQuery(name, apiPath, desc, query)}
           aziExtraInputs={aziExtraInputs}
+          warmQueryLookup={lookup}
         />
       )}
     </>
