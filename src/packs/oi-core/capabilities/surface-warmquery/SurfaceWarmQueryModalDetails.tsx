@@ -1,4 +1,5 @@
 import type { FunctionalComponent, JSX } from 'npm:preact@10.20.1';
+import { useEffect } from '../../.deps.ts';
 
 interface SurfaceWarmQueryModalDetailsProps {
   queryName: string;
@@ -18,18 +19,55 @@ export const SurfaceWarmQueryModalDetails: FunctionalComponent<SurfaceWarmQueryM
     onQueryDescriptionChange,
     onQueryApiPathChange,
   }) => {
-    const handleQueryApiPathChange = (
-      e: JSX.TargetedEvent<HTMLInputElement, Event>,
+    type InputLike = HTMLInputElement | HTMLTextAreaElement;
+    type InputEvt = JSX.TargetedInputEvent<InputLike>;
+    type KbEvt = JSX.TargetedKeyboardEvent<HTMLInputElement>;
+
+    const handleQueryNameChange = (
+      e: string | InputEvt,
     ) => {
-      const inputValue = e.currentTarget.value;
+      const inputValue = typeof e === 'string' ? e : e.currentTarget.value;
+
+      if (inputValue.length == 0) {
+        document.getElementById('queryName')!.style.borderColor = 'red';
+        if (!document.getElementById('saveWrap')!.title.includes('Query Name Required')) {
+          document.getElementById('saveWrap')!.title =
+            document.getElementById('saveWrap')!.title == ''
+              ? 'Query Name Required'
+              : document.getElementById('saveWrap')!.title + '\nQuery Name Required';
+        }
+      } else {
+        document.getElementById('queryName')!.style.borderColor = '';
+        document.getElementById('saveWrap')!.title = document.getElementById('saveWrap')!.title
+          .replace('\nQuery Name Required', '').replace('Query Name Required', '');
+      }
+      onQueryNameChange(inputValue);
+    };
+    const handleQueryApiPathChange = (
+      e: string | InputEvt,
+    ) => {
+      const inputValue = typeof e === 'string' ? e : e.currentTarget.value;
 
       // Allow lowercase letters, numbers, and dashes only
       const filteredValue = inputValue.replace(/[^a-z0-9-]/g, '');
 
+      if (filteredValue.length == 0) {
+        document.getElementById('queryApiPath')!.style.borderColor = 'red';
+        if (!document.getElementById('saveWrap')!.title.includes('Query API Path Required')) {
+          document.getElementById('saveWrap')!.title =
+            document.getElementById('saveWrap')!.title == ''
+              ? 'Query API Path Required'
+              : document.getElementById('saveWrap')!.title + '\nQuery Api Path Required';
+        }
+      } else {
+        document.getElementById('queryApiPath')!.style.borderColor = '';
+        document.getElementById('saveWrap')!.title = document.getElementById('saveWrap')!.title
+          .replace('\nQuery API Path Required', '').replace('Query API Path Required', '');
+      }
       onQueryApiPathChange(filteredValue);
     };
 
-    const handleQueryApiPathKeyDown = (e: KeyboardEvent) => {
+    const handleQueryApiPathKeyDown = (e: KbEvt) => {
       const validKeys = /^[a-z0-9-]$/;
 
       // Allow navigation and editing keys
@@ -53,6 +91,33 @@ export const SurfaceWarmQueryModalDetails: FunctionalComponent<SurfaceWarmQueryM
         e.preventDefault();
       }
     };
+
+    const handleQueryDescriptionChange = (
+      e: string | InputEvt,
+    ) => {
+      const inputValue = typeof e === 'string' ? e : e.currentTarget.value;
+
+      if (inputValue.length == 0) {
+        document.getElementById('queryDescription')!.style.borderColor = 'red';
+        if (!document.getElementById('saveWrap')!.title.includes('Query Description Required')) {
+          document.getElementById('saveWrap')!.title =
+            document.getElementById('saveWrap')!.title == ''
+              ? 'Query Description Required'
+              : document.getElementById('saveWrap')!.title + '\nQuery Description Required';
+        }
+      } else {
+        document.getElementById('queryDescription')!.style.borderColor = '';
+        document.getElementById('saveWrap')!.title = document.getElementById('saveWrap')!.title
+          .replace('\nQuery Description Required', '').replace('Query Description Required', '');
+      }
+      onQueryDescriptionChange(inputValue);
+    };
+
+    useEffect(() => {
+      handleQueryNameChange(queryName);
+      handleQueryApiPathChange(queryApiPath);
+      handleQueryDescriptionChange(queryDescription);
+    }, []);
 
     // Helper for inline SVG icon wrapper
     const Icon = ({ children }: { children: JSX.Element | JSX.Element[] }) => (
@@ -83,13 +148,13 @@ export const SurfaceWarmQueryModalDetails: FunctionalComponent<SurfaceWarmQueryM
                 name='queryName'
                 type='text'
                 value={queryName}
-                onInput={(e) => onQueryNameChange(e.currentTarget.value)}
+                onInput={(e) => handleQueryNameChange(e)}
                 required
-                maxLength={25}
-                placeholder='Enter the query name (max 25 characters)'
-                class='w-full bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-400 px-4 py-2 rounded-sm border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neon-blue-500'
+                maxLength={30}
+                placeholder='Name (max 30)'
+                class='text-xs w-full bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-400 px-4 py-2 rounded-sm border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neon-blue-500 invalid:border-red-500 invalid:focus:ring-red-500'
               />
-              <small class='text-gray-500'>Maximum 25 characters.</small>
+              <small class='text-gray-500'>Maximum 30 characters.</small>
             </div>
           </div>
           {/* Right Column */}
@@ -115,12 +180,12 @@ export const SurfaceWarmQueryModalDetails: FunctionalComponent<SurfaceWarmQueryM
                 onInput={(e) => handleQueryApiPathChange(e)} // Handle input change
                 onKeyDown={handleQueryApiPathKeyDown} // Handle keydown to prevent invalid characters
                 required
-                maxLength={20}
-                placeholder='Enter the api path (lowercase, numbers, dashes, max 20 characters)'
-                class='w-full bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-400 px-4 py-2 rounded-sm border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neon-blue-500'
+                maxLength={30}
+                placeholder='API path (lowercase, numbers, dashes, max 30)'
+                class='text-xs w-full bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-400 px-4 py-2 rounded-sm border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neon-blue-500 invalid:border-red-500 invalid:focus:ring-red-500'
               />
               <small class='text-gray-500'>
-                Maximum 20 characters (lowercase, numbers, dashes).
+                Maximum 30 characters (lowercase, numbers, dashes).
               </small>
             </div>
           </div>
@@ -140,11 +205,11 @@ export const SurfaceWarmQueryModalDetails: FunctionalComponent<SurfaceWarmQueryM
               name='queryDescription'
               type='text'
               value={queryDescription}
-              onInput={(e) => onQueryDescriptionChange(e.currentTarget.value)}
+              onInput={(e) => handleQueryDescriptionChange(e)}
               required
               maxLength={200}
-              placeholder='Enter description'
-              class='w-full h-24 bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-400 p-4 rounded-sm border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neon-blue-500 resize-none'
+              placeholder='Description (max 200)'
+              class='text-xs w-full h-24 bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-400 p-4 rounded-sm border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neon-blue-500 resize-none invalid:border-red-500 invalid:focus:ring-red-500'
             />
             <small class='text-gray-500'>Maximum 200 characters.</small>
           </div>
