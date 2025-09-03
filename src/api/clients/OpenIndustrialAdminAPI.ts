@@ -3,6 +3,7 @@ import { EverythingAsCode } from 'jsr:@fathym/eac@0.2.119';
 import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
 import { ClientHelperBridge } from './ClientHelperBridge.ts';
 import { EaCStatus } from '../.client.deps.ts';
+import { NullableArrayOrObject } from '../.deps.ts';
 
 /**
  * Administrative API subclient for OpenIndustrial.  Provides methods
@@ -17,7 +18,9 @@ export class OpenIndustrialAdminAPI {
    *
    * @param query Optional name fragment used for filtering.
    */
-  public async ListWorkspaces(query?: string): Promise<EverythingAsCodeOIWorkspace[]> {
+  public async ListWorkspaces(
+    query?: string,
+  ): Promise<EverythingAsCodeOIWorkspace[]> {
     const url = new URL(this.bridge.url('/api/admin/enterprises'));
     if (query) {
       url.searchParams.set('q', query);
@@ -62,7 +65,7 @@ export class OpenIndustrialAdminAPI {
    * @returns The status of the delete operation.
    */
   public async DeleteEaC(
-    eac: Partial<EverythingAsCode>,
+    eac: NullableArrayOrObject<EverythingAsCode>,
   ): Promise<{ status: EaCStatus }> {
     const res = await fetch(this.bridge.url('/api/admin/commit'), {
       method: 'DELETE',

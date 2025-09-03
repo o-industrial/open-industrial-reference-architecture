@@ -270,7 +270,7 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
                     <div
                       id='saveErrors'
                       role='alert'
-                      style="border-color:#ef4444"
+                      style='border-color:#ef4444'
                       class='w-full max-w-[720px] rounded-md border !border-red-500 bg-neutral-900/90 text-red-400 px-4 py-3 text-center'
                     >
                       {saveErrors[0]}
