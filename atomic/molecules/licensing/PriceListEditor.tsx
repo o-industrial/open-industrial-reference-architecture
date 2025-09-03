@@ -1,4 +1,7 @@
-import { JSX } from '../../.deps.ts';
+import { JSX, IntentTypes } from '../../.deps.ts';
+import { Input } from '../../atoms/forms/Input.tsx';
+import { Action, ActionStyleTypes } from '../../atoms/Action.tsx';
+import { useState } from '../../.deps.ts';
 
 interface PriceDetails {
   Details: {
@@ -16,18 +19,19 @@ export interface PriceListEditorProps {
   onChange: (prices: Record<string, PriceDetails>) => void;
 }
 
-export function PriceListEditor(
-  { prices, onChange }: PriceListEditorProps,
-): JSX.Element {
+export function PriceListEditor({ prices, onChange }: PriceListEditorProps): JSX.Element {
+  const [newLookup, setNewLookup] = useState<string>('');
+
   const addPrice = () => {
-    const lookup = prompt('Price lookup');
-    if (!lookup) return;
+    const lookup = newLookup.trim();
+    if (!lookup || prices[lookup]) return;
     onChange({
       ...prices,
       [lookup]: {
         Details: { Currency: 'USD', Interval: 'month', Value: 0, Discount: 0 },
       },
     });
+    setNewLookup('');
   };
 
   const removePrice = (lookup: string) => {
@@ -44,64 +48,90 @@ export function PriceListEditor(
   };
 
   return (
-    <div class='-:-:mt-2 -:-:space-y-2'>
-      <div class='-:-:flex -:-:items-center -:-:justify-between'>
-        <h4 class='-:-:font-semibold'>Prices</h4>
-        <button type='button' class='-:-:text-blue-400' onClick={addPrice}>
+    <div class="mt-2 space-y-3">
+      <div class="flex items-end gap-2">
+        <div class="flex-1">
+          <Input
+            label="New Price Lookup"
+            placeholder="e.g., basic-monthly"
+            value={newLookup}
+            onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
+              setNewLookup(e.currentTarget.value)
+            }
+          />
+        </div>
+        <Action
+          type="button"
+          intentType={IntentTypes.Primary}
+          styleType={ActionStyleTypes.Solid | ActionStyleTypes.Rounded | ActionStyleTypes.Thin}
+          onClick={addPrice}
+          disabled={!newLookup.trim()}
+        >
           Add Price
-        </button>
+        </Action>
       </div>
       {Object.entries(prices).map(([lookup, price]) => (
         <div
           key={lookup}
-          class='-:-:p-2 -:-:border -:-:border-slate-700 -:-:rounded -:-:space-y-1'
+          class="p-3 border border-neutral-700 rounded space-y-2"
         >
-          <div class='-:-:flex -:-:items-center -:-:justify-between'>
-            <h5 class='-:-:font-semibold'>{lookup}</h5>
-            <button
-              type='button'
-              class='-:-:text-red-400'
+          <div class="flex items-center justify-between">
+            <h5 class="font-semibold text-sm">{lookup}</h5>
+            <Action
+              type="button"
+              intentType={IntentTypes.Error}
+              styleType={ActionStyleTypes.Link | ActionStyleTypes.Thin}
               onClick={() => removePrice(lookup)}
             >
               Remove
-            </button>
+            </Action>
           </div>
-          <input
-            class='-:-:w-full -:-:p-1 -:-:rounded -:-:bg-slate-800'
-            placeholder='Currency'
-            value={price.Details?.Currency ?? ''}
-            onInput={(e) => updateDetail(lookup, 'Currency', (e.target as HTMLInputElement).value)}
-          />
-          <input
-            class='-:-:w-full -:-:p-1 -:-:rounded -:-:bg-slate-800'
-            placeholder='Interval'
-            value={price.Details?.Interval ?? ''}
-            onInput={(e) => updateDetail(lookup, 'Interval', (e.target as HTMLInputElement).value)}
-          />
-          <input
-            type='number'
-            class='-:-:w-full -:-:p-1 -:-:rounded -:-:bg-slate-800'
-            placeholder='Value'
-            value={price.Details?.Value ?? 0}
-            onInput={(e) =>
-              updateDetail(
-                lookup,
-                'Value',
-                parseFloat((e.target as HTMLInputElement).value),
-              )}
-          />
-          <input
-            type='number'
-            class='-:-:w-full -:-:p-1 -:-:rounded -:-:bg-slate-800'
-            placeholder='Discount'
-            value={price.Details?.Discount ?? 0}
-            onInput={(e) =>
-              updateDetail(
-                lookup,
-                'Discount',
-                parseFloat((e.target as HTMLInputElement).value),
-              )}
-          />
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <Input
+              label="Currency"
+              placeholder="USD"
+              value={price.Details?.Currency ?? ''}
+              onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
+                updateDetail(lookup, 'Currency', e.currentTarget.value)
+              }
+            />
+            <Input
+              label="Interval"
+              placeholder="month"
+              value={price.Details?.Interval ?? ''}
+              onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
+                updateDetail(lookup, 'Interval', e.currentTarget.value)
+              }
+            />
+            <Input
+              label="Value"
+              type="number"
+              value={price.Details?.Value ?? 0}
+              onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
+                updateDetail(
+                  lookup,
+                  'Value',
+                  Number.isNaN(parseFloat(e.currentTarget.value))
+                    ? 0
+                    : parseFloat(e.currentTarget.value)
+                )
+              }
+            />
+            <Input
+              label="Discount"
+              type="number"
+              value={price.Details?.Discount ?? 0}
+              onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
+                updateDetail(
+                  lookup,
+                  'Discount',
+                  Number.isNaN(parseFloat(e.currentTarget.value))
+                    ? 0
+                    : parseFloat(e.currentTarget.value)
+                )
+              }
+            />
+          </div>
         </div>
       ))}
     </div>

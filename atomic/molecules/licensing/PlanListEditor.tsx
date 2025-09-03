@@ -1,9 +1,11 @@
-import { JSX } from '../../.deps.ts';
+import { JSX, IntentTypes, useState } from '../../.deps.ts';
 import {
   PriceListEditor,
   type PriceListEditorProps,
 } from './PriceListEditor.tsx';
 import { StringArrayEditor } from '../../atoms/StringArrayEditor.tsx';
+import { Input } from '../../atoms/forms/Input.tsx';
+import { Action, ActionStyleTypes } from '../../atoms/Action.tsx';
 
 interface PlanDetails {
   Details: {
@@ -25,9 +27,11 @@ export function PlanListEditor({
   plans,
   onChange,
 }: PlanListEditorProps): JSX.Element {
+  const [newLookup, setNewLookup] = useState<string>('');
+
   const addPlan = () => {
-    const lookup = prompt('Plan lookup');
-    if (!lookup) return;
+    const lookup = newLookup.trim();
+    if (!lookup || plans[lookup]) return;
     onChange({
       ...plans,
       [lookup]: {
@@ -35,6 +39,7 @@ export function PlanListEditor({
         Prices: {},
       },
     });
+    setNewLookup('');
   };
 
   const removePlan = (lookup: string) => {
@@ -67,46 +72,60 @@ export function PlanListEditor({
   };
 
   return (
-    <div class="-:-:space-y-4">
-      <div class="-:-:flex -:-:items-center -:-:justify-between">
-        <h2 class="-:-:text-lg -:-:font-semibold">Plans</h2>
-        <button type="button" class="-:-:text-blue-400" onClick={addPlan}>
+    <div class="space-y-4">
+      <div class="flex items-end gap-2">
+        <div class="flex-1">
+          <Input
+            label="New Plan Lookup"
+            placeholder="e.g., basic"
+            value={newLookup}
+            onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
+              setNewLookup(e.currentTarget.value)
+            }
+          />
+        </div>
+        <Action
+          type="button"
+          intentType={IntentTypes.Primary}
+          styleType={ActionStyleTypes.Solid | ActionStyleTypes.Rounded | ActionStyleTypes.Thin}
+          onClick={addPlan}
+          disabled={!newLookup.trim()}
+        >
           Add Plan
-        </button>
+        </Action>
       </div>
       {Object.entries(plans).map(([lookup, plan]) => (
         <div
           key={lookup}
-          class="-:-:border -:-:border-slate-700 -:-:p-4 -:-:rounded -:-:space-y-2"
+          class="border border-neutral-700 p-4 rounded space-y-3"
         >
-          <div class="-:-:flex -:-:items-center -:-:justify-between">
-            <h3 class="-:-:font-semibold">{lookup}</h3>
-            <button
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold text-sm">{lookup}</h3>
+            <Action
               type="button"
-              class="-:-:text-red-400"
+              intentType={IntentTypes.Error}
+              styleType={ActionStyleTypes.Link | ActionStyleTypes.Thin}
               onClick={() => removePlan(lookup)}
             >
               Remove
-            </button>
+            </Action>
           </div>
-          <input
-            class="-:-:w-full -:-:p-2 -:-:rounded -:-:bg-slate-800"
-            placeholder="Plan Name"
+          <Input
+            label="Plan Name"
+            placeholder="Enter plan name"
             value={plan.Details?.Name ?? ''}
-            onInput={(e) =>
-              updateDetail(lookup, 'Name', (e.target as HTMLInputElement).value)
+            onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
+              updateDetail(lookup, 'Name', e.currentTarget.value)
             }
           />
-          <textarea
-            class="-:-:w-full -:-:p-2 -:-:rounded -:-:bg-slate-800"
-            placeholder="Plan Description"
+          <Input
+            label="Plan Description"
+            placeholder="Describe the plan"
+            multiline
+            rows={4}
             value={plan.Details?.Description ?? ''}
-            onInput={(e) =>
-              updateDetail(
-                lookup,
-                'Description',
-                (e.target as HTMLTextAreaElement).value
-              )
+            onInput={(e: JSX.TargetedEvent<HTMLTextAreaElement, Event>) =>
+              updateDetail(lookup, 'Description', e.currentTarget.value)
             }
           />
           <StringArrayEditor
