@@ -262,37 +262,35 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
               />
             </div>
 
-            {saveErrors.length > 0
-              ? (
-                <div
-                  id='saveErrors'
-                  class={`mt-3 rounded-md px-3.5 py-3
-                  bg-neutral-900/90 backdrop-blur-[2px]
-                  ring-1 ring-emerald-500/55 shadow-[0_0_16px_rgba(16,185,129,0.28)]
-                  text-emerald-300
-                  transition-opacity duration-500
-                  w-4/5 mx-auto`}
-                  style='margin:8px;text-align:center;color:red;'
-                >
-                  {saveErrors[0]}
-                </div>
-              )
-              : <div></div>}
-            {saveSuccess && (
-              <div
-                id='saveSuccess'
-                class={`mt-3 rounded-md px-3.5 py-3
-            bg-neutral-900/90 backdrop-blur-[2px]
-            ring-1 ring-emerald-500/55 shadow-[0_0_16px_rgba(16,185,129,0.28)]
-            text-emerald-300
-            transition-opacity duration-500
-            w-4/5 mx-auto
-            ${saveSuccessVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-                style='margin:8px;text-align:center;color:green;'
-              >
-                {saveSuccess}
+            {/* Global banners — centered across the whole modal */}
+            {(saveErrors.length > 0 || saveSuccess) && (
+              <div class='w-full flex justify-center px-2 mb-2'>
+                {saveErrors.length > 0
+                  ? (
+                    <div
+                      id='saveErrors'
+                      role='alert'
+                      style="border-color:#ef4444"
+                      class='w-full max-w-[720px] rounded-md border !border-red-500 bg-neutral-900/90 text-red-400 px-4 py-3 text-center'
+                    >
+                      {saveErrors[0]}
+                    </div>
+                  )
+                  : (
+                    saveSuccess && (
+                      <div
+                        id='saveSuccess'
+                        aria-live='polite'
+                        class={`w-full max-w-[720px] rounded-md border border-emerald-500 bg-neutral-900/90 text-emerald-300 px-4 py-3 text-center transition-opacity duration-500
+                  ${saveSuccessVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                      >
+                        {saveSuccess}
+                      </div>
+                    )
+                  )}
               </div>
             )}
+
             {/* Buttons at the bottom */}
             <div class='mt-0 flex justify-between'>
               <Action
