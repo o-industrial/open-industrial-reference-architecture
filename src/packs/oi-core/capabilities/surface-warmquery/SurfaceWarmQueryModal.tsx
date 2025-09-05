@@ -69,6 +69,17 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
     }
   };
 
+  const onAziStateChange = (state: AziState) => {
+    //setIsLoading(false);
+    //setErrors('> Azi Responded');
+    console.log("KBTEST Azi State Change");
+    if (state && state.Error) {
+      const newErrors = '\n> ERROR: ' + state.Error;
+      console.log("KBTEST Azi Error: " + newErrors);
+      setErrors(newErrors);
+    }
+  };
+
   const onAziStartSend = () => {
     setIsLoading(true);
     setActiveTabKey('query');
@@ -342,6 +353,7 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
               workspaceMgr={workspace}
               onStartSend={onAziStartSend}
               onFinishSend={onAziFinishSend}
+              onStateChange={onAziStateChange}
               renderMessage={(msg) => marked.parse(msg) as string}
               aziMgr={workspace.WarmQueryAzis[warmQueryLookup]}
               extraInputs={{

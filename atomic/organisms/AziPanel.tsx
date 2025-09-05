@@ -30,6 +30,7 @@ type AziPanelProps = {
   onClose?: () => void;
   onStartSend?: (state: AziState) => void;
   onFinishSend?: (state: AziState) => void;
+  onStateChange?: (state: AziState) => void;
   intentTypes?: Partial<Record<Role, IntentTypes>>;
   renderMessage?: (message: string) => string;
   extraInputs?: Record<string, unknown>;
@@ -92,6 +93,7 @@ export function AziPanel({
   onClose,
   onStartSend,
   onFinishSend,
+  onStateChange,
   intentTypes = {
     user: IntentTypes.Secondary,
     azi: IntentTypes.Info,
@@ -118,6 +120,11 @@ export function AziPanel({
 
   const stateRef = useRef(state);
   useEffect(() => { stateRef.current = state; }, [state]);
+
+  // Notify parent on state changes for live updates (e.g., errors)
+  useEffect(() => {
+    onStateChange?.(state);
+  }, [state, onStateChange]);
 
   const wrappedSend = useCallback(
     async (...args: Parameters<typeof send>) => {
