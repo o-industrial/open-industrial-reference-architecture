@@ -76,9 +76,6 @@ export const AzureIoTHubDeviceStatsStep: TStepBuilder = Step(
     const {
       Registry,
       HostName,
-      ServiceConnectionString,
-      ServicePolicyKeyName,
-      ServicePolicySecondaryKey,
     } = ctx.Services as unknown as {
       Registry: IoTRegistry;
       HostName: string;
