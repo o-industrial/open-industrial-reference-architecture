@@ -13,6 +13,23 @@ export class OpenIndustrialAdminAPI {
   constructor(private readonly bridge: ClientHelperBridge) {}
 
   /**
+   * Retrieve the current Everything-as-Code for the active workspace.
+   * Uses the server-side steward to ensure the latest committed state.
+   */
+  public async GetEaC<T = EverythingAsCode>(): Promise<T> {
+    const res = await fetch(this.bridge.url('/api/admin/eac'), {
+      method: 'GET',
+      headers: this.bridge.headers(),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to get EaC: ${res.status}`);
+    }
+
+    return await this.bridge.json(res);
+  }
+
+  /**
    * List top‑level workspaces.  An optional search query can be provided
    * to filter by enterprise name.
    *
