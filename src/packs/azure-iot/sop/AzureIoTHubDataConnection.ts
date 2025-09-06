@@ -11,7 +11,10 @@ import {
 import { EaCAzureIoTHubDataConnectionDetails } from '../../../eac/EaCAzureIoTHubDataConnectionDetails.ts';
 import { EaCDataConnectionAsCode } from '../../../eac/EaCDataConnectionAsCode.ts';
 import { DataConnection } from '../../../fluent/connections/DataConnection.ts';
+import { shaHash } from '../../../utils/shaHash.ts';
 import { DataConnectionModuleBuilder } from '../../../fluent/connections/DataConnectionModuleBuilder.ts';
+import { AzureResolveIoTHubConnectionStringStep } from '../steps/resolve-device-connection-string/AzureResolveIoTHubConnectionStringStep.ts';
+import { AzureResolveCredentialInput } from '../steps/resolve-credential/AzureResolveCredentialInput.ts';
 
 export function AzureIoTHubDataConnection(
   lookup: string,
@@ -33,21 +36,37 @@ export function AzureIoTHubDataConnection(
     .Services((ctx, _ioc) => ({
       Skip: () => !ctx.AsCode.Metadata?.Enabled,
     }))
-    .Steps(async ({ AsCode, Secrets }) => ({
-      IoT: AzureIoTHubDeviceStep.Build({
-        CredentialStrategy: {
-          Method: 'clientSecret',
-          TenantId: await Secrets.Get('AZURE_IOT_TENANT_ID'),
-          ClientId: await Secrets.Get('AZURE_IOT_CLIENT_ID'),
-          ClientSecret: await Secrets.Get('AZURE_IOT_CLIENT_SECRET'),
-        },
-        ResourceGroupName: AsCode.Details?.ResourceGroupName ||
-          (await Secrets.Get('AZURE_IOT_RESOURCE_GROUP'))!,
-        SubscriptionID: AsCode.Details?.SubscriptionID ||
-          (await Secrets.Get('AZURE_IOT_SUBSCRIPTION_ID'))!,
-      }),
-      IoTStats: AzureIoTHubDeviceStatsStep.Build(),
-    }))
+    .Steps(async ({ AsCode, Secrets }) => {
+      const subId = AsCode.Details?.SubscriptionID ||
+        (await Secrets.Get('AZURE_IOT_SUBSCRIPTION_ID'))!;
+
+      const resGroupName = AsCode.Details?.ResourceGroupName ||
+        (await Secrets.Get('AZURE_IOT_RESOURCE_GROUP'))!;
+
+      const credStrat: AzureResolveCredentialInput = {
+        Method: 'clientSecret',
+        TenantId: await Secrets.Get('AZURE_IOT_TENANT_ID'),
+        ClientId: await Secrets.Get('AZURE_IOT_CLIENT_ID'),
+        ClientSecret: await Secrets.Get('AZURE_IOT_CLIENT_SECRET'),
+      };
+
+      return {
+        IoT: AzureIoTHubDeviceStep.Build({
+          CredentialStrategy: credStrat,
+          ResourceGroupName: resGroupName,
+          SubscriptionID: subId,
+        }),
+        IoTStats: AzureIoTHubDeviceStatsStep.Build({
+          CredentialStrategy: credStrat,
+          ResourceGroupName: resGroupName,
+          SubscriptionID: subId,
+        }),
+        ResolveIoTHubConnectionString: AzureResolveIoTHubConnectionStringStep.Build({
+          SubscriptionID: subId,
+          CredentialStrategy: credStrat,
+        }),
+      };
+    })
     .Verifications(({ Services }) => ({
       'skip-check': ({ Lookup }) => {
         if (Services.Skip()) {
@@ -55,12 +74,24 @@ export function AzureIoTHubDataConnection(
         }
       },
     }))
-    .Stats(async ({ Steps, AsCode }) => {
+    .Stats(async ({ Steps, AsCode, EaC, Secrets }) => {
+      // Ensure we use the same hashed DeviceID used during provisioning
+      const deviceId = await shaHash(
+        EaC.EnterpriseLookup!,
+        AsCode.Details!.Name!,
+      );
+
+      const resGroupName = AsCode.Details?.ResourceGroupName ||
+        (await Secrets.Get('AZURE_IOT_RESOURCE_GROUP'))!;
+
+      const { IoTHubName } = await Steps!.ResolveIoTHubConnectionString({
+        ResourceGroupName: resGroupName,
+        KeyName: 'iothubowner',
+      });
+
       return await Steps.IoTStats({
-        DeviceID: AsCode.Details!.Name!,
-        SubscriptionID: AsCode.Details!.SubscriptionID!,
-        ResourceGroupName: AsCode.Details!.ResourceGroupName!,
-        IoTHubName: AsCode.Details!.IoTHubName!,
+        DeviceID: deviceId,
+        IoTHubName: IoTHubName,
       });
     })
     .Deploy(async ({ Steps, AsCode, Lookup: SimulatorLookup, EaC }) => {

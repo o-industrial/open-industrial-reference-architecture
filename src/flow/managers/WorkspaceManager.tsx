@@ -50,9 +50,9 @@ import { IntentStyleMap } from '../../../atomic/utils/getIntentStyles.ts';
 import { impulseSourceColorMap } from '../../../atomic/utils/impulseSourceColorMap.ts';
 import {
   AccountProfileModal,
+  APIKeysModal,
   BillingDetailsModal,
   CurrentLicenseModal,
-  APIKeysModal,
   DataAPISuiteModal,
   ManageWorkspacesModal,
   SimulatorLibraryModal,
