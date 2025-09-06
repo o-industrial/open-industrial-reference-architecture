@@ -1,5 +1,6 @@
 export * from "./azi/.exports.ts";
 export * from "./flows/.exports.ts";
+export * from "./licensing/.exports.ts";
 export * from "./writing-devices/.exports.ts";
 
 export * from "./AdminNav.tsx";
@@ -8,7 +9,7 @@ export * from "./AppFrameBar.tsx";
 export * from "./AziToolResponseCard.tsx";
 export * from "./BreadcrumbBar.tsx";
 export * from "./ConnectionManagementForm.tsx";
-export * from "./EnterpriseList.tsx";
+export * from "./WorkspaceList.tsx";
 export * from "./FlyoutMenu.tsx";
 export * from "./LinePreviewWithValue.tsx";
 export * from "./MetricCard.tsx";

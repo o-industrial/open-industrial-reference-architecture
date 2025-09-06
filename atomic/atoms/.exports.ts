@@ -8,3 +8,4 @@ export * from './LoadingSpinner.tsx';
 export * from './NodeHandle.tsx';
 export * from './NodeStatTile.tsx';
 export * from './SearchInput.tsx';
+export * from './StringArrayEditor.tsx';
