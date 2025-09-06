@@ -176,10 +176,6 @@ export const AzureIoTHubDeviceStatsStep: TStepBuilder = Step(
       ? await createDeviceSas(deviceSecondaryKey)
       : undefined;
 
-    // Event Hub-compatible (service) connection string (use iothubowner secondary)
-    const eventHubCompatibleConnStr =
-      `Endpoint=sb://${HostName}/;SharedAccessKeyName=${ServicePolicyKeyName};SharedAccessKey=${ServicePolicySecondaryKey};EntityPath=${IoTHubName}`;
-
     const metadata: Record<string, string> = {
       Cloud: 'Azure',
       IoTHub: IoTHubName,
@@ -231,10 +227,6 @@ export const AzureIoTHubDeviceStatsStep: TStepBuilder = Step(
         : x509?.primaryThumbprint
         ? { 'HTTP Auth': 'x509 client certificate' }
         : {}),
-
-      // Service-level connection (for consuming events, mgmt)
-      'Service ConnStr (iothubowner)': ServiceConnectionString,
-      'EventHub Compatible ConnStr': eventHubCompatibleConnStr,
 
       Note: 'Stats from Azure IoT Hub + enriched connection details',
     };

@@ -1,4 +1,4 @@
-import { classSet, IntentTypes, JSX, useRef, useState } from '../../.deps.ts';
+import { classSet, JSX, useRef, useState } from '../../.deps.ts';
 import { Action, ActionStyleTypes, Icon } from '../../.exports.ts';
 import { Input, type InputProps } from './Input.tsx';
 
@@ -28,53 +28,52 @@ export function CopyInput(props: CopyInputProps): JSX.Element {
   };
 
   return (
-    <div class='flex items-center gap-2'>
+    <div class='flex items-start gap-2'>
       {(() => {
         const value = (props.value ?? '').toString();
         const isLong = value.length > 60 || props.multiline;
         const rows = props.rows ?? (value.length > 200 ? 4 : value.length > 100 ? 3 : 2);
 
         return (
-          <Input
-            {...props}
-            type={isLong ? undefined : 'text'}
-            multiline={isLong as any}
-            readOnly
-            rows={isLong ? rows : undefined}
-            class={classSet([
-              '-:flex-1 font-mono text-xs',
-              isLong ? 'whitespace-pre-wrap break-all' : 'whitespace-nowrap overflow-x-auto',
-            ], props)}
-            ref={copyRef as any}
-          />
+          <div class='flex-1 min-w-0'>
+            <Input
+              {...props}
+              type={isLong ? undefined : 'text'}
+              multiline={isLong as any}
+              readOnly
+              rows={isLong ? rows : undefined}
+              class={classSet([
+                'w-full font-mono text-xs',
+                isLong
+                  ? 'whitespace-pre-wrap break-all max-h-40 overflow-y-auto'
+                  : 'whitespace-nowrap overflow-x-auto',
+              ], props)}
+              ref={copyRef as any}
+            />
+          </div>
         );
       })()}
 
       <Action
         type='button'
-        intentType={success ? IntentTypes.Info : IntentTypes.Tertiary}
-        styleType={ActionStyleTypes.Outline | ActionStyleTypes.Thin}
+        styleType={ActionStyleTypes.Icon}
         onClick={copyToClipboard}
         title='Copy to clipboard'
+        class='flex-none'
       >
-        <span class='flex items-center gap-2 text-xs'>
-          <Icon
-            class={classSet([
-              'w-4 h-4 text-neon-green-400',
-              success ? 'block' : 'hidden',
-            ])}
-            src={props.icons?.IconSet || '/icons/iconset'}
-            icon={props.icons?.CheckIcon || 'check'}
-          />
-
-          <Icon
-            class={classSet(['w-4 h-4', !success ? 'block' : 'hidden'])}
-            src={props.icons?.IconSet || '/icons/iconset'}
-            icon={props.icons?.CopyIcon || 'copy'}
-          />
-
-          <span>{success ? 'Copied' : 'Copy'}</span>
-        </span>
+        <Icon
+          class={classSet([
+            'w-5 h-5 text-neon-green-400',
+            success ? 'block' : 'hidden',
+          ])}
+          src={props.icons?.IconSet || '/icons/iconset'}
+          icon={props.icons?.CheckIcon || 'check'}
+        />
+        <Icon
+          class={classSet(['w-5 h-5', !success ? 'block' : 'hidden'])}
+          src={props.icons?.IconSet || '/icons/iconset'}
+          icon={props.icons?.CopyIcon || 'copy'}
+        />
       </Action>
     </div>
   );
