@@ -1,5 +1,6 @@
 // src/api/clients/OpenIndustrialAdminAPI.ts
 import { EverythingAsCode } from 'jsr:@fathym/eac@0.2.119';
+import { EaCUserRecord } from '../.client.deps.ts';
 import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
 import { ClientHelperBridge } from './ClientHelperBridge.ts';
 import { EaCStatus } from '../.client.deps.ts';
@@ -50,6 +51,29 @@ export class OpenIndustrialAdminAPI {
     if (!res.ok) {
       throw new Error(`Failed to list enterprises: ${res.status}`);
     }
+    return await this.bridge.json(res);
+  }
+
+  /**
+   * List users across enterprises. Optional search query filters by username or enterprise name.
+   *
+   * @param query Optional fragment to filter results.
+   */
+  public async ListUsers(query?: string): Promise<EaCUserRecord[]> {
+    const url = new URL(this.bridge.url('/api/admin/users'));
+    if (query) {
+      url.searchParams.set('q', query);
+    }
+
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: this.bridge.headers(),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to list users: ${res.status}`);
+    }
+
     return await this.bridge.json(res);
   }
 
