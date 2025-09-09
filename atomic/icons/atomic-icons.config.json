@@ -40,6 +40,8 @@
       "send": "https://api.iconify.design/lucide:send.svg",
       "settings": "https://api.iconify.design/lucide:settings.svg",
       "users": "https://api.iconify.design/lucide:users.svg",
+      "copy": "https://api.iconify.design/lucide:copy.svg",
+      "check": "https://api.iconify.design/lucide:check.svg",
 
       "runtime": "https://api.iconify.design/lucide:cpu.svg",
       "build": "https://api.iconify.design/lucide:hammer.svg",

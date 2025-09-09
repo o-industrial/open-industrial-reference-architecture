@@ -24,15 +24,14 @@ export class AdminManager {
     egi: number;
   }> {
     const enterprises = await this.ListWorkspaces();
-    // TODO(mcgear): call a future admin/users API; for now return zero.
-    const users: number = 0;
+    const users = await this.ListUsers();
 
     // Example Enterprise Growth Index (EGI) – compute or fetch as needed.
     const egi = enterprises.length; // placeholder logic
 
     return {
       enterprises: enterprises.length,
-      users,
+      users: users.length,
       egi,
     };
   }
@@ -48,11 +47,9 @@ export class AdminManager {
   }
 
   /**
-   * Placeholder for listing users.  When a users API becomes available,
-   * call that here (e.g. this.oiSvc.Admin.ListUsers()).
+   * List users via the admin/users endpoint. Accepts optional search text.
    */
-  public ListUsers(): Promise<EaCUserRecord[]> {
-    // TODO(mcgear): implement via admin/users endpoint once available.
-    return Promise.resolve([]);
+  public async ListUsers(search?: string): Promise<EaCUserRecord[]> {
+    return await this.oiSvc.Admin.ListUsers(search);
   }
 }

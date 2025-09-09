@@ -47,11 +47,10 @@ export const AzureIoTHubDeviceStep: TStepBuilder = Step(
   .Services(async (_input, ctx) => {
     const { ResourceGroupName } = ctx.Options!;
 
-    const { ConnectionString, IoTHubName: IoTHubName } = await ctx.Steps!
-      .ResolveIoTHubConnectionString({
-        ResourceGroupName,
-        KeyName: 'iothubowner',
-      });
+    const { ConnectionString, IoTHubName } = await ctx.Steps!.ResolveIoTHubConnectionString({
+      ResourceGroupName,
+      KeyName: 'iothubowner',
+    });
 
     const Registry = IoTRegistry.fromConnectionString(ConnectionString);
 

@@ -131,6 +131,15 @@ export abstract class FluentRuntime<
       }
     };
 
+    ctx.Secrets = {
+      Get(key) {
+        return Promise.resolve(Deno.env.get(key)!);
+      },
+      GetRequired(key: string) {
+        return Promise.resolve(Deno.env.get(key)!);
+      },
+    };
+
     if (this.didInjectServicesFirst()) {
       await injectServices();
 

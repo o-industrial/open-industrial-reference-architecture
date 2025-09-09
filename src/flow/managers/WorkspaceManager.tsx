@@ -50,6 +50,7 @@ import { IntentStyleMap } from '../../../atomic/utils/getIntentStyles.ts';
 import { impulseSourceColorMap } from '../../../atomic/utils/impulseSourceColorMap.ts';
 import {
   AccountProfileModal,
+  APIKeysModal,
   BillingDetailsModal,
   CurrentLicenseModal,
   DataAPISuiteModal,
@@ -162,6 +163,7 @@ export class WorkspaceManager {
     showMngWksps: () => void;
     showAccProf: () => void;
     showWarmQuery: () => void;
+    showApiKeys: () => void;
     showDataSuite: () => void;
     showBilling: () => void;
     showLicense: () => void;
@@ -172,6 +174,7 @@ export class WorkspaceManager {
     const { Modal: teamMgmtModal, Show: showTeamMgmt } = TeamManagementModal.Modal(this);
     const { Modal: wkspSetsModal, Show: showWkspSets } = WorkspaceSettingsModal.Modal(this);
     const { Modal: warmQueryModal, Show: showWarmQuery } = WarmQueryAPIsModal.Modal(this);
+    const { Modal: apiKeysModal, Show: showApiKeys } = APIKeysModal.Modal(this);
     const { Modal: dataSuiteModal, Show: showDataSuite } = DataAPISuiteModal.Modal(this);
     const { Modal: billingModal, Show: showBilling } = BillingDetailsModal.Modal(this);
     const { Modal: licenseModal, Show: showLicense } = CurrentLicenseModal.Modal(eac, this);
@@ -184,6 +187,7 @@ export class WorkspaceManager {
         {teamMgmtModal}
         {wkspSetsModal}
         {warmQueryModal}
+        {apiKeysModal}
         {dataSuiteModal}
         {billingModal}
         {licenseModal}
@@ -211,6 +215,11 @@ export class WorkspaceManager {
 
         case 'apis.warmQuery': {
           showWarmQuery();
+          break;
+        }
+
+        case 'apis.apiKeys': {
+          showApiKeys();
           break;
         }
 
@@ -248,6 +257,7 @@ export class WorkspaceManager {
       link: 'https://api.iconify.design/mdi:link-variant.svg',
       lock: 'https://api.iconify.design/lucide:lock.svg',
       warmQuery: 'https://api.iconify.design/mdi:sql-query.svg',
+      key: 'https://api.iconify.design/lucide:key.svg',
       stack: 'https://api.iconify.design/lucide:layers-3.svg',
       dollar: 'https://api.iconify.design/lucide:dollar-sign.svg',
 
@@ -408,6 +418,12 @@ export class WorkspaceManager {
         items: [
           {
             type: 'item',
+            id: 'apis.apiKeys',
+            label: 'API Keys',
+            iconSrc: I.key,
+          },
+          {
+            type: 'item',
             id: 'apis.dataSuite',
             label: 'Data API Suite',
             iconSrc: I.stack,
@@ -453,6 +469,7 @@ export class WorkspaceManager {
       showMngWksps,
       showAccProf,
       showWarmQuery,
+      showApiKeys,
       showDataSuite,
       showBilling,
       showLicense,

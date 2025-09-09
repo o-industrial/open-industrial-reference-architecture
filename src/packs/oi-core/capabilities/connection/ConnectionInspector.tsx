@@ -54,7 +54,13 @@ export function ConnectionInspector({
           {
             key: 'connection',
             label: 'Connection Info',
-            content: <ConnectionInfoPanel connectionInfo={stats?.Metadata} />,
+            content: (
+              <ConnectionInfoPanel
+                connectionInfo={stats?.Metadata}
+                healthStatus={stats?.HealthStatus}
+                lastReceivedTimestamp={stats?.LastReceivedTimestamp}
+              />
+            ),
           },
           {
             key: 'analytics',
