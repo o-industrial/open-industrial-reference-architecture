@@ -1,6 +1,6 @@
 // src/api/clients/OpenIndustrialAdminAPI.ts
 import { EverythingAsCode } from 'jsr:@fathym/eac@0.2.119';
-import { EaCUserRecord } from '../.client.deps.ts';
+import { EaCUserRecord, EaCUserLicense } from '../.client.deps.ts';
 import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
 import { ClientHelperBridge } from './ClientHelperBridge.ts';
 import { EaCStatus } from '../.client.deps.ts';
@@ -75,6 +75,94 @@ export class OpenIndustrialAdminAPI {
     }
 
     return await this.bridge.json(res);
+  }
+
+  // User Access Cards
+  public async ListUserAccessCards(
+    username: string,
+  ): Promise<{ AccessConfigurationLookup: string; Username: string }[]> {
+    const res = await fetch(
+      this.bridge.url(`/api/admin/users/${encodeURIComponent(username)}/access-cards`),
+      {
+        method: 'GET',
+        headers: this.bridge.headers(),
+      },
+    );
+    if (!res.ok) {
+      throw new Error(`Failed to list user access cards: ${res.status}`);
+    }
+    return await this.bridge.json(res);
+  }
+
+  public async AddUserAccessCard(
+    username: string,
+    accessConfigurationLookup: string,
+  ): Promise<{ AccessConfigurationLookup: string; Username: string }[]> {
+    const res = await fetch(
+      this.bridge.url(`/api/admin/users/${encodeURIComponent(username)}/access-cards`),
+      {
+        method: 'POST',
+        headers: this.bridge.headers(),
+        body: JSON.stringify({ AccessConfigurationLookup: accessConfigurationLookup }),
+      },
+    );
+    if (!res.ok) {
+      throw new Error(`Failed to add user access card: ${res.status}`);
+    }
+    return await this.bridge.json(res);
+  }
+
+  public async RemoveUserAccessCard(
+    username: string,
+    accessConfigurationLookup: string,
+  ): Promise<void> {
+    const res = await fetch(
+      this.bridge.url(
+        `/api/admin/users/${encodeURIComponent(username)}/access-cards/${encodeURIComponent(accessConfigurationLookup)}`,
+      ),
+      {
+        method: 'DELETE',
+        headers: this.bridge.headers(),
+      },
+    );
+    if (!res.ok && res.status !== 204) {
+      throw new Error(`Failed to remove user access card: ${res.status}`);
+    }
+  }
+
+  // User Licenses
+  public async ListUserLicenses(
+    username: string,
+  ): Promise<Record<string, EaCUserLicense>> {
+    const res = await fetch(
+      this.bridge.url(`/api/admin/users/${encodeURIComponent(username)}/licenses`),
+      {
+        method: 'GET',
+        headers: this.bridge.headers(),
+      },
+    );
+    if (!res.ok) {
+      throw new Error(`Failed to list user licenses: ${res.status}`);
+    }
+    return await this.bridge.json(res);
+  }
+
+  public async CancelUserLicense(
+    username: string,
+    licLookup: string,
+  ): Promise<void> {
+    const res = await fetch(
+      this.bridge.url(
+        `/api/admin/users/${encodeURIComponent(username)}/licenses/${encodeURIComponent(licLookup)}`,
+      ),
+      {
+        method: 'DELETE',
+        headers: this.bridge.headers(),
+      },
+    );
+    if (!res.ok && res.status !== 204) {
+      throw new Error(`Failed to cancel user license: ${res.status}`);
+    }
   }
 
   /**
