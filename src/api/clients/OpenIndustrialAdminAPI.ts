@@ -77,6 +77,24 @@ export class OpenIndustrialAdminAPI {
     return await this.bridge.json(res);
   }
 
+  /**
+   * Invite a user to the parent (admin) scope by username (email).
+   */
+  public async InviteUser(username: string): Promise<unknown> {
+    const res = await fetch(this.bridge.url('/api/admin/users/invite'), {
+      method: 'POST',
+      headers: this.bridge.headers(),
+      body: JSON.stringify({ Username: username }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to invite admin user: ${res.status}`);
+    }
+
+    // Steward may return a status or message; pass it through
+    return await this.bridge.json(res).catch(() => ({}));
+  }
+
   // User Access Cards
   public async ListUserAccessCards(
     username: string,
