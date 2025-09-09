@@ -6,6 +6,7 @@ export {
   useCallback,
   useEffect,
   useState,
+  useRef,
 } from 'npm:preact@10.20.1/hooks';
 
 export { type NodeProps } from 'npm:reactflow@11.11.4';
