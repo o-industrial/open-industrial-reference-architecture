@@ -1,6 +1,6 @@
 // src/api/clients/OpenIndustrialAdminAPI.ts
 import { EverythingAsCode } from 'jsr:@fathym/eac@0.2.119';
-import { EaCUserRecord, EaCUserLicense } from '../.client.deps.ts';
+import { EaCUserLicense, EaCUserRecord } from '../.client.deps.ts';
 import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
 import { ClientHelperBridge } from './ClientHelperBridge.ts';
 import { EaCStatus } from '../.client.deps.ts';
@@ -136,7 +136,9 @@ export class OpenIndustrialAdminAPI {
   ): Promise<void> {
     const res = await fetch(
       this.bridge.url(
-        `/api/admin/users/${encodeURIComponent(username)}/access-cards/${encodeURIComponent(accessConfigurationLookup)}`,
+        `/api/admin/users/${encodeURIComponent(username)}/access-cards/${
+          encodeURIComponent(accessConfigurationLookup)
+        }`,
       ),
       {
         method: 'DELETE',
@@ -171,7 +173,9 @@ export class OpenIndustrialAdminAPI {
   ): Promise<void> {
     const res = await fetch(
       this.bridge.url(
-        `/api/admin/users/${encodeURIComponent(username)}/licenses/${encodeURIComponent(licLookup)}`,
+        `/api/admin/users/${encodeURIComponent(username)}/licenses/${
+          encodeURIComponent(licLookup)
+        }`,
       ),
       {
         method: 'DELETE',
