@@ -20,6 +20,6 @@ export {
 
 export { type EverythingAsCodeIdentity } from 'jsr:@fathym/eac-identity@0.0.24';
 
-export { type EverythingAsCodeLicensing } from 'jsr:@fathym/eac-licensing@0.0.53';
+export { type EverythingAsCodeLicensing } from 'jsr:@fathym/eac-licensing@0.0.54';
 
 export type { JSONSchema7 } from 'npm:jsonschema7@0.8.0';
