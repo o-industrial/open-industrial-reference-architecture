@@ -5,6 +5,7 @@ import {
   Select,
   Action,
   ActionStyleTypes,
+  CheckboxRow,
 } from '../../.exports.ts';
 
 export type TeamManagementModalProps = {
@@ -20,6 +21,7 @@ export function TeamManagementModal({
     currentWorkspace,
     teamMembers,
     inviteMember,
+    grantDeployAccess,
     removeMember,
     updateMemberRole,
   } = workspaceMgr.UseWorkspaceSettings();
@@ -29,6 +31,7 @@ export function TeamManagementModal({
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<'Owner' | 'Editor' | 'Viewer'>('Viewer');
+  const [grantDeploy, setGrantDeploy] = useState(false);
 
   const toggleSelected = (email: string) => {
     setSelected((prev) =>
@@ -90,6 +93,13 @@ export function TeamManagementModal({
               />
               <div class="text-sm">{member.Username ?? 'N/A'}</div>
               <div class="text-sm">{member.Username}</div>
+              <Action
+                onClick={() => grantDeployAccess(member.Username)}
+                intentType={IntentTypes.Info}
+                styleType={ActionStyleTypes.Outline}
+              >
+                Grant Deploy
+              </Action>
               {/* <Select
                 value={member.Role}
                 onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>
@@ -130,13 +140,20 @@ export function TeamManagementModal({
                 setName((e.target as HTMLInputElement).value)
               }
             />
-            <Input
-              placeholder="Email"
-              value={email}
-              onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
-                setEmail((e.target as HTMLInputElement).value)
-              }
-            />
+             <Input
+               placeholder="Email"
+               value={email}
+               onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
+                 setEmail((e.target as HTMLInputElement).value)
+               }
+             />
+            <div class="min-w-[180px]">
+              <CheckboxRow
+                label="Grant Deploy Access"
+                checked={grantDeploy}
+                onToggle={(next: boolean) => setGrantDeploy(next)}
+              />
+            </div>
             {/* <Select
               value={role}
               onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>
@@ -153,11 +170,20 @@ export function TeamManagementModal({
               <option value="Owner">Owner</option>
             </Select> */}
             <Action
-              onClick={() => {
+              onClick={async () => {
                 inviteMember(email, role, name);
+                if (grantDeploy) {
+                  try {
+                    await grantDeployAccess(email);
+                  } catch (err) {
+                    console.error('Failed to grant deploy access', err);
+                    alert(`Grant access failed: ${err instanceof Error ? err.message : String(err)}`);
+                  }
+                }
                 setName('');
                 setEmail('');
                 //setRole('Viewer');
+                setGrantDeploy(false);
               }}
             >
               Invite

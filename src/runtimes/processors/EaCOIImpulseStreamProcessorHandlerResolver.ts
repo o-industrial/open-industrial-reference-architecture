@@ -262,7 +262,8 @@ async function createImpulseRuntime({
 
             scheduleEaCRefresh();
           } catch (err) {
-            logger.warn('[ImpulseStream] ⚠️ Failed to parse impulse', err);
+            logger.warn('[ImpulseStream] ⚠️ Failed to parse impulse');
+            logger.warn(err);
           }
         },
         {
@@ -276,7 +277,8 @@ async function createImpulseRuntime({
         try {
           consumer.stop();
         } catch (err) {
-          logger.warn('[ImpulseStream] ⚠️ Error stopping consumer', err);
+          logger.warn('[ImpulseStream] ⚠️ Error stopping consumer');
+          logger.warn(err);
         }
         // consumer
         //   .delete()
@@ -346,7 +348,8 @@ async function handleImpulseStreamConnection({
       try {
         socket.send(JSON.stringify(impulse));
       } catch (err) {
-        logger.error('[WS] ❌ Send failed:', err);
+        logger.error('[WS] ❌ Send failed:');
+        logger.error(err);
       }
     } else {
       logger.warn(
@@ -363,7 +366,8 @@ async function handleImpulseStreamConnection({
     try {
       socket.close(1011, 'runtime unavailable');
     } catch (err) {
-      logger.error('[WS] ❌ Error closing socket after missing runtime:', err);
+      logger.error('[WS] ❌ Error closing socket after missing runtime:');
+      logger.error(err);
     }
     return new Response('Service Unavailable', { status: 503 });
   }
@@ -381,7 +385,8 @@ async function handleImpulseStreamConnection({
       try {
         unsub?.();
       } catch (err) {
-        logger.error('[WS] ❌ Error removing listener:', err);
+        logger.error('[WS] ❌ Error removing listener:');
+        logger.error(err);
       }
     }
 
@@ -395,7 +400,8 @@ async function handleImpulseStreamConnection({
         try {
           socket.close(1000, 'heartbeat timeout');
         } catch (err) {
-          logger.error('[WS] ❌ Error closing socket after missing pong:', err);
+          logger.error('[WS] ❌ Error closing socket after missing pong:');
+          logger.error(err);
         }
         shutdown();
         return;
@@ -406,7 +412,8 @@ async function handleImpulseStreamConnection({
           JSON.stringify({ type: 'ping', ts: new Date().toISOString() }),
         );
       } catch (err) {
-        logger.error('[WS] ❌ Failed to send ping:', err);
+        logger.error('[WS] ❌ Failed to send ping:');
+        logger.error(err);
       }
       scheduleHeartbeat();
     }, HEARTBEAT_TIMEOUT_MS);
@@ -418,7 +425,8 @@ async function handleImpulseStreamConnection({
     try {
       unsub = await runtime.AddWebSocketListener(listener);
     } catch (err) {
-      logger.error('[WS] ❌ Failed to create consumer:', err);
+      logger.error('[WS] ❌ Failed to create consumer:');
+      logger.error(err);
       try {
         socket.close(1011, 'listener error');
       } catch (closeErr) {
@@ -462,7 +470,8 @@ async function handleImpulseStreamConnection({
         return;
       }
     } catch (err) {
-      logger.error('[WS] ❌ Error processing message:', err);
+      logger.error('[WS] ❌ Error processing message:');
+      logger.error(err);
     }
     socket.send(JSON.stringify({ echo: event.data }));
   };

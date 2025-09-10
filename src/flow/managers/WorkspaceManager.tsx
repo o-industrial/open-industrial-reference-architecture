@@ -61,7 +61,7 @@ import {
   WorkspaceSettingsModal,
 } from '../../../atomic/organisms/modals/.exports.ts';
 import { MenuActionItem, MenuRoot } from '../../../atomic/molecules/FlyoutMenu.tsx';
-import { EverythingAsCodeLicensing } from '../../eac/.deps.ts';
+import { EverythingAsCodeLicensing, EverythingAsCodeIdentity } from '../../eac/.deps.ts';
 import { AccountProfile } from '../../types/AccountProfile.ts';
 import { EaCUserRecord } from '../../api/.client.deps.ts';
 
@@ -1339,6 +1339,35 @@ export class WorkspaceManager {
     };
   }
 
+  /**
+   * Grant a user an access card that includes a specific access right lookup.
+   * Defaults to granting the workspace deploy right.
+   */
+  public async GrantDeployAccess(
+    username: string,
+    rightLookup: string = 'Workspace.Deploy',
+  ): Promise<void> {
+    if (!username) return;
+
+    const identity = await this.oiSvc.Admin.GetEaC<EverythingAsCodeIdentity>();
+    const acs = identity?.AccessConfigurations ?? {};
+
+    const match = Object.entries(acs).find(([_, ac]) => {
+      // deno-lint-ignore no-explicit-any
+      const rights = (ac as any)?.AccessRightLookups ?? (ac as any)?.AccessRights ?? [];
+      return Array.isArray(rights) && rights.includes(rightLookup);
+    });
+
+    if (!match) {
+      throw new Error(
+        `No Access Configuration found containing right '${rightLookup}'. Configure one under /admin/access-cards.`,
+      );
+    }
+
+    const [acLookup] = match;
+    await this.oiSvc.Admin.AddUserAccessCard(username, acLookup);
+  }
+
   public UseWorkspaceSettings(): {
     currentWorkspace: WorkspaceSummary;
     teamMembers: EaCUserRecord[];
@@ -1347,6 +1376,7 @@ export class WorkspaceManager {
       role: TeamMember['Role'],
       name?: string,
     ) => void;
+    grantDeployAccess: (username: string) => Promise<void>;
     removeMember: (email: string) => void;
     updateMemberRole: (email: string, role: TeamMember['Role']) => void;
     update: (next: Partial<EaCEnterpriseDetails>) => void;
@@ -1495,6 +1525,8 @@ export class WorkspaceManager {
       currentWorkspace: current,
       teamMembers,
       inviteMember,
+      grantDeployAccess: async (username: string) =>
+        await this.GrantDeployAccess(username),
       removeMember,
       updateMemberRole,
       update,
