@@ -196,6 +196,7 @@ export class OpenIndustrialAdminAPI {
   public async CommitEaC(
     eac: EverythingAsCode,
   ): Promise<{ status: EaCStatus; commitId: string }> {
+    debugger;
     const res = await fetch(this.bridge.url('/api/admin/commit'), {
       method: 'POST',
       headers: this.bridge.headers(),
