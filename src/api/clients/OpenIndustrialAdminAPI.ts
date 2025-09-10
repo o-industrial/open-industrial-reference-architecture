@@ -1,5 +1,5 @@
 // src/api/clients/OpenIndustrialAdminAPI.ts
-import { EverythingAsCode } from 'jsr:@fathym/eac@0.2.119';
+import { EverythingAsCode } from 'jsr:@fathym/eac@0.2.120';
 import { EaCUserLicense, EaCUserRecord } from '../.client.deps.ts';
 import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
 import { ClientHelperBridge } from './ClientHelperBridge.ts';
@@ -93,6 +93,25 @@ export class OpenIndustrialAdminAPI {
 
     // Steward may return a status or message; pass it through
     return await this.bridge.json(res).catch(() => ({}));
+  }
+
+  /**
+   * Delete (soft-delete) a user at the admin scope by username (email).
+   *
+   * Server returns 204 on success; this method throws on non-OK status.
+   */
+  public async DeleteUser(username: string): Promise<void> {
+    const res = await fetch(
+      this.bridge.url(`/api/admin/users/${encodeURIComponent(username)}`),
+      {
+        method: 'DELETE',
+        headers: this.bridge.headers(),
+      },
+    );
+
+    if (!res.ok && res.status !== 204) {
+      throw new Error(`Failed to delete admin user: ${res.status}`);
+    }
   }
 
   // User Access Cards
