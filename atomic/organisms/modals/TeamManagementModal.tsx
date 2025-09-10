@@ -140,18 +140,18 @@ export function TeamManagementModal({
                 setName((e.target as HTMLInputElement).value)
               }
             />
-             <Input
-               placeholder="Email"
-               value={email}
-               onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
-                 setEmail((e.target as HTMLInputElement).value)
-               }
-             />
+            <Input
+              placeholder="Email"
+              value={email}
+              onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
+                setEmail((e.target as HTMLInputElement).value)
+              }
+            />
             <div class="min-w-[180px]">
               <CheckboxRow
                 label="Grant Deploy Access"
                 checked={grantDeploy}
-                onToggle={(next: boolean) => setGrantDeploy(next)}
+                onToggle={((next: boolean) => setGrantDeploy(next)) as any}
               />
             </div>
             {/* <Select
@@ -177,7 +177,11 @@ export function TeamManagementModal({
                     await grantDeployAccess(email);
                   } catch (err) {
                     console.error('Failed to grant deploy access', err);
-                    alert(`Grant access failed: ${err instanceof Error ? err.message : String(err)}`);
+                    alert(
+                      `Grant access failed: ${
+                        err instanceof Error ? err.message : String(err)
+                      }`
+                    );
                   }
                 }
                 setName('');

@@ -61,7 +61,7 @@ import {
   WorkspaceSettingsModal,
 } from '../../../atomic/organisms/modals/.exports.ts';
 import { MenuActionItem, MenuRoot } from '../../../atomic/molecules/FlyoutMenu.tsx';
-import { EverythingAsCodeLicensing, EverythingAsCodeIdentity } from '../../eac/.deps.ts';
+import { EverythingAsCodeIdentity, EverythingAsCodeLicensing } from '../../eac/.deps.ts';
 import { AccountProfile } from '../../types/AccountProfile.ts';
 import { EaCUserRecord } from '../../api/.client.deps.ts';
 
@@ -1525,8 +1525,7 @@ export class WorkspaceManager {
       currentWorkspace: current,
       teamMembers,
       inviteMember,
-      grantDeployAccess: async (username: string) =>
-        await this.GrantDeployAccess(username),
+      grantDeployAccess: async (username: string) => await this.GrantDeployAccess(username),
       removeMember,
       updateMemberRole,
       update,
