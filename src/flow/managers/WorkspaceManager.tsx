@@ -155,7 +155,10 @@ export class WorkspaceManager {
     });
   }
 
-  public UseAppMenu(eac: EverythingAsCode & EverythingAsCodeLicensing): {
+  public UseAppMenu(
+    eac: EverythingAsCode & EverythingAsCodeLicensing,
+    opts?: { canUseManaged?: boolean; canUsePrivate?: boolean },
+  ): {
     handleMenu: (item: MenuActionItem) => void;
     modals: JSX.Element;
     runtimeMenus: MenuRoot[];
@@ -181,7 +184,10 @@ export class WorkspaceManager {
     const { Modal: dataSuiteModal, Show: showDataSuite } = DataAPISuiteModal.Modal(this);
     const { Modal: billingModal, Show: showBilling } = BillingDetailsModal.Modal(this);
     const { Modal: licenseModal, Show: showLicense } = CurrentLicenseModal.Modal(eac, this);
-    const { Modal: externalConnsModal, Show: showExternalConns } = ExternalConnectionsModal.Modal(this);
+    const { Modal: externalConnsModal, Show: showExternalConns } = ExternalConnectionsModal.Modal(
+      this,
+      { canUseManaged: opts?.canUseManaged, canUsePrivate: opts?.canUsePrivate },
+    );
 
     const modals = (
       <>
