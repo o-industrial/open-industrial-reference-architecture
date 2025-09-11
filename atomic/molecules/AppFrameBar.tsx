@@ -79,9 +79,9 @@ export function AppFrameBar({
               onClick={onDeployClick}
               styleType={ActionStyleTypes.Outline | ActionStyleTypes.Thin}
               intentType={
-                hasWorkspaceChanges ? IntentTypes.Primary : IntentTypes.None
+                !hasWorkspaceChanges ? IntentTypes.Primary : IntentTypes.None
               }
-              disabled={!hasWorkspaceChanges}
+              disabled={hasWorkspaceChanges}
             >
               Deploy
             </Action>
