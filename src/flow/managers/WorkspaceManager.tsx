@@ -52,10 +52,10 @@ import {
   AccountProfileModal,
   APIKeysModal,
   BillingDetailsModal,
+  CloudConnectionsModal,
   CurrentLicenseModal,
   DataAPISuiteModal,
   ManageWorkspacesModal,
-  CloudConnectionsModal,
   SimulatorLibraryModal,
   TeamManagementModal,
   WarmQueryAPIsModal,
@@ -183,7 +183,9 @@ export class WorkspaceManager {
     const { Modal: dataSuiteModal, Show: showDataSuite } = DataAPISuiteModal.Modal(this);
     const { Modal: billingModal, Show: showBilling } = BillingDetailsModal.Modal(this);
     const { Modal: licenseModal, Show: showLicense } = CurrentLicenseModal.Modal(eac, this);
-    const { Modal: externalConnsModal, Show: showExternalConns } = CloudConnectionsModal.Modal(this);
+    const { Modal: externalConnsModal, Show: showExternalConns } = CloudConnectionsModal.Modal(
+      this,
+    );
 
     const modals = (
       <>

@@ -38,17 +38,17 @@ export class OpenIndustrialWorkspaceAPI {
    */
   public async Commit(
     snapshot: EaCHistorySnapshot,
-    forceActuators?: boolean
+    forceActuators?: boolean,
   ): Promise<EaCStatus> {
     const res = await fetch(
       this.bridge.url(
-        `/api/workspaces/commit?forceActuators=${forceActuators}`
+        `/api/workspaces/commit?forceActuators=${forceActuators}`,
       ),
       {
         method: 'POST',
         headers: this.bridge.headers(),
         body: JSON.stringify(snapshot),
-      }
+      },
     );
 
     if (!res.ok) {
@@ -84,7 +84,7 @@ export class OpenIndustrialWorkspaceAPI {
       {
         method: 'GET',
         headers: this.bridge.headers(),
-      }
+      },
     );
 
     if (!res.ok) {
@@ -114,7 +114,7 @@ export class OpenIndustrialWorkspaceAPI {
    * Invite new user to current workspace
    */
   public async InviteUser(
-    userRecord: EaCUserRecord
+    userRecord: EaCUserRecord,
   ): Promise<{ EnterpriseLookup: string; CommitID: string }> {
     const res = await fetch(this.bridge.url('/api/workspaces/teams/invite'), {
       method: 'POST',
@@ -139,7 +139,7 @@ export class OpenIndustrialWorkspaceAPI {
       {
         method: 'GET',
         headers: this.bridge.headers(),
-      }
+      },
     );
 
     if (!res.ok) {
@@ -153,7 +153,7 @@ export class OpenIndustrialWorkspaceAPI {
    * Create a new workspace from the given OpenIndustrial EaC configuration.
    */
   public async Create(
-    eac: EverythingAsCodeOIWorkspace
+    eac: EverythingAsCodeOIWorkspace,
   ): Promise<{ EnterpriseLookup: string; CommitID: string }> {
     const res = await fetch(this.bridge.url('/api/workspaces'), {
       method: 'POST',
@@ -241,7 +241,7 @@ export class OpenIndustrialWorkspaceAPI {
    */
   public StreamImpulses(
     onImpulse: (impulse: RuntimeImpulse) => void,
-    filters?: ImpulseStreamFilter
+    filters?: ImpulseStreamFilter,
   ): () => void {
     const url = new URL(this.bridge.url('/api/workspaces/impulses/stream'));
 
@@ -282,8 +282,7 @@ export class OpenIndustrialWorkspaceAPI {
 
     // ✅ Validate runtime impulse
     const isRuntimeImpulse = (obj: RuntimeImpulse): obj is RuntimeImpulse => {
-      const valid =
-        obj &&
+      const valid = obj &&
         typeof obj.Timestamp === 'string' &&
         typeof obj.Confidence === 'number' &&
         typeof obj.Payload === 'object' &&
@@ -314,8 +313,7 @@ export class OpenIndustrialWorkspaceAPI {
       const msg = typeof event.data === 'string' ? event.data : '';
       try {
         const parsed = JSON.parse(msg);
-        const isPing =
-          parsed &&
+        const isPing = parsed &&
           typeof parsed === 'object' &&
           'type' in parsed &&
           (parsed as { type: string }).type === 'ping';
@@ -349,7 +347,7 @@ export class OpenIndustrialWorkspaceAPI {
       console.info(
         '[StreamImpulses] 🔻 WebSocket closed:',
         evt.reason || '(no reason)',
-        ` | code=${evt.code}`
+        ` | code=${evt.code}`,
       );
     };
 
