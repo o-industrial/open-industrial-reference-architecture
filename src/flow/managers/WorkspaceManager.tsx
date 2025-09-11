@@ -55,8 +55,7 @@ import {
   CurrentLicenseModal,
   DataAPISuiteModal,
   ManageWorkspacesModal,
-  // New modal for cloud/external connections
-  ExternalConnectionsModal,
+  CloudConnectionsModal,
   SimulatorLibraryModal,
   TeamManagementModal,
   WarmQueryAPIsModal,
@@ -98,6 +97,7 @@ export class WorkspaceManager {
     scope: NodeScopeTypes = 'workspace',
     aziCircuitUrl: string,
     aziWarmQueryCircuitUrl: string,
+    protected accessRights?: string[],
     jwt?: string,
   ) {
     this.currentScope = { Scope: scope };
@@ -157,7 +157,6 @@ export class WorkspaceManager {
 
   public UseAppMenu(
     eac: EverythingAsCode & EverythingAsCodeLicensing,
-    opts?: { canUseManaged?: boolean; canUsePrivate?: boolean },
   ): {
     handleMenu: (item: MenuActionItem) => void;
     modals: JSX.Element;
@@ -184,10 +183,7 @@ export class WorkspaceManager {
     const { Modal: dataSuiteModal, Show: showDataSuite } = DataAPISuiteModal.Modal(this);
     const { Modal: billingModal, Show: showBilling } = BillingDetailsModal.Modal(this);
     const { Modal: licenseModal, Show: showLicense } = CurrentLicenseModal.Modal(eac, this);
-    const { Modal: externalConnsModal, Show: showExternalConns } = ExternalConnectionsModal.Modal(
-      this,
-      { canUseManaged: opts?.canUseManaged, canUsePrivate: opts?.canUsePrivate },
-    );
+    const { Modal: externalConnsModal, Show: showExternalConns } = CloudConnectionsModal.Modal(this);
 
     const modals = (
       <>
@@ -563,10 +559,12 @@ export class WorkspaceManager {
     isAzureConnected: boolean;
     loading: boolean;
     error?: string;
+    canUseManaged: boolean;
+    canUsePrivate: boolean;
     refreshAzureStatus: () => void;
   } {
     const [isAzureConnected, setConnected] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | undefined>(undefined);
 
     const load = useCallback(async () => {
@@ -593,6 +591,8 @@ export class WorkspaceManager {
       isAzureConnected,
       loading,
       error,
+      canUseManaged: this.accessRights?.includes('Workspace.Infrastructure.Managed') ?? false,
+      canUsePrivate: this.accessRights?.includes('Workspace.Infrastructure.Private') ?? false,
       refreshAzureStatus: load,
     };
   }

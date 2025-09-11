@@ -31,7 +31,13 @@ export function EaCSelectSubscriptionForm(
         const res = await fetch('/workspace/api/azure/subscriptions');
         const data = await res.json();
         if (!cancelled) {
-          setSubs(Array.isArray(data) ? data : []);
+          const list: AzureSubscription[] = Array.isArray(data) ? data : [];
+          list.sort((a, b) =>
+            (a.displayName || '').localeCompare(b.displayName || '', undefined, {
+              sensitivity: 'base',
+            })
+          );
+          setSubs(list);
         }
       } catch (err) {
         if (!cancelled) setError('Failed to load subscriptions');
@@ -66,9 +72,10 @@ export function EaCSelectSubscriptionForm(
             label="Select Subscription"
             required
             disabled={loading || !!error}
+            value={selectedSub}
             onChange={(e) => setSelectedSub((e.target as HTMLSelectElement).value)}
           >
-            <option value="" disabled selected>
+            <option value="" disabled>
               {loading ? 'Loading subscriptions…' : 'Choose a subscription'}
             </option>
             {subs.map((s) => (
@@ -89,4 +96,3 @@ export function EaCSelectSubscriptionForm(
 }
 
 export default EaCSelectSubscriptionForm;
-

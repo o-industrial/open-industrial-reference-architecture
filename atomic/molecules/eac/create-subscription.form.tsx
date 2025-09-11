@@ -95,7 +95,9 @@ export function EaCCreateSubscriptionForm(
             value={name}
             required
             placeholder="Enter new subscription name"
-            onInput={(e) => setName((e.target as HTMLInputElement).value)}
+            onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
+              setName((e.target as HTMLInputElement).value)
+            }
           />
         </div>
 
@@ -120,7 +122,7 @@ export function EaCCreateSubscriptionForm(
               setSectionName('');
             }}
           >
-            <option value="" disabled selected>
+            <option value="" disabled>
               {loading ? 'Loading accounts…' : 'Choose a billing account'}
             </option>
             {accounts.map((a) => (
@@ -140,7 +142,7 @@ export function EaCCreateSubscriptionForm(
               setSectionName('');
             }}
           >
-            <option value="" disabled selected>
+            <option value="" disabled>
               {selectedAccount ? 'Choose a profile' : 'Select an account first'}
             </option>
             {selectedAccount?.billingProfiles?.map((p) => (
@@ -156,7 +158,7 @@ export function EaCCreateSubscriptionForm(
             disabled={!selectedProfile}
             onChange={(e) => setSectionName((e.target as HTMLSelectElement).value)}
           >
-            <option value="" disabled selected>
+            <option value="" disabled>
               {selectedProfile ? 'Choose an invoice section' : 'Select a profile first'}
             </option>
             {selectedProfile?.invoiceSections?.map((s) => (
