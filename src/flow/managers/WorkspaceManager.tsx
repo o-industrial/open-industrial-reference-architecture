@@ -55,6 +55,8 @@ import {
   CurrentLicenseModal,
   DataAPISuiteModal,
   ManageWorkspacesModal,
+  // New modal for cloud/external connections
+  ExternalConnectionsModal,
   SimulatorLibraryModal,
   TeamManagementModal,
   WarmQueryAPIsModal,
@@ -167,6 +169,7 @@ export class WorkspaceManager {
     showDataSuite: () => void;
     showBilling: () => void;
     showLicense: () => void;
+    showExternalConns: () => void;
   } {
     const { Modal: accProfModal, Show: showAccProf } = AccountProfileModal.Modal(this);
     const { Modal: mngWkspsModal, Show: showMngWksps } = ManageWorkspacesModal.Modal(this);
@@ -178,6 +181,7 @@ export class WorkspaceManager {
     const { Modal: dataSuiteModal, Show: showDataSuite } = DataAPISuiteModal.Modal(this);
     const { Modal: billingModal, Show: showBilling } = BillingDetailsModal.Modal(this);
     const { Modal: licenseModal, Show: showLicense } = CurrentLicenseModal.Modal(eac, this);
+    const { Modal: externalConnsModal, Show: showExternalConns } = ExternalConnectionsModal.Modal(this);
 
     const modals = (
       <>
@@ -186,6 +190,7 @@ export class WorkspaceManager {
         {mngWkspsModal}
         {teamMgmtModal}
         {wkspSetsModal}
+        {externalConnsModal}
         {warmQueryModal}
         {apiKeysModal}
         {dataSuiteModal}
@@ -225,6 +230,11 @@ export class WorkspaceManager {
 
         case 'apis.dataSuite': {
           showDataSuite();
+          break;
+        }
+
+        case 'env.connections': {
+          showExternalConns();
           break;
         }
 
@@ -372,44 +382,30 @@ export class WorkspaceManager {
       },
 
       // ===== Environment =====
-      // {
-      //   id: 'environment',
-      //   label: 'Environment',
-      //   items: [
-      //     {
-      //       type: 'item',
-      //       id: 'env.secrets',
-      //       label: 'Manage Secrets',
-      //       iconSrc: I.lock,
-      //     },
-      //     {
-      //       type: 'item',
-      //       id: 'env.connections',
-      //       label: 'External Connections',
-      //       iconSrc: I.link,
-      //     },
-      //     {
-      //       type: 'submenu',
-      //       id: 'env.cloud',
-      //       label: 'Cloud',
-      //       iconSrc: I.cloud,
-      //       items: [
-      //         {
-      //           type: 'item',
-      //           id: 'env.cloud.attachManaged',
-      //           label: 'Attach Managed Cloud',
-      //           iconSrc: I.cloudAttach,
-      //         },
-      //         {
-      //           type: 'item',
-      //           id: 'env.cloud.addPrivate',
-      //           label: 'Add Private Cloud',
-      //           iconSrc: I.privateCloud,
-      //         },
-      //       ],
-      //     },
-      //   ],
-      // },
+      {
+        id: 'environment',
+        label: 'Environment',
+        items: [
+          {
+            type: 'item',
+            id: 'env.connections',
+            label: 'External Connections',
+            iconSrc: I.link,
+          },
+          // Future: Cloud submenus
+          // { type: 'item', id: 'env.secrets', label: 'Manage Secrets', iconSrc: I.lock },
+          // {
+          //   type: 'submenu',
+          //   id: 'env.cloud',
+          //   label: 'Cloud',
+          //   iconSrc: I.cloud,
+          //   items: [
+          //     { type: 'item', id: 'env.cloud.attachManaged', label: 'Attach Managed Cloud', iconSrc: I.cloudAttach },
+          //     { type: 'item', id: 'env.cloud.addPrivate', label: 'Add Private Cloud', iconSrc: I.privateCloud },
+          //   ],
+          // },
+        ],
+      },
 
       // ===== APIs =====
       {
@@ -470,6 +466,7 @@ export class WorkspaceManager {
       showAccProf,
       showWarmQuery,
       showApiKeys,
+      showExternalConns,
       showDataSuite,
       showBilling,
       showLicense,
@@ -553,6 +550,44 @@ export class WorkspaceManager {
       save,
       deleteAccount,
       signOut,
+    };
+  }
+
+  public UseAzureAuth(): {
+    isAzureConnected: boolean;
+    loading: boolean;
+    error?: string;
+    refreshAzureStatus: () => void;
+  } {
+    const [isAzureConnected, setConnected] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | undefined>(undefined);
+
+    const load = useCallback(async () => {
+      try {
+        setLoading(true);
+        setError(undefined);
+        const res = await fetch('/workspace/api/azure/status');
+        if (!res.ok) throw new Error(`Status ${res.status}`);
+        const data = await res.json();
+        setConnected(!!data?.connected || !!data?.Connected);
+      } catch (err) {
+        setError((err as Error).message);
+        setConnected(false);
+      } finally {
+        setLoading(false);
+      }
+    }, []);
+
+    useEffect(() => {
+      load();
+    }, [load]);
+
+    return {
+      isAzureConnected,
+      loading,
+      error,
+      refreshAzureStatus: load,
     };
   }
 
