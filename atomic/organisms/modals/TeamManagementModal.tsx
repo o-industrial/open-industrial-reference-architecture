@@ -79,11 +79,13 @@ export function TeamManagementModal({
   };
 
   return (
-    <Modal
-      title={`Teams: ${currentWorkspace.Details.Name} Members`}
-      onClose={onClose}
-    >
-      <div class="space-y-6">
+    <>
+      <Modal
+        title={`Teams: ${currentWorkspace.Details.Name} Members`}
+        onClose={onClose}
+      >
+        <div class="relative">
+          <div class="space-y-6">
         <div class="flex items-center justify-between">
           <div class="text-sm text-neutral-300 font-medium">
             Current Members
@@ -101,6 +103,9 @@ export function TeamManagementModal({
           </Select> */}
         </div>
 
+          {/* Column label */}
+          <div class="text-xs text-neutral-400 px-1">Email</div>
+
           <div class="space-y-2 max-h-64 overflow-y-auto">
             {localMembers.map((member) => (
               <div
@@ -113,7 +118,8 @@ export function TeamManagementModal({
                   onChange={() => toggleSelected(member.Username)}
                 />
                 {/* <div class="text-sm">{member.Name ?? 'N/A'}</div> */}
-                <div class="text-sm col-span-4">{member.Username}</div>
+                <div class="text-sm col-span-3">{member.Username}</div>
+                <div class="col-span-2 flex items-center justify-end gap-2">
                 <Action
                 onClick={() => grantDeployAccess(member.Username)}
                 intentType={IntentTypes.Info}
@@ -158,6 +164,7 @@ export function TeamManagementModal({
                 >
                   ✖
                 </Action>
+                </div>
               </div>
             ))}
           </div>
@@ -253,10 +260,10 @@ export function TeamManagementModal({
                   class={`pointer-events-auto rounded-lg px-4 py-3 shadow-lg text-sm font-medium ${
                     toast.kind === 'success'
                       ? 'bg-emerald-600 text-white'
-                  : toast.kind === 'warning'
-                  ? 'bg-amber-500 text-white'
-                  : 'bg-rose-600 text-white'
-              }`}
+                      : toast.kind === 'warning'
+                      ? 'bg-amber-500 text-white'
+                      : 'bg-rose-600 text-white'
+                  }`}
                 >
                   {toast.message}
                   <button class="ml-2 underline" onClick={() => setToast(null)}>
