@@ -1,5 +1,5 @@
 import type { FunctionalComponent, JSX } from 'npm:preact@10.20.1';
-import { useEffect } from '../../.deps.ts';
+import { useEffect, useRef } from '../../.deps.ts';
 
 interface SurfaceWarmQueryModalQueryProps {
   query: string;
@@ -26,33 +26,45 @@ export const SurfaceWarmQueryModalQuery: FunctionalComponent<SurfaceWarmQueryMod
       {children}
     </svg>
   );
-  const handleQueryChange = (
-    e: string | InputEvt,
-  ) => {
-    const inputValue = typeof e === 'string' ? e : e.currentTarget.value;
+  const updateQueryUI = (inputValue: string) => {
+    const queryEl = document.getElementById('query') as HTMLTextAreaElement | null;
+    const saveWrap = document.getElementById('saveWrap');
+    const runWrap = document.getElementById('runWrap');
 
-    if (inputValue.length == 0) {
-      document.getElementById('query')!.style.borderColor = 'red';
-      if (!document.getElementById('saveWrap')!.title.includes('Query Required')) {
-        document.getElementById('saveWrap')!.title =
-          document.getElementById('saveWrap')!.title == ''
-            ? 'Query Required'
-            : document.getElementById('saveWrap')!.title + '\nQuery Required';
+    if (!queryEl || !saveWrap || !runWrap) return;
+
+    if (inputValue.length === 0) {
+      queryEl.style.borderColor = 'red';
+      if (!saveWrap.title.includes('Query Required')) {
+        saveWrap.title = saveWrap.title === ''
+          ? 'Query Required'
+          : saveWrap.title + '\nQuery Required';
       }
-      document.getElementById('runWrap')!.title = 'Query Required';
+      runWrap.title = 'Query Required';
     } else {
-      document.getElementById('query')!.style.borderColor = '';
-      document.getElementById('saveWrap')!.title = document.getElementById('saveWrap')!.title
-        .replace(
-          '\nQuery Required',
-          '',
-        ).replace('Query Required', '');
-      document.getElementById('runWrap')!.title = '';
+      queryEl.style.borderColor = '';
+      saveWrap.title = saveWrap.title
+        .replace('\nQuery Required', '')
+        .replace('Query Required', '');
+      runWrap.title = '';
     }
+  };
+
+  const handleQueryChange = (e: string | InputEvt) => {
+    const inputValue = typeof e === 'string' ? e : e.currentTarget.value;
+    updateQueryUI(inputValue);
     onQueryChange(inputValue);
   };
 
   const hasErrors = !!errors && errors.trim().length > 0;
+
+  // Keep the console scrolled to the latest line as errors append
+  const consoleRef = useRef<HTMLPreElement>(null);
+  useEffect(() => {
+    const el = consoleRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }, [errors, isLoading]);
 
   const ConsoleContent = () => {
     // While loading: show the working line and put the blinking underscore at the end.
@@ -84,9 +96,10 @@ export const SurfaceWarmQueryModalQuery: FunctionalComponent<SurfaceWarmQueryMod
     );
   };
 
+  // Keep validation UI in sync when parent updates `query` (e.g., Azi populates it)
   useEffect(() => {
-    handleQueryChange(query);
-  }, []);
+    updateQueryUI(query);
+  }, [query]);
 
   return (
     <>
@@ -94,7 +107,7 @@ export const SurfaceWarmQueryModalQuery: FunctionalComponent<SurfaceWarmQueryMod
       <style>
         {`
         @keyframes crt-blink { 0%,49% { opacity: 1 } 50%,100% { opacity: 0 } }
-        .animate-caret { animation: crt-blink 1s steps(1) infinite; }
+        .animate-caret { animation: crt-blink 1s steps(1) infinite; color: #39ff14; text-shadow: 0 0 6px rgba(57,255,20,.75); }
       `}
       </style>
 
@@ -114,7 +127,8 @@ export const SurfaceWarmQueryModalQuery: FunctionalComponent<SurfaceWarmQueryMod
           required
           maxLength={5000}
           placeholder='Query (max 5000)'
-          class='text-xs w-full h-60 bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-400 p-4 rounded-sm border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neon-blue-500 resize-none invalid:border-red-500 invalid:focus:ring-red-500'
+          class='text-xs w-full bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-400 p-4 rounded-sm border border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neon-blue-500 resize-none invalid:border-red-500 invalid:focus:ring-red-500'
+          style={{ height: '190px' }}
         />
 
         {/* Console label */}
@@ -124,7 +138,7 @@ export const SurfaceWarmQueryModalQuery: FunctionalComponent<SurfaceWarmQueryMod
             width='24'
             height='24'
             viewBox='0 0 24 24'
-            class='text-red-600'
+            class='text-green-500'
           >
             <path
               fill='currentColor'
@@ -137,13 +151,20 @@ export const SurfaceWarmQueryModalQuery: FunctionalComponent<SurfaceWarmQueryMod
         {/* CRT-style console */}
         <div class='relative'>
           <pre
-            class='w-full h-20 overflow-auto bg-black text-red-500 font-mono text-xs leading-4 tracking-wide
-                   border border-red-700/70 rounded-sm p-3 whitespace-pre-wrap break-words
-                   selection:bg-red-700/30'
+            ref={consoleRef}
+            class='w-full overflow-auto font-mono text-xs leading-4 tracking-wide
+                    border rounded-sm p-3 whitespace-pre-wrap break-words
+                    selection:bg-green-700/30'
             style={{
-              textShadow: '0 0 6px rgba(255,60,60,.7)',
+              height: '130px',
+              lineHeight: 1.5,
+              color: 'rgb(34, 197, 94)',
+              backgroundColor: 'rgba(4, 0, 0, 0.9)',
+              borderColor: 'rgba(200, 15, 20, 0.26)',
+              textShadow: 'rgba(255, 15, 20, 0.65) 0px 0px 8px',
               overflowWrap: 'anywhere',
               wordBreak: 'break-word',
+              boxShadow: 'inset 0 0 10px rgba(57,255,20,.25)',
             }}
           >
             <ConsoleContent />
@@ -155,7 +176,7 @@ export const SurfaceWarmQueryModalQuery: FunctionalComponent<SurfaceWarmQueryMod
             class='pointer-events-none absolute inset-0 mix-blend-screen opacity-35'
             style={{
               backgroundImage:
-                'repeating-linear-gradient(to bottom, rgba(255,0,0,.08), rgba(255,0,0,.08) 1px, transparent 2px, transparent 4px)',
+                'repeating-linear-gradient(to bottom, rgba(57,255,20,.08), rgba(57,255,20,.08) 1px, transparent 2px, transparent 4px)',
             }}
           />
         </div>

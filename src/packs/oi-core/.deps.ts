@@ -5,6 +5,7 @@ export {
   type StateUpdater,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from 'npm:preact@10.20.1/hooks';
 
