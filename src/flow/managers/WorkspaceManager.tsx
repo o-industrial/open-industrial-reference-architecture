@@ -53,6 +53,7 @@ import {
   APIKeysModal,
   BillingDetailsModal,
   CloudConnectionsModal,
+  PrivateCALZModal,
   CurrentLicenseModal,
   DataAPISuiteModal,
   ManageWorkspacesModal,
@@ -181,9 +182,8 @@ export class WorkspaceManager {
     const { Modal: dataSuiteModal, Show: showDataSuite } = DataAPISuiteModal.Modal(this);
     const { Modal: billingModal, Show: showBilling } = BillingDetailsModal.Modal(this);
     const { Modal: licenseModal, Show: showLicense } = CurrentLicenseModal.Modal(eac, this);
-    const { Modal: cloudConnsModal, Show: showCloudConns } = CloudConnectionsModal.Modal(
-      this,
-    );
+    const { Modal: cloudConnsModal, Show: showCloudConns } = CloudConnectionsModal.Modal(this);
+    const { Modal: privateCalzModal, Show: showPrivateCalz } = PrivateCALZModal.Modal(this);
 
     const modals = (
       <>
@@ -193,6 +193,7 @@ export class WorkspaceManager {
         {teamMgmtModal}
         {wkspSetsModal}
         {cloudConnsModal}
+        {privateCalzModal}
         {warmQueryModal}
         {apiKeysModal}
         {dataSuiteModal}
@@ -240,6 +241,11 @@ export class WorkspaceManager {
           break;
         }
 
+        case 'env.calz': {
+          showPrivateCalz();
+          break;
+        }
+
         case 'billing.details': {
           showBilling();
           break;
@@ -280,6 +286,8 @@ export class WorkspaceManager {
       license: 'https://api.iconify.design/lucide:badge-check.svg',
       creditCard: 'https://api.iconify.design/lucide:credit-card.svg',
     } as const;
+
+    const hasWorkspaceCloud = !!eac.Clouds?.Workspace?.Details || Object.keys(eac.Clouds || {}).length > 0;
 
     const runtimeMenus: MenuRoot[] = [
       // // ===== File (unchanged example) =====
@@ -394,6 +402,16 @@ export class WorkspaceManager {
             label: 'Cloud Connections',
             iconSrc: I.link,
           },
+          ...(hasWorkspaceCloud
+            ? [
+                {
+                  type: 'item' as const,
+                  id: 'env.calz',
+                  label: 'Manage Private CALZ',
+                  iconSrc: I.privateCloud,
+                },
+              ]
+            : []),
           // Future: Cloud submenus
           // { type: 'item', id: 'env.secrets', label: 'Manage Secrets', iconSrc: I.lock },
           // {
