@@ -36,7 +36,9 @@ export const SurfaceWarmQueryModalQuery: FunctionalComponent<SurfaceWarmQueryMod
     if (inputValue.length === 0) {
       queryEl.style.borderColor = 'red';
       if (!saveWrap.title.includes('Query Required')) {
-        saveWrap.title = saveWrap.title === '' ? 'Query Required' : saveWrap.title + '\nQuery Required';
+        saveWrap.title = saveWrap.title === ''
+          ? 'Query Required'
+          : saveWrap.title + '\nQuery Required';
       }
       runWrap.title = 'Query Required';
     } else {
@@ -162,7 +164,7 @@ export const SurfaceWarmQueryModalQuery: FunctionalComponent<SurfaceWarmQueryMod
               textShadow: 'rgba(255, 15, 20, 0.65) 0px 0px 8px',
               overflowWrap: 'anywhere',
               wordBreak: 'break-word',
-              boxShadow: 'inset 0 0 10px rgba(57,255,20,.25)'
+              boxShadow: 'inset 0 0 10px rgba(57,255,20,.25)',
             }}
           >
             <ConsoleContent />

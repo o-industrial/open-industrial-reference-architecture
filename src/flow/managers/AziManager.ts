@@ -116,7 +116,9 @@ export class AziManager {
             // Errors array
             if (Array.isArray(rec.Errors)) {
               for (const e of rec.Errors) {
-                const msg = typeof e === 'string' ? e : (e?.message ?? e?.Message ?? e?.Error ?? String(e));
+                const msg = typeof e === 'string'
+                  ? e
+                  : (e?.message ?? e?.Message ?? e?.Error ?? String(e));
                 foundErrors.push(String(msg));
               }
             }
@@ -153,7 +155,9 @@ export class AziManager {
             emitted = true;
           }
           if (emitted) this.emit();
-        } catch {}
+        } catch (err) {
+          console.log(err);
+        }
 
         // === Handle error events immediately ===
         if (
@@ -161,12 +165,9 @@ export class AziManager {
           (eventName.endsWith('_error') || eventName === 'on_error')
         ) {
           try {
-            const errMsg =
-              (data as any)?.error?.message ??
+            const errMsg = (data as any)?.error?.message ??
               (data as any)?.message ??
-              (typeof (data as any)?.error === 'string'
-                ? (data as any).error
-                : undefined) ??
+              (typeof (data as any)?.error === 'string' ? (data as any).error : undefined) ??
               (typeof data === 'string' ? data : '') ??
               'Unknown error';
 
@@ -250,7 +251,9 @@ export class AziManager {
           (this.state as any).ErrorCode = __prevErrorCode;
         }
         this.emit();
-      } catch {}
+      } catch (err) {
+        console.log(err);
+      }
     } catch (err) {
       console.error('[AziManager] Send error', err);
     } finally {

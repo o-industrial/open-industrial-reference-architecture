@@ -77,7 +77,9 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
       lastAppendedErrorRef.current = undefined;
       lastAppendedErrorCodeRef.current = undefined;
       lastAppendedDataQueryRef.current = undefined;
-    } catch {}
+    } catch (err) {
+      console.log(err);
+    }
   }, []);
 
   // Append state.Error changes as they stream
@@ -96,9 +98,10 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
     const dataQuery = (state as any)?.DataQuery ?? (state as any).CurrentQuery;
 
     const msg = typeof err === 'string' ? err : String(err);
-    
-    if (msg === lastAppendedErrorRef.current) 
+
+    if (msg === lastAppendedErrorRef.current) {
       return; // append only on change
+    }
 
     lastAppendedErrorRef.current = msg;
     lastAppendedDataQueryRef.current = dataQuery;
@@ -113,7 +116,8 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
         return lead + `> ERROR : ${msg}`;
       } else {
         // Subsequent errors: add resolved banner first
-        const final = lead + `> Azi Resolved Error: ${lastAppendedErrorCodeRef.current}\n\n> ERROR : ${msg}`;
+        const final = lead +
+          `> Azi Resolved Error: ${lastAppendedErrorCodeRef.current}\n\n> ERROR : ${msg}`;
         lastAppendedErrorCodeRef.current = errCode;
         return final;
       }
