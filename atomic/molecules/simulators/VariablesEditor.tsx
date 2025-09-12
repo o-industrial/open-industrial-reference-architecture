@@ -191,7 +191,7 @@ export function VariablesEditor({ value, onChange }: Props): JSX.Element {
         return (
           <div key={idx} class="border border-neutral-700 rounded-md p-2 bg-neutral-900">
             <div class="flex items-start gap-2">
-              <div class="flex-1 grid grid-cols-2 gap-2">
+              <div class="flex-1 space-y-2">
                 <Input
                   label="Name"
                   value={v.name}
@@ -221,7 +221,7 @@ export function VariablesEditor({ value, onChange }: Props): JSX.Element {
                 </Select>
 
                 {(kind === 'counter' || kind === 'randomInt' || kind === 'randomDouble') && (
-                  <>
+                  <div class="flex gap-2">
                     <Input
                       label="Min"
                       type="number"
@@ -246,7 +246,7 @@ export function VariablesEditor({ value, onChange }: Props): JSX.Element {
                         )}
                       class="-:text-xs -:px-2 -:py-1"
                     />
-                  </>
+                  </div>
                 )}
 
                 {kind === 'counter' && (

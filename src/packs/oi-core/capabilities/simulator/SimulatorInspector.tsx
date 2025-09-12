@@ -59,7 +59,7 @@ export function SimulatorInspector({
                   try {
                     const serialized = JSON.stringify(vars);
                     onDetailsChanged({
-                      Variables: serialized
+                      Variables: serialized,
                     });
                   } catch {
                     // ignore serialization issues

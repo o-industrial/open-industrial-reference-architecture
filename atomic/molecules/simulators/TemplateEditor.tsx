@@ -176,7 +176,7 @@ export function TemplateEditor({ value, variables, onChange }: Props): JSX.Eleme
       <div class="space-y-2">
         {fields.map((f, idx) => (
           <div key={idx} class="border border-neutral-700 rounded-md p-2 bg-neutral-900">
-            <div class="grid grid-cols-4 gap-2 items-start">
+            <div class="space-y-2">
               <Input
                 label="Key"
                 value={f.key}
@@ -256,7 +256,7 @@ export function TemplateEditor({ value, variables, onChange }: Props): JSX.Eleme
                 </Select>
               )}
               {f.type === 'object' && (
-                <div class="col-span-2">
+                <div>
                   <SubObjectEditor
                     value={isJSONObject(f.value) ? f.value : {}}
                     variables={varOptions}
@@ -265,7 +265,7 @@ export function TemplateEditor({ value, variables, onChange }: Props): JSX.Eleme
                 </div>
               )}
 
-              <div class="flex items-center gap-1 mt-6 col-span-1 justify-end">
+              <div class="flex items-center gap-1 mt-1 justify-end">
                 <Action
                   title="Up"
                   onClick={() => moveField(idx, -1)}
