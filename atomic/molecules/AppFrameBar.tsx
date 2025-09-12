@@ -79,7 +79,7 @@ export function AppFrameBar({
               onClick={onDeployClick}
               styleType={ActionStyleTypes.Outline | ActionStyleTypes.Thin}
               intentType={
-                hasWorkspaceChanges ? IntentTypes.None : IntentTypes.Primary
+                !hasWorkspaceChanges ? IntentTypes.Primary : IntentTypes.None
               }
               disabled={hasWorkspaceChanges}
             >

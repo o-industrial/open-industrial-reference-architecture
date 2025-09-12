@@ -1,5 +1,7 @@
 export * from "./azi/.exports.ts";
+export * from "./azure/.exports.ts";
 export * from "./flows/.exports.ts";
+export * from "./eac/.exports.ts";
 export * from "./licensing/.exports.ts";
 export * from "./writing-devices/.exports.ts";
 

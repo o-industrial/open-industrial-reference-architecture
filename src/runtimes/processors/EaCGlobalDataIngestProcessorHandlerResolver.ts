@@ -147,12 +147,14 @@ async function startEventHubConsumer(
             initializedStreams,
           );
         } catch (err) {
-          logger.error(`❌ Error resolving device twin for ${deviceId}`, err);
+          logger.error(`❌ Error resolving device twin for ${deviceId}`);
+          logger.error(err);
         }
       }
     },
     processError(err: unknown) {
-      logger.error('❌ EventHub processing error:', err);
+      logger.error('❌ EventHub processing error:');
+      logger.error(err);
       return Promise.resolve();
     },
   };
@@ -165,7 +167,8 @@ async function startEventHubConsumer(
       break;
     } catch (err) {
       attempt++;
-      logger.error('❌ EventHub subscribe error:', err);
+      logger.error('❌ EventHub subscribe error:');
+      logger.error(err);
       if (attempt > maxAttempts) {
         throw err;
       }

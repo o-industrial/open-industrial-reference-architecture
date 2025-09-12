@@ -35,7 +35,8 @@ export function APIKeysModal({ workspaceMgr, onClose }: APIKeysModalProps): JSX.
       if (!tok) throw new Error('No token returned');
       setToken(tok);
     } catch (err) {
-      console.error('Failed to generate token', err);
+      console.error('Failed to generate token');
+      console.error(err);
       setError('Failed to generate token');
     } finally {
       setLoading(false);
