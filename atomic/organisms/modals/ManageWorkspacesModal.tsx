@@ -10,12 +10,16 @@ export function ManageWorkspacesModal({
   workspaceMgr,
   onClose,
 }: ManageWorkspacesModalProps): JSX.Element {
-  const { currentWorkspace, workspaces, switchToWorkspace } =
+  const { currentWorkspace, workspaces, switchToWorkspace, createWorkspace } =
     workspaceMgr.UseWorkspaceSettings();
 
   const [selected, setSelected] = useState<string[]>([]);
   const [filter, setFilter] = useState('');
   const [groupAction, setGroupAction] = useState('');
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newDesc, setNewDesc] = useState('');
+  const [creating, setCreating] = useState(false);
 
   const toggleSelect = (lookup: string) => {
     setSelected((prev) =>
@@ -67,29 +71,29 @@ export function ManageWorkspacesModal({
         <td class="p-2 text-sm text-neutral-400">
           {ws.Details.Description ?? ''}
         </td>
-        <td class="p-2 text-center">{ws.Views ?? 0}</td>
-        <td class="p-2 text-center">{ws.Forks ?? 0}</td>
-        <td class="p-2 text-sm">
+        {/* <td class="p-2 text-center">{ws.Views ?? 0}</td> */}
+        {/* <td class="p-2 text-center">{ws.Forks ?? 0}</td> */}
+        {/* <td class="p-2 text-sm">
           {formatUpdated(
             (ws.UpdatedAt ??
               ws.Details.UpdatedAt ??
               ws.Details.CreatedAt) as string
           )}
-        </td>
+        </td> */}
         <td class="p-2">
           <div class="flex gap-2">
-            <Action
+            {/* <Action
               styleType={ActionStyleTypes.Link}
               onClick={() => switchToWorkspace(ws.Lookup)}
             >
               Settings
-            </Action>
-            <Action
+            </Action> */}
+            {/* <Action
               styleType={ActionStyleTypes.Link}
               onClick={() => alert('Fork not implemented')}
             >
               Fork
-            </Action>
+            </Action> */}
             <Action
               styleType={ActionStyleTypes.Link}
               onClick={() => alert('Archive not implemented')}
@@ -103,12 +107,21 @@ export function ManageWorkspacesModal({
             >
               Delete
             </Action>
+            {ws.Lookup !== currentWorkspace.Lookup && (
+              <Action
+                styleType={ActionStyleTypes.Link}
+                onClick={() => alert('Set active enterprise not implemented')}
+              >
+                Set as Active Enterprise
+              </Action>
+            )}
           </div>
         </td>
       </tr>
     ));
 
   return (
+    <>
     <Modal title="Manage Workspaces" onClose={onClose}>
       <div class="space-y-4">
         <div class="flex justify-between items-center">
@@ -146,11 +159,11 @@ export function ManageWorkspacesModal({
             <thead>
               <tr>
                 <th class="p-2 w-8"></th>
-                <th class="p-2">Title</th>
+                <th class="p-2">Name</th>
                 <th class="p-2">Description</th>
-                <th class="p-2 text-center">Views</th>
-                <th class="p-2 text-center">Forks</th>
-                <th class="p-2">Updated</th>
+                {/* <th class="p-2 text-center">Views</th> */}
+                {/* <th class="p-2 text-center">Forks</th> */}
+                {/* <th class="p-2">Updated</th> */}
                 <th class="p-2">Actions</th>
               </tr>
             </thead>
@@ -165,11 +178,11 @@ export function ManageWorkspacesModal({
               <thead>
                 <tr>
                   <th class="p-2 w-8"></th>
-                  <th class="p-2">Title</th>
+                  <th class="p-2">Name</th>
                   <th class="p-2">Description</th>
-                  <th class="p-2 text-center">Views</th>
-                  <th class="p-2 text-center">Forks</th>
-                  <th class="p-2">Updated</th>
+                  {/* <th class="p-2 text-center">Views</th> */}
+                  {/* <th class="p-2 text-center">Forks</th> */}
+                  {/* <th class="p-2">Updated</th> */}
                   <th class="p-2">Actions</th>
                 </tr>
               </thead>
@@ -180,7 +193,7 @@ export function ManageWorkspacesModal({
 
         <div class="flex justify-end gap-2 pt-4">
           <Action
-            onClick={() => alert('Create workspace not implemented')}
+            onClick={() => setShowCreate(true)}
             intentType={IntentTypes.Primary}
             styleType={ActionStyleTypes.Outline}
           >
@@ -190,6 +203,51 @@ export function ManageWorkspacesModal({
         </div>
       </div>
     </Modal>
+    {showCreate && (
+      <Modal title="Create New Workspace" onClose={() => setShowCreate(false)}>
+        <div class="space-y-4">
+          <div class="space-y-2">
+            <Input
+              placeholder="Name"
+              value={newName}
+              onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
+                setNewName((e.target as HTMLInputElement).value)
+              }
+            />
+            <Input
+              placeholder="Description"
+              value={newDesc}
+              onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
+                setNewDesc((e.target as HTMLInputElement).value)
+              }
+            />
+          </div>
+          <div class="flex justify-end gap-2">
+            <Action onClick={() => setShowCreate(false)}>Cancel</Action>
+            <Action
+              intentType={IntentTypes.Primary}
+              disabled={creating || !newName.trim()}
+              onClick={async () => {
+                const name = newName.trim();
+                if (!name) return;
+                try {
+                  setCreating(true);
+                  await createWorkspace(name, newDesc.trim());
+                  setShowCreate(false);
+                  setNewName('');
+                  setNewDesc('');
+                } finally {
+                  setCreating(false);
+                }
+              }}
+            >
+              {creating ? 'Creating…' : 'Create'}
+            </Action>
+          </div>
+        </div>
+      </Modal>
+    )}
+    </>
   );
 }
 

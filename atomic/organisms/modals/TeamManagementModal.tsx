@@ -120,13 +120,13 @@ export function TeamManagementModal({
                 {/* <div class="text-sm">{member.Name ?? 'N/A'}</div> */}
                 <div class="text-sm col-span-3">{member.Username}</div>
                 <div class="col-span-2 flex items-center justify-end gap-2">
-                <Action
+                {/* <Action
                 onClick={() => grantDeployAccess(member.Username)}
                 intentType={IntentTypes.Info}
                 styleType={ActionStyleTypes.Outline}
               >
                 Grant Deploy
-              </Action>
+              </Action> */}
               {/* <Select
                   value={member.Role}
                   onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>
