@@ -37,7 +37,7 @@ export class SimulatorNodeCapabilityManager
 
     return {
       Metadata: sim.Metadata,
-      Details: (sim.Details ?? {}) as EaCAzureDockerSimulatorDetails,
+      Details: sim.Details as EaCAzureDockerSimulatorDetails,
     };
   }
 
@@ -164,10 +164,7 @@ export class SimulatorNodeCapabilityManager
   ): Partial<EverythingAsCodeOIWorkspace> {
     return {
       Simulators: {
-        [node.ID]: this.mergeDetailsAndMetadata(
-          update.Details,
-          update.Metadata,
-        ),
+        [node.ID]: update,
       },
     };
   }

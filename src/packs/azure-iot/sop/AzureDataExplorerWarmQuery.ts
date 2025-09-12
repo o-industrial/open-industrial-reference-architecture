@@ -24,7 +24,6 @@ export function AzureDataExplorerWarmQuery(
   void,
   void
 > {
-  const cluster = 'fobd1-data-explorer'; // still hardcoded inline
   const region = 'westus2';
   const database = 'Telemetry';
 
@@ -63,10 +62,12 @@ export function AzureDataExplorerWarmQuery(
 
       return { Credential };
     })
-    .Run(async ({ AsCode, Services: { Credential } }) => {
+    .Run(async ({ AsCode, Services: { Credential }, Secrets }) => {
       const query = AsCode.Details?.Query!;
 
-      const kustoClient = await loadKustoClient(cluster, region, Credential);
+      const cluster = await Secrets.Get('AZURE_IOT_ADX_CLUSTER');
+
+      const kustoClient = await loadKustoClient(cluster!, region, Credential);
       kustoClient.ensureOpen();
 
       const result = await kustoClient.execute(database, query);

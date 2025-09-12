@@ -2,6 +2,8 @@ import { InspectorBase, TabbedPanel } from '../../../../../atomic/.exports.ts';
 import { EaCAzureDockerSimulatorDetails } from '../../../../eac/EaCAzureDockerSimulatorDetails.ts';
 import { InspectorCommonProps } from '../../../../flow/.exports.ts';
 import { SimulatorManagementForm } from '../../../../../atomic/molecules/SimulatorManagementForm.tsx';
+import { VariablesEditor } from '../../../../../atomic/molecules/simulators/VariablesEditor.tsx';
+import { TemplateEditor } from '../../../../../atomic/molecules/simulators/TemplateEditor.tsx';
 
 type SimulatorStats = {
   impulseRates?: number[];
@@ -44,6 +46,45 @@ export function SimulatorInspector({
               <SimulatorManagementForm
                 details={details as EaCAzureDockerSimulatorDetails}
                 onChange={onDetailsChanged}
+              />
+            ),
+          },
+          {
+            key: 'variables',
+            label: 'Variables',
+            content: (
+              <VariablesEditor
+                value={(details as EaCAzureDockerSimulatorDetails).Variables}
+                onChange={(vars) => {
+                  try {
+                    const serialized = JSON.stringify(vars);
+                    onDetailsChanged({
+                      Variables: serialized,
+                    });
+                  } catch {
+                    // ignore serialization issues
+                  }
+                }}
+              />
+            ),
+          },
+          {
+            key: 'template',
+            label: 'Template',
+            content: (
+              <TemplateEditor
+                value={(details as EaCAzureDockerSimulatorDetails).MessageTemplate}
+                variables={(details as EaCAzureDockerSimulatorDetails).Variables}
+                onChange={(tmpl) => {
+                  try {
+                    const serialized = JSON.stringify(tmpl);
+                    onDetailsChanged({
+                      MessageTemplate: serialized,
+                    });
+                  } catch {
+                    // ignore serialization issues
+                  }
+                }}
               />
             ),
           },

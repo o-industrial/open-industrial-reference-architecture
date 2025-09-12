@@ -8,3 +8,4 @@ export * from "./DataAPISuiteModal.tsx";
 export * from "./BillingDetailsModal.tsx";
 export * from "./CurrentLicenseModal.tsx";
 export * from "./APIKeysModal.tsx";
+export * from "./CloudConnectionsModal.tsx";

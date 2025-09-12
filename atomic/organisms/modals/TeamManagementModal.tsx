@@ -5,6 +5,7 @@ import {
   Select,
   Action,
   ActionStyleTypes,
+  CheckboxRow,
 } from '../../.exports.ts';
 
 export type TeamManagementModalProps = {
@@ -20,6 +21,7 @@ export function TeamManagementModal({
     currentWorkspace,
     teamMembers,
     inviteMember,
+    grantDeployAccess,
     removeMember,
     updateMemberRole,
   } = workspaceMgr.UseWorkspaceSettings();
@@ -29,6 +31,7 @@ export function TeamManagementModal({
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<'Owner' | 'Editor' | 'Viewer'>('Viewer');
+  const [grantDeploy, setGrantDeploy] = useState(false);
 
   // Invite/Toast state
   const [inviting, setInviting] = useState(false);
@@ -76,32 +79,27 @@ export function TeamManagementModal({
   };
 
   return (
-    <>
-      <Modal
-        title={`Teams: ${currentWorkspace.Details.Name} Members`}
-        onClose={onClose}
-      >
-        <div class="relative">
-          <div class="space-y-6">
-          <div class="flex items-center justify-between">
-            <div class="text-sm text-neutral-300 font-medium">
-              Current Members
-            </div>
-            {/* <Select
-              value={bulkRole}
-              onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>
-                handleBulkChange((e.target as HTMLSelectElement).value)
-              }
-            >
-              <option value="">Bulk change role.</option>
-              <option value="Owner">Owner</option>
-              <option value="Editor">Editor</option>
-              <option value="Viewer">Viewer</option>
-            </Select> */}
+    <Modal
+      title={`Teams: ${currentWorkspace.Details.Name} Members`}
+      onClose={onClose}
+    >
+      <div class="space-y-6">
+        <div class="flex items-center justify-between">
+          <div class="text-sm text-neutral-300 font-medium">
+            Current Members
           </div>
-
-          {/* Column label */}
-          <div class="text-xs text-neutral-400 px-1">Email</div>
+          {/* <Select
+            value={bulkRole}
+            onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>
+              handleBulkChange((e.target as HTMLSelectElement).value)
+            }
+          >
+            <option value="">Bulk change role...</option>
+            <option value="Owner">Owner</option>
+            <option value="Editor">Editor</option>
+            <option value="Viewer">Viewer</option>
+          </Select> */}
+        </div>
 
           <div class="space-y-2 max-h-64 overflow-y-auto">
             {localMembers.map((member) => (
@@ -116,7 +114,14 @@ export function TeamManagementModal({
                 />
                 {/* <div class="text-sm">{member.Name ?? 'N/A'}</div> */}
                 <div class="text-sm col-span-4">{member.Username}</div>
-                {/* <Select
+                <Action
+                onClick={() => grantDeployAccess(member.Username)}
+                intentType={IntentTypes.Info}
+                styleType={ActionStyleTypes.Outline}
+              >
+                Grant Deploy
+              </Action>
+              {/* <Select
                   value={member.Role}
                   onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>
                     updateMemberRole(

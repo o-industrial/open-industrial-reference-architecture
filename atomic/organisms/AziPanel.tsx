@@ -30,6 +30,7 @@ type AziPanelProps = {
   onClose?: () => void;
   onStartSend?: (state: AziState) => void;
   onFinishSend?: (state: AziState) => void;
+  onStateChange?: (state: AziState) => void;
   intentTypes?: Partial<Record<Role, IntentTypes>>;
   renderMessage?: (message: string) => string;
   extraInputs?: Record<string, unknown>;
@@ -92,6 +93,7 @@ export function AziPanel({
   onClose,
   onStartSend,
   onFinishSend,
+  onStateChange,
   intentTypes = {
     user: IntentTypes.Secondary,
     azi: IntentTypes.Info,
@@ -110,14 +112,28 @@ export function AziPanel({
     registerStreamAnchor,
   } = workspaceMgr.UseAzi(aziMgr);
 
-  // Initial peek when mounted
+  // Track when the initial peek has completed
+  const hasPeekedRef = useRef(false);
+
+  // Initial peek when mounted (and mark completion)
   useEffect(() => {
     console.log('[AziPanel] Initial peek()');
-    peek();
+    (async () => {
+      try {
+        await peek();
+      } finally {
+        hasPeekedRef.current = true;
+      }
+    })();
   }, []);
 
   const stateRef = useRef(state);
   useEffect(() => { stateRef.current = state; }, [state]);
+
+  // Notify parent on state changes for live updates (e.g., errors)
+  useEffect(() => {
+    onStateChange?.(state);
+  }, [state, onStateChange]);
 
   const wrappedSend = useCallback(
     async (...args: Parameters<typeof send>) => {
@@ -129,13 +145,17 @@ export function AziPanel({
     [send, onStartSend, onFinishSend]
   );
 
-  // On first load, trigger empty message to prompt stream
+  // After initial peek, if still empty, trigger a single empty message to prompt greeting
+  const autoGreetSentRef = useRef(false);
   useEffect(() => {
-    if (state.Messages?.length === 0) {
-      console.log('[AziPanel] No messages — sending empty message');
+    if (!hasPeekedRef.current) return;
+    if (autoGreetSentRef.current) return;
+    if ((state.Messages?.length ?? 0) === 0 && !isSending) {
+      autoGreetSentRef.current = true;
+      console.log('[AziPanel] No messages after peek – sending empty message');
       send('', extraInputs);
     }
-  }, [state]);
+  }, [state, isSending]);
 
   const resolveRole = (msg: unknown): Role => {
     if (msg instanceof HumanMessage || msg instanceof HumanMessageChunk)

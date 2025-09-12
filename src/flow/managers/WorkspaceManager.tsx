@@ -52,6 +52,7 @@ import {
   AccountProfileModal,
   APIKeysModal,
   BillingDetailsModal,
+  CloudConnectionsModal,
   CurrentLicenseModal,
   DataAPISuiteModal,
   ManageWorkspacesModal,
@@ -61,7 +62,7 @@ import {
   WorkspaceSettingsModal,
 } from '../../../atomic/organisms/modals/.exports.ts';
 import { MenuActionItem, MenuRoot } from '../../../atomic/molecules/FlyoutMenu.tsx';
-import { EverythingAsCodeLicensing } from '../../eac/.deps.ts';
+import { EverythingAsCodeIdentity, EverythingAsCodeLicensing } from '../../eac/.deps.ts';
 import { AccountProfile } from '../../types/AccountProfile.ts';
 import { EaCUserRecord } from '../../api/.client.deps.ts';
 
@@ -96,6 +97,7 @@ export class WorkspaceManager {
     scope: NodeScopeTypes = 'workspace',
     aziCircuitUrl: string,
     aziWarmQueryCircuitUrl: string,
+    protected accessRights?: string[],
     jwt?: string,
   ) {
     this.currentScope = { Scope: scope };
@@ -167,6 +169,7 @@ export class WorkspaceManager {
     showDataSuite: () => void;
     showBilling: () => void;
     showLicense: () => void;
+    showExternalConns: () => void;
   } {
     const { Modal: accProfModal, Show: showAccProf } = AccountProfileModal.Modal(this);
     const { Modal: mngWkspsModal, Show: showMngWksps } = ManageWorkspacesModal.Modal(this);
@@ -178,6 +181,9 @@ export class WorkspaceManager {
     const { Modal: dataSuiteModal, Show: showDataSuite } = DataAPISuiteModal.Modal(this);
     const { Modal: billingModal, Show: showBilling } = BillingDetailsModal.Modal(this);
     const { Modal: licenseModal, Show: showLicense } = CurrentLicenseModal.Modal(eac, this);
+    const { Modal: externalConnsModal, Show: showExternalConns } = CloudConnectionsModal.Modal(
+      this,
+    );
 
     const modals = (
       <>
@@ -186,6 +192,7 @@ export class WorkspaceManager {
         {mngWkspsModal}
         {teamMgmtModal}
         {wkspSetsModal}
+        {externalConnsModal}
         {warmQueryModal}
         {apiKeysModal}
         {dataSuiteModal}
@@ -225,6 +232,11 @@ export class WorkspaceManager {
 
         case 'apis.dataSuite': {
           showDataSuite();
+          break;
+        }
+
+        case 'env.connections': {
+          showExternalConns();
           break;
         }
 
@@ -378,36 +390,22 @@ export class WorkspaceManager {
       //   items: [
       //     {
       //       type: 'item',
-      //       id: 'env.secrets',
-      //       label: 'Manage Secrets',
-      //       iconSrc: I.lock,
-      //     },
-      //     {
-      //       type: 'item',
       //       id: 'env.connections',
       //       label: 'External Connections',
       //       iconSrc: I.link,
       //     },
-      //     {
-      //       type: 'submenu',
-      //       id: 'env.cloud',
-      //       label: 'Cloud',
-      //       iconSrc: I.cloud,
-      //       items: [
-      //         {
-      //           type: 'item',
-      //           id: 'env.cloud.attachManaged',
-      //           label: 'Attach Managed Cloud',
-      //           iconSrc: I.cloudAttach,
-      //         },
-      //         {
-      //           type: 'item',
-      //           id: 'env.cloud.addPrivate',
-      //           label: 'Add Private Cloud',
-      //           iconSrc: I.privateCloud,
-      //         },
-      //       ],
-      //     },
+      //     // Future: Cloud submenus
+      //     // { type: 'item', id: 'env.secrets', label: 'Manage Secrets', iconSrc: I.lock },
+      //     // {
+      //     //   type: 'submenu',
+      //     //   id: 'env.cloud',
+      //     //   label: 'Cloud',
+      //     //   iconSrc: I.cloud,
+      //     //   items: [
+      //     //     { type: 'item', id: 'env.cloud.attachManaged', label: 'Attach Managed Cloud', iconSrc: I.cloudAttach },
+      //     //     { type: 'item', id: 'env.cloud.addPrivate', label: 'Add Private Cloud', iconSrc: I.privateCloud },
+      //     //   ],
+      //     // },
       //   ],
       // },
 
@@ -470,6 +468,7 @@ export class WorkspaceManager {
       showAccProf,
       showWarmQuery,
       showApiKeys,
+      showExternalConns,
       showDataSuite,
       showBilling,
       showLicense,
@@ -553,6 +552,50 @@ export class WorkspaceManager {
       save,
       deleteAccount,
       signOut,
+    };
+  }
+
+  public UseAzureAuth(): {
+    isAzureConnected: boolean;
+    loading: boolean;
+    error?: string;
+    canUseManaged: boolean;
+    canUsePrivate: boolean;
+    refreshAzureStatus: () => void;
+  } {
+    const [isAzureConnected, setConnected] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | undefined>(undefined);
+
+    const load = useCallback(async () => {
+      try {
+        setLoading(true);
+        setError(undefined);
+        const res = await fetch('/workspace/api/azure/status');
+        if (!res.ok) throw new Error(`Status ${res.status}`);
+        const data = await res.json();
+        setConnected(!!data?.connected || !!data?.Connected);
+      } catch (err) {
+        setError((err as Error).message);
+        setConnected(false);
+      } finally {
+        setLoading(false);
+      }
+    }, []);
+
+    useEffect(() => {
+      load();
+    }, [load]);
+
+    return {
+      isAzureConnected,
+      loading,
+      error,
+      canUseManaged: this.accessRights?.includes('Workspace.Infrastructure.Managed') ??
+        false,
+      canUsePrivate: this.accessRights?.includes('Workspace.Infrastructure.Private') ??
+        false,
+      refreshAzureStatus: load,
     };
   }
 
@@ -1339,6 +1382,35 @@ export class WorkspaceManager {
     };
   }
 
+  /**
+   * Grant a user an access card that includes a specific access right lookup.
+   * Defaults to granting the workspace deploy right.
+   */
+  public async GrantDeployAccess(
+    username: string,
+    rightLookup: string = 'Workspace.Deploy',
+  ): Promise<void> {
+    if (!username) return;
+
+    const identity = await this.oiSvc.Admin.GetEaC<EverythingAsCodeIdentity>();
+    const acs = identity?.AccessConfigurations ?? {};
+
+    const match = Object.entries(acs).find(([_, ac]) => {
+      // deno-lint-ignore no-explicit-any
+      const rights = (ac as any)?.AccessRightLookups ?? (ac as any)?.AccessRights ?? [];
+      return Array.isArray(rights) && rights.includes(rightLookup);
+    });
+
+    if (!match) {
+      throw new Error(
+        `No Access Configuration found containing right '${rightLookup}'. Configure one under /admin/access-cards.`,
+      );
+    }
+
+    const [acLookup] = match;
+    await this.oiSvc.Admin.AddUserAccessCard(username, acLookup);
+  }
+
   public UseWorkspaceSettings(): {
     currentWorkspace: WorkspaceSummary;
     teamMembers: EaCUserRecord[];
@@ -1347,6 +1419,7 @@ export class WorkspaceManager {
       role: TeamMember['Role'],
       name?: string,
     ) => void;
+    grantDeployAccess: (username: string) => Promise<void>;
     removeMember: (email: string) => Promise<void>;
     updateMemberRole: (email: string, role: TeamMember['Role']) => void;
     update: (next: Partial<EaCEnterpriseDetails>) => void;
@@ -1495,6 +1568,7 @@ export class WorkspaceManager {
       currentWorkspace: current,
       teamMembers,
       inviteMember,
+      grantDeployAccess: async (username: string) => await this.GrantDeployAccess(username),
       removeMember,
       updateMemberRole,
       update,

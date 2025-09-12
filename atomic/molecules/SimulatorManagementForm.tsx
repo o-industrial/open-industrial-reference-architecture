@@ -43,26 +43,6 @@ export function SimulatorManagementForm({ details, onChange }: Props) {
         onInput={handleStringChange('Name')}
       />
       <Input
-        label="Variables (JSON)"
-        multiline
-        rows={4}
-        value={
-          details.Variables ? JSON.stringify(details.Variables, null, 2) : ''
-        }
-        onInput={handleJsonChange('Variables')}
-      />
-      <Input
-        label="Message Template (JSON)"
-        multiline
-        rows={4}
-        value={
-          details.MessageTemplate
-            ? JSON.stringify(details.MessageTemplate, null, 2)
-            : ''
-        }
-        onInput={handleJsonChange('MessageTemplate')}
-      />
-      <Input
         label="Message Interval (ms)"
         type="number"
         min="0"

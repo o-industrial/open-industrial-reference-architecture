@@ -36,12 +36,20 @@ export class OpenIndustrialWorkspaceAPI {
   /**
    * Commit a snapshot of runtime memory (e.g. agent execution history).
    */
-  public async Commit(snapshot: EaCHistorySnapshot): Promise<EaCStatus> {
-    const res = await fetch(this.bridge.url('/api/workspaces/commit'), {
-      method: 'POST',
-      headers: this.bridge.headers(),
-      body: JSON.stringify(snapshot),
-    });
+  public async Commit(
+    snapshot: EaCHistorySnapshot,
+    forceActuators?: boolean,
+  ): Promise<EaCStatus> {
+    const res = await fetch(
+      this.bridge.url(
+        `/api/workspaces/commit?forceActuators=${forceActuators}`,
+      ),
+      {
+        method: 'POST',
+        headers: this.bridge.headers(),
+        body: JSON.stringify(snapshot),
+      },
+    );
 
     if (!res.ok) {
       throw new Error(`Failed to commit workspace snapshot: ${res.status}`);
@@ -321,13 +329,13 @@ export class OpenIndustrialWorkspaceAPI {
       const msg = typeof event.data === 'string' ? event.data : '';
       try {
         const parsed = JSON.parse(msg);
-        const isPing = parsed && typeof parsed === 'object' && 'type' in parsed &&
+        const isPing = parsed &&
+          typeof parsed === 'object' &&
+          'type' in parsed &&
           (parsed as { type: string }).type === 'ping';
         if (isPing) {
           console.debug('[StreamImpulses] 💓 Ping received - sending pong');
-          _send(
-            JSON.stringify({ type: 'pong', ts: new Date().toISOString() }),
-          );
+          _send(JSON.stringify({ type: 'pong', ts: new Date().toISOString() }));
           return;
         }
         if (isRuntimeImpulse(parsed)) {

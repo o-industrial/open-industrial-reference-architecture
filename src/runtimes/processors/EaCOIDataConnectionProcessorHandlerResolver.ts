@@ -132,6 +132,7 @@ async function forwardToSurfaceSubject(
       `📤 [${surface}/${dataConn}] Forwarded impulse ${impulse.ID} → ${subject}`,
     );
   } catch (err) {
-    logger.error(`❌ [${surface}/${dataConn}] Error forwarding impulse`, err);
+    logger.error(`❌ [${surface}/${dataConn}] Error forwarding impulse`);
+    logger.error(err);
   }
 }

@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import {
   Codec,
   DeliverPolicy,
@@ -249,8 +250,10 @@ async function createImpulseRuntime({
             logger.debug('[ImpulseStream] 📥 Impulse received', { subject });
             const impulse: RuntimeImpulse = JSON.parse(SC.decode(data));
 
-            if (!validateImpulseAgainstEaC(impulse, eac)) {
+            const validation = validateImpulseAgainstEaC(impulse, eac);
+            if (!validation.valid) {
               logger.warn('[WS] ❌ Impulse failed EaC validation');
+              logger.warn(validation);
               return;
             }
 
@@ -262,7 +265,8 @@ async function createImpulseRuntime({
 
             scheduleEaCRefresh();
           } catch (err) {
-            logger.warn('[ImpulseStream] ⚠️ Failed to parse impulse', err);
+            logger.warn('[ImpulseStream] ⚠️ Failed to parse impulse');
+            logger.warn(err);
           }
         },
         {
@@ -276,7 +280,8 @@ async function createImpulseRuntime({
         try {
           consumer.stop();
         } catch (err) {
-          logger.warn('[ImpulseStream] ⚠️ Error stopping consumer', err);
+          logger.warn('[ImpulseStream] ⚠️ Error stopping consumer');
+          logger.warn(err);
         }
         // consumer
         //   .delete()
@@ -346,7 +351,8 @@ async function handleImpulseStreamConnection({
       try {
         socket.send(JSON.stringify(impulse));
       } catch (err) {
-        logger.error('[WS] ❌ Send failed:', err);
+        logger.error('[WS] ❌ Send failed:');
+        logger.error(err);
       }
     } else {
       logger.warn(
@@ -363,7 +369,8 @@ async function handleImpulseStreamConnection({
     try {
       socket.close(1011, 'runtime unavailable');
     } catch (err) {
-      logger.error('[WS] ❌ Error closing socket after missing runtime:', err);
+      logger.error('[WS] ❌ Error closing socket after missing runtime:');
+      logger.error(err);
     }
     return new Response('Service Unavailable', { status: 503 });
   }
@@ -381,7 +388,8 @@ async function handleImpulseStreamConnection({
       try {
         unsub?.();
       } catch (err) {
-        logger.error('[WS] ❌ Error removing listener:', err);
+        logger.error('[WS] ❌ Error removing listener:');
+        logger.error(err);
       }
     }
 
@@ -395,7 +403,8 @@ async function handleImpulseStreamConnection({
         try {
           socket.close(1000, 'heartbeat timeout');
         } catch (err) {
-          logger.error('[WS] ❌ Error closing socket after missing pong:', err);
+          logger.error('[WS] ❌ Error closing socket after missing pong:');
+          logger.error(err);
         }
         shutdown();
         return;
@@ -406,7 +415,8 @@ async function handleImpulseStreamConnection({
           JSON.stringify({ type: 'ping', ts: new Date().toISOString() }),
         );
       } catch (err) {
-        logger.error('[WS] ❌ Failed to send ping:', err);
+        logger.error('[WS] ❌ Failed to send ping:');
+        logger.error(err);
       }
       scheduleHeartbeat();
     }, HEARTBEAT_TIMEOUT_MS);
@@ -418,7 +428,8 @@ async function handleImpulseStreamConnection({
     try {
       unsub = await runtime.AddWebSocketListener(listener);
     } catch (err) {
-      logger.error('[WS] ❌ Failed to create consumer:', err);
+      logger.error('[WS] ❌ Failed to create consumer:');
+      logger.error(err);
       try {
         socket.close(1011, 'listener error');
       } catch (closeErr) {
@@ -462,7 +473,8 @@ async function handleImpulseStreamConnection({
         return;
       }
     } catch (err) {
-      logger.error('[WS] ❌ Error processing message:', err);
+      logger.error('[WS] ❌ Error processing message:');
+      logger.error(err);
     }
     socket.send(JSON.stringify({ echo: event.data }));
   };
@@ -488,66 +500,181 @@ async function handleImpulseStreamConnection({
   return response;
 }
 
+type ImpulseValidationResult =
+  | { valid: true }
+  | {
+    valid: false;
+    code: string;
+    reason: string;
+    context?: Record<string, unknown>;
+  };
+
 function validateImpulseAgainstEaC(
   impulse: RuntimeImpulse,
   eac: EverythingAsCodeOIWorkspace,
-): boolean {
+): ImpulseValidationResult {
   if (impulse.Source === 'DataConnection') {
-    return (
-      !!impulse.Metadata?.ConnectionLookup &&
-      !!eac.DataConnections?.[impulse.Metadata.ConnectionLookup]
-    );
+    const lookup = impulse.Metadata?.ConnectionLookup;
+    if (!lookup) {
+      return {
+        valid: false,
+        code: 'missing_connection_lookup',
+        reason: 'Missing ConnectionLookup for DataConnection impulse.',
+      };
+    }
+    if (!eac.DataConnections?.[lookup]) {
+      return {
+        valid: false,
+        code: 'unknown_data_connection',
+        reason: 'DataConnection lookup not found in workspace EaC.',
+        context: { lookup },
+      };
+    }
+    return { valid: true };
   }
 
   if (impulse.Source === 'SurfaceConnection') {
-    return (
-      !!impulse.Metadata?.SurfaceLookup &&
-      !!impulse.Metadata?.ConnectionLookup &&
-      !!eac.Surfaces?.[impulse.Metadata.SurfaceLookup]?.DataConnections?.[
-        impulse.Metadata.ConnectionLookup
-      ]
-    );
+    const sLookup = impulse.Metadata?.SurfaceLookup;
+    const cLookup = impulse.Metadata?.ConnectionLookup;
+    if (!sLookup || !cLookup) {
+      return {
+        valid: false,
+        code: 'missing_surface_or_connection_lookup',
+        reason: 'SurfaceConnection requires SurfaceLookup and ConnectionLookup.',
+        context: { SurfaceLookup: sLookup, ConnectionLookup: cLookup },
+      };
+    }
+    const surface = eac.Surfaces?.[sLookup];
+    if (!surface) {
+      return {
+        valid: false,
+        code: 'unknown_surface',
+        reason: 'Surface lookup not found in workspace EaC.',
+        context: { SurfaceLookup: sLookup },
+      };
+    }
+    if (!surface.DataConnections?.[cLookup]) {
+      return {
+        valid: false,
+        code: 'unknown_surface_connection',
+        reason: 'Connection not found under the specified surface.',
+        context: { SurfaceLookup: sLookup, ConnectionLookup: cLookup },
+      };
+    }
+    return { valid: true };
   }
 
   if (impulse.Source === 'SurfaceSchema') {
-    return (
-      !!impulse.Metadata?.SurfaceLookup &&
-      !!impulse.Metadata?.SchemaLookup &&
-      !!eac.Surfaces?.[impulse.Metadata.SurfaceLookup]?.Schemas?.[
-        impulse.Metadata.SchemaLookup
-      ]
-    );
+    const sLookup = impulse.Metadata?.SurfaceLookup;
+    const schLookup = impulse.Metadata?.SchemaLookup;
+    if (!sLookup || !schLookup) {
+      return {
+        valid: false,
+        code: 'missing_surface_or_schema_lookup',
+        reason: 'SurfaceSchema requires SurfaceLookup and SchemaLookup.',
+        context: { SurfaceLookup: sLookup, SchemaLookup: schLookup },
+      };
+    }
+    const surface = eac.Surfaces?.[sLookup];
+    if (!surface) {
+      return {
+        valid: false,
+        code: 'unknown_surface',
+        reason: 'Surface lookup not found in workspace EaC.',
+        context: { SurfaceLookup: sLookup },
+      };
+    }
+    if (!surface.Schemas?.[schLookup]) {
+      return {
+        valid: false,
+        code: 'unknown_surface_schema',
+        reason: 'Schema not found under the specified surface.',
+        context: { SurfaceLookup: sLookup, SchemaLookup: schLookup },
+      };
+    }
+    return { valid: true };
   }
 
   if (impulse.Source === 'SurfaceAgent') {
-    return (
-      !!impulse.Metadata?.SurfaceLookup &&
-      !!impulse.Metadata?.AgentLookup &&
-      !!impulse.Metadata?.MatchedSchemaLookup &&
-      !!eac.Surfaces?.[impulse.Metadata.SurfaceLookup]?.Agents?.[
-        impulse.Metadata.AgentLookup
-      ] &&
-      !!eac.Schemas?.[impulse.Metadata.MatchedSchemaLookup]
-    );
+    const sLookup = impulse.Metadata?.SurfaceLookup;
+    const aLookup = impulse.Metadata?.AgentLookup;
+    const mSchema = impulse.Metadata?.MatchedSchemaLookup;
+    if (!sLookup || !aLookup || !mSchema) {
+      return {
+        valid: false,
+        code: 'missing_surface_agent_or_matched_schema',
+        reason: 'SurfaceAgent requires SurfaceLookup, AgentLookup, and MatchedSchemaLookup.',
+        context: {
+          SurfaceLookup: sLookup,
+          AgentLookup: aLookup,
+          MatchedSchemaLookup: mSchema,
+        },
+      };
+    }
+    const surface = eac.Surfaces?.[sLookup];
+    if (!surface) {
+      return {
+        valid: false,
+        code: 'unknown_surface',
+        reason: 'Surface lookup not found in workspace EaC.',
+        context: { SurfaceLookup: sLookup },
+      };
+    }
+    if (!surface.Agents?.[aLookup]) {
+      return {
+        valid: false,
+        code: 'unknown_surface_agent',
+        reason: 'Agent not found under the specified surface.',
+        context: { SurfaceLookup: sLookup, AgentLookup: aLookup },
+      };
+    }
+    if (!eac.Schemas?.[mSchema]) {
+      return {
+        valid: false,
+        code: 'unknown_matched_schema',
+        reason: 'Matched schema lookup not found in workspace EaC.',
+        context: { MatchedSchemaLookup: mSchema },
+      };
+    }
+    return { valid: true };
   }
 
   if (impulse.Source === 'SurfaceWarmQuery') {
+    const sLookup = impulse.Metadata?.SurfaceLookup;
+    const wqLookup = impulse.Metadata?.WarmQueryLookup;
+    if (!sLookup || !wqLookup) {
+      return {
+        valid: false,
+        code: 'missing_surface_or_warmquery_lookup',
+        reason: 'SurfaceWarmQuery requires SurfaceLookup and WarmQueryLookup.',
+        context: { SurfaceLookup: sLookup, WarmQueryLookup: wqLookup },
+      };
+    }
     // TODO(kbowers): When WarmQuery metadata is formalized, validate using eac.Surfaces
-    return (
-      !!impulse.Metadata?.SurfaceLookup && !!impulse.Metadata?.WarmQueryLookup
-    );
+    return { valid: true };
   }
 
   if (impulse.Source === 'Signal') {
-    return (
-      !!impulse.Metadata?.SignalLookup &&
-      !!impulse.Metadata?.TriggeringAgentLookup
-    );
+    const sig = impulse.Metadata?.SignalLookup;
+    const trig = impulse.Metadata?.TriggeringAgentLookup;
+    if (!sig || !trig) {
+      return {
+        valid: false,
+        code: 'missing_signal_or_triggering_agent',
+        reason: 'Signal requires SignalLookup and TriggeringAgentLookup.',
+        context: { SignalLookup: sig, TriggeringAgentLookup: trig },
+      };
+    }
+    return { valid: true };
   }
 
   if (impulse.Source === 'System') {
-    return true;
+    return { valid: true };
   }
 
-  return false;
+  return {
+    valid: false,
+    code: 'unknown_source',
+    reason: `Unsupported impulse source: ${String((impulse as any)?.Source)}`,
+  };
 }
