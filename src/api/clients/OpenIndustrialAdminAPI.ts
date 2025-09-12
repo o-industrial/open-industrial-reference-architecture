@@ -39,7 +39,7 @@ export class OpenIndustrialAdminAPI {
   public async ListWorkspaces(
     query?: string,
   ): Promise<EverythingAsCodeOIWorkspace[]> {
-    const url = new URL(this.bridge.url('/api/admin/enterprises'));
+    const url = new URL(this.bridge.url('/api/admin/workspaces'));
     if (query) {
       url.searchParams.set('q', query);
     }
@@ -50,6 +50,25 @@ export class OpenIndustrialAdminAPI {
     });
     if (!res.ok) {
       throw new Error(`Failed to list enterprises: ${res.status}`);
+    }
+    return await this.bridge.json(res);
+  }
+
+  /**
+   * Get a specific workspace by enterprise lookup, enriched with $Owner when available.
+   */
+  public async GetWorkspace(
+    entLookup: string,
+  ): Promise<EverythingAsCodeOIWorkspace & { $Owner?: EaCUserRecord }> {
+    const res = await fetch(
+      this.bridge.url(`/api/admin/workspaces/${encodeURIComponent(entLookup)}`),
+      {
+        method: 'GET',
+        headers: this.bridge.headers(),
+      },
+    );
+    if (!res.ok) {
+      throw new Error(`Failed to get workspace: ${res.status}`);
     }
     return await this.bridge.json(res);
   }
@@ -74,6 +93,30 @@ export class OpenIndustrialAdminAPI {
       throw new Error(`Failed to list users: ${res.status}`);
     }
 
+    return await this.bridge.json(res);
+  }
+
+  /**
+   * List workspaces for a specific user (Owner flag maintained via $Owner).
+   */
+  public async ListUserWorkspaces(
+    username: string,
+    query?: string,
+  ): Promise<(EverythingAsCode & { $Owner?: EaCUserRecord })[]> {
+    const url = new URL(
+      this.bridge.url(
+        `/api/admin/users/${encodeURIComponent(username)}/workspaces`,
+      ),
+    );
+    if (query) url.searchParams.set('q', query);
+
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: this.bridge.headers(),
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to list user workspaces: ${res.status}`);
+    }
     return await this.bridge.json(res);
   }
 
