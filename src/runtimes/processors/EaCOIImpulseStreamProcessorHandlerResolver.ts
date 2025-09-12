@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import {
   Codec,
   DeliverPolicy,
@@ -501,7 +502,12 @@ async function handleImpulseStreamConnection({
 
 type ImpulseValidationResult =
   | { valid: true }
-  | { valid: false; code: string; reason: string; context?: Record<string, unknown> };
+  | {
+    valid: false;
+    code: string;
+    reason: string;
+    context?: Record<string, unknown>;
+  };
 
 function validateImpulseAgainstEaC(
   impulse: RuntimeImpulse,
@@ -597,8 +603,7 @@ function validateImpulseAgainstEaC(
       return {
         valid: false,
         code: 'missing_surface_agent_or_matched_schema',
-        reason:
-          'SurfaceAgent requires SurfaceLookup, AgentLookup, and MatchedSchemaLookup.',
+        reason: 'SurfaceAgent requires SurfaceLookup, AgentLookup, and MatchedSchemaLookup.',
         context: {
           SurfaceLookup: sLookup,
           AgentLookup: aLookup,
@@ -670,6 +675,6 @@ function validateImpulseAgainstEaC(
   return {
     valid: false,
     code: 'unknown_source',
-    reason: `Unsupported impulse source: ${String(impulse.Source)}`,
+    reason: `Unsupported impulse source: ${String((impulse as any)?.Source)}`,
   };
 }
