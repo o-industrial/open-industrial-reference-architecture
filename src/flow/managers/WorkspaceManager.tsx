@@ -384,30 +384,30 @@ export class WorkspaceManager {
       },
 
       // ===== Environment =====
-      // {
-      //   id: 'environment',
-      //   label: 'Environment',
-      //   items: [
-      //     {
-      //       type: 'item',
-      //       id: 'env.connections',
-      //       label: 'External Connections',
-      //       iconSrc: I.link,
-      //     },
-      //     // Future: Cloud submenus
-      //     // { type: 'item', id: 'env.secrets', label: 'Manage Secrets', iconSrc: I.lock },
-      //     // {
-      //     //   type: 'submenu',
-      //     //   id: 'env.cloud',
-      //     //   label: 'Cloud',
-      //     //   iconSrc: I.cloud,
-      //     //   items: [
-      //     //     { type: 'item', id: 'env.cloud.attachManaged', label: 'Attach Managed Cloud', iconSrc: I.cloudAttach },
-      //     //     { type: 'item', id: 'env.cloud.addPrivate', label: 'Add Private Cloud', iconSrc: I.privateCloud },
-      //     //   ],
-      //     // },
-      //   ],
-      // },
+      {
+        id: 'environment',
+        label: 'Environment',
+        items: [
+          {
+            type: 'item',
+            id: 'env.connections',
+            label: 'External Connections',
+            iconSrc: I.link,
+          },
+          // Future: Cloud submenus
+          // { type: 'item', id: 'env.secrets', label: 'Manage Secrets', iconSrc: I.lock },
+          // {
+          //   type: 'submenu',
+          //   id: 'env.cloud',
+          //   label: 'Cloud',
+          //   iconSrc: I.cloud,
+          //   items: [
+          //     { type: 'item', id: 'env.cloud.attachManaged', label: 'Attach Managed Cloud', iconSrc: I.cloudAttach },
+          //     { type: 'item', id: 'env.cloud.addPrivate', label: 'Add Private Cloud', iconSrc: I.privateCloud },
+          //   ],
+          // },
+        ],
+      },
 
       // ===== APIs =====
       {
