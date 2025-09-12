@@ -169,7 +169,7 @@ export class WorkspaceManager {
     showDataSuite: () => void;
     showBilling: () => void;
     showLicense: () => void;
-    showExternalConns: () => void;
+    showCloudConns: () => void;
   } {
     const { Modal: accProfModal, Show: showAccProf } = AccountProfileModal.Modal(this);
     const { Modal: mngWkspsModal, Show: showMngWksps } = ManageWorkspacesModal.Modal(this);
@@ -181,7 +181,7 @@ export class WorkspaceManager {
     const { Modal: dataSuiteModal, Show: showDataSuite } = DataAPISuiteModal.Modal(this);
     const { Modal: billingModal, Show: showBilling } = BillingDetailsModal.Modal(this);
     const { Modal: licenseModal, Show: showLicense } = CurrentLicenseModal.Modal(eac, this);
-    const { Modal: externalConnsModal, Show: showExternalConns } = CloudConnectionsModal.Modal(
+    const { Modal: cloudConnsModal, Show: showCloudConns } = CloudConnectionsModal.Modal(
       this,
     );
 
@@ -192,7 +192,7 @@ export class WorkspaceManager {
         {mngWkspsModal}
         {teamMgmtModal}
         {wkspSetsModal}
-        {externalConnsModal}
+        {cloudConnsModal}
         {warmQueryModal}
         {apiKeysModal}
         {dataSuiteModal}
@@ -236,7 +236,7 @@ export class WorkspaceManager {
         }
 
         case 'env.connections': {
-          showExternalConns();
+          showCloudConns();
           break;
         }
 
@@ -391,7 +391,7 @@ export class WorkspaceManager {
           {
             type: 'item',
             id: 'env.connections',
-            label: 'External Connections',
+            label: 'Cloud Connections',
             iconSrc: I.link,
           },
           // Future: Cloud submenus
@@ -468,7 +468,7 @@ export class WorkspaceManager {
       showAccProf,
       showWarmQuery,
       showApiKeys,
-      showExternalConns,
+      showCloudConns,
       showDataSuite,
       showBilling,
       showLicense,
