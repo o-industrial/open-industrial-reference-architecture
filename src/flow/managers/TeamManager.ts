@@ -74,7 +74,10 @@ export class TeamManager {
     }
   }
 
-  public RemoveUser(email: string): void {
+  public async RemoveUser(email: string): Promise<void> {
+    // Call workspace API to delete the user from the current workspace
+    await this.oiSvc.Workspaces.DeleteUser(email);
+
     const initial = this.members.length;
     this.members = this.members.filter((m) => m.Email !== email);
 

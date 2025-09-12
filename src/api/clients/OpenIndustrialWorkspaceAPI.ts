@@ -121,6 +121,22 @@ export class OpenIndustrialWorkspaceAPI {
     return await this.bridge.json(res);
   }
   /**
+   * Remove a user from the current workspace team by username (email).
+   */
+  public async DeleteUser(username: string): Promise<void> {
+    const res = await fetch(
+      this.bridge.url(`/api/workspaces/teams/${encodeURIComponent(username)}`),
+      {
+        method: 'DELETE',
+        headers: this.bridge.headers(),
+      },
+    );
+
+    if (!res.ok && res.status !== 204) {
+      throw new Error(`Failed to delete user: ${res.status}`);
+    }
+  }
+  /**
    * Get the status for a specific commit in the current workspace.
    *
    * @param commitId - The ID of the commit to retrieve.
