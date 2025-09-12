@@ -33,7 +33,7 @@ export class HistoryManager {
   }
 
   public HasUnsavedChanges(): boolean {
-    if (!this.committed) return true;
+    if (!this.committed || this.dirty) return true;
 
     const current = this.GetCurrent();
 
