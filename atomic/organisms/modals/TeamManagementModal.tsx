@@ -81,7 +81,8 @@ export function TeamManagementModal({
         title={`Teams: ${currentWorkspace.Details.Name} Members`}
         onClose={onClose}
       >
-        <div class="space-y-6">
+        <div class="relative">
+          <div class="space-y-6">
           <div class="flex items-center justify-between">
             <div class="text-sm text-neutral-300 font-medium">
               Current Members
@@ -236,30 +237,31 @@ export function TeamManagementModal({
               </Action>
             </div>
           </div>
-        </div>
-        {/* In-modal toast (sticks to modal bottom) */}
-        {toast && (
-          <div class="sticky bottom-0 z-10 pt-4 -mb-4">
-            <div class="flex justify-center pointer-events-none">
-              <div
-                role="status"
-                aria-live="polite"
-                class={`pointer-events-auto rounded-lg px-4 py-3 shadow-lg text-sm font-medium ${
-                  toast.kind === 'success'
-                    ? 'bg-emerald-600 text-white'
-                : toast.kind === 'warning'
-                ? 'bg-amber-500 text-white'
-                : 'bg-rose-600 text-white'
-            }`}
-              >
-                {toast.message}
-                <button class="ml-2 underline" onClick={() => setToast(null)}>
-                  Dismiss
-                </button>
+          </div>
+          {/* In-modal toast (sticks to modal bottom) */}
+          {toast && (
+            <div class="sticky bottom-0 z-10 pt-4 -mb-4">
+              <div class="flex justify-center pointer-events-none">
+                <div
+                  role="status"
+                  aria-live="polite"
+                  class={`pointer-events-auto rounded-lg px-4 py-3 shadow-lg text-sm font-medium ${
+                    toast.kind === 'success'
+                      ? 'bg-emerald-600 text-white'
+                  : toast.kind === 'warning'
+                  ? 'bg-amber-500 text-white'
+                  : 'bg-rose-600 text-white'
+              }`}
+                >
+                  {toast.message}
+                  <button class="ml-2 underline" onClick={() => setToast(null)}>
+                    Dismiss
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </Modal>
     </>
   );
