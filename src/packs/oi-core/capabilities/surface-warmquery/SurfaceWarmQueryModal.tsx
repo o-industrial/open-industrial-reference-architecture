@@ -142,7 +142,7 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
 
     if ((result as any).HasError) {
       const errTxt = (result as any).Messages.Error;
-      setErrors(`\n\n> ERROR: ${errTxt}`);
+      setErrors(`> Executing Query...\n\n> ERROR: ${errTxt}`);
       setActiveTabKey('query');
     } else {
       setErrors('> Query Executed Successfully');
