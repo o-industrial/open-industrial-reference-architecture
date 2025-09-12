@@ -221,7 +221,7 @@ export function VariablesEditor({ value, onChange }: Props): JSX.Element {
                 </Select>
 
                 {(kind === 'counter' || kind === 'randomInt' || kind === 'randomDouble') && (
-                  <div class="flex gap-2">
+                  <div class="space-y-2">
                     <Input
                       label="Min"
                       type="number"
