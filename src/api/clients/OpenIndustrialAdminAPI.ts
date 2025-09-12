@@ -114,23 +114,6 @@ export class OpenIndustrialAdminAPI {
     }
   }
 
-  /**
-   * Delete a user by username (email) from the enterprise via the admin API.
-   */
-  public async DeleteUser(username: string): Promise<void> {
-    const res = await fetch(
-      this.bridge.url(`/api/admin/users/${encodeURIComponent(username)}`),
-      {
-        method: 'DELETE',
-        headers: this.bridge.headers(),
-      },
-    );
-
-    if (!res.ok && res.status !== 204) {
-      throw new Error(`Failed to delete user: ${res.status}`);
-    }
-  }
-
   // User Access Cards
   public async ListUserAccessCards(
     username: string,
