@@ -63,6 +63,10 @@ export class AziManager {
     console.info('[AziManager] Send initiated', { input, extraInputs });
 
     try {
+      // Reset error state for a fresh run
+      (this.state as any).Error = undefined;
+      (this.state as any).Errors = [] as string[];
+
       const humanMsg = new HumanMessage(input);
       const aiMsg = new AIMessage('');
       this.state.Messages.push(humanMsg, aiMsg);
@@ -92,6 +96,90 @@ export class AziManager {
         // === Handle custom events ===
         if (eventName === 'on_custom_event' && name?.startsWith('thinky:')) {
           this.handleCustomEvent(name.replace('thinky:', ''), data);
+        }
+
+        // === Handle errors and related fields embedded in payload ===
+        try {
+          const foundErrors: string[] = [];
+          let latestDataQuery: string | undefined;
+          let latestErrorCode: string | undefined;
+
+          const collect = (obj: unknown) => {
+            if (!obj || typeof obj !== 'object') return;
+            const rec: any = obj as any;
+
+            // Single error field
+            if (typeof rec.Error !== 'undefined') {
+              const val = rec.Error;
+              if (val != null) foundErrors.push(typeof val === 'string' ? val : String(val));
+            }
+            // Errors array
+            if (Array.isArray(rec.Errors)) {
+              for (const e of rec.Errors) {
+                const msg = typeof e === 'string'
+                  ? e
+                  : (e?.message ?? e?.Message ?? e?.Error ?? String(e));
+                foundErrors.push(String(msg));
+              }
+            }
+            // Live query and error code updates
+            if (typeof rec.DataQuery !== 'undefined' && rec.DataQuery != null) {
+              latestDataQuery = String(rec.DataQuery);
+            }
+            if (typeof rec.ErrorCode !== 'undefined' && rec.ErrorCode != null) {
+              latestErrorCode = String(rec.ErrorCode);
+            }
+
+            // Recurse into common containers
+            for (const k of ['state', 'output', 'result', 'checkpoint', 'data']) {
+              if (rec && typeof rec[k] === 'object') collect(rec[k]);
+            }
+          };
+
+          collect(data);
+
+          let emitted = false;
+          if (foundErrors.length) {
+            const errorsArr = ((this.state as any).Errors ?? []) as string[];
+            for (const m of foundErrors) errorsArr.push(String(m));
+            (this.state as any).Errors = errorsArr;
+            (this.state as any).Error = String(foundErrors[foundErrors.length - 1]);
+            emitted = true;
+          }
+          if (typeof latestDataQuery !== 'undefined') {
+            (this.state as any).DataQuery = latestDataQuery;
+            emitted = true;
+          }
+          if (typeof latestErrorCode !== 'undefined') {
+            (this.state as any).ErrorCode = latestErrorCode;
+            emitted = true;
+          }
+          if (emitted) this.emit();
+        } catch (err) {
+          console.log(err);
+        }
+
+        // === Handle error events immediately ===
+        if (
+          typeof eventName === 'string' &&
+          (eventName.endsWith('_error') || eventName === 'on_error')
+        ) {
+          try {
+            const errMsg = (data as any)?.error?.message ??
+              (data as any)?.message ??
+              (typeof (data as any)?.error === 'string' ? (data as any).error : undefined) ??
+              (typeof data === 'string' ? data : '') ??
+              'Unknown error';
+
+            const msg = String(errMsg);
+            const errorsArr = ((this.state as any).Errors ?? []) as string[];
+            errorsArr.push(msg);
+            (this.state as any).Errors = errorsArr;
+            (this.state as any).Error = msg;
+            this.emit();
+          } catch (e) {
+            console.warn('[AziManager] Failed to capture stream error', e);
+          }
         }
 
         // === Handle LLM streaming ===
@@ -132,8 +220,40 @@ export class AziManager {
         // }
       }
 
-      console.info('[AziManager] Stream complete — syncing final state');
+      console.info('[AziManager] Stream complete – syncing final state');
+      const __prevError = (this.state as any).Error;
+      const __prevErrors = (this.state as any).Errors as string[] | undefined;
+      const __prevDataQuery = (this.state as any).DataQuery as string | undefined;
+      const __prevErrorCode = (this.state as any).ErrorCode as string | undefined;
       await this.Peek(extraInputs);
+      // Merge any locally accumulated errors with the peeked state instead of overwriting it.
+      try {
+        const peekedErrors = ((this.state as any).Errors ?? []) as string[];
+        const localErrors = (__prevErrors ?? []) as string[];
+        const mergedErrors = [...peekedErrors, ...localErrors].filter(
+          (e) => typeof e === 'string' && e.length > 0,
+        );
+
+        if (mergedErrors.length) {
+          (this.state as any).Errors = mergedErrors;
+          (this.state as any).Error = mergedErrors[mergedErrors.length - 1];
+        } else if (typeof __prevError !== 'undefined' && __prevError !== null) {
+          // Preserve a single error if present
+          (this.state as any).Error = String(__prevError);
+          (this.state as any).Errors = __prevErrors ?? [];
+        }
+
+        // Restore last streamed DataQuery and ErrorCode if present
+        if (typeof __prevDataQuery !== 'undefined') {
+          (this.state as any).DataQuery = __prevDataQuery;
+        }
+        if (typeof __prevErrorCode !== 'undefined') {
+          (this.state as any).ErrorCode = __prevErrorCode;
+        }
+        this.emit();
+      } catch (err) {
+        console.log(err);
+      }
     } catch (err) {
       console.error('[AziManager] Send error', err);
     } finally {

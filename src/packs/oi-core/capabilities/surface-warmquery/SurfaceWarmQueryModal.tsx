@@ -56,23 +56,82 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
   const isSaveDisabled = !queryName || !query || !queryDescription || !queryApiPath || isLoading;
   const isRunDisabled = !query || isLoading;
 
+  const seenFirstErrorRef = useRef(false);
+
   const onAziFinishSend = (state: AziState) => {
     setIsLoading(false);
-    setErrors('> Azi Responded');
     if (state && state.DataQuery && state.DataQuery != state.CurrentQuery) {
       setQuery(state.DataQuery as string);
       setActiveTabKey('query');
     }
-    if (state && state.Error) {
-      const newErrors = '> Azi Responded' + '\n> ERROR: ' + state.Error;
-      setErrors(newErrors);
+
+    // Append final banner without overwriting any streamed error history
+    setErrors((prev) => (prev ? prev + '\n\n' : '') + '> Azi Responded');
+  };
+
+  // Clear console and reset stream tracking when the modal mounts (every open)
+  useEffect(() => {
+    setErrors('');
+    try {
+      seenFirstErrorRef.current = false;
+      lastAppendedErrorRef.current = undefined;
+      lastAppendedErrorCodeRef.current = undefined;
+      lastAppendedDataQueryRef.current = undefined;
+    } catch (err) {
+      console.log(err);
     }
+  }, []);
+
+  // Append state.Error changes as they stream
+  const lastAppendedErrorRef = useRef<string | undefined>(undefined);
+  const lastAppendedErrorCodeRef = useRef<string | undefined>(undefined);
+  const lastAppendedDataQueryRef = useRef<string | undefined>(undefined);
+
+  const onAziStateChange = (state: AziState) => {
+    // Ignore hydrated errors from initial Peek; only append during an active send
+    if (!isLoading) return;
+
+    const err = (state as any)?.Error;
+    if (!err) return;
+
+    const errCode = (state as any)?.ErrorCode ?? 'UNKNOWN';
+    const dataQuery = (state as any)?.DataQuery ?? (state as any).CurrentQuery;
+
+    const msg = typeof err === 'string' ? err : String(err);
+
+    if (msg === lastAppendedErrorRef.current) {
+      return; // append only on change
+    }
+
+    lastAppendedErrorRef.current = msg;
+    lastAppendedDataQueryRef.current = dataQuery;
+
+    setErrors((prev) => {
+      const lead = prev ? prev + '\n\n' : '';
+      setQuery(dataQuery);
+      if (!seenFirstErrorRef.current) {
+        // First error of this run: plain
+        seenFirstErrorRef.current = true;
+        lastAppendedErrorCodeRef.current = errCode;
+        return lead + `> ERROR : ${msg}`;
+      } else {
+        // Subsequent errors: add resolved banner first
+        const final = lead +
+          `> Azi Resolved Error: ${lastAppendedErrorCodeRef.current}\n\n> ERROR : ${msg}`;
+        lastAppendedErrorCodeRef.current = errCode;
+        return final;
+      }
+    });
   };
 
   const onAziStartSend = () => {
     setIsLoading(true);
     setActiveTabKey('query');
     setErrors('> Azi Thinking...');
+    lastAppendedErrorRef.current = undefined;
+    lastAppendedDataQueryRef.current = undefined;
+    lastAppendedErrorCodeRef.current = undefined;
+    seenFirstErrorRef.current = false;
   };
 
   const handleRunClick = async () => {
@@ -87,7 +146,7 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
 
     if ((result as any).HasError) {
       const errTxt = (result as any).Messages.Error;
-      setErrors(`> ERROR: ${errTxt}`);
+      setErrors(`> Executing Query...\n\n> ERROR: ${errTxt}`);
       setActiveTabKey('query');
     } else {
       setErrors('> Query Executed Successfully');
@@ -171,6 +230,11 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
       clearTimeout(clear);
     };
   }, [saveSuccess]);
+
+  // Always clear console errors when the modal opens
+  useEffect(() => {
+    setErrors('');
+  }, []);
 
   const tabData = [
     {
@@ -342,6 +406,7 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
               workspaceMgr={workspace}
               onStartSend={onAziStartSend}
               onFinishSend={onAziFinishSend}
+              onStateChange={onAziStateChange}
               renderMessage={(msg) => marked.parse(msg) as string}
               aziMgr={workspace.WarmQueryAzis[warmQueryLookup]}
               extraInputs={{
