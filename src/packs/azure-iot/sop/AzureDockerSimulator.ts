@@ -166,8 +166,8 @@ export function AzureDockerSimulator(
                 DeviceList: deviceId,
                 MessageCount: (MessageCountPerDevice || 0).toString(),
                 Interval: (MessageIntervalMS || 60000).toString(),
-                Template: MessageTemplate ? JSON.stringify(MessageTemplate) : '',
-                Variables: Variables ? JSON.stringify(Variables) : '',
+                Template: MessageTemplate || '',
+                Variables: Variables || '',
               },
             });
           }

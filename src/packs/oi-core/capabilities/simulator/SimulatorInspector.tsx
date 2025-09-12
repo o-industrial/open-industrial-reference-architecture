@@ -55,10 +55,16 @@ export function SimulatorInspector({
             content: (
               <VariablesEditor
                 value={(details as EaCAzureDockerSimulatorDetails).Variables}
-                onChange={(vars) =>
-                  onDetailsChanged({
-                    Variables: vars as unknown as Record<string, unknown>,
-                  })}
+                onChange={(vars) => {
+                  try {
+                    const serialized = JSON.stringify(vars);
+                    onDetailsChanged({
+                      Variables: serialized
+                    });
+                  } catch {
+                    // ignore serialization issues
+                  }
+                }}
               />
             ),
           },
@@ -69,7 +75,16 @@ export function SimulatorInspector({
               <TemplateEditor
                 value={(details as EaCAzureDockerSimulatorDetails).MessageTemplate}
                 variables={(details as EaCAzureDockerSimulatorDetails).Variables}
-                onChange={(tmpl) => onDetailsChanged({ MessageTemplate: tmpl })}
+                onChange={(tmpl) => {
+                  try {
+                    const serialized = JSON.stringify(tmpl);
+                    onDetailsChanged({
+                      MessageTemplate: serialized,
+                    });
+                  } catch {
+                    // ignore serialization issues
+                  }
+                }}
               />
             ),
           },

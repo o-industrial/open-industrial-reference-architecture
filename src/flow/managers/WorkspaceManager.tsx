@@ -155,9 +155,7 @@ export class WorkspaceManager {
     });
   }
 
-  public UseAppMenu(
-    eac: EverythingAsCode & EverythingAsCodeLicensing,
-  ): {
+  public UseAppMenu(eac: EverythingAsCode & EverythingAsCodeLicensing): {
     handleMenu: (item: MenuActionItem) => void;
     modals: JSX.Element;
     runtimeMenus: MenuRoot[];
@@ -593,8 +591,10 @@ export class WorkspaceManager {
       isAzureConnected,
       loading,
       error,
-      canUseManaged: this.accessRights?.includes('Workspace.Infrastructure.Managed') ?? false,
-      canUsePrivate: this.accessRights?.includes('Workspace.Infrastructure.Private') ?? false,
+      canUseManaged: this.accessRights?.includes('Workspace.Infrastructure.Managed') ??
+        false,
+      canUsePrivate: this.accessRights?.includes('Workspace.Infrastructure.Private') ??
+        false,
       refreshAzureStatus: load,
     };
   }

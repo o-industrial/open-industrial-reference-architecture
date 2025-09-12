@@ -25,6 +25,14 @@ type Props = {
 
 function asArray(input?: unknown): VariableDef[] {
   if (!input) return [];
+  if (typeof input === 'string') {
+    try {
+      const parsed = JSON.parse(input);
+      return asArray(parsed);
+    } catch {
+      return [];
+    }
+  }
   if (Array.isArray(input)) {
     // best-effort cast
     return input as VariableDef[];

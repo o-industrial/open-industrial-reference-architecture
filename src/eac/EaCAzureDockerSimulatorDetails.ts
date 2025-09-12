@@ -8,11 +8,16 @@ import { EaCSimulatorDetails, EaCSimulatorDetailsSchema } from './EaCSimulatorDe
  * https://learn.microsoft.com/en-us/samples/azure-samples/iot-telemetry-simulator/azure-iot-device-telemetry-simulator/
  */
 export type EaCAzureDockerSimulatorDetails = EaCSimulatorDetails<'AzureDocker'> & {
-  /** JSON object defining variable values used in message templating. */
-  Variables?: Record<string, unknown>;
+  /**
+   * Serialized JSON string defining variable values used in message templating.
+   * Storing as a string ensures stable serialization and avoids merge ambiguity.
+   */
+  Variables?: string;
 
-  /** JSON object that serves as the telemetry message template. */
-  MessageTemplate?: Record<string, unknown>;
+  /**
+   * Serialized JSON string that serves as the telemetry message template.
+   */
+  MessageTemplate?: string;
 
   /** Delay between messages, in milliseconds. */
   MessageIntervalMS?: number;
@@ -28,13 +33,13 @@ export const EaCAzureDockerSimulatorDetailsSchema: z.ZodType<EaCAzureDockerSimul
   EaCSimulatorDetailsSchema.extend({
     Type: z.literal('AzureDocker'),
     Variables: z
-      .record(z.unknown())
+      .string()
       .optional()
-      .describe('JSON object for variable overrides in templates.'),
+      .describe('Serialized JSON for variable overrides in templates.'),
     MessageTemplate: z
-      .record(z.unknown())
+      .string()
       .optional()
-      .describe('JSON object defining the telemetry message format.'),
+      .describe('Serialized JSON defining the telemetry message format.'),
     MessageIntervalMS: z
       .number()
       .optional()

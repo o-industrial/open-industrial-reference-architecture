@@ -29,6 +29,14 @@ function isJSONObject(x: unknown): x is JSONObject {
 }
 
 function toFields(obj?: unknown): Field[] {
+  if (typeof obj === 'string') {
+    try {
+      const parsed = JSON.parse(obj);
+      return toFields(parsed);
+    } catch {
+      return [];
+    }
+  }
   if (!isJSONObject(obj)) return [];
   const fields: Field[] = [];
   for (const [k, v] of Object.entries(obj)) {
@@ -69,6 +77,14 @@ const BUILT_INS = ['DeviceId', 'Guid', 'Time', 'LocalTime', 'Ticks', 'Epoch', 'M
 
 function parseVariables(value?: unknown): string[] {
   if (!value) return [];
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return parseVariables(parsed);
+    } catch {
+      return [];
+    }
+  }
   if (Array.isArray(value)) {
     return (value as Array<{ name?: string }>).map((v) => v?.name).filter(Boolean) as string[];
   }
