@@ -1,5 +1,5 @@
 import { EverythingAsCode, IntentTypes, JSX } from '../.deps.ts';
-import { Action, ActionStyleTypes } from '../atoms/Action.tsx';
+import { Badge } from '../atoms/Badge.tsx';
 
 /**
  * Props for the workspace list component.
@@ -40,19 +40,13 @@ export function WorkspaceList({
               )}
             </div>
             {((eac as any)?.$Owner?.Username) && (
-              <Action
-                href={`/admin/users/${encodeURIComponent((eac as any).$Owner.Username)}`}
-                data-eac-bypass-base
-                onClick={(ev) => ev.stopPropagation()}
-                title={`Owner: ${(eac as any).$Owner.Username}`}
-                styleType={
-                  ActionStyleTypes.Outline | ActionStyleTypes.Rounded | ActionStyleTypes.UltraThin
-                }
+              <Badge
                 intentType={IntentTypes.Info}
+                title={`Owner: ${(eac as any).$Owner.Username}`}
                 class="-:-:text-xs -:-:whitespace-nowrap"
               >
                 Owner: {(eac as any).$Owner.Username}
-              </Action>
+              </Badge>
             )}
           </div>
         </li>

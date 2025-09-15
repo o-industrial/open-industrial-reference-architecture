@@ -55,6 +55,9 @@ export function InspectorBase({
   const computedYMax =
     yMax ?? (impulseRates?.length ? Math.max(...impulseRates) + 3 : 100);
 
+  // Remove to turn back on impulse rates
+  impulseRates = undefined;
+
   return (
     <section
       class={classSet(

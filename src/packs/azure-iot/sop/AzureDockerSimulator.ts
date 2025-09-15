@@ -22,7 +22,7 @@ import { z } from '../.deps.ts';
 export async function safeAppName(
   workspace: string,
   id: string,
-  prefix: string,
+  prefix: string
 ): Promise<string> {
   const hash = await shaHash(workspace, id);
 
@@ -32,7 +32,7 @@ export async function safeAppName(
 }
 
 export function AzureDockerSimulator(
-  lookup: string,
+  lookup: string
 ): SimulatorModuleBuilder<
   EaCSimulatorAsCode<EaCAzureDockerSimulatorDetails>,
   void,
@@ -71,10 +71,11 @@ export function AzureDockerSimulator(
           CredentialStrategy: credStrat,
           SubscriptionID: subId,
         }),
-        ResolveIoTHubConnectionString: AzureResolveIoTHubConnectionStringStep.Build({
-          SubscriptionID: subId,
-          CredentialStrategy: credStrat,
-        }),
+        ResolveIoTHubConnectionString:
+          AzureResolveIoTHubConnectionStringStep.Build({
+            SubscriptionID: subId,
+            CredentialStrategy: credStrat,
+          }),
       };
     })
     .Services(
@@ -83,11 +84,11 @@ export function AzureDockerSimulator(
           ApplicationName: await safeAppName(
             WorkspaceLookup!,
             `simulator-azure-docker-${Lookup}`,
-            'sim-az-dckr',
+            'sim-az-dckr'
           ),
           AppEnvironmentName: 'simulator-container-app-env',
         };
-      },
+      }
     )
     .Stats(async ({ Steps, EaC, Services: { ApplicationName } }) => {
       const ensured = await Steps.EnsureResGroup({
@@ -125,34 +126,31 @@ export function AzureDockerSimulator(
 
         const jobs: t[] = [];
 
-        for (
-          const [dcLookup, dc] of Object.entries(
-            EaC.DataConnections || {},
-          )
-        ) {
+        for (const [dcLookup, dc] of Object.entries(
+          EaC.DataConnections || {}
+        )) {
           const dcDetails = dc.Details ?? {};
 
           if (
             dc.SimulatorLookup === SimulatorLookup &&
             isEaCAzureIoTHubDataConnectionDetails(dcDetails)
           ) {
-            const { ConnectionString } = await Steps.ResolveIoTHubConnectionString({
-              ResourceGroupName: await Secrets.GetRequired(
-                'AZURE_IOT_RESOURCE_GROUP',
-              ),
-              KeyName: 'iothubowner',
-            });
+            const { ConnectionString } =
+              await Steps.ResolveIoTHubConnectionString({
+                ResourceGroupName: await Secrets.GetRequired(
+                  'AZURE_IOT_RESOURCE_GROUP'
+                ),
+                KeyName: 'iothubowner',
+              });
 
-            const deviceId = await shaHash(
-              EaC.EnterpriseLookup!,
-              dc.Details!.Name!,
-            );
+            const deviceId = await shaHash(EaC.EnterpriseLookup!, dcLookup);
 
             jobs.push({
               ResourceGroupName: ensured.ResourceGroupName,
               AppEnvironmentName: AppEnvironmentName,
               AppName: ApplicationName,
-              Image: 'mcr.microsoft.com/oss/azure-samples/azureiot-telemetrysimulator:latest',
+              Image:
+                'mcr.microsoft.com/oss/azure-samples/azureiot-telemetrysimulator:latest',
               AppEnvironmentTags: {
                 WorkspaceLookup: EaC.EnterpriseLookup!,
               },
@@ -174,11 +172,11 @@ export function AzureDockerSimulator(
         }
 
         return await Promise.all(jobs.map((job) => Steps.DeployJob(job)));
-      },
+      }
     ) as unknown as SimulatorModuleBuilder<
-      EaCSimulatorAsCode<EaCAzureDockerSimulatorDetails>,
-      void,
-      AzureContainerAppJobDeployOutput[],
-      AzureContainerAppJobStatsOutput
-    >;
+    EaCSimulatorAsCode<EaCAzureDockerSimulatorDetails>,
+    void,
+    AzureContainerAppJobDeployOutput[],
+    AzureContainerAppJobStatsOutput
+  >;
 }
