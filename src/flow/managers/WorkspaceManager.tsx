@@ -1448,7 +1448,7 @@ export class WorkspaceManager {
       name?: string,
     ) => void;
     grantDeployAccess: (username: string) => Promise<void>;
-    removeMember: (email: string) => void;
+    removeMember: (email: string) => Promise<void>;
     updateMemberRole: (email: string, role: TeamMember['Role']) => void;
     update: (next: Partial<EaCEnterpriseDetails>) => void;
     save: () => Promise<void>;
@@ -1576,8 +1576,8 @@ export class WorkspaceManager {
       this.Team?.InviteUser?.(email, role, name);
     };
 
-    const removeMember = (email: string) => {
-      this.Team?.RemoveUser?.(email);
+    const removeMember = async (email: string) => {
+      await this.Team?.RemoveUser?.(email);
     };
 
     const updateMemberRole = (email: string, role: TeamMember['Role']) => {
