@@ -74,12 +74,8 @@ export function AzureIoTHubDataConnection(
         }
       },
     }))
-    .Stats(async ({ Steps, AsCode, EaC, Secrets }) => {
-      // Ensure we use the same hashed DeviceID used during provisioning
-      const deviceId = await shaHash(
-        EaC.EnterpriseLookup!,
-        AsCode.Details!.Name!,
-      );
+    .Stats(async ({ Steps, Lookup, AsCode, EaC, Secrets }) => {
+      const deviceId = await shaHash(EaC.EnterpriseLookup!, Lookup);
 
       const resGroupName = AsCode.Details?.ResourceGroupName ||
         (await Secrets.Get('AZURE_IOT_RESOURCE_GROUP'))!;
@@ -94,8 +90,8 @@ export function AzureIoTHubDataConnection(
         IoTHubName: IoTHubName,
       });
     })
-    .Deploy(async ({ Steps, AsCode, Lookup: SimulatorLookup, EaC }) => {
-      const deviceId = AsCode.Details!.Name!;
+    .Deploy(async ({ Steps, AsCode, Lookup, EaC }) => {
+      const deviceId = Lookup;
       const isIoTEdge = AsCode.Details!.IsIoTEdge ?? false;
       const workspaceLookup = EaC.EnterpriseLookup!;
 
@@ -104,7 +100,8 @@ export function AzureIoTHubDataConnection(
         Devices: {
           [deviceId]: {
             IsIoTEdge: isIoTEdge,
-            DataConnectionLookup: SimulatorLookup,
+            DataConnectionLookup: Lookup,
+            DeviceName: AsCode.Details!.Name!,
           },
         },
       });

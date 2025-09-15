@@ -56,13 +56,18 @@ import {
   CurrentLicenseModal,
   DataAPISuiteModal,
   ManageWorkspacesModal,
+  PrivateCALZModal,
   SimulatorLibraryModal,
   TeamManagementModal,
   WarmQueryAPIsModal,
   WorkspaceSettingsModal,
 } from '../../../atomic/organisms/modals/.exports.ts';
 import { MenuActionItem, MenuRoot } from '../../../atomic/molecules/FlyoutMenu.tsx';
-import { EverythingAsCodeIdentity, EverythingAsCodeLicensing } from '../../eac/.deps.ts';
+import {
+  EverythingAsCodeClouds,
+  EverythingAsCodeIdentity,
+  EverythingAsCodeLicensing,
+} from '../../eac/.deps.ts';
 import { AccountProfile } from '../../types/AccountProfile.ts';
 import { EaCUserRecord } from '../../api/.client.deps.ts';
 
@@ -155,7 +160,9 @@ export class WorkspaceManager {
     });
   }
 
-  public UseAppMenu(eac: EverythingAsCode & EverythingAsCodeLicensing): {
+  public UseAppMenu(
+    eac: EverythingAsCode & EverythingAsCodeLicensing & EverythingAsCodeClouds,
+  ): {
     handleMenu: (item: MenuActionItem) => void;
     modals: JSX.Element;
     runtimeMenus: MenuRoot[];
@@ -169,7 +176,7 @@ export class WorkspaceManager {
     showDataSuite: () => void;
     showBilling: () => void;
     showLicense: () => void;
-    showExternalConns: () => void;
+    showCloudConns: () => void;
   } {
     const { Modal: accProfModal, Show: showAccProf } = AccountProfileModal.Modal(this);
     const { Modal: mngWkspsModal, Show: showMngWksps } = ManageWorkspacesModal.Modal(this);
@@ -181,9 +188,8 @@ export class WorkspaceManager {
     const { Modal: dataSuiteModal, Show: showDataSuite } = DataAPISuiteModal.Modal(this);
     const { Modal: billingModal, Show: showBilling } = BillingDetailsModal.Modal(this);
     const { Modal: licenseModal, Show: showLicense } = CurrentLicenseModal.Modal(eac, this);
-    const { Modal: externalConnsModal, Show: showExternalConns } = CloudConnectionsModal.Modal(
-      this,
-    );
+    const { Modal: cloudConnsModal, Show: showCloudConns } = CloudConnectionsModal.Modal(this);
+    const { Modal: privateCalzModal, Show: showPrivateCalz } = PrivateCALZModal.Modal(this);
 
     const modals = (
       <>
@@ -192,7 +198,8 @@ export class WorkspaceManager {
         {mngWkspsModal}
         {teamMgmtModal}
         {wkspSetsModal}
-        {externalConnsModal}
+        {cloudConnsModal}
+        {privateCalzModal}
         {warmQueryModal}
         {apiKeysModal}
         {dataSuiteModal}
@@ -236,7 +243,12 @@ export class WorkspaceManager {
         }
 
         case 'env.connections': {
-          showExternalConns();
+          showCloudConns();
+          break;
+        }
+
+        case 'env.calz': {
+          showPrivateCalz();
           break;
         }
 
@@ -280,6 +292,9 @@ export class WorkspaceManager {
       license: 'https://api.iconify.design/lucide:badge-check.svg',
       creditCard: 'https://api.iconify.design/lucide:credit-card.svg',
     } as const;
+
+    const hasWorkspaceCloud = !!eac.Clouds?.Workspace?.Details ||
+      Object.keys(eac.Clouds || {}).length > 0;
 
     const runtimeMenus: MenuRoot[] = [
       // // ===== File (unchanged example) =====
@@ -384,30 +399,40 @@ export class WorkspaceManager {
       },
 
       // ===== Environment =====
-      // {
-      //   id: 'environment',
-      //   label: 'Environment',
-      //   items: [
-      //     {
-      //       type: 'item',
-      //       id: 'env.connections',
-      //       label: 'External Connections',
-      //       iconSrc: I.link,
-      //     },
-      //     // Future: Cloud submenus
-      //     // { type: 'item', id: 'env.secrets', label: 'Manage Secrets', iconSrc: I.lock },
-      //     // {
-      //     //   type: 'submenu',
-      //     //   id: 'env.cloud',
-      //     //   label: 'Cloud',
-      //     //   iconSrc: I.cloud,
-      //     //   items: [
-      //     //     { type: 'item', id: 'env.cloud.attachManaged', label: 'Attach Managed Cloud', iconSrc: I.cloudAttach },
-      //     //     { type: 'item', id: 'env.cloud.addPrivate', label: 'Add Private Cloud', iconSrc: I.privateCloud },
-      //     //   ],
-      //     // },
-      //   ],
-      // },
+      {
+        id: 'environment',
+        label: 'Environment',
+        items: [
+          {
+            type: 'item',
+            id: 'env.connections',
+            label: 'Cloud Connections',
+            iconSrc: I.link,
+          },
+          ...(hasWorkspaceCloud
+            ? [
+              {
+                type: 'item' as const,
+                id: 'env.calz',
+                label: 'Manage Private CALZ',
+                iconSrc: I.privateCloud,
+              },
+            ]
+            : []),
+          // Future: Cloud submenus
+          // { type: 'item', id: 'env.secrets', label: 'Manage Secrets', iconSrc: I.lock },
+          // {
+          //   type: 'submenu',
+          //   id: 'env.cloud',
+          //   label: 'Cloud',
+          //   iconSrc: I.cloud,
+          //   items: [
+          //     { type: 'item', id: 'env.cloud.attachManaged', label: 'Attach Managed Cloud', iconSrc: I.cloudAttach },
+          //     { type: 'item', id: 'env.cloud.addPrivate', label: 'Add Private Cloud', iconSrc: I.privateCloud },
+          //   ],
+          // },
+        ],
+      },
 
       // ===== APIs =====
       {
@@ -468,7 +493,7 @@ export class WorkspaceManager {
       showAccProf,
       showWarmQuery,
       showApiKeys,
-      showExternalConns,
+      showCloudConns,
       showDataSuite,
       showBilling,
       showLicense,
@@ -524,7 +549,10 @@ export class WorkspaceManager {
 
     const signOut = () => {
       console.log('Signing out...');
-      location.assign('/'); // Simulate signout
+
+      location.assign(
+        `/oauth/signout?success_url=https://auth.fathym.com/fathymcloudprd.onmicrosoft.com/b2c_1_sign_up_sign_in/oauth2/v2.0/logout?post_logout_redirect_uri=${location.origin}`,
+      );
       return Promise.resolve();
     };
 
@@ -1429,6 +1457,7 @@ export class WorkspaceManager {
     listWorkspaces: () => void;
     workspaces: WorkspaceSummary[];
     switchToWorkspace: (_lookup: string) => void;
+    createWorkspace: (name: string, description?: string) => Promise<void>;
   } {
     const getCurrentWorkspace = (): WorkspaceSummary => {
       const eac = this.EaC.GetEaC();
@@ -1510,6 +1539,24 @@ export class WorkspaceManager {
       listWorkspaces();
     }, []);
 
+    const createWorkspace = async (name: string, description?: string) => {
+      const trimmedName = (name || '').trim();
+      if (!trimmedName) return;
+
+      const eac: EverythingAsCodeOIWorkspace = {
+        Details: { Name: trimmedName, Description: description ?? '' },
+      } as unknown as EverythingAsCodeOIWorkspace;
+
+      const result = await this.oiSvc.Workspaces.Create(eac);
+      // After creating, switch to the new workspace (triggers reload)
+      if (result?.EnterpriseLookup) {
+        switchToWorkspace(result.EnterpriseLookup);
+      } else {
+        // Fallback: refresh list if no lookup returned
+        listWorkspaces();
+      }
+    };
+
     const update = (next: Partial<EaCEnterpriseDetails>) => {
       this.EaC.UpdateWorkspace(next);
 
@@ -1557,11 +1604,25 @@ export class WorkspaceManager {
     };
 
     const switchToWorkspace = (_lookup: string) => {
-      //  TODO(mcgear): Set the kv Current EaC value for the user
+      try {
+        // Submit a full-page POST so server can set KV and issue redirect
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/workspace/api/workspaces/active';
 
-      location.reload();
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'WorkspaceLookup';
+        input.value = _lookup;
+        form.appendChild(input);
 
-      setCurrent(getCurrentWorkspace());
+        document.body.appendChild(form);
+        form.submit();
+      } catch (err) {
+        console.error('Failed to set active workspace (form submit)', err);
+        // Last-resort fallback
+        location.href = '/workspace';
+      }
     };
 
     return {
@@ -1578,6 +1639,7 @@ export class WorkspaceManager {
       listWorkspaces,
       workspaces,
       switchToWorkspace,
+      createWorkspace,
     };
   }
 

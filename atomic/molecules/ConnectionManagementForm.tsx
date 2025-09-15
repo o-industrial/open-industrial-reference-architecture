@@ -76,12 +76,12 @@ export function ConnectionManagementForm({
       /> */}
 
       {/* Ingest Protocols */}
-      <MultiSelectCheckboxGroup
+      {/* <MultiSelectCheckboxGroup
         label="Ingest Protocols"
         options={ingestOptions}
         selected={details.MultiProtocolIngest ?? []}
         onChange={handleProtocolsChange}
-      />
+      /> */}
     </div>
   );
 }

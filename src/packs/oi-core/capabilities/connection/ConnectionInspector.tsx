@@ -62,24 +62,24 @@ export function ConnectionInspector({
               />
             ),
           },
-          {
-            key: 'analytics',
-            label: 'Analytics',
-            content: (
-              <p class='text-sm text-neutral-300'>
-                📈 Connection analytics will appear here.
-              </p>
-            ),
-          },
-          {
-            key: 'stream',
-            label: 'Impulse Stream',
-            content: (
-              <p class='text-sm text-neutral-300'>
-                📡 Live impulse logs and stream filtering.
-              </p>
-            ),
-          },
+          // {
+          //   key: 'analytics',
+          //   label: 'Analytics',
+          //   content: (
+          //     <p class='text-sm text-neutral-300'>
+          //       📈 Connection analytics will appear here.
+          //     </p>
+          //   ),
+          // },
+          // {
+          //   key: 'stream',
+          //   label: 'Impulse Stream',
+          //   content: (
+          //     <p class='text-sm text-neutral-300'>
+          //       📡 Live impulse logs and stream filtering.
+          //     </p>
+          //   ),
+          // },
         ]}
       />
     </InspectorBase>

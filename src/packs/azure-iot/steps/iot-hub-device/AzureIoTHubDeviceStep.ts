@@ -74,10 +74,8 @@ export const AzureIoTHubDeviceStep: TStepBuilder = Step(
       Object.entries(Devices).map(async ([id, def]) => {
         const desiredTags: Record<string, string> = {
           WorkspaceLookup,
-          DeviceID: id,
-          ...(def.DataConnectionLookup && {
-            DataConnectionLookup: def.DataConnectionLookup,
-          }),
+          DeviceName: def.DeviceName,
+          DataConnectionLookup: def.DataConnectionLookup,
         };
 
         id = await shaHash(WorkspaceLookup, id);
