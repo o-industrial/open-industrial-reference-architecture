@@ -5,7 +5,8 @@ export const AzureIoTHubDeviceInputSchema: z.ZodObject<{
     z.ZodString,
     z.ZodObject<{
       IsIoTEdge: z.ZodOptional<z.ZodBoolean>;
-      DataConnectionLookup: z.ZodOptional<z.ZodString>;
+      DataConnectionLookup: z.ZodString;
+      DeviceName: z.ZodString;
     }>
   >;
   WorkspaceLookup: z.ZodString;
@@ -13,7 +14,8 @@ export const AzureIoTHubDeviceInputSchema: z.ZodObject<{
   Devices: z.record(
     z.object({
       IsIoTEdge: z.boolean().optional(),
-      DataConnectionLookup: z.string().optional(),
+      DataConnectionLookup: z.string(),
+      DeviceName: z.string(),
     }),
   ),
   WorkspaceLookup: z.string(),

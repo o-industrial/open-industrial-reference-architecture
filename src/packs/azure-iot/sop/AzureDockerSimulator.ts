@@ -143,10 +143,7 @@ export function AzureDockerSimulator(
               KeyName: 'iothubowner',
             });
 
-            const deviceId = await shaHash(
-              EaC.EnterpriseLookup!,
-              dc.Details!.Name!,
-            );
+            const deviceId = await shaHash(EaC.EnterpriseLookup!, dcLookup);
 
             jobs.push({
               ResourceGroupName: ensured.ResourceGroupName,
