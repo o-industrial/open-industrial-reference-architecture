@@ -53,17 +53,21 @@ import {
   APIKeysModal,
   BillingDetailsModal,
   CloudConnectionsModal,
-  PrivateCALZModal,
   CurrentLicenseModal,
   DataAPISuiteModal,
   ManageWorkspacesModal,
+  PrivateCALZModal,
   SimulatorLibraryModal,
   TeamManagementModal,
   WarmQueryAPIsModal,
   WorkspaceSettingsModal,
 } from '../../../atomic/organisms/modals/.exports.ts';
 import { MenuActionItem, MenuRoot } from '../../../atomic/molecules/FlyoutMenu.tsx';
-import { EverythingAsCodeIdentity, EverythingAsCodeLicensing } from '../../eac/.deps.ts';
+import {
+  EverythingAsCodeClouds,
+  EverythingAsCodeIdentity,
+  EverythingAsCodeLicensing,
+} from '../../eac/.deps.ts';
 import { AccountProfile } from '../../types/AccountProfile.ts';
 import { EaCUserRecord } from '../../api/.client.deps.ts';
 
@@ -156,7 +160,9 @@ export class WorkspaceManager {
     });
   }
 
-  public UseAppMenu(eac: EverythingAsCode & EverythingAsCodeLicensing): {
+  public UseAppMenu(
+    eac: EverythingAsCode & EverythingAsCodeLicensing & EverythingAsCodeClouds,
+  ): {
     handleMenu: (item: MenuActionItem) => void;
     modals: JSX.Element;
     runtimeMenus: MenuRoot[];
@@ -287,7 +293,8 @@ export class WorkspaceManager {
       creditCard: 'https://api.iconify.design/lucide:credit-card.svg',
     } as const;
 
-    const hasWorkspaceCloud = !!eac.Clouds?.Workspace?.Details || Object.keys(eac.Clouds || {}).length > 0;
+    const hasWorkspaceCloud = !!eac.Clouds?.Workspace?.Details ||
+      Object.keys(eac.Clouds || {}).length > 0;
 
     const runtimeMenus: MenuRoot[] = [
       // // ===== File (unchanged example) =====
@@ -404,13 +411,13 @@ export class WorkspaceManager {
           },
           ...(hasWorkspaceCloud
             ? [
-                {
-                  type: 'item' as const,
-                  id: 'env.calz',
-                  label: 'Manage Private CALZ',
-                  iconSrc: I.privateCloud,
-                },
-              ]
+              {
+                type: 'item' as const,
+                id: 'env.calz',
+                label: 'Manage Private CALZ',
+                iconSrc: I.privateCloud,
+              },
+            ]
             : []),
           // Future: Cloud submenus
           // { type: 'item', id: 'env.secrets', label: 'Manage Secrets', iconSrc: I.lock },
@@ -542,8 +549,10 @@ export class WorkspaceManager {
 
     const signOut = () => {
       console.log('Signing out...');
-      // Redirect to runtime signout endpoint similar to Open Biotech
-      location.assign('/signout?success_url=/');
+
+      location.assign(
+        `/oauth/signout?success_url=https://auth.fathym.com/fathymcloudprd.onmicrosoft.com/b2c_1_sign_up_sign_in/oauth2/v2.0/logout?post_logout_redirect_uri=${location.origin}`,
+      );
       return Promise.resolve();
     };
 

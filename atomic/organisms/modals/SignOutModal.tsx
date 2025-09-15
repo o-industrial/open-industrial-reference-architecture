@@ -6,8 +6,9 @@ export type SignOutModalProps = {
   onClose: () => void;
 };
 
-export function SignOutModal({ onClose }: SignOutModalProps): JSX.Element {
+export function SignOutModal({ workspaceMgr, onClose }: SignOutModalProps): JSX.Element {
   const [ready, setReady] = useState(false);
+  const { signOut } = workspaceMgr.UseAccountProfile();
 
   return (
     <Modal title="Sign Out" onClose={onClose}>
@@ -16,11 +17,11 @@ export function SignOutModal({ onClose }: SignOutModalProps): JSX.Element {
           <iframe
             class="w-full h-full rounded"
             style={{ width: '100%', height: '100%', minHeight: '350px' }}
-            src="https://www.youtube.com/embed/rOXaPE6gklI?si=ZPGuZtTWiKyuuoew&controls=0&autoplay=1&mute=0&playsinline=1"
+            src="https://www.youtube.com/embed/rOXaPE6gklI?si=ZPGuZtTWiKyuuoew&controls=0&autoplay=1&mute=0&playsinline=1&start=3"
             title="YouTube video player"
             frameBorder={0}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerPolicy="strict-origin-when-cross-origin"
+            referrerpolicy="strict-origin-when-cross-origin"
             allowFullScreen
             onLoad={() => setReady(true)}
           />
@@ -32,7 +33,7 @@ export function SignOutModal({ onClose }: SignOutModalProps): JSX.Element {
           </Badge>
 
           <Action
-            href="/signout?success_url=/"
+            onClick={() => signOut()}
             styleType={ActionStyleTypes.Solid | ActionStyleTypes.Rounded}
             intentType={IntentTypes.Error}
             disabled={!ready}

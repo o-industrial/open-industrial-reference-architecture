@@ -5,10 +5,7 @@ import { shaHash } from '../../../../utils/shaHash.ts';
 import { IoTRegistry } from '../../.deps.ts';
 import { AzureResolveIoTHubConnectionStringStep } from '../resolve-device-connection-string/AzureResolveIoTHubConnectionStringStep.ts';
 
-import {
-  AzureIoTHubDeviceInput,
-  AzureIoTHubDeviceInputSchema,
-} from './AzureIoTHubDeviceInput.ts';
+import { AzureIoTHubDeviceInput, AzureIoTHubDeviceInputSchema } from './AzureIoTHubDeviceInput.ts';
 import {
   AzureIoTHubDeviceOptions,
   AzureIoTHubDeviceOptionsSchema,
@@ -32,7 +29,7 @@ type DeviceDescription = {
 
 export const AzureIoTHubDeviceStep: TStepBuilder = Step(
   'Azure IoT Hub Device Provisioning',
-  'Adds devices to an Azure IoT Hub and updates tags if needed'
+  'Adds devices to an Azure IoT Hub and updates tags if needed',
 )
   .Input(AzureIoTHubDeviceInputSchema)
   .Output(AzureIoTHubDeviceOutputSchema)
@@ -41,21 +38,19 @@ export const AzureIoTHubDeviceStep: TStepBuilder = Step(
     const { SubscriptionID, CredentialStrategy } = ctx.Options!;
 
     return {
-      ResolveIoTHubConnectionString:
-        AzureResolveIoTHubConnectionStringStep.Build({
-          SubscriptionID,
-          CredentialStrategy,
-        }),
+      ResolveIoTHubConnectionString: AzureResolveIoTHubConnectionStringStep.Build({
+        SubscriptionID,
+        CredentialStrategy,
+      }),
     };
   })
   .Services(async (_input, ctx) => {
     const { ResourceGroupName } = ctx.Options!;
 
-    const { ConnectionString, IoTHubName } =
-      await ctx.Steps!.ResolveIoTHubConnectionString({
-        ResourceGroupName,
-        KeyName: 'iothubowner',
-      });
+    const { ConnectionString, IoTHubName } = await ctx.Steps!.ResolveIoTHubConnectionString({
+      ResourceGroupName,
+      KeyName: 'iothubowner',
+    });
 
     const Registry = IoTRegistry.fromConnectionString(ConnectionString);
 
@@ -90,7 +85,7 @@ export const AzureIoTHubDeviceStep: TStepBuilder = Step(
           const currentTags = twin.tags ?? {};
 
           const tagMismatch = Object.entries(desiredTags).some(
-            ([k, v]) => currentTags[k] !== v
+            ([k, v]) => currentTags[k] !== v,
           );
 
           if (tagMismatch) {
@@ -109,7 +104,7 @@ export const AzureIoTHubDeviceStep: TStepBuilder = Step(
 
           toAdd.push(device);
         }
-      })
+      }),
     );
 
     const results: Record<string, unknown> = {};
@@ -128,7 +123,7 @@ export const AzureIoTHubDeviceStep: TStepBuilder = Step(
             };
             return acc;
           },
-          {}
+          {},
         );
       } else {
         results.Added = toAdd.map((d) => d.deviceId);
@@ -139,7 +134,7 @@ export const AzureIoTHubDeviceStep: TStepBuilder = Step(
       await Registry.updateTwin(
         update.deviceId,
         { tags: update.tags },
-        update.etag
+        update.etag,
       );
     }
 

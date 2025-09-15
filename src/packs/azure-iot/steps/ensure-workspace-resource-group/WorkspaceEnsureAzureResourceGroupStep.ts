@@ -92,7 +92,7 @@ export const WorkspaceEnsureAzureResourceGroupStep: TStepBuilder = Step(
 
     const hash = await shaHash(WorkspaceLookup, '');
 
-    const resGroupRoot = Deno.env.get("OPEN_INDUSTRIAL_RESOURCE_GROUP_ROOT") || 'eac-ws';
+    const resGroupRoot = Deno.env.get('OPEN_INDUSTRIAL_RESOURCE_GROUP_ROOT') || 'eac-ws';
 
     const ResourceGroupName = `${resGroupRoot}-${hash}`;
 
