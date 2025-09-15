@@ -1457,6 +1457,7 @@ export class WorkspaceManager {
     listWorkspaces: () => void;
     workspaces: WorkspaceSummary[];
     switchToWorkspace: (_lookup: string) => void;
+    createWorkspace: (name: string, description?: string) => Promise<void>;
   } {
     const getCurrentWorkspace = (): WorkspaceSummary => {
       const eac = this.EaC.GetEaC();
@@ -1538,6 +1539,24 @@ export class WorkspaceManager {
       listWorkspaces();
     }, []);
 
+    const createWorkspace = async (name: string, description?: string) => {
+      const trimmedName = (name || '').trim();
+      if (!trimmedName) return;
+
+      const eac: EverythingAsCodeOIWorkspace = {
+        Details: { Name: trimmedName, Description: description ?? '' },
+      } as unknown as EverythingAsCodeOIWorkspace;
+
+      const result = await this.oiSvc.Workspaces.Create(eac);
+      // After creating, switch to the new workspace (triggers reload)
+      if (result?.EnterpriseLookup) {
+        switchToWorkspace(result.EnterpriseLookup);
+      } else {
+        // Fallback: refresh list if no lookup returned
+        listWorkspaces();
+      }
+    };
+
     const update = (next: Partial<EaCEnterpriseDetails>) => {
       this.EaC.UpdateWorkspace(next);
 
@@ -1585,11 +1604,25 @@ export class WorkspaceManager {
     };
 
     const switchToWorkspace = (_lookup: string) => {
-      //  TODO(mcgear): Set the kv Current EaC value for the user
+      try {
+        // Submit a full-page POST so server can set KV and issue redirect
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/workspace/api/workspaces/active';
 
-      location.reload();
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'WorkspaceLookup';
+        input.value = _lookup;
+        form.appendChild(input);
 
-      setCurrent(getCurrentWorkspace());
+        document.body.appendChild(form);
+        form.submit();
+      } catch (err) {
+        console.error('Failed to set active workspace (form submit)', err);
+        // Last-resort fallback
+        location.href = '/workspace';
+      }
     };
 
     return {
@@ -1606,6 +1639,7 @@ export class WorkspaceManager {
       listWorkspaces,
       workspaces,
       switchToWorkspace,
+      createWorkspace,
     };
   }
 

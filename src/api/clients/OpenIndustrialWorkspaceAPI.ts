@@ -185,6 +185,21 @@ export class OpenIndustrialWorkspaceAPI {
   }
 
   /**
+   * Set the active enterprise/workspace for the current user session.
+   */
+  public async SetActiveWorkspace(workspaceLookup: string): Promise<void> {
+    const res = await fetch(this.bridge.url('/api/workspaces/active'), {
+      method: 'POST',
+      headers: this.bridge.headers(),
+      body: JSON.stringify({ WorkspaceLookup: workspaceLookup }),
+    });
+
+    if (!res.ok && res.status !== 204) {
+      throw new Error(`Failed to set active workspace: ${res.status}`);
+    }
+  }
+
+  /**
    * Get the EaC JWT for a workspace for the authenticated user.
    */
   public async EaCJWT(): Promise<{ Token: string }> {
