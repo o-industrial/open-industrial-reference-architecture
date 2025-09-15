@@ -1,12 +1,5 @@
 import { JSX, WorkspaceManager, IntentTypes, useState, useEffect } from '../../.deps.ts';
-import {
-  Modal,
-  Input,
-  Select,
-  Action,
-  ActionStyleTypes,
-  CheckboxRow,
-} from '../../.exports.ts';
+import { Modal, Input, Select, Action, ActionStyleTypes } from '../../.exports.ts';
 
 export type TeamManagementModalProps = {
   workspaceMgr: WorkspaceManager;
@@ -21,7 +14,6 @@ export function TeamManagementModal({
     currentWorkspace,
     teamMembers,
     inviteMember,
-    grantDeployAccess,
     removeMember,
     updateMemberRole,
   } = workspaceMgr.UseWorkspaceSettings();
@@ -31,7 +23,7 @@ export function TeamManagementModal({
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<'Owner' | 'Editor' | 'Viewer'>('Viewer');
-  const [grantDeploy, setGrantDeploy] = useState(false);
+  // removed: grant-deploy UI; no local state needed
 
   // Invite/Toast state
   const [inviting, setInviting] = useState(false);
@@ -120,13 +112,6 @@ export function TeamManagementModal({
                 {/* <div class="text-sm">{member.Name ?? 'N/A'}</div> */}
                 <div class="text-sm col-span-3">{member.Username}</div>
                 <div class="col-span-2 flex items-center justify-end gap-2">
-                {/* <Action
-                onClick={() => grantDeployAccess(member.Username)}
-                intentType={IntentTypes.Info}
-                styleType={ActionStyleTypes.Outline}
-              >
-                Grant Deploy
-              </Action> */}
               {/* <Select
                   value={member.Role}
                   onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>

@@ -110,9 +110,9 @@ export function ManageWorkspacesModal({
             {ws.Lookup !== currentWorkspace.Lookup && (
               <Action
                 styleType={ActionStyleTypes.Link}
-                onClick={() => alert('Set active enterprise not implemented')}
+                onClick={() => switchToWorkspace(ws.Lookup)}
               >
-                Set as Active Enterprise
+                Set as Active Workspace
               </Action>
             )}
           </div>
