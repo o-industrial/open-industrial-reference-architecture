@@ -542,7 +542,8 @@ export class WorkspaceManager {
 
     const signOut = () => {
       console.log('Signing out...');
-      location.assign('/'); // Simulate signout
+      // Redirect to runtime signout endpoint similar to Open Biotech
+      location.assign('/signout?success_url=/');
       return Promise.resolve();
     };
 

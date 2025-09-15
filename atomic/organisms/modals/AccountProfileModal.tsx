@@ -10,6 +10,7 @@ import {
   Select,
   Badge,
 } from '../../.exports.ts';
+import { SignOutModal } from './SignOutModal.tsx';
 
 type AccountProfileModalProps = {
   workspaceMgr: WorkspaceManager;
@@ -29,8 +30,10 @@ export function AccountProfileModal({
     // updateTeamRole,
     // leaveTeam,
     // deleteAccount,
-    signOut,
   } = workspaceMgr.UseAccountProfile();
+
+  const { Modal: signOutModal, Show: showSignOut } =
+    SignOutModal.Modal(workspaceMgr);
 
   return (
     <Modal
@@ -41,7 +44,7 @@ export function AccountProfileModal({
             class="ml-auto"
             styleType={ActionStyleTypes.Thin | ActionStyleTypes.Outline}
             intentType={IntentTypes.Info}
-            onClick={() => signOut()}
+            onClick={() => showSignOut()}
             aria-label="Sign out"
           >
             Sign out
@@ -50,6 +53,7 @@ export function AccountProfileModal({
       }
       onClose={onClose}
     >
+      {signOutModal}
       <TabbedPanel
         direction="vertical"
         tabs={[
