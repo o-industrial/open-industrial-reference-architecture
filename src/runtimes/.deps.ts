@@ -15,15 +15,15 @@ export {
   EaCRuntimeHandlerPipeline,
 } from 'jsr:@fathym/eac@0.2.120/runtime/pipelines';
 
-export type { EverythingAsCodeApplications } from 'jsr:@fathym/eac-applications@0.0.187';
+export type { EverythingAsCodeApplications } from 'jsr:@fathym/eac-applications@0.0.190';
 export {
   type EaCApplicationProcessorConfig,
   type EaCProcessor,
   isEaCProcessor,
-} from 'jsr:@fathym/eac-applications@0.0.187/processors';
-export { establishJwtValidationMiddleware } from 'jsr:@fathym/eac-applications@0.0.187/runtime/modules';
-export { EaCApplicationsLoggingProvider } from 'jsr:@fathym/eac-applications@0.0.187/runtime/logging';
-export type { ProcessorHandlerResolver } from 'jsr:@fathym/eac-applications@0.0.187/runtime/processors';
+} from 'jsr:@fathym/eac-applications@0.0.190/processors';
+export { establishJwtValidationMiddleware } from 'jsr:@fathym/eac-applications@0.0.190/runtime/modules';
+export { EaCApplicationsLoggingProvider } from 'jsr:@fathym/eac-applications@0.0.190/runtime/logging';
+export type { ProcessorHandlerResolver } from 'jsr:@fathym/eac-applications@0.0.190/runtime/processors';
 
 export { Logger } from 'jsr:@std/log@0.224.14/logger';
 
