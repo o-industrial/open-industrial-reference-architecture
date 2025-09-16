@@ -526,7 +526,10 @@ function validateImpulseAgainstEaC(
       return {
         valid: false,
         code: 'unknown_data_connection',
-        reason: 'DataConnection lookup not found in workspace EaC.',
+        reason:
+          `DataConnection lookup ${lookup} not found in workspace EaC ${eac.EnterpriseLookup}.\n\n${
+            JSON.stringify(eac.DataConnections, null, 2)
+          }`,
         context: { lookup },
       };
     }
