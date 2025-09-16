@@ -18,6 +18,7 @@ import { shaHash } from '../../../utils/shaHash.ts';
 import { isEaCAzureIoTHubDataConnectionDetails } from '../../../eac/EaCAzureIoTHubDataConnectionDetails.ts';
 import { AzureResolveIoTHubConnectionStringStep } from '../steps/resolve-device-connection-string/AzureResolveIoTHubConnectionStringStep.ts';
 import { z } from '../.deps.ts';
+import { AzureContainerAppStopStep } from '../steps/container-app-stop/AzureContainerAppStopStep.ts';
 
 export async function safeAppName(
   workspace: string,
@@ -64,6 +65,10 @@ export function AzureDockerSimulator(
           SubscriptionID: subId,
         }),
         DeployJob: AzureContainerAppJobDeployStep.Build({
+          CredentialStrategy: credStrat,
+          SubscriptionID: subId,
+        }),
+        StopApp: AzureContainerAppStopStep.Build({
           CredentialStrategy: credStrat,
           SubscriptionID: subId,
         }),
@@ -118,6 +123,15 @@ export function AzureDockerSimulator(
         const ensured = await Steps.EnsureResGroup({
           WorkspaceLookup: EaC.EnterpriseLookup!,
         });
+
+        const enabled = (AsCode.Metadata as { Enabled?: boolean } | undefined)?.Enabled ?? true;
+        if (!enabled) {
+          await Steps.StopApp({
+            ResourceGroupName: ensured.ResourceGroupName,
+            AppName: ApplicationName,
+          });
+          return [];
+        }
 
         //  Load any Data Connectin that points at this Simulator, and for every data connection that points at this simulator, Deploy a configured job
 
