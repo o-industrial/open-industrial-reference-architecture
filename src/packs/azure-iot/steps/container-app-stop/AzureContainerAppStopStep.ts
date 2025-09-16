@@ -5,7 +5,7 @@ import { StepModuleBuilder } from '../../../../fluent/steps/StepModuleBuilder.ts
 import { AzureResolveCredentialStep } from '../resolve-credential/AzureResolveCredentialStep.ts';
 import { AzureResolveCredentialInputSchema } from '../resolve-credential/AzureResolveCredentialInput.ts';
 
-import { ContainerAppsAPIClient } from 'npm:@azure/arm-appcontainers@2.2.0';
+import { ContainerApp, ContainerAppsAPIClient } from 'npm:@azure/arm-appcontainers@2.2.0';
 
 // ---------- Input / Output ----------
 
@@ -94,33 +94,40 @@ export const AzureContainerAppStopStep: TStepBuilder = Step(
 
     try {
       // Preferred: call stop on the container app
-      // deno-lint-ignore no-explicit-any
       const ops: any = ContainerAppClient.containerApps as any;
       if (typeof ops.beginStopAndWait === 'function') {
         await ops.beginStopAndWait(ResourceGroupName, AppName);
       } else if (typeof ops.beginStop === 'function') {
         await ops.beginStop(ResourceGroupName, AppName);
       } else {
-        // Fallback: set scale maxReplicas to 0 via update
+        // Fallback: set scale to 0 via update without mutating possibly-undefined nested properties
         const current = await ContainerAppClient.containerApps.get(
           ResourceGroupName,
           AppName,
         );
 
-        current.template = current.template || {} as any;
-        current.template.scale = { minReplicas: 0, maxReplicas: 0 } as any;
+        const update: ContainerApp = {
+          location: current.location,
+          tags: current.tags,
+          managedEnvironmentId: current.managedEnvironmentId,
+          configuration: current.configuration,
+          template: {
+            ...(current.template ?? ({} as any)),
+            // Ensure scale exists and forces zero replicas
+            scale: { minReplicas: 0, maxReplicas: 0 } as any,
+          } as any,
+        };
 
         await ContainerAppClient.containerApps.beginCreateOrUpdateAndWait(
           ResourceGroupName,
           AppName,
-          current,
+          update,
         );
       }
     } catch (err) {
       // If stopping fails (e.g., app not found), surface a clean error
-      throw new Error(`Failed to stop container app '${AppName}': ${err?.message ?? err}`);
+      throw new Error(`Failed to stop container app '${AppName}': ${err}`);
     }
 
     return { AppName, Status: 'Stopped' };
   }) as unknown as TStepBuilder;
-
