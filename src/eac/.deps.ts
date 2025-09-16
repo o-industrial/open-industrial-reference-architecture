@@ -8,7 +8,7 @@ export {
   type EverythingAsCode,
 } from 'jsr:@fathym/eac@0.2.120';
 
-export type { EverythingAsCodeApplications } from 'jsr:@fathym/eac-applications@0.0.187';
+export type { EverythingAsCodeApplications } from 'jsr:@fathym/eac-applications@0.0.190';
 
 export {
   type EaCWarmQueryAsCode,
