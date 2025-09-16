@@ -4,10 +4,10 @@ export type {
   EaCEnterpriseDetails,
   EaCVertexDetails,
   EverythingAsCode,
-} from 'jsr:@fathym/eac@0.2.120';
-export { type EaCStatus, EaCStatusProcessingTypes } from 'jsr:@fathym/eac@0.2.120/steward/status';
+} from 'jsr:@fathym/eac@0.2.122';
+export { type EaCStatus, EaCStatusProcessingTypes } from 'jsr:@fathym/eac@0.2.122/steward/status';
 
-export type { EaCLicenseAsCode, EaCUserLicense } from 'jsr:@fathym/eac-licensing@0.0.55';
+export type { EaCLicenseAsCode, EaCUserLicense } from 'jsr:@fathym/eac-licensing@0.0.56';
 
 export type { ComponentType, JSX, RefObject } from 'npm:preact@10.20.1';
 export {
