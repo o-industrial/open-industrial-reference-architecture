@@ -235,35 +235,55 @@ export function CurrentLicenseModal({
         <section class="relative overflow-hidden rounded-3xl border border-slate-700/60 bg-neutral-900/80 p-6 shadow-xl">
           <CardAccent gradient={`${plansAccent} opacity-80`} />
           <div class="space-y-1">
-            <h3 class="text-lg font-semibold text-white">Available plans</h3>
+            <h3 class="text-lg font-semibold text-white">{activePlan ? 'Selected plan' : 'Available plans'}</h3>
             <p class="text-sm text-slate-400">
-              Choose a plan that matches your workspace workload. Featured plans include extra automation and telemetry capabilities.
+              {activePlan
+                ? `You're about to activate ${activePlanDetails?.Name ?? 'this plan'}. Review what's included, then confirm payment below.`
+                : 'Choose a plan that matches your workspace workload. Featured plans include extra automation and telemetry capabilities.'}
             </p>
           </div>
 
-          {intervalPlans.length === 0 ? (
+          {licenseLoading && !clientSecret ? (
+            <div class="mt-8 flex justify-center py-10">
+              <LoadingIcon class="inline-block h-16 w-16 animate-spin text-neon-violet-500" />
+            </div>
+          ) : intervalPlans.length === 0 ? (
             <div class="mt-6 rounded-2xl border border-dashed border-slate-700/60 bg-neutral-950/40 p-6 text-center text-slate-400">
               No plans available for this billing interval yet. Try switching cadence or check back soon.
             </div>
+          ) : activePlan && activePlanDetails ? (
+            <div class="mt-6 flex justify-center">
+              <LicenseCard
+                key={activePlanDetails.Lookup}
+                class="w-full max-w-3xl scale-[1.02]"
+                name={activePlanDetails.Name}
+                licenseLoading={licenseLoading}
+                description={activePlanDetails.Description}
+                amount={activePlanDetails.Amount}
+                interval={activePlanDetails.Interval}
+                features={activePlanDetails.Features}
+                featured={activePlanDetails.Featured}
+                highlightLabel={typeof activePlanDetails.Highlight === 'string' ? activePlanDetails.Highlight : undefined}
+                isActive
+              />
+            </div>
           ) : (
             <div class="mt-6 grid gap-6 md:grid-cols-2">
-              {intervalPlans
-                .filter((p) => !activePlan || activePlan === p.PlanLookup)
-                .map((plan) => (
-                  <LicenseCard
-                    key={plan.Lookup}
-                    name={plan.Name}
-                    licenseLoading={licenseLoading}
-                    description={plan.Description}
-                    amount={plan.Amount}
-                    interval={plan.Interval}
-                    features={plan.Features}
-                    featured={plan.Featured}
-                    highlightLabel={typeof plan.Highlight === 'string' ? plan.Highlight : undefined}
-                    isActive={activePlan === plan.PlanLookup}
-                    onSelect={() => activatePlan(plan.PlanLookup, isMonthly)}
-                  />
-                ))}
+              {intervalPlans.map((plan) => (
+                <LicenseCard
+                  key={plan.Lookup}
+                  name={plan.Name}
+                  licenseLoading={licenseLoading}
+                  description={plan.Description}
+                  amount={plan.Amount}
+                  interval={plan.Interval}
+                  features={plan.Features}
+                  featured={plan.Featured}
+                  highlightLabel={typeof plan.Highlight === 'string' ? plan.Highlight : undefined}
+                  isActive={activePlan === plan.PlanLookup}
+                  onSelect={() => activatePlan(plan.PlanLookup, isMonthly)}
+                />
+              ))}
             </div>
           )}
         </section>
