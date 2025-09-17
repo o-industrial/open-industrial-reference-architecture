@@ -51,6 +51,8 @@ const durationAccent = 'from-violet-500/70 via-sky-500/70 to-cyan-400/70';
 const tokenAccent = 'from-emerald-500/70 via-sky-500/70 to-cyan-400/70';
 const infoAccent = 'from-amber-400/70 via-orange-500/70 to-pink-500/70';
 
+
+
 export function APIKeysModal({ workspaceMgr, onClose }: APIKeysModalProps): JSX.Element {
   void workspaceMgr;
 
@@ -328,3 +330,16 @@ APIKeysModal.Modal = (
 };
 
 export default APIKeysModal;
+
+
+
+
+
+
+
+
+
+
+
+
+

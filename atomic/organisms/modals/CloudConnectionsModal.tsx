@@ -116,6 +116,53 @@ export function CloudConnectionsModal({
   const [checking, setChecking] = useState(false);
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined);
   const [checkError, setCheckError] = useState<string | undefined>(undefined);
+  const [creatingManaged, setCreatingManaged] = useState(false);
+  const [managedError, setManagedError] = useState<string | undefined>(undefined);
+
+  const createManagedSubscription = async () => {
+    setCreatingManaged(true);
+    setManagedError(undefined);
+
+    try {
+      const resp = await fetch('/workspace/api/o-industrial/eac/clouds/subs', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+
+      const data = await resp.json().catch(() => ({}));
+
+      if (!resp.ok) {
+        const message = typeof data?.error === 'string'
+          ? data.error
+          : `Failed to start managed subscription (status ${resp.status}).`;
+        setManagedError(message);
+        return;
+      }
+
+      const redirectUrl = typeof data?.redirect === 'string' ? data.redirect : undefined;
+
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+        return;
+      }
+
+      if (data?.status?.ID) {
+        window.location.href = `/workspace/commit/${data.status.ID}`;
+        return;
+      }
+
+      setManagedError('Managed subscription provisioning returned an unexpected response.');
+    } catch (err) {
+      setManagedError(
+        err instanceof Error
+          ? err.message
+          : 'Unexpected error starting managed subscription.',
+      );
+    } finally {
+      setCreatingManaged(false);
+    }
+  };
 
   const maskId = (id?: string) => {
     if (!id) return '----';
@@ -320,10 +367,14 @@ export function CloudConnectionsModal({
                     <Action
                       intentType={IntentTypes.Primary}
                       styleType={ActionStyleTypes.Outline}
-                      onClick={() => alert('Managed subscription flow coming soon')}
+                      disabled={creatingManaged}
+                      onClick={createManagedSubscription}
                     >
-                      Create Managed Subscription
+                      {creatingManaged ? 'Provisioning...' : 'Create Managed Subscription'}
                     </Action>
+                    {managedError && (
+                      <p class="w-full text-sm text-rose-300">{managedError}</p>
+                    )}
                   </div>
                 </div>
               </div>
