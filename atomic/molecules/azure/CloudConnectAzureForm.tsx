@@ -25,13 +25,13 @@ export function CloudConnectAzureForm(
     ...rest
   } = props as CloudConnectAzureFormProps & JSX.HTMLAttributes<HTMLFormElement> & {
     class?: string;
-    onSubmit?: JSX.EventHandler<HTMLFormElement, Event>;
+    onSubmit?: JSX.EventHandler<JSX.TargetedEvent<HTMLFormElement, SubmitEvent>>;
   };
 
   const formAction = providedAction ?? '/azure/oauth/signin';
 
-  const handleSubmit = useCallback<JSX.EventHandler<HTMLFormElement, Event>>(
-    (event) => {
+  const handleSubmit = useCallback<JSX.EventHandler<JSX.TargetedEvent<HTMLFormElement, SubmitEvent>>>(
+    (event: JSX.TargetedEvent<HTMLFormElement, SubmitEvent>) => {
       onSubmit?.(event);
 
       if (event.defaultPrevented) {
