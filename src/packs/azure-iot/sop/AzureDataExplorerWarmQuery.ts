@@ -63,7 +63,15 @@ export function AzureDataExplorerWarmQuery(
       return { Credential };
     })
     .Run(async ({ AsCode, Services: { Credential }, Secrets }) => {
-      const query = AsCode.Details?.Query!;
+      const rawQuery = AsCode.Details?.Query;
+
+      if (typeof rawQuery !== 'string' || !rawQuery.trim().length) {
+        throw new Error(
+          `Warm query \"${lookup}\" is missing query text. Save a query body before invoking the API.`,
+        );
+      }
+
+      const query = rawQuery.trim();
 
       const cluster = await Secrets.Get('AZURE_IOT_ADX_CLUSTER');
 

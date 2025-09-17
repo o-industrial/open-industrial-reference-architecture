@@ -125,7 +125,7 @@ function WorkspaceDetailsTab({
           Save Changes
         </Action>
         <div class="flex gap-2">
-          <Action
+          {/* <Action
             intentType={IntentTypes.Primary}
             styleType={ActionStyleTypes.Outline}
             onClick={onManageTeam}
@@ -138,7 +138,7 @@ function WorkspaceDetailsTab({
             onClick={onManageWorkspaces}
           >
             Manage Workspaces
-          </Action>
+          </Action> */}
           <Action
             onClick={() => {
               if (confirm('Are you sure you want to archive this workspace?')) {
