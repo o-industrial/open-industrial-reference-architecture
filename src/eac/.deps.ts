@@ -16,7 +16,7 @@ export {
   type EaCWarmQueryDetails,
   type EverythingAsCodeClouds,
   EverythingAsCodeCloudsSchema,
-} from 'jsr:@fathym/eac-azure@0.0.109';
+} from 'jsr:@fathym/eac-azure@0.0.110';
 
 export { type EverythingAsCodeIdentity } from 'jsr:@fathym/eac-identity@0.0.26';
 

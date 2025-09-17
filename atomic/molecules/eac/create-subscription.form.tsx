@@ -1,7 +1,7 @@
 import { Action } from '../../atoms/Action.tsx';
 import { Input } from '../../atoms/forms/Input.tsx';
 import { Select } from '../../atoms/forms/Select.tsx';
-import { JSX, classSet, useEffect, useState } from '../../.deps.ts';
+import { JSX, classSet, useEffect, useMemo, useState } from '../../.deps.ts';
 import { ToggleCheckbox } from '../../atoms/forms/ToggleCheckbox.tsx';
 
 export type EaCCreateSubscriptionFormProps = JSX.HTMLAttributes<HTMLFormElement> & {
@@ -21,6 +21,12 @@ export function EaCCreateSubscriptionForm(
   const [error, setError] = useState<string | undefined>();
 
   const [selectedScope, setSelectedScope] = useState('');
+
+  const sortedScopes = useMemo(() => {
+    return Object.entries(billingScopes)
+      .map(([id, label]) => ({ id, label }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [billingScopes]);
 
   useEffect(() => {
     let cancelled = false;
@@ -45,13 +51,14 @@ export function EaCCreateSubscriptionForm(
   }, []);
 
   useEffect(() => {
-    if (!selectedScope) {
-      const firstScope = Object.keys(billingScopes)[0];
-      if (firstScope) {
-        setSelectedScope(firstScope);
-      }
+    const scopeExists = selectedScope && selectedScope in billingScopes;
+
+    if ((!selectedScope || !scopeExists) && sortedScopes.length) {
+      setSelectedScope(sortedScopes[0].id);
+    } else if (!sortedScopes.length && selectedScope) {
+      setSelectedScope('');
     }
-  }, [billingScopes, selectedScope]);
+  }, [billingScopes, sortedScopes, selectedScope]);
 
   return (
     <form
@@ -97,17 +104,22 @@ export function EaCCreateSubscriptionForm(
           <Select
             label="Billing Scope"
             value={selectedScope}
-            disabled={loading || !!error}
+            disabled={loading || !!error || sortedScopes.length === 0}
             onChange={(e) => setSelectedScope((e.target as HTMLSelectElement).value)}
           >
             <option value="" disabled>
               {loading ? 'Loading scopes...' : 'Choose a billing scope'}
             </option>
-            {Object.entries(billingScopes).map(([id, label]) => (
-              <option value={id}>{label}</option>
+            {sortedScopes.map((scope) => (
+              <option value={scope.id}>{scope.label}</option>
             ))}
           </Select>
           {error && <p class="mt-1 text-xs text-rose-300">{error}</p>}
+          {!loading && !error && sortedScopes.length === 0 && (
+            <p class="mt-1 text-xs text-slate-300">
+              No billing scopes found. Verify your Azure account has access to billing profiles or invoice sections.
+            </p>
+          )}
         </div>
       </div>
 
