@@ -1,4 +1,4 @@
-﻿import { JSX, WorkspaceManager, useEffect, useState } from '../../.deps.ts';
+import { JSX, WorkspaceManager, useEffect, useRef, useState, IS_BROWSER } from '../../.deps.ts';
 import {
   Action,
   ActionStyleTypes,
@@ -118,6 +118,51 @@ export function CloudConnectionsModal({
   const [checkError, setCheckError] = useState<string | undefined>(undefined);
   const [creatingManaged, setCreatingManaged] = useState(false);
   const [managedError, setManagedError] = useState<string | undefined>(undefined);
+  const authRefreshTimeout = useRef<number | undefined>(undefined);
+  const [authInFlight, setAuthInFlight] = useState(false);
+
+  useEffect(() => {
+    if (!IS_BROWSER) {
+      return;
+    }
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) {
+        return;
+      }
+
+      const data = event.data as Record<string, unknown> | null;
+
+      if (!data) {
+        return;
+      }
+
+      const messageType = data.type;
+
+      if (typeof messageType !== 'string' || messageType !== 'azure-auth-success') {
+        return;
+      }
+
+      if (authRefreshTimeout.current !== undefined) {
+        clearTimeout(authRefreshTimeout.current);
+        authRefreshTimeout.current = undefined;
+      }
+
+      setAuthInFlight(false);
+      refreshAzureStatus();
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+
+      if (authRefreshTimeout.current !== undefined) {
+        clearTimeout(authRefreshTimeout.current);
+        authRefreshTimeout.current = undefined;
+      }
+    };
+  }, [refreshAzureStatus]);
 
   const createManagedSubscription = async () => {
     setCreatingManaged(true);
@@ -404,8 +449,31 @@ export function CloudConnectionsModal({
                         action="/azure/oauth/signin"
                         data-eac-bypass-base
                         actionText="Sign in with Microsoft"
-                        onSubmitCapture={() => setTimeout(() => refreshAzureStatus(), 1500)}
+                        submitDisabled={authInFlight}
+                        onSubmitCapture={() => {
+                          setAuthInFlight(true);
+
+                          if (!IS_BROWSER) {
+                            refreshAzureStatus();
+                            return;
+                          }
+
+                          if (authRefreshTimeout.current !== undefined) {
+                            clearTimeout(authRefreshTimeout.current);
+                          }
+
+                          authRefreshTimeout.current = window.setTimeout(() => {
+                            authRefreshTimeout.current = undefined;
+                            setAuthInFlight(false);
+                            refreshAzureStatus();
+                          }, 5000);
+                        }}
                       />
+                      {authInFlight && (
+                        <p class="text-xs text-slate-400">
+                          Complete the Microsoft sign-in popup to continue.
+                        </p>
+                      )}
                     </div>
                   )}
 
@@ -501,4 +569,3 @@ CloudConnectionsModal.Modal = (
 };
 
 export default CloudConnectionsModal;
-
