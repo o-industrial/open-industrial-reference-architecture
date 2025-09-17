@@ -46,6 +46,13 @@ const describeMinutes = (value: number): string => {
   return `${value} minutes`;
 };
 
+const heroAccent = 'from-sky-500/80 via-indigo-500/70 to-violet-500/80';
+const durationAccent = 'from-violet-500/70 via-sky-500/70 to-cyan-400/70';
+const tokenAccent = 'from-emerald-500/70 via-sky-500/70 to-cyan-400/70';
+const infoAccent = 'from-amber-400/70 via-orange-500/70 to-pink-500/70';
+
+
+
 export function APIKeysModal({ workspaceMgr, onClose }: APIKeysModalProps): JSX.Element {
   void workspaceMgr;
 
@@ -118,7 +125,8 @@ export function APIKeysModal({ workspaceMgr, onClose }: APIKeysModalProps): JSX.
   return (
     <Modal title="API Keys" onClose={onClose}>
       <div class="space-y-6 text-sm text-slate-200">
-        <section class="rounded-3xl border border-slate-700/60 bg-gradient-to-br from-slate-900/80 via-neutral-900/70 to-slate-950/80 p-6 shadow-xl">
+        <section class="relative overflow-hidden rounded-3xl border border-slate-700/60 bg-gradient-to-br from-slate-900/80 via-neutral-900/70 to-slate-950/80 p-6 shadow-xl">
+          <div class={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${heroAccent} opacity-80`} />
           <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div class="max-w-xl space-y-2">
               <p class="text-xs font-semibold uppercase tracking-wide text-sky-300/90">Access tokens</p>
@@ -132,7 +140,8 @@ export function APIKeysModal({ workspaceMgr, onClose }: APIKeysModalProps): JSX.
           </div>
         </section>
 
-        <section class="space-y-5 rounded-3xl border border-slate-700/60 bg-neutral-900/80 p-6 shadow-xl">
+        <section class="relative space-y-5 overflow-hidden rounded-3xl border border-slate-700/60 bg-neutral-900/80 p-6 shadow-xl">
+          <div class={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${durationAccent} opacity-80`} />
           <div class="space-y-1">
             <h3 class="text-lg font-semibold text-white">Choose an expiration</h3>
             <p class="text-sm text-slate-400">Pick a preset or enter a custom duration. Tokens expire automatically; you can regenerate at any time.</p>
@@ -217,7 +226,8 @@ export function APIKeysModal({ workspaceMgr, onClose }: APIKeysModalProps): JSX.
         </section>
 
         {token ? (
-          <section class="space-y-4 rounded-3xl border border-slate-700/60 bg-neutral-900/80 p-6 shadow-xl">
+          <section class="relative space-y-4 overflow-hidden rounded-3xl border border-slate-700/60 bg-neutral-900/80 p-6 shadow-xl">
+            <div class={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${tokenAccent} opacity-80`} />
             <div class="flex flex-wrap items-start justify-between gap-3">
               <div class="space-y-1">
                 <h3 class="text-lg font-semibold text-white">Workspace JWT</h3>
@@ -268,12 +278,14 @@ export function APIKeysModal({ workspaceMgr, onClose }: APIKeysModalProps): JSX.
             )}
           </section>
         ) : (
-          <section class="rounded-3xl border border-dashed border-slate-700/60 bg-neutral-900/40 p-6 text-center text-sm text-slate-400">
+          <section class="relative overflow-hidden rounded-3xl border border-dashed border-slate-700/60 bg-neutral-900/40 p-6 text-center text-sm text-slate-400">
+            <div class={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${tokenAccent} opacity-60`} />
             <p>Generate a JWT to preview it here. Tokens are shown once so you can capture them in a secure vault.</p>
           </section>
         )}
 
-        <section class="space-y-4 rounded-3xl border border-slate-700/60 bg-neutral-900/70 p-6 shadow-inner">
+        <section class="relative space-y-4 overflow-hidden rounded-3xl border border-slate-700/60 bg-neutral-900/70 p-6 shadow-inner">
+          <div class={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${infoAccent} opacity-80`} />
           <h3 class="text-lg font-semibold text-white">Usage tips</h3>
           <div class="grid gap-4 md:grid-cols-2">
             <div class="rounded-2xl border border-neutral-800/60 bg-neutral-950/40 p-4">
@@ -318,3 +330,16 @@ APIKeysModal.Modal = (
 };
 
 export default APIKeysModal;
+
+
+
+
+
+
+
+
+
+
+
+
+
