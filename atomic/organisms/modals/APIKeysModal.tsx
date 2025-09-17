@@ -1,5 +1,12 @@
-import { IntentTypes, JSX, WorkspaceManager, useEffect, useState } from '../../.deps.ts';
-import { Action, ActionStyleTypes, LoadingIcon, Modal } from '../../.exports.ts';
+﻿import { IntentTypes, JSX, WorkspaceManager, useEffect, useState } from '../../.deps.ts';
+import {
+  Action,
+  ActionStyleTypes,
+  Badge,
+  Input,
+  LoadingIcon,
+  Modal,
+} from '../../.exports.ts';
 
 export type APIKeysModalProps = {
   workspaceMgr: WorkspaceManager;
@@ -20,6 +27,24 @@ const durationPresets: DurationPreset[] = [
   { label: '7 days', value: 10080, hint: 'Temporary integration' },
   { label: '30 days', value: 43200, hint: 'Long-lived service' },
 ];
+
+const describeMinutes = (value: number): string => {
+  if (value < 60) {
+    return `${value} minute${value === 1 ? '' : 's'}`;
+  }
+
+  if (value % 1440 === 0) {
+    const days = value / 1440;
+    return `${days} day${days === 1 ? '' : 's'}`;
+  }
+
+  if (value % 60 === 0) {
+    const hours = value / 60;
+    return `${hours} hour${hours === 1 ? '' : 's'}`;
+  }
+
+  return `${value} minutes`;
+};
 
 export function APIKeysModal({ workspaceMgr, onClose }: APIKeysModalProps): JSX.Element {
   void workspaceMgr;
@@ -113,63 +138,62 @@ export function APIKeysModal({ workspaceMgr, onClose }: APIKeysModalProps): JSX.
             <p class="text-sm text-slate-400">Pick a preset or enter a custom duration. Tokens expire automatically; you can regenerate at any time.</p>
           </div>
 
-          <div class="grid gap-4 md:grid-cols-2">
-            <div class="space-y-3">
-              <div class="flex flex-wrap gap-2">
-                {durationPresets.map((preset) => {
-                  const selected = preset.value === minutes;
-                  return (
-                    <button
-                      key={preset.value}
-                      type="button"
-                      onClick={() => applyMinutes(preset.value)}
-                      class={`group inline-flex flex-col rounded-xl border px-3 py-2 text-left transition ${
-                        selected
-                          ? 'border-sky-500/70 bg-sky-500/15 text-white shadow-lg shadow-sky-500/20'
-                          : 'border-slate-700/70 bg-neutral-950/40 text-slate-300 hover:border-sky-500/40 hover:text-sky-100'
-                      }`}
-                    >
-                      <span class="text-sm font-semibold">{preset.label}</span>
-                      <span class="text-xs text-slate-400 transition group-hover:text-slate-300">{preset.hint}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+          <div class="grid gap-3 md:grid-cols-2">
+            {durationPresets.map((preset) => {
+              const selected = preset.value === minutes;
+              return (
+                <Action
+                  key={preset.value}
+                  type="button"
+                  styleType={
+                    ActionStyleTypes.Outline | ActionStyleTypes.Rounded | ActionStyleTypes.Thin
+                  }
+                  intentType={selected ? IntentTypes.Primary : IntentTypes.Secondary}
+                  onClick={() => applyMinutes(preset.value)}
+                  class={`group min-h-[3.5rem] items-stretch justify-start text-left transition ${
+                    selected
+                      ? 'border-neon-violet-500 bg-neon-violet-500/10 shadow-lg shadow-neon-violet-500/20'
+                      : 'border-slate-700/70 bg-neutral-950/40 hover:border-neon-violet-400/60 hover:bg-neutral-900/60'
+                  }`}
+                >
+                  <div class="flex flex-col items-start gap-0.5">
+                    <span class="text-sm font-semibold text-white">{preset.label}</span>
+                    <span class="text-xs text-slate-400 transition group-hover:text-slate-300">
+                      {preset.hint}
+                    </span>
+                  </div>
+                </Action>
+              );
+            })}
+          </div>
 
-            <div class="space-y-2 rounded-2xl border border-slate-700/60 bg-neutral-950/40 p-4">
-              <label
-                class="text-xs font-semibold uppercase tracking-wide text-slate-400"
-                for="api-keys-custom-minutes"
-              >
-                Custom duration
-              </label>
-              <div class="flex flex-wrap items-center gap-2">
-                <input
-                  id="api-keys-custom-minutes"
-                  type="number"
-                  min={1}
-                  step={1}
-                  class="w-24 rounded-lg border border-slate-700/70 bg-neutral-900 px-3 py-2 text-sm text-white focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
-                  value={minutes}
-                  onChange={(event) => {
-                    const value = Number((event.currentTarget as HTMLInputElement).value);
-                    if (Number.isNaN(value)) return;
+          <div class="space-y-3 rounded-2xl border border-slate-700/60 bg-neutral-950/40 p-4">
+            <Input
+              id="api-keys-custom-minutes"
+              label="Custom duration (minutes)"
+              type="number"
+              min={1}
+              step={1}
+              value={minutes}
+              class="w-32 bg-neutral-900"
+              onInput={(event: JSX.TargetedEvent<HTMLInputElement, Event>) => {
+                const value = Number((event.currentTarget as HTMLInputElement).value);
+                if (Number.isNaN(value)) return;
 
-                    applyMinutes(value);
-                  }}
-                />
-                <span class="text-xs uppercase tracking-wide text-slate-500">Minutes</span>
-                {activePreset ? (
-                  <span class="rounded-full border border-sky-500/40 bg-sky-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-sky-200">
-                    {activePreset.label}
-                  </span>
-                ) : (
-                  <span class="rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-200">
-                    Custom
-                  </span>
-                )}
-              </div>
+                applyMinutes(value);
+              }}
+            />
+            <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+              {activePreset ? (
+                <Badge intentType={IntentTypes.Info} class="uppercase tracking-wide">
+                  {activePreset.label}
+                </Badge>
+              ) : (
+                <Badge intentType={IntentTypes.Warning} class="uppercase tracking-wide">
+                  Custom duration
+                </Badge>
+              )}
+              <span>Token expires after {describeMinutes(minutes)}.</span>
             </div>
           </div>
 
@@ -200,19 +224,19 @@ export function APIKeysModal({ workspaceMgr, onClose }: APIKeysModalProps): JSX.
                 <p class="text-sm text-slate-400">Use this value as a Bearer token in the Authorization header.</p>
               </div>
               {generatedAt && (
-                <span class="rounded-full border border-emerald-500/40 bg-emerald-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-200">
+                <Badge intentType={IntentTypes.Secondary} class="uppercase tracking-wide">
                   Generated {new Date(generatedAt).toLocaleString()}
-                </span>
+                </Badge>
               )}
             </div>
 
-            <div class="rounded-2xl border border-neutral-800/70 bg-neutral-950/80 p-4">
-              <textarea
-                class="h-36 w-full resize-none rounded-xl border border-neutral-800 bg-neutral-950/70 p-3 font-mono text-xs text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
-                readOnly
-                value={token}
-              />
-            </div>
+            <Input
+              multiline
+              readOnly
+              rows={7}
+              value={token}
+              class="max-h-40 resize-none whitespace-pre-wrap break-all bg-neutral-950/80 font-mono text-xs text-slate-100"
+            />
 
             <div class="flex flex-wrap items-center justify-between gap-3">
               <div class="flex flex-wrap gap-2">
