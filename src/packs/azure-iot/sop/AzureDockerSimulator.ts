@@ -19,6 +19,7 @@ import { isEaCAzureIoTHubDataConnectionDetails } from '../../../eac/EaCAzureIoTH
 import { AzureResolveIoTHubConnectionStringStep } from '../steps/resolve-device-connection-string/AzureResolveIoTHubConnectionStringStep.ts';
 import { z } from '../.deps.ts';
 import { AzureContainerAppStopStep } from '../steps/container-app-stop/AzureContainerAppStopStep.ts';
+import { AzureContainerAppStartStep } from '../steps/container-app-start/AzureContainerAppStartStep.ts';
 
 export async function safeAppName(
   workspace: string,
@@ -65,6 +66,10 @@ export function AzureDockerSimulator(
           SubscriptionID: subId,
         }),
         DeployJob: AzureContainerAppJobDeployStep.Build({
+          CredentialStrategy: credStrat,
+          SubscriptionID: subId,
+        }),
+        StartApp: AzureContainerAppStartStep.Build({
           CredentialStrategy: credStrat,
           SubscriptionID: subId,
         }),
@@ -184,7 +189,15 @@ export function AzureDockerSimulator(
           }
         }
 
-        return await Promise.all(jobs.map((job) => Steps.DeployJob(job)));
+        const outputs = await Promise.all(jobs.map((job) => Steps.DeployJob(job)));
+
+        // Ensure the app is started when enabled
+        await Steps.StartApp({
+          ResourceGroupName: ensured.ResourceGroupName,
+          AppName: ApplicationName,
+        });
+
+        return outputs;
       },
     ) as unknown as SimulatorModuleBuilder<
       EaCSimulatorAsCode<EaCAzureDockerSimulatorDetails>,
