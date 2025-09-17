@@ -73,7 +73,11 @@ export function WarmQueryAPIsModal({
     [warmQueries, selectedLookup],
   );
 
-  const endpointPath = selected ? `/api/workspaces/explorer/warm-queries/${selected.lookup}` : '';
+  const endpointPath = useMemo(() => {
+    if (!selected) return '';
+    const raw = (`/api/workspaces/explorer/warm-queries/${(selected.apiPath || selected.lookup).trim()}`);
+    return raw.startsWith('/') ? raw : `/${raw}`;
+  }, [selected]);
   const origin = IS_BROWSER ? window.location.origin : HOST_PLACEHOLDER;
   const endpointUrl = selected ? `${origin}${endpointPath}` : '';
 

@@ -1,24 +1,12 @@
 import { Action } from '../../atoms/Action.tsx';
 import { Input } from '../../atoms/forms/Input.tsx';
 import { Select } from '../../atoms/forms/Select.tsx';
-import { JSX, classSet, useEffect, useMemo, useState } from '../../.deps.ts';
+import { JSX, classSet, useEffect, useState } from '../../.deps.ts';
 import { ToggleCheckbox } from '../../atoms/forms/ToggleCheckbox.tsx';
 
 export type EaCCreateSubscriptionFormProps = JSX.HTMLAttributes<HTMLFormElement> & {
   entLookup?: string;
   cloudLookup?: string;
-};
-
-type BillingProfile = {
-  name?: string;
-  displayName?: string;
-  invoiceSections?: { name?: string; displayName?: string }[];
-};
-
-type BillingAccount = {
-  name?: string;
-  displayName?: string;
-  billingProfiles?: BillingProfile[];
 };
 
 export function EaCCreateSubscriptionForm(
@@ -28,38 +16,24 @@ export function EaCCreateSubscriptionForm(
 
   const [name, setName] = useState('');
   const [isDev, setIsDev] = useState(true);
-  const [accounts, setAccounts] = useState<BillingAccount[]>([]);
+  const [billingScopes, setBillingScopes] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
-  const [accountName, setAccountName] = useState('');
-  const [profileName, setProfileName] = useState('');
-  const [sectionName, setSectionName] = useState('');
-
-  const selectedAccount = useMemo(
-    () => accounts.find((a) => a.name === accountName),
-    [accounts, accountName],
-  );
-  const selectedProfile = useMemo(
-    () => selectedAccount?.billingProfiles?.find((p) => p.name === profileName),
-    [selectedAccount, profileName],
-  );
-
-  const billingScope = useMemo(() => {
-    if (!accountName || !profileName || !sectionName) return '';
-    return `/providers/Microsoft.Billing/billingAccounts/${accountName}/billingProfiles/${profileName}/invoiceSections/${sectionName}`;
-  }, [accountName, profileName, sectionName]);
+  const [selectedScope, setSelectedScope] = useState('');
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         setLoading(true);
-        const res = await fetch('/workspace/api/azure/billing/accounts');
+        const res = await fetch('/workspace/api/azure/billing/scopes');
         const data = await res.json();
-        if (!cancelled) setAccounts(Array.isArray(data) ? data : []);
+        if (!cancelled) {
+          setBillingScopes((typeof data === 'object' && data !== null) ? data : {});
+        }
       } catch (err) {
-        if (!cancelled) setError('Failed to load billing accounts');
+        if (!cancelled) setError('Failed to load billing scopes');
         console.error(err);
       } finally {
         if (!cancelled) setLoading(false);
@@ -69,6 +43,15 @@ export function EaCCreateSubscriptionForm(
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!selectedScope) {
+      const firstScope = Object.keys(billingScopes)[0];
+      if (firstScope) {
+        setSelectedScope(firstScope);
+      }
+    }
+  }, [billingScopes, selectedScope]);
 
   return (
     <form
@@ -82,7 +65,7 @@ export function EaCCreateSubscriptionForm(
     >
       <input id="entLookup" name="entLookup" type="hidden" value={props.entLookup} />
       <input id="cloudLookup" name="cloudLookup" type="hidden" value={props.cloudLookup} />
-      <input id="billing-scope" name="billing-scope" type="hidden" value={billingScope} />
+      <input id="billing-scope" name="billing-scope" type="hidden" value={selectedScope} />
       <input id="is-dev" name="is-dev" type="hidden" value={isDev ? 'true' : 'false'} />
 
       <div class="grid grid-cols-1 gap-4">
@@ -112,68 +95,27 @@ export function EaCCreateSubscriptionForm(
 
         <div>
           <Select
-            label="Billing Account"
-            value={accountName}
+            label="Billing Scope"
+            value={selectedScope}
             disabled={loading || !!error}
-            onChange={(e) => {
-              const v = (e.target as HTMLSelectElement).value;
-              setAccountName(v);
-              setProfileName('');
-              setSectionName('');
-            }}
+            onChange={(e) => setSelectedScope((e.target as HTMLSelectElement).value)}
           >
             <option value="" disabled>
-              {loading ? 'Loading accounts…' : 'Choose a billing account'}
+              {loading ? 'Loading scopes...' : 'Choose a billing scope'}
             </option>
-            {accounts.map((a) => (
-              <option value={a.name || ''}>{a.displayName || a.name}</option>
+            {Object.entries(billingScopes).map(([id, label]) => (
+              <option value={id}>{label}</option>
             ))}
           </Select>
-        </div>
-
-        <div>
-          <Select
-            label="Billing Profile"
-            value={profileName}
-            disabled={!selectedAccount}
-            onChange={(e) => {
-              const v = (e.target as HTMLSelectElement).value;
-              setProfileName(v);
-              setSectionName('');
-            }}
-          >
-            <option value="" disabled>
-              {selectedAccount ? 'Choose a profile' : 'Select an account first'}
-            </option>
-            {selectedAccount?.billingProfiles?.map((p) => (
-              <option value={p.name || ''}>{p.displayName || p.name}</option>
-            ))}
-          </Select>
-        </div>
-
-        <div>
-          <Select
-            label="Invoice Section"
-            value={sectionName}
-            disabled={!selectedProfile}
-            onChange={(e) => setSectionName((e.target as HTMLSelectElement).value)}
-          >
-            <option value="" disabled>
-              {selectedProfile ? 'Choose an invoice section' : 'Select a profile first'}
-            </option>
-            {selectedProfile?.invoiceSections?.map((s) => (
-              <option value={s.name || ''}>{s.displayName || s.name}</option>
-            ))}
-          </Select>
+          {error && <p class="mt-1 text-xs text-rose-300">{error}</p>}
         </div>
       </div>
 
       <div class="flex justify-start pt-2">
-        <Action type="submit" disabled={!billingScope || !name}>Create Subscription</Action>
+        <Action type="submit" disabled={!selectedScope || !name}>Create Subscription</Action>
       </div>
     </form>
   );
 }
 
 export default EaCCreateSubscriptionForm;
-
