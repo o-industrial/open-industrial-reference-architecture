@@ -127,7 +127,7 @@ export const AzureContainerAppStartStep: TStepBuilder = Step(
         );
       }
     } catch (err) {
-      throw new Error(`Failed to start container app '${AppName}': ${err?.message ?? err}`);
+      throw new Error(`Failed to start container app '${AppName}': ${err}`);
     }
 
     return { AppName, Status: 'Started' };
