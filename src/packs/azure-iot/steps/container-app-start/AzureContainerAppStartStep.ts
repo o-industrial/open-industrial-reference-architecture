@@ -5,10 +5,7 @@ import { StepModuleBuilder } from '../../../../fluent/steps/StepModuleBuilder.ts
 import { AzureResolveCredentialStep } from '../resolve-credential/AzureResolveCredentialStep.ts';
 import { AzureResolveCredentialInputSchema } from '../resolve-credential/AzureResolveCredentialInput.ts';
 
-import {
-  ContainerApp,
-  ContainerAppsAPIClient,
-} from 'npm:@azure/arm-appcontainers@2.2.0';
+import { ContainerApp, ContainerAppsAPIClient } from 'npm:@azure/arm-appcontainers@2.2.0';
 
 // ---------- Input / Output ----------
 
@@ -116,7 +113,10 @@ export const AzureContainerAppStartStep: TStepBuilder = Step(
           configuration: current.configuration,
           template: {
             ...(current.template ?? ({} as any)),
-            scale: { minReplicas: 1, maxReplicas: Math.max(1, (current.template as any)?.scale?.maxReplicas ?? 1) } as any,
+            scale: {
+              minReplicas: 1,
+              maxReplicas: Math.max(1, (current.template as any)?.scale?.maxReplicas ?? 1),
+            } as any,
           } as any,
         };
 
@@ -132,4 +132,3 @@ export const AzureContainerAppStartStep: TStepBuilder = Step(
 
     return { AppName, Status: 'Started' };
   }) as unknown as TStepBuilder;
-

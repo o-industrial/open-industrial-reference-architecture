@@ -254,6 +254,9 @@ async function createImpulseRuntime({
             if (!validation.valid) {
               logger.warn('[WS] ❌ Impulse failed EaC validation');
               logger.warn(validation);
+              // Trigger an EaC refresh so newly added resources (e.g.,
+              // DataConnections/Surfaces) show up without restarting.
+              scheduleEaCRefresh();
               return;
             }
 
@@ -263,6 +266,7 @@ async function createImpulseRuntime({
 
             cb(impulse);
 
+            // Keep EaC reasonably fresh even on valid traffic.
             scheduleEaCRefresh();
           } catch (err) {
             logger.warn('[ImpulseStream] ⚠️ Failed to parse impulse');
