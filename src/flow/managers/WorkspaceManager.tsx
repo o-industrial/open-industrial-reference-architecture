@@ -1563,13 +1563,13 @@ export class WorkspaceManager {
       setCurrent(getCurrentWorkspace());
     };
 
-    const save = () => {
-      this.Commit();
+    const save = async () => {
+      await this.Commit();
 
       console.log('💾 Saved workspace details');
 
-      return Promise.resolve();
-      // this.ReloadPacks();
+      // Refresh list so Manage Workspaces reflects latest name/desc
+      listWorkspaces();
     };
 
     const archive = () => {
