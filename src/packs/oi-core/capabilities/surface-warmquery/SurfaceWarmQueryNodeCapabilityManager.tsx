@@ -40,14 +40,19 @@ export class SurfaceWarmQueryNodeCapabilityManager
 
     if (!wqAsCode || !surfaceSettings) return null;
 
-    const { Metadata, ...surfaceOverrides } = surfaceSettings;
+    const { Metadata: surfaceMetadata, ...surfaceOverrides } = surfaceSettings;
+
+    const mergedMetadata = {
+      ...(wqAsCode.Metadata ?? {}),
+      ...(surfaceMetadata ?? {}),
+    };
 
     return {
-      Metadata,
       Details: {
         ...wqAsCode.Details,
         ...surfaceOverrides,
       } as SurfaceWarmQueryNodeDetails,
+      ...(Object.keys(mergedMetadata).length > 0 ? { Metadata: mergedMetadata } : {}),
     };
   }
 
