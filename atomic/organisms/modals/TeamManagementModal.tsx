@@ -1,243 +1,152 @@
-import { JSX, WorkspaceManager, IntentTypes, useState, useEffect } from '../../.deps.ts';
-import { Modal, Input, Select, Action, ActionStyleTypes } from '../../.exports.ts';
+﻿import { JSX, WorkspaceManager, IntentTypes, useEffect, useState } from '../../.deps.ts';
+import { Modal, Input, Action, ActionStyleTypes } from '../../.exports.ts';
 
 export type TeamManagementModalProps = {
   workspaceMgr: WorkspaceManager;
   onClose: () => void;
 };
 
-export function TeamManagementModal({
-  workspaceMgr,
-  onClose,
-}: TeamManagementModalProps): JSX.Element {
-  const {
-    currentWorkspace,
-    teamMembers,
-    inviteMember,
-    removeMember,
-    updateMemberRole,
-  } = workspaceMgr.UseWorkspaceSettings();
+const friendlyDate = (joined?: string): string => {
+  if (!joined) return 'Unknown';
+  try {
+    return new Date(joined).toLocaleDateString();
+  } catch {
+    return joined;
+  }
+};
 
-  const [selected, setSelected] = useState<string[]>([]);
-  const [bulkRole, setBulkRole] = useState('');
-  const [name, setName] = useState('');
+const resolveJoined = (member: unknown): string | undefined => {
+  if (member && typeof member === 'object' && 'Joined' in (member as Record<string, unknown>)) {
+    const value = (member as { Joined?: string }).Joined;
+    if (typeof value === 'string' && value.length > 0) return value;
+  }
+  return undefined;
+};
+
+export function TeamManagementModal({ workspaceMgr, onClose }: TeamManagementModalProps): JSX.Element {
+  const { currentWorkspace, teamMembers, inviteMember, removeMember } = workspaceMgr.UseWorkspaceSettings();
+
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState<'Owner' | 'Editor' | 'Viewer'>('Viewer');
-  // removed: grant-deploy UI; no local state needed
-
-  // Invite/Toast state
   const [inviting, setInviting] = useState(false);
   const [toast, setToast] = useState<{ message: string; kind: 'success' | 'error' | 'warning' } | null>(null);
-
-  // Local mirror for instant UI updates
   const [localMembers, setLocalMembers] = useState(teamMembers);
+
   useEffect(() => setLocalMembers(teamMembers), [teamMembers]);
 
   const showToast = (message: string, kind: 'success' | 'error' | 'warning' = 'success') => {
     setToast({ message, kind });
-    // auto-hide after 4s
     setTimeout(() => setToast(null), 4000);
   };
 
-  const toggleSelected = (username: string) => {
-    setSelected((prev) =>
-      prev.includes(username) ? prev.filter((e) => e !== username) : [...prev, username]
-    );
-  };
-
-  const handleBulkChange = (nextRole: string) => {
-    setBulkRole('');
-    if (!nextRole) return;
-    selected.forEach((username) =>
-      updateMemberRole(username, nextRole as 'Owner' | 'Editor' | 'Viewer')
-    );
-    setSelected([]);
-  };
-
-  const friendlyDate = (joined?: string) => {
-    if (!joined) return 'N/A';
-    try {
-      return new Date(joined).toLocaleDateString();
-    } catch {
-      return joined;
-    }
-  };
-
-  // Basic email validation
-  const isValidEmail = (value: string) => {
-    const v = value.trim();
-    // Simple but effective pattern for typical emails
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-  };
+  const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 
   return (
     <>
-      <Modal
-        title={`Teams: ${currentWorkspace.Details.Name} Members`}
-        onClose={onClose}
-      >
-        <div class="relative">
-          <div class="space-y-6">
-        <div class="flex items-center justify-between">
-          <div class="text-sm text-neutral-300 font-medium">
-            Current Members
-          </div>
-          {/* <Select
-            value={bulkRole}
-            onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>
-              handleBulkChange((e.target as HTMLSelectElement).value)
-            }
-          >
-            <option value="">Bulk change role...</option>
-            <option value="Owner">Owner</option>
-            <option value="Editor">Editor</option>
-            <option value="Viewer">Viewer</option>
-          </Select> */}
-        </div>
+      <Modal title="Team Members" onClose={onClose}>
+        <div class="space-y-6 text-sm text-slate-200">
+          <section class="relative overflow-hidden rounded-3xl border border-slate-700/60 bg-gradient-to-br from-slate-950/80 via-slate-900/70 to-slate-950/80 p-6 shadow-xl">
+            <div class={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-neon-violet-500/80 via-sky-500/70 to-cyan-400/80`} />
+            <div class="space-y-1">
+              <p class="text-xs font-semibold uppercase tracking-wide text-sky-300/90">Workspace</p>
+              <h3 class="text-2xl font-semibold text-white">{currentWorkspace.Details.Name}</h3>
+              <p class="text-sm text-slate-300">Invite collaborators and keep membership aligned with your deployment cadence.</p>
+            </div>
+          </section>
 
-          {/* Column label */}
-          <div class="text-xs text-neutral-400 px-1">Email</div>
+          <section class="relative overflow-hidden rounded-3xl border border-slate-700/60 bg-neutral-900/80 p-6 shadow-xl">
+            <div class={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-fuchsia-500/70 via-violet-500/70 to-sky-500/70 opacity-80`} />
+            <div class="flex items-center justify-between">
+              <h4 class="text-sm font-semibold text-white">Current members</h4>
+              <span class="text-xs text-slate-400">{localMembers.length} total</span>
+            </div>
 
-          <div class="space-y-2 max-h-64 overflow-y-auto">
-            {localMembers.map((member) => (
-              <div
-                class="grid grid-cols-[auto_1fr_1fr_auto_auto_auto] items-center gap-2 border p-2 rounded"
-                key={member.Username}
-              >
-                <input
-                  type="checkbox"
-                  checked={selected.includes(member.Username)}
-                  onChange={() => toggleSelected(member.Username)}
-                />
-                {/* <div class="text-sm">{member.Name ?? 'N/A'}</div> */}
-                <div class="text-sm col-span-3">{member.Username}</div>
-                <div class="col-span-2 flex items-center justify-end gap-2">
-              {/* <Select
-                  value={member.Role}
-                  onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>
-                    updateMemberRole(
-                      member.Email,
-                      (e.target as HTMLSelectElement).value as
-                        | 'Owner'
-                        | 'Editor'
-                        | 'Viewer'
-                    )
-                  }
+            <div class="mt-3 space-y-2 max-h-64 overflow-y-auto">
+              {localMembers.map((member) => (
+                <div
+                  class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-700/60 bg-neutral-950/60 px-3 py-2"
+                  key={member.Username}
                 >
-                  <option>Owner</option>
-                  <option>Editor</option>
-                  <option>Viewer</option>
-                </Select> */}
-                {/* <div class="text-sm">{friendlyDate(member.Joined)}</div> */}
-                <Action
-                  onClick={async () => {
-                    const username = member.Username;
-                    const confirmed = confirm(`Are you sure you want to remove ${username} from this workspace?`);
-                    if (!confirmed) return;
+                  <div class="text-sm text-slate-200">
+                    <p>{member.Username}</p>
+                    <p class="text-xs text-slate-500">Joined {friendlyDate(resolveJoined(member))}</p>
+                  </div>
+                  <Action
+                    intentType={IntentTypes.Error}
+                    styleType={ActionStyleTypes.Outline}
+                    onClick={async () => {
+                      const username = member.Username;
+                      if (!confirm(`Remove ${username} from this workspace?`)) return;
+                      try {
+                        await removeMember(username);
+                        setLocalMembers((prev) => prev.filter((m) => m.Username !== username));
+                        showToast(`${username} has been removed`, 'success');
+                      } catch (err) {
+                        console.error('Remove user failed', err);
+                        showToast(`Failed to remove ${username}`, 'error');
+                      }
+                    }}
+                  >
+                    Remove
+                  </Action>
+                </div>
+              ))}
+            </div>
 
+            {localMembers.length === 0 && (
+              <p class="mt-4 rounded-xl border border-dashed border-slate-700/60 bg-neutral-950/50 p-4 text-center text-xs text-slate-400">
+                No members yet. Invite your teammates below.
+              </p>
+            )}
+          </section>
+
+          <section class="relative overflow-hidden rounded-3xl border border-slate-700/60 bg-neutral-900/80 p-6 shadow-xl">
+            <div class={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500/70 via-sky-500/70 to-cyan-400/70 opacity-80`} />
+            <div class="space-y-3">
+              <h4 class="text-sm font-semibold text-white">Invite a new member</h4>
+              <div class="flex flex-wrap items-center gap-3">
+                <Input
+                  placeholder="Email"
+                  value={email}
+                  onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) => setEmail((e.target as HTMLInputElement).value)}
+                />
+                <Action
+                  intentType={IntentTypes.Primary}
+                  disabled={inviting || !email.trim()}
+                  onClick={async () => {
+                    const target = email.trim().toLowerCase();
+                    if (!target) return;
+                    if (!isValidEmail(target)) {
+                      showToast(`"${email}" is not a valid email`, 'warning');
+                      return;
+                    }
+                    const exists = localMembers.some((m) => (m.Username ?? '').toLowerCase() === target);
+                    if (exists) {
+                      showToast(`${target} is already on this workspace`, 'warning');
+                      return;
+                    }
                     try {
-                      await removeMember(username);
-                      setLocalMembers((p) => p.filter((m) => m.Username !== username));
-                      showToast(`${username} has been removed`, 'success');
+                      setInviting(true);
+                      await inviteMember(email, 'Viewer', '');
+                      setLocalMembers((prev) => [...prev, { Username: target } as any]);
+                      setEmail('');
+                      showToast(`Invitation sent to ${target}`, 'success');
                     } catch (err) {
-                      console.error('Remove user failed', err);
-                      showToast(`Failed to remove ${username}`, 'error');
+                      console.error('Invite failed', err);
+                      showToast(`Failed to invite ${target}`, 'error');
+                    } finally {
+                      setInviting(false);
                     }
                   }}
-                  intentType={IntentTypes.Error}
-                  styleType={ActionStyleTypes.Icon}
                 >
-                  ✖
+                  {inviting ? 'Inviting...' : 'Invite'}
                 </Action>
-                </div>
               </div>
-            ))}
-          </div>
-
-          <div class="space-y-2 pt-4">
-            <div class="text-sm text-neutral-300 font-medium">
-              Invite New Team Member
+              <p class="text-xs text-slate-400">Invited members receive email instructions. Access defaults to Viewer; adjust permissions once they join.</p>
             </div>
-            <div class="flex items-center gap-2">
-              {/* <Input
-                placeholder="Name (optional)"
-                value={name}
-                onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
-                  setName((e.target as HTMLInputElement).value)
-                }
-              /> */}
-              <Input
-                placeholder="Email"
-                value={email}
-                onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
-                  setEmail((e.target as HTMLInputElement).value)
-                }
-              />
-              {/* <Select
-                value={role}
-                onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>
-                  setRole(
-                    (e.target as HTMLSelectElement).value as
-                      | 'Owner'
-                      | 'Editor'
-                      | 'Viewer'
-                  )
-                }
-              >
-                <option value="Viewer">Viewer</option>
-                <option value="Editor">Editor</option>
-                <option value="Owner">Owner</option>
-              </Select> */}
-              <Action
-                disabled={inviting || !email}
-                onClick={async () => {
-                  const target = email.trim().toLowerCase();
-                  if (!target) return;
+          </section>
 
-                  // Validate email format
-                  if (!isValidEmail(target)) {
-                    showToast(`"${email}" is not a valid email`, 'warning');
-                    return;
-                  }
-
-                  // Duplicate check against local view
-                  const alreadyMember = localMembers.some(
-                    (m) => (m.Username ?? '').toLowerCase() === target
-                  );
-                  if (alreadyMember) {
-                    showToast(`${email} is already a team member`, 'warning');
-                    return;
-                  }
-
-                  try {
-                    setInviting(true);
-                    await inviteMember(email, role, name);
-                    // Optimistically add to local list for immediate feedback
-                    setLocalMembers((prev) => [
-                      ...prev,
-                      // Minimal shape used by this UI
-                      { Username: email } as any,
-                    ]);
-                    showToast(`Invitation sent to ${email}`, 'success');
-                    setName('');
-                    setEmail('');
-                    // setRole('Viewer');
-                  } catch (err) {
-                    console.error('Invite failed', err);
-                    showToast(`Failed to invite ${email}`, 'error');
-                  } finally {
-                    setInviting(false);
-                  }
-                }}
-              >
-                {inviting ? 'Inviting…' : 'Invite'}
-              </Action>
-            </div>
-          </div>
-          </div>
-          {/* In-modal toast (sticks to modal bottom) */}
           {toast && (
-            <div class="sticky bottom-0 z-10 pt-4 -mb-4">
+            <div class="sticky bottom-0 z-10 pt-2 -mb-2">
               <div class="flex justify-center pointer-events-none">
                 <div
                   role="status"
@@ -251,9 +160,7 @@ export function TeamManagementModal({
                   }`}
                 >
                   {toast.message}
-                  <button class="ml-2 underline" onClick={() => setToast(null)}>
-                    Dismiss
-                  </button>
+                  <button class="ml-3 underline" onClick={() => setToast(null)}>Dismiss</button>
                 </div>
               </div>
             </div>
@@ -278,10 +185,7 @@ TeamManagementModal.Modal = (
     Modal: (
       <>
         {shown && (
-          <TeamManagementModal
-            workspaceMgr={workspaceMgr}
-            onClose={() => setShow(false)}
-          />
+          <TeamManagementModal workspaceMgr={workspaceMgr} onClose={() => setShow(false)} />
         )}
       </>
     ),

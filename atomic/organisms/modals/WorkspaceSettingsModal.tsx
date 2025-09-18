@@ -1,17 +1,11 @@
-import {
+﻿import {
   JSX,
   WorkspaceManager,
   IntentTypes,
   useState,
   EaCEnterpriseDetails,
 } from '../../.deps.ts';
-import {
-  Modal,
-  TabbedPanel,
-  Input,
-  Action,
-  ActionStyleTypes,
-} from '../../.exports.ts';
+import { Modal, Input, Action, ActionStyleTypes } from '../../.exports.ts';
 import { TeamManagementModal } from './TeamManagementModal.tsx';
 import { ManageWorkspacesModal } from './ManageWorkspacesModal.tsx';
 
@@ -37,15 +31,55 @@ export function WorkspaceSettingsModal({
   return (
     <>
       <Modal title="Workspace Settings" onClose={onClose}>
-        <WorkspaceDetailsTab
-          details={details}
-          onUpdate={update}
-          onSave={() => save().then()}
-          onArchive={archive}
-          hasChanges={hasChanges}
-          onManageTeam={() => showTeamModal()}
-          onManageWorkspaces={() => showMngWkspcs()}
-        />
+        <div class="space-y-6 text-sm text-slate-200">
+          <section class="relative overflow-hidden rounded-3xl border border-slate-700/60 bg-gradient-to-br from-slate-950/80 via-slate-900/70 to-slate-950/80 p-6 shadow-xl">
+            <div
+              class={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-neon-violet-500/80 via-sky-500/70 to-cyan-400/80`}
+            />
+            <div class="flex flex-wrap items-center justify-between gap-4">
+              <div class="space-y-2">
+                <p class="text-xs font-semibold uppercase tracking-wide text-sky-300/90">
+                  Workspace overview
+                </p>
+                <h3 class="text-2xl font-semibold text-white">
+                  {details.Name || 'Untitled Workspace'}
+                </h3>
+                {details.Description && (
+                  <p class="max-w-2xl text-sm leading-relaxed text-slate-300">
+                    {details.Description}
+                  </p>
+                )}
+                <div class="flex flex-wrap gap-3 text-xs text-slate-400">
+                  {currentWorkspace.Lookup && (
+                    <span>ID: {currentWorkspace.Lookup}</span>
+                  )}
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <Action
+                  intentType={IntentTypes.Secondary}
+                  styleType={ActionStyleTypes.Outline}
+                  onClick={() => showTeamModal()}
+                >
+                  Manage Team Members
+                </Action>
+              </div>
+            </div>
+          </section>
+
+          <section class="relative overflow-hidden rounded-3xl border border-slate-700/60 bg-neutral-900/80 p-6 shadow-xl">
+            <div
+              class={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-fuchsia-500/70 via-violet-500/70 to-sky-500/70 opacity-80`}
+            />
+            <WorkspaceDetailsTab
+              details={details}
+              onUpdate={update}
+              onSave={() => save().then()}
+              onArchive={archive}
+              hasChanges={hasChanges}
+            />
+          </section>
+        </div>
       </Modal>
       {teamModal}
       {mngWkspcsModal}
@@ -86,16 +120,12 @@ function WorkspaceDetailsTab({
   onSave,
   onArchive,
   hasChanges,
-  onManageTeam,
-  onManageWorkspaces,
 }: {
   details: EaCEnterpriseDetails;
   onUpdate: (next: Partial<EaCEnterpriseDetails>) => void;
   onSave: () => void;
   onArchive: () => void;
   hasChanges: boolean;
-  onManageTeam: () => void;
-  onManageWorkspaces: () => void;
 }) {
   return (
     <div class="space-y-4">
@@ -115,30 +145,11 @@ function WorkspaceDetailsTab({
         }
       />
 
-      {/* <div class="text-xs text-neutral-400 space-y-1">
-        <div>Created At: {details.CreatedAt}</div>
-        <div>Workspace ID: {details.ID}</div>
-      </div> */}
-
       <div class="flex justify-between mt-4 gap-2">
         <Action onClick={onSave} disabled={!hasChanges}>
           Save Changes
         </Action>
         <div class="flex gap-2">
-          {/* <Action
-            intentType={IntentTypes.Primary}
-            styleType={ActionStyleTypes.Outline}
-            onClick={onManageTeam}
-          >
-            Manage Team Members
-          </Action>
-          <Action
-            intentType={IntentTypes.Primary}
-            styleType={ActionStyleTypes.Outline}
-            onClick={onManageWorkspaces}
-          >
-            Manage Workspaces
-          </Action> */}
           <Action
             onClick={() => {
               if (confirm('Are you sure you want to archive this workspace?')) {
@@ -148,7 +159,7 @@ function WorkspaceDetailsTab({
             intentType={IntentTypes.Error}
             styleType={ActionStyleTypes.Outline}
           >
-            🧊 Archive Workspace
+            Archive Workspace
           </Action>
         </div>
       </div>

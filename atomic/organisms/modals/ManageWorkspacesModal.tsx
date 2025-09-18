@@ -1,4 +1,4 @@
-import { JSX, WorkspaceManager, useState, IntentTypes } from '../../.deps.ts';
+﻿import { JSX, WorkspaceManager, useState, IntentTypes } from '../../.deps.ts';
 import { Modal, Input, Action, ActionStyleTypes } from '../../.exports.ts';
 
 export type ManageWorkspacesModalProps = {
@@ -6,33 +6,14 @@ export type ManageWorkspacesModalProps = {
   onClose: () => void;
 };
 
-export function ManageWorkspacesModal({
-  workspaceMgr,
-  onClose,
-}: ManageWorkspacesModalProps): JSX.Element {
-  const { currentWorkspace, workspaces, switchToWorkspace, createWorkspace } =
-    workspaceMgr.UseWorkspaceSettings();
+export function ManageWorkspacesModal({ workspaceMgr, onClose }: ManageWorkspacesModalProps): JSX.Element {
+  const { currentWorkspace, workspaces, switchToWorkspace, createWorkspace } = workspaceMgr.UseWorkspaceSettings();
 
-  const [selected, setSelected] = useState<string[]>([]);
   const [filter, setFilter] = useState('');
-  const [groupAction, setGroupAction] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [creating, setCreating] = useState(false);
-
-  const toggleSelect = (lookup: string) => {
-    setSelected((prev) =>
-      prev.includes(lookup)
-        ? prev.filter((id) => id !== lookup)
-        : [...prev, lookup]
-    );
-  };
-
-  const handleGroupAction = () => {
-    if (!groupAction || selected.length === 0) return;
-    alert(`${groupAction} [${selected.join(', ')}] not implemented`);
-  };
 
   const filtered = workspaces.filter((ws) =>
     ws.Details.Name?.toLowerCase().includes(filter.toLowerCase())
@@ -41,212 +22,183 @@ export function ManageWorkspacesModal({
   const active = filtered.filter((ws) => !ws.Archived);
   const archived = filtered.filter((ws) => ws.Archived);
 
-  const formatUpdated = (iso?: string) => {
-    if (!iso) return '';
-    const diff = Date.now() - Date.parse(iso);
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (Number.isNaN(days) || days < 0) return '';
-    if (days === 0) return 'today';
-    if (days === 1) return '1 day ago';
-    return `${days} days ago`;
-  };
-
-  const renderRows = (rows: typeof workspaces) =>
-    rows.map((ws) => (
-      <tr key={ws.Lookup} class="hover:bg-neutral-800">
-        <td class="p-2">
-          <input
-            type="checkbox"
-            checked={selected.includes(ws.Lookup)}
-            onChange={() => toggleSelect(ws.Lookup)}
-          />
-        </td>
-        <td
-          class="p-2 cursor-pointer"
-          onClick={() => switchToWorkspace(ws.Lookup)}
-        >
-          {ws.Details.Name ?? 'Untitled'}
-          {ws.Lookup === currentWorkspace.Lookup && ' (current)'}
-        </td>
-        <td class="p-2 text-sm text-neutral-400">
-          {ws.Details.Description ?? ''}
-        </td>
-        {/* <td class="p-2 text-center">{ws.Views ?? 0}</td> */}
-        {/* <td class="p-2 text-center">{ws.Forks ?? 0}</td> */}
-        {/* <td class="p-2 text-sm">
-          {formatUpdated(
-            (ws.UpdatedAt ??
-              ws.Details.UpdatedAt ??
-              ws.Details.CreatedAt) as string
-          )}
-        </td> */}
-        <td class="p-2">
-          <div class="flex gap-2">
-            {/* <Action
-              styleType={ActionStyleTypes.Link}
-              onClick={() => switchToWorkspace(ws.Lookup)}
-            >
-              Settings
-            </Action> */}
-            {/* <Action
-              styleType={ActionStyleTypes.Link}
-              onClick={() => alert('Fork not implemented')}
-            >
-              Fork
-            </Action> */}
-            <Action
-              styleType={ActionStyleTypes.Link}
-              onClick={() => alert('Archive not implemented')}
-            >
-              Archive
-            </Action>
-            <Action
-              styleType={ActionStyleTypes.Link}
-              intentType={IntentTypes.Error}
-              onClick={() => alert('Delete not implemented')}
-            >
-              Delete
-            </Action>
-            {ws.Lookup !== currentWorkspace.Lookup && (
+  const renderRows = (rows: typeof workspaces) => (
+    <tbody>
+      {rows.map((ws) => (
+        <tr key={ws.Lookup} class="border-t border-slate-800/60 hover:bg-neutral-900/80">
+          <td class="p-3 align-middle text-white">
+            <div class="flex items-center gap-3">
+              <div>
+                <span class="font-medium">{ws.Details.Name ?? 'Untitled'}</span>
+                <p class="text-xs text-slate-400">{ws.Details.Description || 'No description'}</p>
+              </div>
+              {ws.Lookup === currentWorkspace.Lookup && (
+                <span class="rounded-full border border-sky-400/60 bg-sky-500/15 px-2 py-0.5 text-[0.65rem] uppercase tracking-wide text-sky-200">
+                  Current
+                </span>
+              )}
+            </div>
+          </td>
+          <td class="p-3 align-middle">
+            <div class="flex flex-wrap gap-2 text-sm">
               <Action
                 styleType={ActionStyleTypes.Link}
-                onClick={() => switchToWorkspace(ws.Lookup)}
+                onClick={() => alert('Archive not implemented')}
               >
-                Set as Active Workspace
+                Archive
               </Action>
-            )}
-          </div>
-        </td>
-      </tr>
-    ));
+              <Action
+                styleType={ActionStyleTypes.Link}
+                intentType={IntentTypes.Error}
+                onClick={() => alert('Delete not implemented')}
+              >
+                Delete
+              </Action>
+              {ws.Lookup !== currentWorkspace.Lookup && (
+                <Action
+                  styleType={ActionStyleTypes.Link}
+                  onClick={() => switchToWorkspace(ws.Lookup)}
+                >
+                  Set Active
+                </Action>
+              )}
+            </div>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  );
 
   return (
     <>
-    <Modal title="Manage Workspaces" onClose={onClose}>
-      <div class="space-y-4">
-        <div class="flex justify-between items-center">
-          <Input
-            placeholder="Search workspaces..."
-            value={filter}
-            onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
-              setFilter((e.target as HTMLInputElement).value)
-            }
-          />
-          <div class="flex gap-2">
-            <select
-              class="bg-neutral-900 border border-neutral-700 rounded p-2"
-              value={groupAction}
-              onChange={(e: JSX.TargetedEvent<HTMLSelectElement, Event>) =>
-                setGroupAction((e.target as HTMLSelectElement).value)
-              }
-            >
-              <option value="">Group Action</option>
-              <option value="archive">Archive</option>
-              <option value="delete">Delete</option>
-            </select>
-            <Action
-              onClick={handleGroupAction}
-              disabled={!groupAction || selected.length === 0}
-            >
-              Apply
-            </Action>
-          </div>
-        </div>
-
-        <section>
-          <h3 class="font-semibold mb-2">Workspaces</h3>
-          <table class="w-full text-left text-sm">
-            <thead>
-              <tr>
-                <th class="p-2 w-8"></th>
-                <th class="p-2">Name</th>
-                <th class="p-2">Description</th>
-                {/* <th class="p-2 text-center">Views</th> */}
-                {/* <th class="p-2 text-center">Forks</th> */}
-                {/* <th class="p-2">Updated</th> */}
-                <th class="p-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>{renderRows(active)}</tbody>
-          </table>
-        </section>
-
-        {archived.length > 0 && (
-          <section>
-            <h3 class="font-semibold mb-2">Archived Workspaces</h3>
-            <table class="w-full text-left text-sm">
-              <thead>
-                <tr>
-                  <th class="p-2 w-8"></th>
-                  <th class="p-2">Name</th>
-                  <th class="p-2">Description</th>
-                  {/* <th class="p-2 text-center">Views</th> */}
-                  {/* <th class="p-2 text-center">Forks</th> */}
-                  {/* <th class="p-2">Updated</th> */}
-                  <th class="p-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>{renderRows(archived)}</tbody>
-            </table>
+      <Modal title="Manage Workspaces" onClose={onClose}>
+        <div class="space-y-6 text-sm text-slate-200">
+          <section class="relative overflow-hidden rounded-3xl border border-slate-700/60 bg-gradient-to-br from-slate-950/80 via-slate-900/70 to-slate-950/80 p-6 shadow-xl">
+            <div class={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-neon-violet-500/80 via-sky-500/70 to-cyan-400/80`} />
+            <div class="space-y-1">
+              <p class="text-xs font-semibold uppercase tracking-wide text-sky-300/90">Workspace catalogue</p>
+              <h3 class="text-2xl font-semibold text-white">Your Workspaces</h3>
+              <p class="text-sm text-slate-300">Filter, inspect, and jump between workspaces. Kick off new environments whenever you are ready.</p>
+            </div>
           </section>
-        )}
 
-        <div class="flex justify-end gap-2 pt-4">
-          <Action
-            onClick={() => setShowCreate(true)}
-            intentType={IntentTypes.Primary}
-            styleType={ActionStyleTypes.Outline}
-          >
-            + Create New Workspace
-          </Action>
-          <Action onClick={onClose}>Close</Action>
-        </div>
-      </div>
-    </Modal>
-    {showCreate && (
-      <Modal title="Create New Workspace" onClose={() => setShowCreate(false)}>
-        <div class="space-y-4">
-          <div class="space-y-2">
-            <Input
-              placeholder="Name"
-              value={newName}
-              onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
-                setNewName((e.target as HTMLInputElement).value)
-              }
-            />
-            <Input
-              placeholder="Description"
-              value={newDesc}
-              onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
-                setNewDesc((e.target as HTMLInputElement).value)
-              }
-            />
-          </div>
-          <div class="flex justify-end gap-2">
-            <Action onClick={() => setShowCreate(false)}>Cancel</Action>
-            <Action
-              intentType={IntentTypes.Primary}
-              disabled={creating || !newName.trim()}
-              onClick={async () => {
-                const name = newName.trim();
-                if (!name) return;
-                try {
-                  setCreating(true);
-                  await createWorkspace(name, newDesc.trim());
-                  setShowCreate(false);
-                  setNewName('');
-                  setNewDesc('');
-                } finally {
-                  setCreating(false);
+          <section class="relative overflow-hidden rounded-3xl border border-slate-700/60 bg-neutral-900/80 p-4 shadow-xl">
+            <div class={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-fuchsia-500/70 via-violet-500/70 to-sky-500/70 opacity-80`} />
+            <div class="flex flex-wrap items-center gap-3">
+              <Input
+                placeholder="Search workspaces..."
+                value={filter}
+                onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
+                  setFilter((e.target as HTMLInputElement).value)
                 }
-              }}
+              />
+              <p class="text-xs text-slate-400">{filtered.length} result{filtered.length === 1 ? '' : 's'}</p>
+            </div>
+          </section>
+
+          <section class="relative overflow-hidden rounded-3xl border border-slate-700/60 bg-neutral-900/80 p-4 shadow-xl">
+            <div class={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500/70 via-sky-500/70 to-cyan-400/70 opacity-80`} />
+            <h4 class="text-sm font-semibold text-white">Active workspaces</h4>
+            <div class="mt-3 overflow-x-auto rounded-2xl border border-slate-800/40">
+              <table class="w-full text-left text-sm text-slate-200">
+                <thead class="bg-neutral-900/80 text-xs uppercase tracking-wide text-slate-400">
+                  <tr>
+                    <th class="p-2">Workspace</th>
+                    <th class="p-2">Actions</th>
+                  </tr>
+                </thead>
+                {renderRows(active)}
+              </table>
+            </div>
+            {active.length === 0 && (
+              <p class="mt-4 rounded-xl border border-dashed border-slate-700/60 bg-neutral-950/50 p-4 text-center text-xs text-slate-400">
+                No workspaces match your current filter.
+              </p>
+            )}
+          </section>
+
+          {archived.length > 0 && (
+            <section class="relative overflow-hidden rounded-3xl border border-slate-700/60 bg-neutral-900/80 p-4 shadow-xl">
+              <div class={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400/70 via-orange-500/70 to-pink-500/70 opacity-80`} />
+              <h4 class="text-sm font-semibold text-white">Archived workspaces</h4>
+              <div class="mt-3 overflow-x-auto rounded-2xl border border-slate-800/40">
+                <table class="w-full text-left text-sm text-slate-200">
+                  <thead class="bg-neutral-900/80 text-xs uppercase tracking-wide text-slate-400">
+                    <tr>
+                      <th class="p-2">Workspace</th>
+                      <th class="p-2">Actions</th>
+                    </tr>
+                  </thead>
+                  {renderRows(archived)}
+                </table>
+              </div>
+            </section>
+          )}
+
+          <div class="flex justify-end gap-2">
+            <Action
+              onClick={() => setShowCreate(true)}
+              intentType={IntentTypes.Primary}
+              styleType={ActionStyleTypes.Outline}
             >
-              {creating ? 'Creating…' : 'Create'}
+              + Create New Workspace
             </Action>
+            <Action onClick={onClose}>Close</Action>
           </div>
         </div>
       </Modal>
-    )}
+
+      {showCreate && (
+        <Modal title="Create New Workspace" onClose={() => setShowCreate(false)}>
+          <div class="space-y-4 text-sm text-slate-200">
+            <section class="relative overflow-hidden rounded-3xl border border-slate-700/60 bg-neutral-900/85 p-5 shadow-xl">
+              <div class={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-neon-violet-500/80 via-sky-500/70 to-cyan-400/80`} />
+              <div class="space-y-3">
+                <div class="space-y-1">
+                  <p class="text-xs font-semibold uppercase tracking-wide text-sky-300/90">Workspace details</p>
+                  <h3 class="text-xl font-semibold text-white">New workspace</h3>
+                </div>
+                <Input
+                  placeholder="Name"
+                  value={newName}
+                  onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
+                    setNewName((e.target as HTMLInputElement).value)
+                  }
+                />
+                <Input
+                  placeholder="Description"
+                  value={newDesc}
+                  onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
+                    setNewDesc((e.target as HTMLInputElement).value)
+                  }
+                />
+                <div class="flex justify-end gap-2 pt-2">
+                  <Action onClick={() => setShowCreate(false)}>Cancel</Action>
+                  <Action
+                    intentType={IntentTypes.Primary}
+                    disabled={creating || !newName.trim()}
+                    onClick={async () => {
+                      const name = newName.trim();
+                      if (!name) return;
+                      try {
+                        setCreating(true);
+                        await createWorkspace(name, newDesc.trim());
+                        setShowCreate(false);
+                        setNewName('');
+                        setNewDesc('');
+                      } finally {
+                        setCreating(false);
+                      }
+                    }}
+                  >
+                    {creating ? 'Creating...' : 'Create'}
+                  </Action>
+                </div>
+              </div>
+            </section>
+          </div>
+        </Modal>
+      )}
     </>
   );
 }
@@ -265,10 +217,7 @@ ManageWorkspacesModal.Modal = (
     Modal: (
       <>
         {shown && (
-          <ManageWorkspacesModal
-            workspaceMgr={workspaceMgr}
-            onClose={() => setShow(false)}
-          />
+          <ManageWorkspacesModal workspaceMgr={workspaceMgr} onClose={() => setShow(false)} />
         )}
       </>
     ),
