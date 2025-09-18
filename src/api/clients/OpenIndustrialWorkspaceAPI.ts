@@ -5,6 +5,12 @@ import { ClientHelperBridge } from './ClientHelperBridge.ts';
 import { RuntimeImpulse } from '../../types/RuntimeImpulse.ts';
 import { ImpulseStreamFilter } from '../../flow/managers/ImpulseStreamManager.ts';
 import { OpenIndustrialWorkspaceExplorerAPI } from './OpenIndustrialWorkspaceExplorerAPI.ts';
+type ImpulseStreamHandlers = {
+  onOpen?: () => void;
+  onClose?: (event: CloseEvent) => void;
+  onError?: (event: Event) => void;
+  onActivity?: () => void;
+};
 
 /**
  * Subclient for managing OpenIndustrial workspace lifecycle and memory commits.
@@ -273,45 +279,41 @@ export class OpenIndustrialWorkspaceAPI {
   public StreamImpulses(
     onImpulse: (impulse: RuntimeImpulse) => void,
     filters?: ImpulseStreamFilter,
+    handlers?: ImpulseStreamHandlers,
   ): () => void {
     const url = new URL(this.bridge.url('/api/workspaces/impulses/stream'));
 
-    // 🌐 Attach surface filter if present
     if (filters?.Surface) {
       url.searchParams.set('surface', filters.Surface);
-      console.info('[StreamImpulses] 🌐 Surface filter:', filters.Surface);
+      console.info('[StreamImpulses] Surface filter:', filters.Surface);
     }
 
-    // 🔐 Attach auth token if present
     const token = this.bridge.token();
     if (token) {
       url.searchParams.set('Authorization', token);
-      console.info('[StreamImpulses] 🛡️ Token attached');
+      console.info('[StreamImpulses] Token attached');
     } else {
-      console.warn('[StreamImpulses] ⚠️ No auth token present!');
+      console.warn('[StreamImpulses] No auth token present!');
     }
 
-    // 🔁 Convert http/https to ws/wss
     url.protocol = url.protocol.replace(/^http/, 'ws');
 
-    console.info('[StreamImpulses] 🚀 Connecting to:', url.toString());
+    console.info('[StreamImpulses] Connecting to:', url.toString());
 
     const socket = new WebSocket(url.toString());
 
     let isOpen = false;
     const messageQueue: string[] = [];
 
-    // ✅ Helper to safely send messages
-    const _send = (msg: string) => {
+    const send = (msg: string) => {
       if (isOpen && socket.readyState === WebSocket.OPEN) {
         socket.send(msg);
       } else {
         messageQueue.push(msg);
-        console.debug('[StreamImpulses] ⏳ Queued message until open:', msg);
+        console.debug('[StreamImpulses] Queued message until open:', msg);
       }
     };
 
-    // ✅ Validate runtime impulse
     const isRuntimeImpulse = (obj: RuntimeImpulse): obj is RuntimeImpulse => {
       const valid = obj &&
         typeof obj.Timestamp === 'string' &&
@@ -320,27 +322,31 @@ export class OpenIndustrialWorkspaceAPI {
         obj.Payload !== null;
 
       if (!valid) {
-        console.warn('[StreamImpulses] ❌ Invalid impulse payload:', obj);
+        console.warn('[StreamImpulses] Invalid impulse payload:', obj);
       }
 
       return valid;
     };
 
-    // ✅ WebSocket events
     socket.onopen = () => {
       isOpen = true;
-      console.info('[StreamImpulses] ✅ WebSocket opened');
+      console.info('[StreamImpulses] WebSocket opened');
+      handlers?.onOpen?.();
 
-      // Flush message queue
-      for (const msg of messageQueue) {
-        socket.send(msg);
+      while (messageQueue.length > 0) {
+        const msg = messageQueue.shift();
+        if (msg) {
+          socket.send(msg);
+        }
       }
 
-      messageQueue.length = 0;
+      handlers?.onActivity?.();
     };
 
     socket.onmessage = (event) => {
-      console.debug('[StreamImpulses] 📥 Raw message:', event.data);
+      console.debug('[StreamImpulses] Raw message:', event.data);
+      handlers?.onActivity?.();
+
       const msg = typeof event.data === 'string' ? event.data : '';
       try {
         const parsed = JSON.parse(msg);
@@ -348,47 +354,50 @@ export class OpenIndustrialWorkspaceAPI {
           typeof parsed === 'object' &&
           'type' in parsed &&
           (parsed as { type: string }).type === 'ping';
+
         if (isPing) {
-          console.debug('[StreamImpulses] 💓 Ping received - sending pong');
-          _send(JSON.stringify({ type: 'pong', ts: new Date().toISOString() }));
+          console.debug('[StreamImpulses] Ping received - sending pong');
+          send(JSON.stringify({ type: 'pong', ts: new Date().toISOString() }));
           return;
         }
+
         if (isRuntimeImpulse(parsed)) {
-          console.debug('[StreamImpulses] ✅ Parsed RuntimeImpulse');
+          console.debug('[StreamImpulses] Parsed RuntimeImpulse');
           onImpulse(parsed);
+          return;
         }
       } catch (err) {
         if (msg === 'ping') {
-          console.debug('[StreamImpulses] 💓 Ping received - sending pong');
-          _send('pong');
+          console.debug('[StreamImpulses] Ping received - sending pong');
+          send('pong');
           return;
         }
-        console.error('[StreamImpulses] ❌ Parse error:', err);
+        console.error('[StreamImpulses] Parse error:', err);
         console.debug('Raw data:', event.data);
       }
     };
 
     socket.onerror = (err) => {
-      console.error('[StreamImpulses] ❌ WebSocket error:');
-      console.error(err);
+      console.error('[StreamImpulses] WebSocket error:', err);
+      handlers?.onError?.(err);
     };
 
     socket.onclose = (evt) => {
       isOpen = false;
       console.info(
-        '[StreamImpulses] 🔻 WebSocket closed:',
+        '[StreamImpulses] WebSocket closed:',
         evt.reason || '(no reason)',
-        ` | code=${evt.code}`,
+        `| code=${evt.code}`,
       );
+      handlers?.onClose?.(evt);
     };
 
-    // ✅ Return cleanup function
     return () => {
       if (
         socket.readyState === WebSocket.OPEN ||
         socket.readyState === WebSocket.CONNECTING
       ) {
-        console.info('[StreamImpulses] 🔌 Closing WebSocket manually');
+        console.info('[StreamImpulses] Closing WebSocket manually');
         socket.close(1000, 'Client disconnect');
       }
     };
