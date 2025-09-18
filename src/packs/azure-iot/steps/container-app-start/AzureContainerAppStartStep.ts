@@ -97,7 +97,6 @@ export const AzureContainerAppStartStep: TStepBuilder = Step(
 
     try {
       // Preferred: call start on the container app
-      // deno-lint-ignore no-explicit-any
       const ops: any = ContainerAppClient.containerApps as any;
       if (typeof ops.beginStartAndWait === 'function') {
         await ops.beginStartAndWait(ResourceGroupName, AppName);
@@ -117,7 +116,6 @@ export const AzureContainerAppStartStep: TStepBuilder = Step(
           configuration: current.configuration,
           template: {
             ...(current.template ?? ({} as any)),
-            // deno-lint-ignore no-explicit-any
             scale: { minReplicas: 1, maxReplicas: Math.max(1, (current.template as any)?.scale?.maxReplicas ?? 1) } as any,
           } as any,
         };
