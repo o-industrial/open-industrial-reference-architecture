@@ -158,15 +158,18 @@ export function ManageWorkspacesModal({ workspaceMgr, onClose }: ManageWorkspace
                   <p class="text-xs font-semibold uppercase tracking-wide text-sky-300/90">Workspace details</p>
                   <h3 class="text-xl font-semibold text-white">New workspace</h3>
                 </div>
-                <Input
-                  placeholder="Name"
+                                <Input
+                  label="Workspace Name"
+                  placeholder="e.g. Production Ops"
                   value={newName}
                   onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
                     setNewName((e.target as HTMLInputElement).value)
                   }
                 />
-                <Input
-                  placeholder="Description"
+                                <Input
+                  multiline
+                  label="Description"
+                  placeholder="Optional details for teammates"
                   value={newDesc}
                   onInput={(e: JSX.TargetedEvent<HTMLInputElement, Event>) =>
                     setNewDesc((e.target as HTMLInputElement).value)
@@ -226,3 +229,4 @@ ManageWorkspacesModal.Modal = (
     Show: () => setShow(true),
   };
 };
+
