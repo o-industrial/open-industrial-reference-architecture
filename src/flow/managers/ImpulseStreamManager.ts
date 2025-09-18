@@ -96,6 +96,8 @@ export class ImpulseStreamManager {
           this.scheduleReconnect();
         },
       },
+      // Attempt to resume from the last activity time on reconnect; default server fallback = 20m
+      this.lastActivityAt ? { since: new Date(this.lastActivityAt).toISOString() } : undefined,
     );
   }
 

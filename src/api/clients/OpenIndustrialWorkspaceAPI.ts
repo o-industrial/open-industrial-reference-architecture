@@ -280,12 +280,20 @@ export class OpenIndustrialWorkspaceAPI {
     onImpulse: (impulse: RuntimeImpulse) => void,
     filters?: ImpulseStreamFilter,
     handlers?: ImpulseStreamHandlers,
+    opts?: { since?: string; windowSec?: number },
   ): () => void {
     const url = new URL(this.bridge.url('/api/workspaces/impulses/stream'));
 
     if (filters?.Surface) {
       url.searchParams.set('surface', filters.Surface);
       console.info('[StreamImpulses] Surface filter:', filters.Surface);
+    }
+
+    // Optional replay window parameters
+    if (opts?.since) {
+      url.searchParams.set('since', opts.since);
+    } else if (typeof opts?.windowSec === 'number') {
+      url.searchParams.set('windowSec', String(opts.windowSec));
     }
 
     const token = this.bridge.token();
