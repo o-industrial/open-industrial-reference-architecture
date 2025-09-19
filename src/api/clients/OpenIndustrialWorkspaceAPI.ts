@@ -270,6 +270,29 @@ export class OpenIndustrialWorkspaceAPI {
   }
 
   /**
+   * Validate a workspace cloud configuration by delegating to the API runtime.
+   *
+   * @param cloudLookup - Optional cloud lookup (defaults to "Workspace").
+   */
+  public async ValidateCloud(cloudLookup?: string): Promise<{ valid: boolean; message?: string }> {
+    const url = new URL(this.bridge.url('/api/workspaces/clouds/validate'));
+    if (cloudLookup) {
+      url.searchParams.set('cloud', cloudLookup);
+    }
+
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: this.bridge.headers(),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to validate cloud configuration: ${res.status}`);
+    }
+
+    return await this.bridge.json(res);
+  }
+
+  /**
    * Connect to the impulse stream via WebSocket and receive live impulses.
    *
    * @param onImpulse - Callback invoked with each valid RuntimeImpulse

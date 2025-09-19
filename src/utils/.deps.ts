@@ -1,5 +1,5 @@
 export type { EaCVertexDetails } from 'jsr:@fathym/eac@0.2.122';
-export type { EaCWarmQueryDetails } from 'jsr:@fathym/eac-azure@0.0.111';
+export type { EaCWarmQueryDetails } from 'jsr:@fathym/eac-azure@0.0.113';
 
 export { Client, Message } from 'npm:azure-iot-device@1.18.3';
 export { Mqtt } from 'npm:azure-iot-device-mqtt@1.16.3';
