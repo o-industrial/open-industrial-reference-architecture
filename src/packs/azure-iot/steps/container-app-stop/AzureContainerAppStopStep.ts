@@ -93,6 +93,20 @@ export const AzureContainerAppStopStep: TStepBuilder = Step(
     const { ContainerAppClient } = ctx.Services!;
 
     try {
+      // Short-circuit if already stopped (minReplicas === 0)
+      try {
+        const current = await ContainerAppClient.containerApps.get(
+          ResourceGroupName,
+          AppName,
+        );
+        const min = Number((current?.template as any)?.scale?.minReplicas ?? 0);
+        if (!min || min === 0) {
+          return { AppName, Status: 'Stopped' };
+        }
+      } catch (_) {
+        // If fetching current state fails (e.g., not found), proceed to stop
+      }
+
       // Preferred: call stop on the container app
       const ops: any = ContainerAppClient.containerApps as any;
       if (typeof ops.beginStopAndWait === 'function') {
