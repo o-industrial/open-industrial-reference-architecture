@@ -53,19 +53,19 @@ export function RuntimeWorkspaceDashboardTemplate({
 
   const streamRowSpan = bottomBothCollapsed ? 1 : 4;
   const streamColSpan = bottomBothCollapsed
-    ? 7
+    ? 10
     : streamExpanded
     ? timelineExpanded
-      ? 7
+      ? 10
       : 15
     : 1;
 
   const timelineRowSpan = bottomBothCollapsed ? 1 : 4;
   const timelineColSpan = bottomBothCollapsed
-    ? 9
+    ? 6
     : timelineExpanded
     ? streamExpanded
-      ? 9
+      ? 6
       : 15
     : 1;
   const timelineColStart = bottomBothCollapsed
