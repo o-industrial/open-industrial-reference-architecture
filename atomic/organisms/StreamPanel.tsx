@@ -3,6 +3,7 @@ import { EverythingAsCodeOIWorkspace } from '../../src/eac/EverythingAsCodeOIWor
 import { JSX, useMemo, useState, WorkspaceManager } from '../.deps.ts';
 import { ImpulseEntry } from '../molecules/flows/ImpulseEntry.tsx';
 import { StreamPanelTemplate } from '../templates/StreamPanelTemplate.tsx';
+import { EaCDataConnectionAsCode } from '../../src/eac/EaCDataConnectionAsCode.ts';
 
 type StreamPanelProps = {
   workspaceMgr: WorkspaceManager;
@@ -30,12 +31,43 @@ export function StreamPanel({ workspaceMgr }: StreamPanelProps): JSX.Element {
   const [searchText, setSearchText] = useState<string>('');
 
   const connectionOptions = useMemo(() => {
-    const globalConnections = Object.keys(eac.DataConnections ?? {});
-    const surfaceConnections = Object.values(eac.Surfaces ?? {}).flatMap((surface) =>
-      Object.keys((surface as { DataConnections?: Record<string, unknown> })?.DataConnections ?? {})
-    );
+    const descriptors = new Map<string, string>();
 
-    return Array.from(new Set([...globalConnections, ...surfaceConnections])).sort();
+    const resolveLabel = (candidate: EaCDataConnectionAsCode, fallback: string): string => {
+      if (candidate) {
+        const maybeName = candidate.Details?.Name;
+        if (typeof maybeName === 'string') {
+          const trimmed = maybeName.trim();
+          if (trimmed.length > 0) {
+            return trimmed;
+          }
+        }
+      }
+
+      return fallback;
+    };
+
+    const globalConnections = eac.DataConnections ?? {};
+    for (const [lookup, definition] of Object.entries(globalConnections)) {
+      descriptors.set(lookup, resolveLabel(definition, lookup));
+    }
+
+    const surfaces = Object.values(eac.Surfaces ?? {});
+    for (const surface of surfaces) {
+      const surfaceConnections = surface?.DataConnections ?? {};
+
+      for (const [lookup, definition] of Object.entries(surfaceConnections)) {
+        const label = resolveLabel(definition, lookup);
+
+        if (!descriptors.has(lookup) || descriptors.get(lookup) === lookup) {
+          descriptors.set(lookup, label);
+        }
+      }
+    }
+
+    return Array.from(descriptors.entries())
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => a.value.localeCompare(b.value));
   }, [eac]);
 
   const filteredImpulses = useMemo(() => {
@@ -76,7 +108,9 @@ export function StreamPanel({ workspaceMgr }: StreamPanelProps): JSX.Element {
           onChange={(event) => setConnection((event.target as HTMLSelectElement).value)}
         >
           <option value=''>All Connections</option>
-          {connectionOptions.map((conn) => <option key={conn} value={conn}>{conn}</option>)}
+          {connectionOptions.map((conn) => (
+            <option key={conn.value} value={conn.value}>{conn.label}</option>
+          ))}
         </select>
 
         <input
