@@ -218,12 +218,25 @@ async function createImpulseRuntime({
 
   logger.info('[ImpulseStream] Stream ensured');
 
-  let eac: EverythingAsCodeOIWorkspace;
+  let eac: EverythingAsCodeOIWorkspace | null = null;
 
   const loadEaC = async () => {
-    const oiSvc = new OpenIndustrialAPIClient(new URL(oiServiceURL), jwt);
+    try {
+      const oiSvc = new OpenIndustrialAPIClient(new URL(oiServiceURL), jwt);
+      const latest = await oiSvc.Workspaces.Get();
+      eac = latest;
+      logger.debug('[ImpulseStream] EaC snapshot refreshed');
+    } catch (err) {
+      logger.warn('[ImpulseStream] Failed to refresh EaC snapshot; using cached data');
+      logger.warn(err);
 
-    eac = await oiSvc.Workspaces.Get();
+      if (!eac) {
+        eac = {
+          DataConnections: {},
+          Surfaces: {},
+        } as unknown as EverythingAsCodeOIWorkspace;
+      }
+    }
   };
 
   let refreshTimer: number | undefined;
@@ -265,14 +278,16 @@ async function createImpulseRuntime({
             logger.debug('[ImpulseStream] Impulse received', { subject });
             const impulse: RuntimeImpulse = JSON.parse(SC.decode(data));
 
-            const validation = validateImpulseAgainstEaC(impulse, eac);
-            if (!validation.valid) {
-              logger.warn('[WS] Impulse failed EaC validation');
-              logger.warn(validation);
-              // Trigger an EaC refresh so newly added resources (e.g.,
-              // DataConnections/Surfaces) show up without restarting.
-              scheduleEaCRefresh();
-              return;
+            if (eac) {
+              const validation = validateImpulseAgainstEaC(impulse, eac);
+              if (!validation.valid) {
+                logger.warn('[WS] Impulse failed EaC validation');
+                logger.warn(validation);
+                // Trigger an EaC refresh so newly added resources (e.g.,
+                // DataConnections/Surfaces) show up without restarting.
+                scheduleEaCRefresh();
+                return;
+              }
             }
 
             headers?.forEach((val, key) => {

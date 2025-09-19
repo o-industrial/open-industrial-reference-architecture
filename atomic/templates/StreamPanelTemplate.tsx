@@ -21,7 +21,7 @@ export function StreamPanelTemplate({
       </header>
 
       {/* Scrollable Impulse List */}
-      <div class="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-transparent px-4 py-3 flex flex-col gap-2">
+      <div class="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-transparent flex flex-col gap-2">
         {children}
       </div>
 

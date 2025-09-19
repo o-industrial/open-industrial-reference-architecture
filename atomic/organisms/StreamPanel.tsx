@@ -69,7 +69,7 @@ export function StreamPanel({ workspaceMgr }: StreamPanelProps): JSX.Element {
 
   return (
     <StreamPanelTemplate>
-      <div class='flex items-center gap-2 p-2 border-b border-neutral-800/60'>
+      <div class='sticky top-0 z-10 flex items-center gap-2 p-2 border-b border-neutral-800/60 bg-neutral-950/80 backdrop-blur'>
         <select
           class='bg-neutral-900 text-neutral-200 text-xs px-2 py-1 rounded border border-neutral-700'
           value={connection}
@@ -88,7 +88,7 @@ export function StreamPanel({ workspaceMgr }: StreamPanelProps): JSX.Element {
         />
       </div>
 
-      <div class='flex flex-col gap-3 text-xs text-neutral-300 font-mono'>
+      <div class='flex flex-col gap-3 text-xs text-neutral-300 px-4 my-2 font-mono'>
         {filteredImpulses.length === 0
           ? (
             <div class='text-center text-sm text-neutral-600 my-3 italic'>
@@ -109,3 +109,5 @@ export function StreamPanel({ workspaceMgr }: StreamPanelProps): JSX.Element {
     </StreamPanelTemplate>
   );
 }
+
+
