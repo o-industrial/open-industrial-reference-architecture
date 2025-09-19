@@ -129,12 +129,23 @@ export function AzureDockerSimulator(
           WorkspaceLookup: EaC.EnterpriseLookup!,
         });
 
-        const enabled = (AsCode.Metadata as { Enabled?: boolean } | undefined)?.Enabled ?? true;
+        const enabled = (AsCode.Metadata as { Enabled?: boolean } | undefined)
+          ?.Enabled ?? true;
+
+        // Compare against the previously deployed value in the current workspace EaC
+        const prevEnabled = (EaC.Simulators?.[SimulatorLookup]?.Metadata as
+          | { Enabled?: boolean }
+          | undefined)?.Enabled;
+
+        const hasChanged = prevEnabled === undefined || prevEnabled !== enabled;
+
         if (!enabled) {
-          await Steps.StopApp({
-            ResourceGroupName: ensured.ResourceGroupName,
-            AppName: ApplicationName,
-          });
+          if (hasChanged) {
+            await Steps.StopApp({
+              ResourceGroupName: ensured.ResourceGroupName,
+              AppName: ApplicationName,
+            });
+          }
           return [];
         }
 
@@ -191,11 +202,13 @@ export function AzureDockerSimulator(
 
         const outputs = await Promise.all(jobs.map((job) => Steps.DeployJob(job)));
 
-        // Ensure the app is started when enabled
-        await Steps.StartApp({
-          ResourceGroupName: ensured.ResourceGroupName,
-          AppName: ApplicationName,
-        });
+        // Start only if enabled value changed to enabled
+        if (hasChanged) {
+          await Steps.StartApp({
+            ResourceGroupName: ensured.ResourceGroupName,
+            AppName: ApplicationName,
+          });
+        }
 
         return outputs;
       },
