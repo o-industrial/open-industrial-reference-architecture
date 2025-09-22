@@ -35,14 +35,6 @@ export function SurfaceWarmQueryInspector({
   }), [lookup, surfaceLookup]);
 
   const handleOpenModal = () => {
-    if (workspaceMgr.HasUnsavedChanges()) {
-      if (window.confirm("You have unsaved flow changes that will not be reflected in Warm Query Manager. Are you sure you want to continue?")) {
-        setIsModalOpen(true);
-        return;
-      } else {
-        return;
-      }
-    }
     setIsModalOpen(true);
   }
   const handleCloseModal = () => setIsModalOpen(false);
