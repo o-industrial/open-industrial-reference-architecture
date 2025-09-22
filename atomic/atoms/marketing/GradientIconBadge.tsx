@@ -6,7 +6,7 @@ export type GradientIconBadgeProps = {
   icon: JSX.ElementType;
   intent?: GradientIntent;
   size?: 'md' | 'lg';
-} & JSX.HTMLAttributes<HTMLDivElement>;
+} & Omit<JSX.HTMLAttributes<HTMLDivElement>, 'size' | 'icon'>;
 
 const gradientMap: Record<GradientIntent, string> = {
   blue: 'from-neon-blue-500 to-neon-blue-300',

@@ -20,7 +20,7 @@ interface SurfaceWarmQueryModalProps {
   queryDescription: string;
   queryText: string;
   queryApiPath: string;
-  _onClose: () => void;
+  onClose: () => void;
   onRun: (query: string) => Promise<KustoResponseDataSet>;
   onSave: (name: string, apiPath: string, description: string, query: string) => void;
   aziExtraInputs?: Record<string, unknown>;
@@ -356,7 +356,14 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
             )}
 
             {/* Buttons at the bottom */}
-            <div class='mt-0 flex justify-end'>
+            <div class='mt-0 flex justify-between'>
+              <Action
+                type='button'
+                onClick={onClose}
+                class='bg-gray-600 hover:bg-gray-700 text-white'
+              >
+                Close
+              </Action>
               <div class='flex space-x-4'>
                 <div id='runWrap' tabIndex={0} aria-disabled='true'>
                   <Action
