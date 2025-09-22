@@ -6,7 +6,7 @@ export type GradientIconBadgeProps = {
   icon: ComponentType<JSX.SVGAttributes<SVGSVGElement>>;
   intent?: GradientIntent;
   size?: 'md' | 'lg';
-} & Omit<JSX.HTMLAttributes<HTMLDivElement>, 'icon' | 'size'>;
+} & Omit<JSX.HTMLAttributes<HTMLDivElement>, 'size' | 'icon'>;
 
 const gradientMap: Record<GradientIntent, string> = {
   blue: 'from-neon-blue-500 to-neon-blue-300',
