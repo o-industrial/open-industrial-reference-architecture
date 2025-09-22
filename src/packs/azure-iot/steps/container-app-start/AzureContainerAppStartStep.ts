@@ -93,6 +93,20 @@ export const AzureContainerAppStartStep: TStepBuilder = Step(
     const { ContainerAppClient } = ctx.Services!;
 
     try {
+      // Short-circuit if already started (minReplicas >= 1)
+      try {
+        const current = await ContainerAppClient.containerApps.get(
+          ResourceGroupName,
+          AppName,
+        );
+        const min = Number((current?.template as any)?.scale?.minReplicas ?? 0);
+        if (min >= 1) {
+          return { AppName, Status: 'Started' };
+        }
+      } catch (_) {
+        // If fetching current state fails (e.g., not found), proceed to start
+      }
+
       // Preferred: call start on the container app
       const ops: any = ContainerAppClient.containerApps as any;
       if (typeof ops.beginStartAndWait === 'function') {

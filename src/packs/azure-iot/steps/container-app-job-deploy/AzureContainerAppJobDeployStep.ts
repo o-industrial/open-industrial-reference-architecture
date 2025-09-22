@@ -181,7 +181,7 @@ export const AzureContainerAppJobDeployStep: TStepBuilder = Step(
       managedEnvironmentId:
         `/subscriptions/${SubscriptionID}/resourceGroups/${ResourceGroupName}/providers/Microsoft.App/managedEnvironments/${AppEnvironmentName}`,
       configuration: {
-        activeRevisionsMode: 'Multiple',
+        activeRevisionsMode: 'Single',
       },
       template: {
         containers: [
