@@ -20,7 +20,7 @@ interface SurfaceWarmQueryModalProps {
   queryDescription: string;
   queryText: string;
   queryApiPath: string;
-  onClose: () => void;
+  _onClose: () => void;
   onRun: (query: string) => Promise<KustoResponseDataSet>;
   onSave: (name: string, apiPath: string, description: string, query: string) => void;
   aziExtraInputs?: Record<string, unknown>;
