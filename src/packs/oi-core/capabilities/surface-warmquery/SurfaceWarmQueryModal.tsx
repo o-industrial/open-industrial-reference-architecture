@@ -412,4 +412,3 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
     </div>
   );
 };
-

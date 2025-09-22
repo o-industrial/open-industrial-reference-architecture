@@ -1,13 +1,16 @@
-export * from "./AccountProfileModal.tsx";
-export * from "./SimulatorLibraryModal.tsx";
-export * from "./WorkspaceSettingsModal.tsx";
-export * from "./TeamManagementModal.tsx";
-export * from "./ManageWorkspacesModal.tsx";
-export * from "./WarmQueryAPIsModal.tsx";
-export * from "./DataAPISuiteModal.tsx";
-export * from "./BillingDetailsModal.tsx";
-export * from "./CurrentLicenseModal.tsx";
-export * from "./APIKeysModal.tsx";
-export * from "./CloudConnectionsModal.tsx";
-export * from "./PrivateCALZModal.tsx";
-export * from "./SignOutModal.tsx";
+export * from './AccountProfileModal.tsx';
+export * from './SimulatorLibraryModal.tsx';
+export * from './WorkspaceSettingsModal.tsx';
+export * from './TeamManagementModal.tsx';
+export * from './ManageWorkspacesModal.tsx';
+export * from './WarmQueryAPIsModal.tsx';
+export * from './DataAPISuiteModal.tsx';
+export * from './BillingDetailsModal.tsx';
+export {
+  CurrentLicenseModal,
+  type CurrentLicenseModalProps,
+} from './CurrentLicenseModal.tsx';
+export * from './APIKeysModal.tsx';
+export * from './CloudConnectionsModal.tsx';
+export * from './PrivateCALZModal.tsx';
+export * from './SignOutModal.tsx';
