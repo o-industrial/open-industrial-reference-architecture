@@ -1,6 +1,6 @@
 // SurfaceWarmQueryInspector.tsx
 import { useMemo, useState } from 'npm:preact@10.20.1/hooks';
-import { Action, InspectorBase, NodeStatTile } from '../../../../../atomic/.exports.ts';
+import { Action, InspectorBase } from '../../../../../atomic/.exports.ts';
 import { InspectorCommonProps } from '../../../../flow/.exports.ts';
 import { SurfaceWarmQueryStats } from './SurfaceWarmQueryStats.tsx';
 import { EaCWarmQueryDetails } from '../../../../eac/.deps.ts';
@@ -34,7 +34,9 @@ export function SurfaceWarmQueryInspector({
     SurfaceLookup: surfaceLookup,
   }), [lookup, surfaceLookup]);
 
-  const handleOpenModal = () => setIsModalOpen(true);
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  }
   const handleCloseModal = () => setIsModalOpen(false);
 
   const handleRunQuery = (query: string) => {
@@ -56,6 +58,16 @@ export function SurfaceWarmQueryInspector({
       Query: query,
       Description: description,
     } as Partial<EaCWarmQueryDetails>);
+  }; 
+
+  const isConnected = () => {
+    const surface = eac.Surfaces?.[surfaceLookup!];
+    const wqSettings = surface?.WarmQueries?.[lookup];
+    if (!wqSettings || ((!wqSettings.SchemaLookups || wqSettings.SchemaLookups.length === 0) &&
+    (!wqSettings.DataConnectionLookups || wqSettings.DataConnectionLookups.length === 0))) {
+      return false;
+    }
+    return true;
   };
 
   return (
@@ -68,17 +80,19 @@ export function SurfaceWarmQueryInspector({
         onToggleEnabled={onToggleEnabled}
         onDelete={onDelete}
       >
-        <NodeStatTile label='Matches' value={stats?.matchesHandled || 0} />
-        <NodeStatTile label='Avg Latency' value={`${stats?.avgLatencyMs}ms`} />
+        {/* <NodeStatTile label='Matches' value={stats?.matchesHandled || 0} />
+        <NodeStatTile label='Avg Latency' value={`${stats?.avgLatencyMs}ms`} /> */}
 
         <div class='mt-4'>
           <Action
             type='button'
             onClick={handleOpenModal}
+            disabled={!isConnected()}
             class='bg-indigo-600 hover:bg-indigo-800 text-white font-bold py-2 px-4 rounded mx-auto block'
           >
             Manage Query
           </Action>
+          {!isConnected() && <span class="block w-full text-xs text-center italic pt-4">Please connect a data connection or schema and save before managing query.</span>}
         </div>
       </InspectorBase>
 
