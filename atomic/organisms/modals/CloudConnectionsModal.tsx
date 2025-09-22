@@ -536,9 +536,6 @@ export function CloudConnectionsModal({
           </section>
         )}
 
-        <div class="flex justify-end gap-2 pt-2">
-          <Action onClick={onClose}>Close</Action>
-        </div>
       </div>
     </Modal>
   );
@@ -569,3 +566,8 @@ CloudConnectionsModal.Modal = (
 };
 
 export default CloudConnectionsModal;
+
+
+
+
+

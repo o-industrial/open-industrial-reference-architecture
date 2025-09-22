@@ -1,4 +1,4 @@
-﻿import { JSX, WorkspaceManager, useEffect, useState } from '../../.deps.ts';
+import { JSX, WorkspaceManager, useEffect, useState } from '../../.deps.ts';
 import { Action, Modal, LoadingIcon } from '../../.exports.ts';
 import { ActionStyleTypes } from '../../atoms/Action.tsx';
 
@@ -432,10 +432,6 @@ export function PrivateCALZModal({
             </div>
           </section>
         )}
-
-        <div class="flex justify-end">
-          <Action onClick={onClose}>Close</Action>
-        </div>
       </div>
     </Modal>
   );
@@ -469,4 +465,5 @@ PrivateCALZModal.Modal = (
 };
 
 export default PrivateCALZModal;
+
 

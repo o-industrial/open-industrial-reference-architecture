@@ -1,4 +1,4 @@
-﻿import { JSX, WorkspaceManager, useState, IntentTypes } from '../../.deps.ts';
+import { JSX, WorkspaceManager, useState, IntentTypes } from '../../.deps.ts';
 import { Modal, Input, Action, ActionStyleTypes } from '../../.exports.ts';
 
 export type ManageWorkspacesModalProps = {
@@ -143,7 +143,6 @@ export function ManageWorkspacesModal({ workspaceMgr, onClose }: ManageWorkspace
             >
               + Create New Workspace
             </Action>
-            <Action onClick={onClose}>Close</Action>
           </div>
         </div>
       </Modal>
@@ -229,4 +228,5 @@ ManageWorkspacesModal.Modal = (
     Show: () => setShow(true),
   };
 };
+
 
