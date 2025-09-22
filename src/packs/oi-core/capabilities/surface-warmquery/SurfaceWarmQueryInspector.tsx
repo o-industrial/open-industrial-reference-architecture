@@ -1,6 +1,6 @@
 // SurfaceWarmQueryInspector.tsx
 import { useMemo, useState } from 'npm:preact@10.20.1/hooks';
-import { Action, InspectorBase, NodeStatTile } from '../../../../../atomic/.exports.ts';
+import { Action, InspectorBase } from '../../../../../atomic/.exports.ts';
 import { InspectorCommonProps } from '../../../../flow/.exports.ts';
 import { SurfaceWarmQueryStats } from './SurfaceWarmQueryStats.tsx';
 import { EaCWarmQueryDetails } from '../../../../eac/.deps.ts';
