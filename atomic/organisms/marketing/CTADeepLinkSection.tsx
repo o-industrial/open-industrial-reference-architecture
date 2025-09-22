@@ -20,7 +20,7 @@ export type CTAContent = {
 
 export type CTADeepLinkSectionProps = {
   content: CTAContent;
-} & JSX.HTMLAttributes<HTMLElement>;
+} & Omit<JSX.HTMLAttributes<HTMLElement>, 'content'>;
 
 function mapIntent(intent?: MarketingActionIntent): ActionStyleTypes {
   switch (intent) {

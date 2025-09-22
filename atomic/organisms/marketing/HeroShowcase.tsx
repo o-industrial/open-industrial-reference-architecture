@@ -24,7 +24,7 @@ export type HeroShowcaseProps = {
   secondaryAction?: HeroShowcaseAction;
   hubspotFormId?: string;
   children?: ComponentChildren;
-} & JSX.HTMLAttributes<HTMLElement>;
+} & Omit<JSX.HTMLAttributes<HTMLElement>, 'media'>;
 
 function mapIntent(intent?: HeroShowcaseActionIntent): ActionStyleTypes {
   switch (intent) {

@@ -1,12 +1,12 @@
-import { classSet, JSX } from '../../.deps.ts';
+import { classSet, ComponentType, JSX } from '../../.deps.ts';
 
 export type GradientIntent = 'blue' | 'green' | 'purple' | 'orange';
 
 export type GradientIconBadgeProps = {
-  icon: JSX.ElementType;
+  icon: ComponentType<JSX.SVGAttributes<SVGSVGElement>>;
   intent?: GradientIntent;
   size?: 'md' | 'lg';
-} & JSX.HTMLAttributes<HTMLDivElement>;
+} & Omit<JSX.HTMLAttributes<HTMLDivElement>, 'icon' | 'size'>;
 
 const gradientMap: Record<GradientIntent, string> = {
   blue: 'from-neon-blue-500 to-neon-blue-300',
