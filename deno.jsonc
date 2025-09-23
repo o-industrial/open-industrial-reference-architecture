@@ -53,7 +53,7 @@
 
     // "jsr:@fathym/eac-identity@0.0.26": "../../fathym-deno/eac-identity/src/identity/.exports.ts"
   },
-  "exclude": ["**/_eac-runtime/*", "!src/**/.exports.ts", "!src/**/.deps.ts","!mod.ts"],
+  "exclude": ["**/_eac-runtime/*", "!src/**/.exports.ts", "!src/**/.deps.ts", "!mod.ts"],
   "lint": {
     "include": ["apps/", "configs/", "src/", "tests/"],
     "exclude": [],

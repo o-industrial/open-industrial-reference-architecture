@@ -1,32 +1,114 @@
-import { classSet, JSX } from '../../.deps.ts';
+﻿import { classSet, JSX } from '../../.deps.ts';
+import type { GradientIntent } from '../../atoms/marketing/GradientIconBadge.tsx';
+
+type QuoteCardVariant = 'light' | 'dark';
+
+type AccentPalette = Record<GradientIntent, { top: string; bottom: string }>;
+
+const quoteSurfaceVariants: Record<QuoteCardVariant, string> = {
+  light:
+    'group relative overflow-hidden rounded-3xl border border-white/60 bg-gradient-to-br from-[rgba(245,243,255,1)] via-[rgba(248,245,255,1)] to-[rgba(232,244,255,1)] p-6 text-left shadow-[0_35px_90px_-70px_rgba(62,45,171,0.55)] backdrop-blur-sm transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_50px_140px_-80px_rgba(62,45,171,0.6)] dark:border-white/10 dark:from-[rgba(24,20,54,1)] dark:via-[rgba(38,29,88,1)] dark:to-[rgba(13,29,61,1)]',
+  dark:
+    'group relative overflow-hidden rounded-[24px] border border-white/12 bg-[linear-gradient(130deg,rgba(19,23,44,0.92),rgba(8,11,26,0.96))] p-6 text-left shadow-[0_38px_140px_-110px_rgba(10,14,42,0.95)] backdrop-blur-sm transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_60px_170px_-120px_rgba(18,28,76,0.95)]',
+};
+
+const glowPalettes: Record<QuoteCardVariant, AccentPalette> = {
+  light: {
+    purple: {
+      top: 'bg-neon-purple-500/25 dark:bg-neon-purple-500/30',
+      bottom: 'bg-neon-blue-400/25 dark:bg-neon-blue-400/30',
+    },
+    blue: {
+      top: 'bg-neon-blue-500/25 dark:bg-neon-blue-500/30',
+      bottom: 'bg-neon-green-400/25 dark:bg-neon-green-400/30',
+    },
+    green: {
+      top: 'bg-neon-green-400/25 dark:bg-neon-green-400/30',
+      bottom: 'bg-neon-blue-400/25 dark:bg-neon-blue-400/30',
+    },
+    orange: {
+      top: 'bg-neon-orange-500/25 dark:bg-neon-orange-500/30',
+      bottom: 'bg-neon-purple-500/25 dark:bg-neon-purple-500/30',
+    },
+  },
+  dark: {
+    purple: {
+      top: 'bg-[rgba(149,108,255,0.38)]',
+      bottom: 'bg-[rgba(94,234,255,0.26)]',
+    },
+    blue: {
+      top: 'bg-[rgba(82,134,255,0.32)]',
+      bottom: 'bg-[rgba(56,189,248,0.22)]',
+    },
+    green: {
+      top: 'bg-[rgba(45,212,191,0.28)]',
+      bottom: 'bg-[rgba(134,239,172,0.22)]',
+    },
+    orange: {
+      top: 'bg-[rgba(251,146,60,0.3)]',
+      bottom: 'bg-[rgba(251,113,133,0.24)]',
+    },
+  },
+};
+
+const quoteTextClass: Record<QuoteCardVariant, string> = {
+  light: 'relative text-lg font-medium leading-7 text-neutral-900 dark:text-neutral-100',
+  dark: 'relative text-lg font-medium leading-snug text-white/85',
+};
+
+const metaClass: Record<QuoteCardVariant, string> = {
+  light: 'relative mt-6 text-sm text-neutral-600 dark:text-neutral-300',
+  dark: 'relative mt-5 text-sm text-white/60',
+};
+
+const nameClass: Record<QuoteCardVariant, string> = {
+  light: 'font-semibold text-neutral-900 dark:text-white',
+  dark: 'font-semibold text-white/85',
+};
+
+const topGlowBase =
+  'pointer-events-none absolute -left-14 top-6 h-40 w-40 rounded-full opacity-0 blur-[110px] transition-opacity duration-500 group-hover:opacity-100';
+const bottomGlowBase =
+  'pointer-events-none absolute -bottom-16 right-[-10%] h-52 w-56 rounded-full opacity-0 blur-[120px] transition-opacity duration-500 group-hover:opacity-100';
 
 export type QuoteCardProps = {
   quote: JSX.Element | string;
   attribution?: JSX.Element | string;
   role?: JSX.Element | string;
-} & JSX.HTMLAttributes<HTMLElement>;
+  variant?: QuoteCardVariant;
+  intent?: GradientIntent;
+} & Omit<JSX.HTMLAttributes<HTMLElement>, 'role'>;
 
 export function QuoteCard({
   quote,
   attribution,
   role,
+  variant = 'light',
+  intent = 'purple',
   ...rest
 }: QuoteCardProps): JSX.Element {
+  const glowPalette = glowPalettes[variant][intent];
+
   return (
     <figure
       {...rest}
-      class={classSet(
-        [
-          'rounded-2xl border border-neutral-200/80 bg-neutral-900/80 p-6 text-left shadow-md dark:border-white/10 dark:bg-neutral-900',
-        ],
-        rest,
-      )}
+      class={classSet([quoteSurfaceVariants[variant]], rest)}
     >
-      <blockquote class='text-base italic text-neutral-100'>�{quote}�</blockquote>
+      <div
+        aria-hidden='true'
+        class={classSet([topGlowBase, glowPalette.top])}
+      />
+      <div
+        aria-hidden='true'
+        class={classSet([bottomGlowBase, glowPalette.bottom])}
+      />
+      <blockquote class={quoteTextClass[variant]}>
+        &quot;{quote}&quot;
+      </blockquote>
       {(attribution || role)
         ? (
-          <figcaption class='mt-4 text-sm text-neutral-400'>
-            {attribution ? <div class='font-semibold text-neutral-200'>{attribution}</div> : null}
+          <figcaption class={metaClass[variant]}>
+            {attribution ? <div class={nameClass[variant]}>{attribution}</div> : null}
             {role ? <div>{role}</div> : null}
           </figcaption>
         )

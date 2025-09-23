@@ -1,6 +1,9 @@
 import { classSet, ComponentChildren, JSX } from '../../.deps.ts';
 import { Action, ActionStyleTypes } from '../../atoms/Action.tsx';
-import { SectionSurface } from '../../atoms/marketing/SectionSurface.tsx';
+import {
+  SectionSurface,
+  type SectionSurfaceProps,
+} from '../../atoms/marketing/SectionSurface.tsx';
 import {
   SectionHeader,
   type SectionHeaderProps,
@@ -24,7 +27,7 @@ export type HeroShowcaseProps = {
   secondaryAction?: HeroShowcaseAction;
   hubspotFormId?: string;
   children?: ComponentChildren;
-} & JSX.HTMLAttributes<HTMLElement>;
+} & Omit<SectionSurfaceProps, 'children' | 'tone'>;
 
 function mapIntent(intent?: HeroShowcaseActionIntent): ActionStyleTypes {
   switch (intent) {
