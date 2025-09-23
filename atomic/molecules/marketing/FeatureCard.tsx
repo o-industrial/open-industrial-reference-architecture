@@ -13,7 +13,7 @@ type GlowMap = Record<FeatureCardVariant, Record<GradientIntent, string>>;
 
 type BulletMap = Record<FeatureCardVariant, Record<GradientIntent, string>>;
 
-type HighlightMap = Record<FeatureCardVariant, string>;
+type HighlightContainerMap = Record<FeatureCardVariant, string>;
 
 type ChipMap = Record<FeatureCardVariant, string>;
 
@@ -23,7 +23,7 @@ type TitleMap = Record<FeatureCardVariant, string>;
 
 type IndexBadgeMap = Record<GradientIntent, string>;
 
-type HighlightPillMap = Record<GradientIntent, string>;
+type HighlightAccentMap = Record<GradientIntent, string>;
 
 const surfaceMap: SurfaceMap = {
   light: {
@@ -38,13 +38,13 @@ const surfaceMap: SurfaceMap = {
   },
   dark: {
     blue:
-      'border-white/12 bg-[linear-gradient(132deg,rgba(16,22,42,0.92),rgba(7,10,24,0.95))]',
+      'border-white/8 bg-[radial-gradient(circle_at_top_left,rgba(60,95,210,0.18),transparent_55%),radial-gradient(circle_at_bottom_right,rgba(14,25,56,0.65),rgba(6,10,22,0.95))]',
     green:
-      'border-white/12 bg-[linear-gradient(132deg,rgba(14,32,29,0.92),rgba(6,12,18,0.95))]',
+      'border-white/8 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.18),transparent_55%),radial-gradient(circle_at_bottom_right,rgba(14,32,30,0.65),rgba(6,12,18,0.95))]',
     purple:
-      'border-white/12 bg-[linear-gradient(132deg,rgba(32,24,58,0.92),rgba(10,12,26,0.96))]',
+      'border-white/8 bg-[radial-gradient(circle_at_top_left,rgba(167,139,250,0.2),transparent_55%),radial-gradient(circle_at_bottom_right,rgba(30,24,68,0.68),rgba(11,13,28,0.95))]',
     orange:
-      'border-white/12 bg-[linear-gradient(132deg,rgba(44,24,18,0.92),rgba(14,10,22,0.96))]',
+      'border-white/8 bg-[radial-gradient(circle_at_top_left,rgba(249,115,22,0.2),transparent_55%),radial-gradient(circle_at_bottom_right,rgba(46,26,18,0.68),rgba(12,9,20,0.95))]',
   },
 };
 
@@ -60,10 +60,10 @@ const glowMap: GlowMap = {
       'from-[rgba(251,146,60,0.35)] via-[rgba(255,213,170,0.15)] to-transparent dark:from-[rgba(249,115,22,0.4)] dark:via-[rgba(251,146,60,0.2)] dark:to-transparent',
   },
   dark: {
-    blue: 'from-[rgba(77,171,255,0.38)] via-[rgba(50,102,214,0.22)] to-transparent',
-    green: 'from-[rgba(45,212,191,0.36)] via-[rgba(16,185,129,0.2)] to-transparent',
-    purple: 'from-[rgba(167,139,250,0.4)] via-[rgba(129,140,248,0.22)] to-transparent',
-    orange: 'from-[rgba(251,146,60,0.38)] via-[rgba(249,115,22,0.22)] to-transparent',
+    blue: 'from-[rgba(82,134,255,0.32)] via-[rgba(56,130,255,0.18)] to-transparent',
+    green: 'from-[rgba(45,212,191,0.3)] via-[rgba(16,185,129,0.16)] to-transparent',
+    purple: 'from-[rgba(167,139,250,0.32)] via-[rgba(129,140,248,0.18)] to-transparent',
+    orange: 'from-[rgba(251,146,60,0.32)] via-[rgba(249,115,22,0.18)] to-transparent',
   },
 };
 
@@ -84,7 +84,7 @@ const bulletMap: BulletMap = {
   },
 };
 
-const highlightMap: HighlightMap = {
+const highlightContainerMap: HighlightContainerMap = {
   light:
     'relative space-y-2 rounded-2xl border border-white/70 bg-white/70 p-4 text-sm text-neutral-600 shadow-inner dark:border-white/10 dark:bg-white/5 dark:text-neutral-300',
   dark:
@@ -100,7 +100,7 @@ const chipMap: ChipMap = {
 
 const descriptionMap: DescriptionMap = {
   light: 'text-sm text-neutral-600 dark:text-neutral-300',
-  dark: 'text-sm text-white/70',
+  dark: 'text-sm text-white/75',
 };
 
 const titleMap: TitleMap = {
@@ -115,11 +115,11 @@ const indexBadgeMap: IndexBadgeMap = {
   orange: 'from-orange-500 via-amber-500 to-orange-400',
 };
 
-const highlightPillMap: HighlightPillMap = {
-  blue: 'bg-gradient-to-r from-[rgba(56,130,255,0.78)] via-[rgba(76,132,255,0.68)] to-[rgba(37,99,235,0.75)]',
-  green: 'bg-gradient-to-r from-[rgba(16,185,129,0.78)] via-[rgba(5,150,105,0.68)] to-[rgba(4,120,87,0.75)]',
-  purple: 'bg-gradient-to-r from-[rgba(167,139,250,0.82)] via-[rgba(129,140,248,0.72)] to-[rgba(99,102,241,0.82)]',
-  orange: 'bg-gradient-to-r from-[rgba(249,115,22,0.82)] via-[rgba(251,146,60,0.72)] to-[rgba(234,88,12,0.82)]',
+const highlightAccentMap: HighlightAccentMap = {
+  blue: 'from-[rgba(56,130,255,0.75)] via-[rgba(82,134,255,0.6)] to-[rgba(37,99,235,0.7)]',
+  green: 'from-[rgba(16,185,129,0.75)] via-[rgba(5,150,105,0.6)] to-[rgba(4,120,87,0.68)]',
+  purple: 'from-[rgba(167,139,250,0.78)] via-[rgba(129,140,248,0.62)] to-[rgba(99,102,241,0.75)]',
+  orange: 'from-[rgba(249,115,22,0.78)] via-[rgba(251,146,60,0.62)] to-[rgba(234,88,12,0.72)]',
 };
 
 export type FeatureCardProps = {
@@ -159,9 +159,9 @@ export function FeatureCard({
       {...rest}
       class={classSet(
         [
-          'group relative flex h-full flex-col gap-5 overflow-hidden rounded-3xl border p-6 transition-all duration-200 hover:-translate-y-1',
+          'group relative flex h-full flex-col gap-6 overflow-hidden rounded-[28px] border p-7 transition-all duration-200 hover:-translate-y-1',
           variant === 'dark'
-            ? 'shadow-[0_40px_150px_-110px_rgba(8,12,32,0.95)] hover:shadow-[0_60px_180px_-120px_rgba(16,24,64,0.95)]'
+            ? 'border-white/6 shadow-[0_65px_200px_-140px_rgba(7,12,36,0.95)] hover:shadow-[0_90px_240px_-150px_rgba(16,28,72,0.95)]'
             : 'shadow-[0_30px_80px_-60px_rgba(62,45,171,0.45)] hover:shadow-[0_45px_120px_-60px_rgba(62,45,171,0.5)]',
           surfaceIntent,
         ],
@@ -171,15 +171,15 @@ export function FeatureCard({
       <div
         aria-hidden='true'
         class={classSet([
-          'pointer-events-none absolute -top-28 right-[-25%] h-64 w-64 rounded-full bg-gradient-to-br opacity-70 blur-3xl transition-opacity duration-500 group-hover:opacity-100',
+          'pointer-events-none absolute -top-28 right-[-25%] h-64 w-64 rounded-full bg-gradient-to-br opacity-65 blur-3xl transition-opacity duration-500 group-hover:opacity-95',
           glowIntent,
         ])}
       />
-      <div class='relative flex items-start gap-4'>
+      <div class='relative flex items-start gap-5'>
         {displayIndex !== undefined
           ? (
             <span
-              class={`inline-flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br text-base font-semibold text-white shadow-lg shadow-black/30 ${indexBadgeMap[intent]}`}
+              class={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-base font-semibold text-white shadow-lg shadow-black/40 ${indexBadgeMap[intent]}`}
             >
               {String(displayIndex).padStart(2, '0')}
             </span>
@@ -206,19 +206,24 @@ export function FeatureCard({
         ? (
           variant === 'dark'
             ? (
-              <div class={highlightMap[variant]}>
+              <div class={highlightContainerMap[variant]}>
                 {highlights.map((item) => (
-                  <span
+                  <div
                     key={item}
-                    class={`inline-flex items-center gap-3 rounded-[18px] border border-white/12 px-4 py-2 text-sm font-medium text-white shadow-[0_12px_40px_-24px_rgba(20,40,80,0.9)] ${highlightPillMap[intent]}`}
+                    class={`inline-flex w-full flex-wrap items-center gap-3 rounded-[18px] border border-white/10 bg-gradient-to-r px-4 py-3 text-sm font-medium text-white shadow-[0_24px_90px_-70px_rgba(20,30,80,0.95)] ${highlightAccentMap[intent]}`}
                   >
-                    {item}
-                  </span>
+                    <span class='text-[0.65rem] font-semibold uppercase tracking-[0.32em] text-white/80'>
+                      Prompt
+                    </span>
+                    <span class='flex-1 text-left text-sm font-medium leading-snug text-white/95'>
+                      {item}
+                    </span>
+                  </div>
                 ))}
               </div>
             )
             : (
-              <ul class={highlightMap[variant]}>
+              <ul class={highlightContainerMap[variant]}>
                 {highlights.map((item) => (
                   <li key={item} class='flex items-start gap-3'>
                     <span class={`mt-1 h-2 w-2 rounded-full ${bulletAccent}`} />

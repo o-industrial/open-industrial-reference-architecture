@@ -71,10 +71,10 @@ export function ValueGridSection({
         <div class={leftGlowClass} />
         <div class={rightGlowClass} />
       </div>
-      <div class='space-y-12'>
+      <div class='space-y-14'>
         <SectionHeader {...header} align={header.align ?? 'center'} />
 
-        <div class={`grid gap-6 ${grid}`}>
+        <div class={`grid gap-8 ${grid}`}>
           {items.map((item, index) => (
             <FeatureCard
               key={`feature-${index}`}
