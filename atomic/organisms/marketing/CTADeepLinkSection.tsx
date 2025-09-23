@@ -56,9 +56,9 @@ export function CTADeepLinkSection({
         <div class='absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent dark:via-white/10' />
       </div>
       <div class='relative mx-auto flex max-w-4xl flex-col items-center gap-6 text-center'>
-        <h2 class='text-3xl font-semibold text-neutral-900 dark:text-white'>{content.title}</h2>
+        <h2 class='text-3xl font-semibold text-neutral-100 dark:text-white'>{content.title}</h2>
         {content.description
-          ? <p class='text-lg text-neutral-600 dark:text-neutral-300'>{content.description}</p>
+          ? <p class='text-lg text-neutral-300 dark:text-neutral-300'>{content.description}</p>
           : null}
         <div class='flex flex-col gap-3 sm:flex-row'>
           {content.primaryAction

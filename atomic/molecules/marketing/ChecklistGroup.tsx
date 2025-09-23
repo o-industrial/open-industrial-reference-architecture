@@ -11,13 +11,13 @@ type SurfaceIntent = GradientIntent | 'neutral';
 const cardSurfaceVariants: Record<ChecklistVariant, Record<SurfaceIntent, string>> = {
   light: {
     blue:
-      'border-neon-blue-500/40 bg-gradient-to-br from-[#e6f2ff]/80 via-white/90 to-[#eaf6ff]/75 dark:border-neon-blue-400/25 dark:from-[#0b162f]/70 dark:via-[#101d3b]/65 dark:to-[#071226]/75',
+      'border-neon-blue-500/40 bg-gradient-to-br from-[rgba(219,234,254,0.8)] via-white/90 to-[rgba(239,246,255,0.75)] dark:border-neon-blue-400/25 dark:from-[rgba(11,22,47,0.7)] dark:via-[rgba(16,29,59,0.65)] dark:to-[rgba(7,18,38,0.75)]',
     green:
-      'border-emerald-500/40 bg-gradient-to-br from-[#e6f9f1]/80 via-white/90 to-[#eafef6]/75 dark:border-emerald-400/25 dark:from-[#0a261a]/70 dark:via-[#0f2f22]/65 dark:to-[#071a12]/75',
+      'border-neon-green-500/40 bg-gradient-to-br from-[rgba(209,250,229,0.8)] via-white/90 to-[rgba(234,254,246,0.75)] dark:border-neon-green-400/25 dark:from-[rgba(10,38,26,0.7)] dark:via-[rgba(15,47,34,0.65)] dark:to-[rgba(7,26,18,0.75)]',
     purple:
-      'border-neon-purple-500/40 bg-gradient-to-br from-[#f3efff]/80 via-white/90 to-[#eee8ff]/75 dark:border-neon-purple-400/25 dark:from-[#19143a]/70 dark:via-[#221a52]/65 dark:to-[#120f2d]/75',
+      'border-neon-purple-500/40 bg-gradient-to-br from-[rgba(243,239,255,0.8)] via-white/90 to-[rgba(238,232,255,0.75)] dark:border-neon-purple-400/25 dark:from-[rgba(25,20,58,0.7)] dark:via-[rgba(34,26,82,0.65)] dark:to-[rgba(18,15,45,0.75)]',
     orange:
-      'border-orange-500/40 bg-gradient-to-br from-[#fff4eb]/80 via-white/90 to-[#fff0e2]/75 dark:border-orange-400/25 dark:from-[#2d1708]/70 dark:via-[#351d0d]/65 dark:to-[#1f1309]/75',
+      'border-neon-orange-500/40 bg-gradient-to-br from-[rgba(255,244,235,0.8)] via-white/90 to-[rgba(255,240,226,0.75)] dark:border-neon-orange-400/25 dark:from-[rgba(45,23,8,0.7)] dark:via-[rgba(53,29,13,0.65)] dark:to-[rgba(31,19,9,0.75)]',
     neutral:
       'border-white/60 bg-white/80 dark:border-white/10 dark:bg-white/5',
   },
@@ -25,11 +25,11 @@ const cardSurfaceVariants: Record<ChecklistVariant, Record<SurfaceIntent, string
     blue:
       'border-neon-blue-500/35 bg-[linear-gradient(135deg,rgba(20,36,74,0.82),rgba(8,13,30,0.94))]',
     green:
-      'border-emerald-400/35 bg-[linear-gradient(135deg,rgba(16,44,32,0.82),rgba(8,14,26,0.94))]',
+      'border-neon-green-400/35 bg-[linear-gradient(135deg,rgba(16,44,32,0.82),rgba(8,14,26,0.94))]',
     purple:
       'border-neon-purple-500/35 bg-[linear-gradient(135deg,rgba(36,24,64,0.82),rgba(11,13,32,0.95))]',
     orange:
-      'border-orange-400/35 bg-[linear-gradient(135deg,rgba(54,29,18,0.82),rgba(18,12,28,0.95))]',
+      'border-neon-orange-400/35 bg-[linear-gradient(135deg,rgba(54,29,18,0.82),rgba(18,12,28,0.95))]',
     neutral:
       'border-white/12 bg-[linear-gradient(135deg,rgba(18,22,36,0.82),rgba(7,10,22,0.94))]',
   },
@@ -50,7 +50,7 @@ const cardGlowVariants: Record<ChecklistVariant, Record<SurfaceIntent, string>> 
   },
   dark: {
     blue: 'from-[rgba(56,130,255,0.34)] via-[rgba(45,95,210,0.16)] to-transparent',
-    green: 'from-[rgba(45,212,191,0.32)] via-[rgba(34,197,94,0.14)] to-transparent',
+    green: 'from-[rgba(45,212,191,0.32)] via-[rgba(52,211,153,0.14)] to-transparent',
     purple: 'from-[rgba(167,139,250,0.36)] via-[rgba(129,140,248,0.18)] to-transparent',
     orange: 'from-[rgba(251,146,60,0.34)] via-[rgba(249,115,22,0.16)] to-transparent',
     neutral: 'from-[rgba(148,163,184,0.28)] via-[rgba(148,163,184,0.14)] to-transparent',

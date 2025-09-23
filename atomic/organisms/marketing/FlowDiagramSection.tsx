@@ -26,13 +26,13 @@ export type FlowDiagramSectionProps = {
 } & Omit<SectionSurfaceProps, 'children' | 'tone'>;
 
 const inputPalette = [
-  'border-neon-purple-500/40 bg-gradient-to-br from-[#f4efff] via-[#ede6ff] to-[#f7f4ff] dark:border-neon-purple-400/25 dark:from-[#1a163c] dark:via-[#241c55] dark:to-[#121335]',
-  'border-neon-blue-500/40 bg-gradient-to-br from-[#edf4ff] via-[#e8f1ff] to-[#f1f8ff] dark:border-neon-blue-400/25 dark:from-[#111a32] dark:via-[#1a2648] dark:to-[#0c1633]',
+  'border-neon-purple-500/40 bg-gradient-to-br from-neon-purple-50 via-neon-purple-100 to-neon-purple-50 dark:border-neon-purple-400/25 dark:from-[rgba(26,22,60,1)] dark:via-[rgba(36,28,85,1)] dark:to-[rgba(18,19,53,1)]',
+  'border-neon-blue-500/40 bg-gradient-to-br from-neon-blue-50 via-neon-blue-100 to-neon-blue-50 dark:border-neon-blue-400/25 dark:from-[rgba(17,26,50,1)] dark:via-[rgba(26,38,72,1)] dark:to-[rgba(12,22,51,1)]',
 ];
 
 const outputPalette = [
-  'border-emerald-500/40 bg-gradient-to-br from-[#e9fbf4] via-[#e3f7ef] to-[#f2fdf9] dark:border-emerald-400/25 dark:from-[#0d2b1e] dark:via-[#153b2a] dark:to-[#0b2015]',
-  'border-orange-500/40 bg-gradient-to-br from-[#fff2e8] via-[#ffeee0] to-[#fff8ee] dark:border-orange-400/25 dark:from-[#2c1807] dark:via-[#3b210b] dark:to-[#1f1309]',
+  'border-neon-green-500/40 bg-gradient-to-br from-neon-green-50 via-neon-green-100 to-neon-green-50 dark:border-neon-green-400/25 dark:from-[rgba(13,43,31,1)] dark:via-[rgba(21,59,41,1)] dark:to-[rgba(11,32,22,1)]',
+  'border-neon-orange-500/40 bg-gradient-to-br from-neon-orange-50 via-neon-yellow-50 to-neon-orange-50 dark:border-neon-orange-400/25 dark:from-[rgba(44,24,7,1)] dark:via-[rgba(59,31,11,1)] dark:to-[rgba(31,19,9,1)]',
 ];
 
 function renderNode(node: FlowNode, index: number, prefix: string): JSX.Element {
@@ -52,12 +52,12 @@ function renderNode(node: FlowNode, index: number, prefix: string): JSX.Element 
         <span>{prefix === 'input' ? 'Input' : 'Output'}</span>
         <span>{String(index + 1).padStart(2, '0')}</span>
       </div>
-      <h4 class='text-sm font-semibold text-neutral-900 dark:text-white'>{node.title}</h4>
+      <h4 class='text-sm font-semibold text-neutral-100 dark:text-white'>{node.title}</h4>
       {node.subtitle
-        ? <div class='text-xs text-neutral-600 dark:text-neutral-300'>{node.subtitle}</div>
+        ? <div class='text-xs text-neutral-300 dark:text-neutral-300'>{node.subtitle}</div>
         : null}
       {node.description
-        ? <p class='mt-2 text-xs text-neutral-600 dark:text-neutral-300'>{node.description}</p>
+        ? <p class='mt-2 text-xs text-neutral-300 dark:text-neutral-300'>{node.description}</p>
         : null}
     </div>
   );
@@ -93,7 +93,7 @@ export function FlowDiagramSection({
 
           <div class='flex flex-col items-center gap-4'>
             <div class='h-12 w-px bg-gradient-to-b from-neon-purple-400/40 via-transparent to-neon-blue-400/40 lg:h-full lg:w-px lg:bg-gradient-to-r' />
-            <div class='relative overflow-hidden rounded-3xl border border-white/60 bg-gradient-to-br from-[#221b63] via-[#3d2f9e] to-[#1f5db8] px-6 py-8 text-center text-white shadow-[0_40px_120px_-60px_rgba(41,33,125,0.65)] backdrop-blur-xl dark:border-white/20 dark:from-[#1a1452] dark:via-[#2d21a0] dark:to-[#124a94]'>
+            <div class='relative overflow-hidden rounded-3xl border border-white/60 bg-gradient-to-br from-slate-950 via-[#181d34] to-slate-900 px-6 py-8 text-center text-white shadow-[0_40px_120px_-60px_rgba(15,23,42,0.65)] backdrop-blur-xl dark:border-white/20 dark:from-[rgba(26,20,82,1)] dark:via-[rgba(45,33,160,1)] dark:to-[rgba(18,74,148,1)]'>
               <div
                 aria-hidden='true'
                 class='pointer-events-none absolute -top-10 right-1/2 h-40 w-40 translate-x-1/2 rounded-full bg-white/15 blur-3xl'
@@ -104,7 +104,7 @@ export function FlowDiagramSection({
                 ? <p class='mt-2 text-sm text-white/80'>{content.hub.description}</p>
                 : null}
             </div>
-            <div class='h-12 w-px bg-gradient-to-b from-neon-blue-400/40 via-transparent to-emerald-400/40 lg:h-full lg:w-px lg:bg-gradient-to-r' />
+            <div class='h-12 w-px bg-gradient-to-b from-neon-blue-400/40 via-transparent to-neon-green-400/40 lg:h-full lg:w-px lg:bg-gradient-to-r' />
           </div>
 
           <div class='relative space-y-4 lg:pl-8'>

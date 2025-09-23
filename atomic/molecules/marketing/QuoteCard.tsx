@@ -7,7 +7,7 @@ type AccentPalette = Record<GradientIntent, { top: string; bottom: string }>;
 
 const quoteSurfaceVariants: Record<QuoteCardVariant, string> = {
   light:
-    'group relative overflow-hidden rounded-3xl border border-white/60 bg-gradient-to-br from-[#f2efff] via-[#f8f5ff] to-[#e8f4ff] p-6 text-left shadow-[0_35px_90px_-70px_rgba(62,45,171,0.55)] backdrop-blur-sm transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_50px_140px_-80px_rgba(62,45,171,0.6)] dark:border-white/10 dark:from-[#181436] dark:via-[#261d58] dark:to-[#0d1d3d]',
+    'group relative overflow-hidden rounded-3xl border border-white/60 bg-gradient-to-br from-[rgba(245,243,255,1)] via-[rgba(248,245,255,1)] to-[rgba(232,244,255,1)] p-6 text-left shadow-[0_35px_90px_-70px_rgba(62,45,171,0.55)] backdrop-blur-sm transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_50px_140px_-80px_rgba(62,45,171,0.6)] dark:border-white/10 dark:from-[rgba(24,20,54,1)] dark:via-[rgba(38,29,88,1)] dark:to-[rgba(13,29,61,1)]',
   dark:
     'group relative overflow-hidden rounded-[24px] border border-white/12 bg-[linear-gradient(130deg,rgba(19,23,44,0.92),rgba(8,11,26,0.96))] p-6 text-left shadow-[0_38px_140px_-110px_rgba(10,14,42,0.95)] backdrop-blur-sm transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_60px_170px_-120px_rgba(18,28,76,0.95)]',
 };
@@ -20,14 +20,14 @@ const glowPalettes: Record<QuoteCardVariant, AccentPalette> = {
     },
     blue: {
       top: 'bg-neon-blue-500/25 dark:bg-neon-blue-500/30',
-      bottom: 'bg-emerald-400/25 dark:bg-emerald-400/30',
+      bottom: 'bg-neon-green-400/25 dark:bg-neon-green-400/30',
     },
     green: {
-      top: 'bg-emerald-400/25 dark:bg-emerald-400/30',
+      top: 'bg-neon-green-400/25 dark:bg-neon-green-400/30',
       bottom: 'bg-neon-blue-400/25 dark:bg-neon-blue-400/30',
     },
     orange: {
-      top: 'bg-orange-400/25 dark:bg-orange-400/30',
+      top: 'bg-neon-orange-500/25 dark:bg-neon-orange-500/30',
       bottom: 'bg-neon-purple-500/25 dark:bg-neon-purple-500/30',
     },
   },

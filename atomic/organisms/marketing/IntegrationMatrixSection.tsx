@@ -12,23 +12,23 @@ import { ChipList } from '../../atoms/marketing/ChipList.tsx';
 const columnPalettes = [
   {
     surface:
-      'border-neon-purple-500/40 bg-gradient-to-br from-[#f4efff] via-[#ece4ff] to-[#f5f2ff] dark:border-neon-purple-400/25 dark:from-[#18143a] dark:via-[#241c55] dark:to-[#101331]',
-    chip: 'bg-neon-purple-500/15 text-neutral-800 dark:bg-neon-purple-500/20 dark:text-white',
+      'border-neon-purple-500/35 bg-gradient-to-br from-[rgba(18,20,38,0.95)] via-[rgba(22,24,45,0.82)] to-[rgba(12,15,31,0.92)] dark:border-neon-purple-400/30 dark:from-[rgba(24,20,58,1)] dark:via-[rgba(36,28,85,1)] dark:to-[rgba(16,19,49,1)]',
+    chip: 'bg-neon-purple-500/15 text-neutral-100 dark:bg-neon-purple-500/20 dark:text-white',
   },
   {
     surface:
-      'border-neon-blue-500/40 bg-gradient-to-br from-[#edf4ff] via-[#e7f0ff] to-[#f0f7ff] dark:border-neon-blue-400/25 dark:from-[#10182f] dark:via-[#182349] dark:to-[#0b1634]',
-    chip: 'bg-neon-blue-500/15 text-neutral-800 dark:bg-neon-blue-500/20 dark:text-white',
+      'border-neon-blue-500/35 bg-gradient-to-br from-[rgba(16,19,38,0.95)] via-[rgba(18,24,45,0.82)] to-[rgba(10,14,31,0.92)] dark:border-neon-blue-400/30 dark:from-[rgba(16,24,47,1)] dark:via-[rgba(24,35,73,1)] dark:to-[rgba(11,22,52,1)]',
+    chip: 'bg-neon-blue-500/15 text-neutral-100 dark:bg-neon-blue-500/20 dark:text-white',
   },
   {
     surface:
-      'border-orange-500/40 bg-gradient-to-br from-[#fff2e8] via-[#ffece0] to-[#fff8ef] dark:border-orange-400/25 dark:from-[#2a1707] dark:via-[#3a1f0b] dark:to-[#1f1309]',
-    chip: 'bg-orange-500/15 text-neutral-800 dark:bg-orange-500/25 dark:text-white',
+      'border-neon-orange-500/35 bg-gradient-to-br from-[rgba(24,18,20,0.95)] via-[rgba(28,20,24,0.82)] to-[rgba(16,12,18,0.92)] dark:border-neon-orange-400/30 dark:from-[rgba(42,23,7,1)] dark:via-[rgba(58,31,11,1)] dark:to-[rgba(31,19,9,1)]',
+    chip: 'bg-neon-orange-500/15 text-neutral-100 dark:bg-neon-orange-500/25 dark:text-white',
   },
   {
     surface:
-      'border-emerald-500/40 bg-gradient-to-br from-[#e9fbf4] via-[#e3f7ef] to-[#f1fdf8] dark:border-emerald-400/25 dark:from-[#0c2a1d] dark:via-[#153b29] dark:to-[#0a2016]',
-    chip: 'bg-emerald-500/15 text-neutral-800 dark:bg-emerald-500/25 dark:text-white',
+      'border-neon-green-500/35 bg-gradient-to-br from-[rgba(18,28,30,0.95)] via-[rgba(20,32,34,0.82)] to-[rgba(12,21,24,0.92)] dark:border-neon-green-400/30 dark:from-[rgba(12,42,29,1)] dark:via-[rgba(21,59,41,1)] dark:to-[rgba(10,32,22,1)]',
+    chip: 'bg-neon-green-500/15 text-neutral-100 dark:bg-neon-green-500/25 dark:text-white',
   },
 ];
 
@@ -81,7 +81,7 @@ export function IntegrationMatrixSection({
                   aria-hidden='true'
                   class='pointer-events-none absolute -top-20 right-[-35%] h-52 w-52 rounded-full bg-white/25 blur-3xl opacity-70 transition-opacity duration-500 group-hover:opacity-100 dark:bg-white/15'
                 />
-                <h3 class='text-lg font-semibold text-neutral-900 dark:text-white'>
+                <h3 class='text-lg font-semibold text-neutral-100 dark:text-white'>
                   {column.title}
                 </h3>
                 <div class='flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-neutral-400 dark:text-neutral-500'>

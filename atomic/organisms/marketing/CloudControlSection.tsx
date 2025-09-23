@@ -16,10 +16,10 @@ const intentSurfaceMap: Record<GradientIntent, string> = {
   blue:
     'border-neon-blue-500/40 bg-neon-blue-500/10 dark:border-neon-blue-400/30 dark:bg-neon-blue-500/10',
   green:
-    'border-emerald-500/40 bg-emerald-500/10 dark:border-emerald-400/30 dark:bg-emerald-500/10',
+    'border-neon-green-500/40 bg-neon-green-500/10 dark:border-neon-green-400/30 dark:bg-neon-green-500/10',
   purple:
     'border-neon-purple-500/40 bg-neon-purple-500/10 dark:border-neon-purple-400/30 dark:bg-neon-purple-500/10',
-  orange: 'border-orange-500/40 bg-orange-500/10 dark:border-orange-400/30 dark:bg-orange-500/10',
+  orange: 'border-neon-orange-500/40 bg-neon-orange-500/10 dark:border-neon-orange-400/30 dark:bg-neon-orange-500/10',
 };
 
 const neutralSurface = 'border-neutral-200/80 bg-white/70 dark:border-white/10 dark:bg-white/5';
@@ -76,12 +76,12 @@ export function CloudControlSection({
                     <span class='mt-1 block h-2 w-2 rounded-full bg-neutral-400 dark:bg-neutral-500' />
                   )}
                 <div>
-                  <h4 class='text-base font-semibold text-neutral-900 dark:text-white'>
+                  <h4 class='text-base font-semibold text-neutral-100 dark:text-white'>
                     {item.title}
                   </h4>
                   {item.description
                     ? (
-                      <p class='mt-1 text-sm text-neutral-600 dark:text-neutral-300'>
+                      <p class='mt-1 text-sm text-neutral-300 dark:text-neutral-300'>
                         {item.description}
                       </p>
                     )
