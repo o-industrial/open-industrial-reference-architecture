@@ -44,7 +44,7 @@ function renderNode(node: FlowNode, index: number, prefix: string): JSX.Element 
     <div
       key={`${prefix}-${index}-${node.title}`}
       class={classSet([
-        'space-y-2 rounded-2xl border p-4 text-center shadow-[0_18px_60px_-50px_rgba(62,45,171,0.45)] backdrop-blur-sm',
+        'space-y-2 rounded-2xl border p-4 text-center shadow-[0_18px_60px_-50px_rgba(62,45,171,0.45)] backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_28px_90px_-60px_rgba(62,45,171,0.5)]',
         palette,
       ])}
     >
@@ -86,7 +86,8 @@ export function FlowDiagramSection({
         <SectionHeader {...header} align={header.align ?? 'center'} />
 
         <div class='grid gap-8 lg:grid-cols-[1fr_auto_1fr] lg:items-start'>
-          <div class='space-y-4'>
+          <div class='relative space-y-4 lg:pr-8'>
+            <div class='pointer-events-none absolute inset-y-8 -right-3 hidden w-px bg-gradient-to-b from-transparent via-white/60 to-transparent dark:via-white/10 lg:block' />
             {content.inputs.map((node, index) => renderNode(node, index, 'input'))}
           </div>
 
@@ -106,7 +107,8 @@ export function FlowDiagramSection({
             <div class='h-12 w-px bg-gradient-to-b from-neon-blue-400/40 via-transparent to-emerald-400/40 lg:h-full lg:w-px lg:bg-gradient-to-r' />
           </div>
 
-          <div class='space-y-4'>
+          <div class='relative space-y-4 lg:pl-8'>
+            <div class='pointer-events-none absolute inset-y-8 -left-3 hidden w-px bg-gradient-to-b from-transparent via-white/60 to-transparent dark:via-white/10 lg:block' />
             {content.outputs.map((node, index) => renderNode(node, index, 'output'))}
           </div>
         </div>
