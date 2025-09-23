@@ -1,5 +1,8 @@
 import { classSet, JSX } from '../../.deps.ts';
-import { SectionSurface } from '../../atoms/marketing/SectionSurface.tsx';
+import {
+  SectionSurface,
+  type SectionSurfaceProps,
+} from '../../atoms/marketing/SectionSurface.tsx';
 import {
   SectionHeader,
   type SectionHeaderProps,
@@ -13,7 +16,7 @@ export type StepsSectionProps = {
   header: SectionHeaderProps;
   steps: ChecklistGroupProps['items'];
   columns?: ChecklistGroupProps['columns'];
-} & JSX.HTMLAttributes<HTMLElement>;
+} & Omit<SectionSurfaceProps, 'children' | 'tone'>;
 
 export function StepsSection({
   header,
@@ -26,8 +29,15 @@ export function StepsSection({
     <SectionSurface
       tone='muted'
       {...rest}
-      class={classSet([], { class: className })}
+      class={classSet(['relative overflow-hidden'], { class: className })}
     >
+      <div
+        aria-hidden='true'
+        class='pointer-events-none absolute inset-0'
+      >
+        <div class='absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(167,139,250,0.14),_rgba(255,255,255,0)_75%)] opacity-80 dark:bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.2),_rgba(8,13,35,0)_78%)]' />
+        <div class='absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-white/50 to-transparent dark:via-white/10' />
+      </div>
       <div class='space-y-12'>
         <SectionHeader {...header} align={header.align ?? 'center'} />
 
