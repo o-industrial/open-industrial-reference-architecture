@@ -22,6 +22,7 @@ export type ValueGridSectionProps = {
   tone?: SectionSurfaceTone;
   variant?: ValueGridSectionVariant;
   cardVariant?: FeatureCardProps['variant'];
+  showIndexBadge?: boolean;
 } & Omit<SectionSurfaceProps, 'children' | 'tone'>;
 
 export function ValueGridSection({
@@ -31,6 +32,7 @@ export function ValueGridSection({
   tone,
   variant = 'light',
   cardVariant,
+  showIndexBadge = false,
   class: className,
   ...rest
 }: ValueGridSectionProps): JSX.Element {
@@ -78,6 +80,8 @@ export function ValueGridSection({
               key={`feature-${index}`}
               {...item}
               variant={resolvedCardVariant}
+              index={index}
+              showIndexBadge={showIndexBadge}
             />
           ))}
         </div>

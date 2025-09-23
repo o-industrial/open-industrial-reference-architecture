@@ -21,6 +21,10 @@ type DescriptionMap = Record<FeatureCardVariant, string>;
 
 type TitleMap = Record<FeatureCardVariant, string>;
 
+type IndexBadgeMap = Record<GradientIntent, string>;
+
+type HighlightPillMap = Record<GradientIntent, string>;
+
 const surfaceMap: SurfaceMap = {
   light: {
     blue:
@@ -84,7 +88,7 @@ const highlightMap: HighlightMap = {
   light:
     'relative space-y-2 rounded-2xl border border-white/70 bg-white/70 p-4 text-sm text-neutral-600 shadow-inner dark:border-white/10 dark:bg-white/5 dark:text-neutral-300',
   dark:
-    'relative space-y-2 rounded-2xl border border-white/12 bg-[linear-gradient(135deg,rgba(10,14,28,0.82),rgba(6,9,20,0.9))] p-4 text-sm text-white/70 shadow-[inset_0_0_35px_-20px_rgba(10,16,40,0.85)]',
+    'relative flex flex-col gap-3',
 };
 
 const chipMap: ChipMap = {
@@ -104,6 +108,20 @@ const titleMap: TitleMap = {
   dark: 'text-xl font-semibold text-white',
 };
 
+const indexBadgeMap: IndexBadgeMap = {
+  blue: 'from-neon-blue-500 via-sky-500 to-indigo-500',
+  green: 'from-emerald-500 via-teal-400 to-emerald-300',
+  purple: 'from-neon-purple-500 via-purple-500 to-indigo-500',
+  orange: 'from-orange-500 via-amber-500 to-orange-400',
+};
+
+const highlightPillMap: HighlightPillMap = {
+  blue: 'bg-gradient-to-r from-[rgba(56,130,255,0.78)] via-[rgba(76,132,255,0.68)] to-[rgba(37,99,235,0.75)]',
+  green: 'bg-gradient-to-r from-[rgba(16,185,129,0.78)] via-[rgba(5,150,105,0.68)] to-[rgba(4,120,87,0.75)]',
+  purple: 'bg-gradient-to-r from-[rgba(167,139,250,0.82)] via-[rgba(129,140,248,0.72)] to-[rgba(99,102,241,0.82)]',
+  orange: 'bg-gradient-to-r from-[rgba(249,115,22,0.82)] via-[rgba(251,146,60,0.72)] to-[rgba(234,88,12,0.82)]',
+};
+
 export type FeatureCardProps = {
   title: string;
   description: JSX.Element | string;
@@ -112,6 +130,8 @@ export type FeatureCardProps = {
   highlights?: string[];
   chips?: string[];
   variant?: FeatureCardVariant;
+  index?: number;
+  showIndexBadge?: boolean;
 } & Omit<JSX.HTMLAttributes<HTMLElement>, 'icon'>;
 
 export function FeatureCard({
@@ -122,11 +142,17 @@ export function FeatureCard({
   highlights,
   chips,
   variant = 'light',
+  index,
+  showIndexBadge = false,
   ...rest
 }: FeatureCardProps): JSX.Element {
   const surfaceIntent = surfaceMap[variant][intent] ?? surfaceMap[variant].blue;
   const glowIntent = glowMap[variant][intent] ?? glowMap[variant].blue;
   const bulletAccent = bulletMap[variant][intent] ?? bulletMap[variant].blue;
+
+  const displayIndex = showIndexBadge && typeof index === 'number'
+    ? index + 1
+    : undefined;
 
   return (
     <article
@@ -150,7 +176,15 @@ export function FeatureCard({
         ])}
       />
       <div class='relative flex items-start gap-4'>
-        {Icon
+        {displayIndex !== undefined
+          ? (
+            <span
+              class={`inline-flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br text-base font-semibold text-white shadow-lg shadow-black/30 ${indexBadgeMap[intent]}`}
+            >
+              {String(displayIndex).padStart(2, '0')}
+            </span>
+          )
+          : Icon
           ? (
             <GradientIconBadge
               icon={Icon}
@@ -170,14 +204,29 @@ export function FeatureCard({
 
       {highlights?.length
         ? (
-          <ul class={highlightMap[variant]}>
-            {highlights.map((item) => (
-              <li key={item} class='flex items-start gap-3'>
-                <span class={`mt-1 h-2 w-2 rounded-full ${bulletAccent}`} />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
+          variant === 'dark'
+            ? (
+              <div class={highlightMap[variant]}>
+                {highlights.map((item) => (
+                  <span
+                    key={item}
+                    class={`inline-flex items-center gap-3 rounded-[18px] border border-white/12 px-4 py-2 text-sm font-medium text-white shadow-[0_12px_40px_-24px_rgba(20,40,80,0.9)] ${highlightPillMap[intent]}`}
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            )
+            : (
+              <ul class={highlightMap[variant]}>
+                {highlights.map((item) => (
+                  <li key={item} class='flex items-start gap-3'>
+                    <span class={`mt-1 h-2 w-2 rounded-full ${bulletAccent}`} />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            )
         )
         : null}
 
