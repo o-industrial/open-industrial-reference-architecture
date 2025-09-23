@@ -168,13 +168,6 @@ export function FlowDiagramSection({
       {...rest}
       class={classSet(['relative overflow-hidden'], { class: className })}
     >
-      <div
-        aria-hidden='true'
-        class='pointer-events-none absolute inset-0'
-      >
-        <div class='absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(167,139,250,0.12),_rgba(255,255,255,0)_70%)] dark:bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.18),_rgba(8,13,35,0)_72%)]' />
-        <div class='absolute inset-0 bg-[linear-gradient(120deg,_rgba(255,255,255,0.18)_0%,_rgba(255,255,255,0)_35%)] opacity-50 dark:bg-[linear-gradient(120deg,_rgba(255,255,255,0.08)_0%,_rgba(255,255,255,0)_35%)]' />
-      </div>
       <div class='space-y-12'>
         <SectionHeader {...header} align={header.align ?? 'center'} />
 
