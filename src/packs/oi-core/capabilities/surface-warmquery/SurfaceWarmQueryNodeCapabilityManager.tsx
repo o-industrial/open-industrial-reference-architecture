@@ -401,7 +401,7 @@ export class SurfaceWarmQueryNodeCapabilityManager
     const apiPath = wq.Details?.ApiPath?.toString().trim();
     const query = wq.Details?.Query?.toString().trim();
     const description = wq.Details?.Description?.toString().trim();
-    debugger;
+
     if (!name) {
       errors.push({ code: 'REQUIRED', field: 'Details.Name', message: 'Name is required' });
     }

@@ -8,6 +8,7 @@ export class HistoryManager {
   protected committed: EaCHistorySnapshot | null = null;
   protected dirty = false;
   protected maxHistory = 100;
+  protected lastLoggedDirtyPointer = -1;
 
   protected listeners: Set<() => void> = new Set<() => void>();
 
@@ -39,11 +40,16 @@ export class HistoryManager {
 
     const a = this.stableStringify(current.eac);
     const b = this.stableStringify(this.committed.eac);
-    if (a !== b) return true;
+    if (a !== b) {
+      this.maybeLogDirty('eac', a, b);
+      return true;
+    }
 
     const ad = this.stableStringify(current.deletes);
     const bd = this.stableStringify(this.committed.deletes);
-    return ad !== bd;
+    const delDirty = ad !== bd;
+    if (delDirty) this.maybeLogDirty('deletes', ad, bd);
+    return delDirty;
   }
 
   public CanUndo(): boolean {
@@ -139,7 +145,41 @@ export class HistoryManager {
     for (const cb of this.listeners) cb();
   }
 
+  protected isDebugEnabled(): boolean {
+    try {
+      type DebugGlobal = { OI_DEBUG?: { history?: boolean } };
+      const g = globalThis as unknown as DebugGlobal;
+      if (g.OI_DEBUG?.history) return true;
+      if (typeof localStorage !== 'undefined') {
+        return localStorage.getItem('OI_DEBUG_HISTORY') === '1';
+      }
+    } catch (_) {
+      // ignore
+    }
+    return false;
+  }
+
+  protected maybeLogDirty(kind: 'eac' | 'deletes', cur: string, base: string): void {
+    if (!this.isDebugEnabled()) return;
+    if (this.pointer === this.lastLoggedDirtyPointer) return;
+    this.lastLoggedDirtyPointer = this.pointer;
+
+    try {
+      console.debug('[HistoryManager] Unsaved changes detected:', {
+        version: this.pointer,
+        kind,
+      });
+      // Keep the heavy logs collapsed and only on demand
+      console.debug('[HistoryManager] current.' + kind, cur);
+      console.debug('[HistoryManager] committed.' + kind, base);
+    } catch (_) {
+      // best-effort logging
+    }
+  }
+
   // Deterministic JSON stringify (recursive lexicographic key order)
+  // Additionally prunes empty objects so that {} is treated like an absent key
+  // during structural comparisons (helps dirty-checks when shells remain).
   protected stableStringify(value: unknown): string {
     const normalize = (v: unknown): unknown => {
       if (Array.isArray(v)) return v.map((x) => normalize(x));
@@ -147,7 +187,17 @@ export class HistoryManager {
         const obj = v as Record<string, unknown>;
         const keys = Object.keys(obj).sort();
         const out: Record<string, unknown> = {};
-        for (const k of keys) out[k] = normalize(obj[k]);
+        for (const k of keys) {
+          const nv = normalize(obj[k]);
+          // prune empty objects
+          if (
+            nv && typeof nv === 'object' && !Array.isArray(nv) &&
+            Object.keys(nv as Record<string, unknown>).length === 0
+          ) {
+            continue;
+          }
+          out[k] = nv;
+        }
         return out;
       }
       return v;
