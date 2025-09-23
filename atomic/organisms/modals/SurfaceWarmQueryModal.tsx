@@ -1,15 +1,15 @@
 // deno-lint-ignore-file no-explicit-any
 
 // SurfaceWarmQueryModal.tsx
-import { Modal, TabbedPanel } from '../../../../../atomic/.exports.ts';
+import { Modal, TabbedPanel } from '../../.exports.ts';
 import { marked } from 'npm:marked@15.0.1';
 import { useEffect, useRef, useState } from 'npm:preact@10.20.1/hooks';
-import { Action } from '../../../../../atomic/.exports.ts';
+import { Action } from '../../.exports.ts';
 import type { FunctionalComponent } from 'npm:preact@10.20.1';
-import { AziPanel } from '../../../../../atomic/organisms/.exports.ts';
+import { AziPanel } from '../.exports.ts';
 import { SurfaceWarmQueryModalQuery } from './SurfaceWarmQueryModalQuery.tsx';
 import { SurfaceWarmQueryModalResults } from './SurfaceWarmQueryModalResults.tsx';
-import { AziState, WorkspaceManager } from '../../../../flow/.exports.ts';
+import { AziState, WorkspaceManager } from '../../../src/flow/.exports.ts';
 import { KustoResponseDataSet } from 'npm:azure-kusto-data@6.0.2';
 
 interface SurfaceWarmQueryModalProps {
