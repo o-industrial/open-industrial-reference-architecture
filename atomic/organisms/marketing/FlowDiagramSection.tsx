@@ -82,7 +82,39 @@ function renderNode(node: FlowNode, index: number, prefix: 'input' | 'output'): 
     ? inputDecor[index % inputDecor.length]
     : outputDecor[index % outputDecor.length];
 
-  const symbol = node.title.charAt(0).toUpperCase();
+  const glyph = prefix === 'input'
+    ? (
+      <svg
+        aria-hidden='true'
+        class='h-5 w-5 text-white/90'
+        fill='none'
+        stroke='currentColor'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        strokeWidth='1.6'
+        viewBox='0 0 20 20'
+      >
+        <path d='M3.5 10h9.5' />
+        <path d='M9.8 6.2 13.6 10l-3.8 3.8' />
+        <path d='M3.5 5.6v8.8' opacity='0.4' />
+      </svg>
+    )
+    : (
+      <svg
+        aria-hidden='true'
+        class='h-5 w-5 text-white/90'
+        fill='none'
+        stroke='currentColor'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        strokeWidth='1.6'
+        viewBox='0 0 20 20'
+      >
+        <path d='M16.5 10h-9.5' />
+        <path d='M10.2 6.2 6.4 10l3.8 3.8' />
+        <path d='M16.5 5.6v8.8' opacity='0.35' />
+      </svg>
+    );
 
   return (
     <div
@@ -105,7 +137,7 @@ function renderNode(node: FlowNode, index: number, prefix: 'input' | 'output'): 
           decor.icon,
         ])}
       >
-        {symbol}
+        {glyph}
       </span>
       <div class='space-y-2 text-white'>
         <h4 class='text-sm font-semibold'>{node.title}</h4>
@@ -115,12 +147,6 @@ function renderNode(node: FlowNode, index: number, prefix: 'input' | 'output'): 
         {node.description
           ? <p class='text-[0.72rem] text-white/60'>{node.description}</p>
           : null}
-      </div>
-      <div class='flex items-center justify-center gap-3 text-[0.58rem] uppercase tracking-[0.3em] text-white/55'>
-        <span class='rounded-full bg-white/10 px-3 py-1 text-white/65 backdrop-blur-sm'>
-          {prefix === 'input' ? 'Input' : 'Output'}
-        </span>
-        <span class='text-white/35'>{String(index + 1).padStart(2, '0')}</span>
       </div>
     </div>
   );
@@ -157,7 +183,7 @@ export function FlowDiagramSection({
             <header class='text-center text-xs font-semibold uppercase tracking-[0.4em] text-white/60'>
               Input Systems
             </header>
-            <div class='grid w-full gap-4 grid-cols-2 sm:grid-cols-4'>
+            <div class='grid w-full gap-4 grid-cols-4'>
               {content.inputs.map((node, index) => renderNode(node, index, 'input'))}
             </div>
           </div>
@@ -196,7 +222,7 @@ export function FlowDiagramSection({
             <header class='text-center text-xs font-semibold uppercase tracking-[0.4em] text-white/60'>
               Output Destinations
             </header>
-            <div class='grid w-full gap-4 grid-cols-2 sm:grid-cols-4'>
+            <div class='grid w-full gap-4 grid-cols-4'>
               {content.outputs.map((node, index) => renderNode(node, index, 'output'))}
             </div>
           </div>

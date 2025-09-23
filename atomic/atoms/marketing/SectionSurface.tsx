@@ -7,7 +7,7 @@ export type SectionSurfaceProps = {
   tone?: SectionSurfaceTone;
   width?: 'default' | 'wide' | 'full';
   contentClass?: string;
-} & JSX.HTMLAttributes<HTMLElement>;
+} & Omit<JSX.HTMLAttributes<HTMLElement>, 'width'>;
 
 const toneMap: Record<SectionSurfaceTone, string> = {
   default: 'bg-white dark:bg-neutral-950',
