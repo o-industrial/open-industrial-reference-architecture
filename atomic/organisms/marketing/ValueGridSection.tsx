@@ -1,4 +1,4 @@
-﻿import { classSet, JSX } from '../../.deps.ts';
+import { classSet, JSX } from '../../.deps.ts';
 import {
   SectionSurface,
   type SectionSurfaceProps,
@@ -23,6 +23,7 @@ export type ValueGridSectionProps = {
   variant?: ValueGridSectionVariant;
   cardVariant?: FeatureCardProps['variant'];
   showIndexBadge?: boolean;
+  disableAccents?: boolean;
 } & Omit<SectionSurfaceProps, 'children' | 'tone'>;
 
 export function ValueGridSection({
@@ -33,6 +34,7 @@ export function ValueGridSection({
   variant = 'light',
   cardVariant,
   showIndexBadge = false,
+  disableAccents = false,
   class: className,
   ...rest
 }: ValueGridSectionProps): JSX.Element {
@@ -56,6 +58,7 @@ export function ValueGridSection({
     : 'absolute -right-16 top-24 h-48 w-48 rounded-full bg-[radial-gradient(circle,_rgba(148,163,184,0.18),_rgba(255,255,255,0)_70%)] blur-[120px] dark:bg-[radial-gradient(circle,_rgba(34,211,238,0.28),_rgba(255,255,255,0)_72%)]';
 
   const resolvedCardVariant = cardVariant ?? (variant === 'dark' ? 'dark' : 'light');
+  const showAccents = !disableAccents;
 
   return (
     <SectionSurface
@@ -63,14 +66,16 @@ export function ValueGridSection({
       {...rest}
       class={classSet(['relative overflow-hidden'], { class: className })}
     >
-      <div
-        aria-hidden='true'
-        class='pointer-events-none absolute inset-0'
-      >
-        <div class={overlayClass} />
-        <div class={leftGlowClass} />
-        <div class={rightGlowClass} />
-      </div>
+      {showAccents ? (
+        <div
+          aria-hidden='true'
+          class='pointer-events-none absolute inset-0'
+        >
+          <div class={overlayClass} />
+          <div class={leftGlowClass} />
+          <div class={rightGlowClass} />
+        </div>
+      ) : null}
       <div class='space-y-14'>
         <SectionHeader {...header} align={header.align ?? 'center'} />
 
