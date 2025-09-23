@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import {
   ComponentType,
   Connection,
@@ -917,7 +918,15 @@ export class WorkspaceManager {
       version,
       undo: () => this.Undo(),
       redo: () => this.Redo(),
-      commit: () => this.Commit(),
+      commit: async () => {
+        const validation = this.ValidateGraph();
+        if (validation.errors.length > 0) {
+          console.warn('[WorkspaceManager] Validation failed before commit:', validation);
+          // Do not commit here; caller UI should show a modal using ValidateGraph()
+          return;
+        }
+        await this.Commit();
+      },
       deploy: async () => {
         setIsDeploying(true);
 
@@ -985,15 +994,63 @@ export class WorkspaceManager {
         setDetails((prev): EaCVertexDetails => {
           const merged = merge<EaCVertexDetails>(prev, next);
 
-          if (selectedId) {
-            this.EaC.UpdateNodePatch(selectedId, { Details: merged });
-            console.log(`🟢 Live-synced EaC details for node ${selectedId}`);
+          // Normalize: trim strings and drop empties
+          const normalized: EaCVertexDetails = { ...merged };
+          for (const k of Object.keys(normalized)) {
+            const v = (normalized as any)[k];
+            if (typeof v === 'string') {
+              const t = v.trim();
+              if (t.length === 0) {
+                delete (normalized as any)[k];
+              } else {
+                (normalized as any)[k] = t;
+              }
+            }
           }
 
-          return merged;
+          if (selectedId) {
+            // Compute removed string keys (e.g., user cleared a field)
+            const removed: string[] = [];
+            for (const k of Object.keys(prev)) {
+              const pv = (prev as any)[k];
+              if (typeof pv === 'string' && !(k in normalized)) removed.push(k);
+            }
+
+            // Only push when the normalized differs from current
+            const current = this.EaC.GetNodeAsCode(selectedId)?.Details ?? {};
+            const stable = (obj: unknown) => {
+              const norm = (v: unknown): unknown => {
+                if (Array.isArray(v)) return v.map((x) => norm(x));
+                if (v && typeof v === 'object') {
+                  const o = v as Record<string, unknown>;
+                  const keys = Object.keys(o).sort();
+                  const out: Record<string, unknown> = {};
+                  for (const k of keys) out[k] = norm(o[k]);
+                  return out;
+                }
+                return v;
+              };
+              return JSON.stringify(norm(obj));
+            };
+
+            if (stable(current) !== stable(normalized)) {
+              this.EaC.UpdateNodePatch(selectedId, { Details: normalized });
+              console.log('[UseInspector] Live-synced EaC details for node', selectedId);
+            }
+
+            // If any keys were removed and this is a warmquery node, emit delete patch
+            if (removed.length && selected?.type === 'warmquery') {
+              const del: any = { WarmQueries: { [selectedId]: { Details: {} } } };
+              for (const k of removed) del.WarmQueries[selectedId].Details[k] = null;
+              this.EaC.MergeDelete(del);
+              console.log('[UseInspector] Deleted fields for', selectedId, removed);
+            }
+          }
+
+          return normalized;
         });
       },
-      [selectedId],
+      [selectedId, selected],
     );
 
     const handleToggleEnabled = useCallback(
@@ -1190,7 +1247,6 @@ export class WorkspaceManager {
         setLicLookup(lookup);
         const lic = parentEaC.Licenses![lookup];
         setLicense(lic);
-        // deno-lint-ignore no-explicit-any
         const details: any = lic.Details;
         setStripePublishableKey(details?.PublishableKey);
       }
@@ -1424,7 +1480,6 @@ export class WorkspaceManager {
     const acs = identity?.AccessConfigurations ?? {};
 
     const match = Object.entries(acs).find(([_, ac]) => {
-      // deno-lint-ignore no-explicit-any
       const rights = (ac as any)?.AccessRightLookups ?? (ac as any)?.AccessRights ?? [];
       return Array.isArray(rights) && rights.includes(rightLookup);
     });
@@ -1653,6 +1708,44 @@ export class WorkspaceManager {
     if (status.Processing === EaCStatusProcessingTypes.COMPLETE) {
       this.History.Commit();
     }
+  }
+
+  // Validate all graph nodes against their capability managers
+  public ValidateGraph(): {
+    errors: Array<{
+      node: { ID: string; Type: string; Label?: string };
+      issues: { code?: string; field?: string; message: string }[];
+    }>;
+  } {
+    const nodes = this.Graph.GetGraph().Nodes;
+    const caps = this.EaC.GetCapabilities();
+    // Validate against the current in-memory snapshot (including unsaved diffs)
+    const snapshot = this.History.GetCurrent();
+    const liveEaC = snapshot.eac;
+    const ctx = {
+      GetEaC: () => liveEaC,
+      ...(this.currentScope.Scope === 'surface' && this.currentScope.Lookup
+        ? { SurfaceLookup: this.currentScope.Lookup }
+        : {}),
+    } as any;
+
+    const errors: Array<{
+      node: { ID: string; Type: string; Label?: string };
+      issues: { code?: string; field?: string; message: string }[];
+    }> = [];
+
+    for (const n of nodes) {
+      const cap = caps.GetCapabilityFor(n);
+      const hasValidate = cap && typeof (cap as any).Validate === 'function';
+      if (!hasValidate) continue;
+
+      const res = (cap as any).Validate(n, ctx);
+      if (res && res.valid === false && Array.isArray(res.errors) && res.errors.length) {
+        errors.push({ node: { ID: n.ID, Type: n.Type, Label: n.Label }, issues: res.errors });
+      }
+    }
+
+    return { errors };
   }
 
   public async Deploy(): Promise<void> {

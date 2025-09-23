@@ -14,6 +14,19 @@ import { NodeEventRouter } from '../../types/nodes/NodeEventRouter.ts';
 import { NodePreset } from '../../types/react/NodePreset.ts';
 import { WorkspaceManager } from '../WorkspaceManager.tsx';
 
+// Validation result types for capability managers
+export type CapabilityValidationIssue = {
+  code?: string;
+  field?: string;
+  message: string;
+};
+
+export type CapabilityValidationResult = {
+  valid: boolean;
+  errors: CapabilityValidationIssue[];
+  warnings?: CapabilityValidationIssue[];
+};
+
 /**
  * Abstract base class for managing scoped node capabilities in the EaC model.
  *
@@ -176,6 +189,16 @@ export abstract class EaCNodeCapabilityManager<
    */
   public Matches(node: FlowGraphNode): boolean {
     return node.Type === this.Type;
+  }
+
+  /**
+   * Validates the given node; base implementation is valid with no errors.
+   */
+  public Validate(
+    _node: FlowGraphNode,
+    _context: EaCNodeCapabilityContext,
+  ): CapabilityValidationResult {
+    return { valid: true, errors: [] };
   }
 
   // ---------------------------------------------------------------------

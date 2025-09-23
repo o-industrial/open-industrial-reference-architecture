@@ -1,6 +1,8 @@
+// deno-lint-ignore-file no-explicit-any
 import { Position } from '../../../../eac/.exports.ts';
 import { EaCFlowNodeMetadata } from '../../../../eac/EaCFlowNodeMetadata.ts';
 import {
+  CapabilityValidationResult,
   EaCNodeCapabilityAsCode,
   EaCNodeCapabilityContext,
   EaCNodeCapabilityManager,
@@ -372,5 +374,86 @@ export class SurfaceWarmQueryNodeCapabilityManager
       avgLatencyMs: Number((Math.random() * 40 + 10).toFixed(1)),
       lastRunAgo: `${Math.floor(Math.random() * 90)}s ago`,
     };
+  }
+
+  public override Validate(
+    node: FlowGraphNode,
+    context: EaCNodeCapabilityContext,
+  ): CapabilityValidationResult {
+    const errors: { code?: string; field?: string; message: string }[] = [];
+    const norm = (s?: string) => (s ?? '').trim().toLowerCase();
+
+    const eac = context.GetEaC();
+    const wqId = node.ID;
+    const surfaceId = context.SurfaceLookup as string | undefined;
+
+    const wq = eac.WarmQueries?.[wqId];
+    if (!wq) {
+      errors.push({
+        code: 'WQ_NOT_FOUND',
+        field: `WarmQueries.${wqId}`,
+        message: `Warm Query '${wqId}' not found in workspace`,
+      });
+      return { valid: false, errors };
+    }
+
+    const name = wq.Details?.Name?.toString().trim();
+    const apiPath = wq.Details?.ApiPath?.toString().trim();
+    const query = wq.Details?.Query?.toString().trim();
+    const description = wq.Details?.Description?.toString().trim();
+    debugger;
+    if (!name) {
+      errors.push({ code: 'REQUIRED', field: 'Details.Name', message: 'Name is required' });
+    }
+    if (!apiPath) {
+      errors.push({ code: 'REQUIRED', field: 'Details.ApiPath', message: 'API Path is required' });
+    }
+    if (!query) {
+      errors.push({ code: 'REQUIRED', field: 'Details.Query', message: 'Query is required' });
+    }
+    if (!description) {
+      errors.push({
+        code: 'REQUIRED',
+        field: 'Details.Description',
+        message: 'Description is required',
+      });
+    }
+
+    for (const [lookup, entry] of Object.entries(eac.WarmQueries ?? {})) {
+      if (lookup === wqId) continue;
+      const d = (entry as any).Details ?? {};
+      if (norm(d.Name) === norm(name)) {
+        errors.push({
+          code: 'UNIQUE',
+          field: 'Details.Name',
+          message: `A Warm Query with the Name of '${name} already exists in the Workspace`,
+        });
+      }
+    }
+    for (const [lookup, entry] of Object.entries(eac.WarmQueries ?? {})) {
+      if (lookup === wqId) continue;
+      const d = (entry as any).Details ?? {};
+      if (norm(d.ApiPath) === norm(apiPath)) {
+        errors.push({
+          code: 'UNIQUE',
+          field: 'Details.ApiPath',
+          message: `A Warm Query with the API Path of '${apiPath} already exists in the Workspace`,
+        });
+      }
+    }
+
+    if (surfaceId) {
+      const surface = eac.Surfaces?.[surfaceId];
+      const settings = surface?.WarmQueries?.[wqId];
+      if (!settings) {
+        errors.push({
+          code: 'MISSING_SURFACE_SETTINGS',
+          field: `Surfaces.${surfaceId}.WarmQueries.${wqId}`,
+          message: `Warm Query is not configured for surface '${surfaceId}'`,
+        });
+      }
+    }
+
+    return { valid: errors.length === 0, errors };
   }
 }

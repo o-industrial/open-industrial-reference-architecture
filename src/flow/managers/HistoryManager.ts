@@ -37,10 +37,13 @@ export class HistoryManager {
 
     const current = this.GetCurrent();
 
-    return (
-      JSON.stringify(current.eac) !== JSON.stringify(this.committed.eac) ||
-      JSON.stringify(current.deletes) !== JSON.stringify(this.committed.deletes)
-    );
+    const a = this.stableStringify(current.eac);
+    const b = this.stableStringify(this.committed.eac);
+    if (a !== b) return true;
+
+    const ad = this.stableStringify(current.deletes);
+    const bd = this.stableStringify(this.committed.deletes);
+    return ad !== bd;
   }
 
   public CanUndo(): boolean {
@@ -134,5 +137,22 @@ export class HistoryManager {
 
   protected emit(): void {
     for (const cb of this.listeners) cb();
+  }
+
+  // Deterministic JSON stringify (recursive lexicographic key order)
+  protected stableStringify(value: unknown): string {
+    const normalize = (v: unknown): unknown => {
+      if (Array.isArray(v)) return v.map((x) => normalize(x));
+      if (v && typeof v === 'object') {
+        const obj = v as Record<string, unknown>;
+        const keys = Object.keys(obj).sort();
+        const out: Record<string, unknown> = {};
+        for (const k of keys) out[k] = normalize(obj[k]);
+        return out;
+      }
+      return v;
+    };
+
+    return JSON.stringify(normalize(value));
   }
 }

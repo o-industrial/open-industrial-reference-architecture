@@ -9,6 +9,20 @@ import { EverythingAsCodeOIWorkspace } from '../../../eac/EverythingAsCodeOIWork
  */
 export class EaCDiffManager {
   constructor(protected history: HistoryManager, protected emit: () => void) {}
+  protected stableStringify(value: unknown): string {
+    const normalize = (v: unknown): unknown => {
+      if (Array.isArray(v)) return v.map((x) => normalize(x));
+      if (v && typeof v === 'object') {
+        const obj = v as Record<string, unknown>;
+        const keys = Object.keys(obj).sort();
+        const out: Record<string, unknown> = {};
+        for (const k of keys) out[k] = normalize(obj[k]);
+        return out;
+      }
+      return v;
+    };
+    return JSON.stringify(normalize(value));
+  }
 
   public MergePartial(
     current: EverythingAsCodeOIWorkspace,
@@ -16,7 +30,7 @@ export class EaCDiffManager {
     partial: EverythingAsCodeOIWorkspace,
   ): { updated: EverythingAsCodeOIWorkspace; changed: boolean } {
     const updated = merge<EverythingAsCodeOIWorkspace>(current, partial);
-    const changed = JSON.stringify(current) !== JSON.stringify(updated);
+    const changed = this.stableStringify(current) !== this.stableStringify(updated);
 
     if (changed) {
       this.history.Push(updated, deleteEaC);
@@ -41,7 +55,7 @@ export class EaCDiffManager {
 
     this.deepDelete(updated, deleteEaC);
 
-    const changed = JSON.stringify(current) !== JSON.stringify(updated);
+    const changed = this.stableStringify(current) !== this.stableStringify(updated);
 
     if (changed) {
       this.history.Push(updated, deleteEaC);
