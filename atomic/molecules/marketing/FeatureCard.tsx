@@ -1,4 +1,4 @@
-﻿import { classSet, ComponentType, JSX } from '../../.deps.ts';
+import { classSet, ComponentType, JSX } from '../../.deps.ts';
 import {
   GradientIconBadge,
   type GradientIntent,
@@ -35,28 +35,28 @@ const darkVariant: VariantDecor = {
     blue: {
       badge: 'bg-gradient-to-br from-neon-blue-500 via-neon-cyan-500 to-neon-indigo-500 shadow-[0_0_25px_-6px_rgba(96,165,250,0.55)]',
       halo: 'bg-neon-blue-500/25',
-      promptBackground: 'bg-gradient-to-r from-neon-blue-500/30 via-neon-cyan-500/20 to-neon-blue-400/30',
-      promptBorder: 'border-neon-blue-400/60',
+      promptBackground: 'bg-gradient-to-br from-neon-blue-500/22 via-neon-cyan-500/16 to-neon-indigo-500/20',
+      promptBorder: 'border-neon-cyan-400/60',
       promptText: 'text-neon-cyan-100',
     },
     green: {
       badge: 'bg-gradient-to-br from-neon-green-500 via-neon-teal-500 to-neon-cyan-500 shadow-[0_0_25px_-6px_rgba(52,211,153,0.55)]',
       halo: 'bg-neon-green-500/25',
-      promptBackground: 'bg-gradient-to-r from-neon-green-500/30 via-neon-teal-500/20 to-neon-green-400/30',
-      promptBorder: 'border-neon-green-400/60',
+      promptBackground: 'bg-gradient-to-br from-neon-green-500/22 via-neon-teal-500/16 to-neon-cyan-500/20',
+      promptBorder: 'border-neon-teal-400/60',
       promptText: 'text-neon-green-100',
     },
     purple: {
       badge: 'bg-gradient-to-br from-neon-purple-500 via-neon-violet-500 to-neon-indigo-500 shadow-[0_0_25px_-6px_rgba(167,139,250,0.55)]',
       halo: 'bg-neon-purple-500/25',
-      promptBackground: 'bg-gradient-to-r from-neon-purple-500/30 via-neon-violet-500/20 to-neon-indigo-500/30',
+      promptBackground: 'bg-gradient-to-br from-neon-purple-500/22 via-neon-violet-500/16 to-neon-indigo-500/20',
       promptBorder: 'border-neon-purple-500/60',
       promptText: 'text-neon-purple-100',
     },
     orange: {
       badge: 'bg-gradient-to-br from-neon-orange-500 via-neon-yellow-500 to-neon-orange-600 shadow-[0_0_25px_-6px_rgba(251,146,60,0.55)]',
       halo: 'bg-neon-orange-500/25',
-      promptBackground: 'bg-gradient-to-r from-neon-orange-500/30 via-neon-yellow-500/20 to-neon-orange-500/30',
+      promptBackground: 'bg-gradient-to-br from-neon-orange-500/24 via-neon-yellow-500/16 to-neon-orange-600/22',
       promptBorder: 'border-neon-orange-500/60',
       promptText: 'text-neon-yellow-100',
     },
@@ -74,29 +74,29 @@ const lightVariant: VariantDecor = {
     blue: {
       badge: 'bg-gradient-to-br from-neon-blue-500 via-neon-cyan-500 to-neon-indigo-500 shadow-[0_0_18px_-6px_rgba(96,165,250,0.35)]',
       halo: 'bg-neon-blue-500/15',
-      promptBackground: 'bg-gradient-to-r from-neon-blue-100 via-neon-blue-50 to-neon-indigo-100',
-      promptBorder: 'border-neon-blue-300',
+      promptBackground: 'bg-gradient-to-br from-neon-blue-300/30 via-neon-cyan-200/25 to-neon-indigo-300/30',
+      promptBorder: 'border-neon-cyan-300',
       promptText: 'text-neon-blue-700',
     },
     green: {
       badge: 'bg-gradient-to-br from-neon-green-500 via-neon-teal-500 to-neon-cyan-500 shadow-[0_0_18px_-6px_rgba(52,211,153,0.35)]',
       halo: 'bg-neon-green-500/15',
-      promptBackground: 'bg-gradient-to-r from-neon-green-100 via-neon-green-50 to-neon-teal-100',
-      promptBorder: 'border-neon-green-300',
+      promptBackground: 'bg-gradient-to-br from-neon-green-300/28 via-neon-teal-200/22 to-neon-cyan-300/28',
+      promptBorder: 'border-neon-teal-300',
       promptText: 'text-neon-green-700',
     },
     purple: {
       badge: 'bg-gradient-to-br from-neon-purple-500 via-neon-violet-500 to-neon-indigo-500 shadow-[0_0_18px_-6px_rgba(167,139,250,0.35)]',
       halo: 'bg-neon-purple-500/15',
-      promptBackground: 'bg-gradient-to-r from-neon-purple-100 via-neon-purple-50 to-neon-indigo-100',
+      promptBackground: 'bg-gradient-to-br from-neon-purple-300/28 via-neon-violet-200/22 to-neon-indigo-300/28',
       promptBorder: 'border-neon-purple-300',
       promptText: 'text-neon-purple-700',
     },
     orange: {
       badge: 'bg-gradient-to-br from-neon-orange-500 via-neon-yellow-500 to-neon-orange-600 shadow-[0_0_18px_-6px_rgba(249,115,22,0.35)]',
       halo: 'bg-neon-orange-500/15',
-      promptBackground: 'bg-gradient-to-r from-neon-yellow-100 via-neon-yellow-50 to-neon-orange-100',
-      promptBorder: 'border-neon-yellow-300',
+      promptBackground: 'bg-gradient-to-br from-neon-orange-300/28 via-neon-yellow-200/22 to-neon-orange-300/28',
+      promptBorder: 'border-neon-orange-300',
       promptText: 'text-neon-yellow-700',
     },
   },
@@ -184,7 +184,7 @@ export function FeatureCard({
             <span
               class={`inline-flex items-center justify-between gap-4 rounded-[18px] border px-5 py-3 text-sm font-medium ${intentDecor.promptBackground} ${intentDecor.promptBorder} ${intentDecor.promptText}`}
             >
-              “{highlights[0]}”
+              "{highlights[0]}"
             </span>
           </div>
         )
