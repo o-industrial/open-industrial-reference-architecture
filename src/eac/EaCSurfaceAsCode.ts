@@ -8,6 +8,14 @@ export type SurfaceWarmQuerySettings = {
   DataConnectionLookups?: string[];
 } & EaCFlowSettings;
 
+export type SurfaceInterfaceSettings = {
+  SchemaLookups?: string[];
+  WarmQueryLookups?: string[];
+  DataConnectionLookups?: string[];
+  Theme?: string;
+  RefreshMs?: number;
+} & EaCFlowSettings;
+
 /**
  * Connection-specific runtime configuration used by a surface.
  */
@@ -50,6 +58,7 @@ export type EaCSurfaceAsCode = EaCDetails<EaCSurfaceDetails> & {
   Schemas?: Record<string, SurfaceSchemaSettings>;
   Surfaces?: Record<string, SurfaceChildSettings>;
   WarmQueries?: Record<string, SurfaceWarmQuerySettings>;
+  Interfaces?: Record<string, SurfaceInterfaceSettings>;
 };
 
 /**
@@ -100,6 +109,18 @@ export const EaCSurfaceAsCodeSchema: z.ZodType<EaCSurfaceAsCode> = EaCDetailsSch
       EaCFlowSettingsSchema.extend({
         SchemaLookups: z.array(z.string()).optional(),
         DataConnectionLookups: z.array(z.string()).optional(),
+      }).catchall(z.unknown()),
+    )
+    .optional(),
+
+  Interfaces: z
+    .record(
+      EaCFlowSettingsSchema.extend({
+        SchemaLookups: z.array(z.string()).optional(),
+        WarmQueryLookups: z.array(z.string()).optional(),
+        DataConnectionLookups: z.array(z.string()).optional(),
+        Theme: z.string().optional(),
+        RefreshMs: z.number().optional(),
       }).catchall(z.unknown()),
     )
     .optional(),

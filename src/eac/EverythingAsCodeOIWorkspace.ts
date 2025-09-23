@@ -13,6 +13,7 @@ import {
   EaCDataConnectionAsCode,
   EaCDataConnectionAsCodeSchema,
 } from './EaCDataConnectionAsCode.ts';
+import { EaCInterfaceAsCode, EaCInterfaceAsCodeSchema } from './EaCInterfaceAsCode.ts';
 import { EaCSchemaAsCode, EaCSchemaAsCodeSchema } from './EaCSchemaAsCode.ts';
 import { EaCSurfaceAsCode, EaCSurfaceAsCodeSchema } from './EaCSurfaceAsCode.ts';
 import { EaCSimulatorAsCode, EaCSimulatorAsCodeSchema } from './EaCSimulatorAsCode.ts';
@@ -86,6 +87,9 @@ export type EverythingAsCodeOIWorkspace =
 
     /** Surfaces such as dashboards, panels, and visual UIs. */
     Surfaces?: Record<string, EaCSurfaceAsCode>;
+
+    /** Interfaces delivered as HMI routes/pages. */
+    Interfaces?: Record<string, EaCInterfaceAsCode>;
   }
   & EverythingAsCode
   & EverythingAsCodeClouds
@@ -229,6 +233,11 @@ export const EverythingAsCodeOIWorkspaceSchema: EverythingAsCodeOIWorkspaceSchem
       .record(EaCSurfaceAsCodeSchema)
       .optional()
       .describe('User-facing dashboards, panels, or apps.'),
+
+    Interfaces: z
+      .record(EaCInterfaceAsCodeSchema)
+      .optional()
+      .describe('Interface nodes representing HMI routes and editors.'),
   })
     .strip()
     .describe(

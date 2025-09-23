@@ -4,9 +4,11 @@ import { EaCSchemaDetails } from '../eac/EaCSchemaDetails.ts';
 import {
   SurfaceAgentSettings,
   SurfaceDataConnectionSettings,
+  SurfaceInterfaceSettings,
   SurfaceSchemaSettings,
 } from '../eac/EaCSurfaceAsCode.ts';
 import { EaCDataConnectionDetails } from '../eac/EaCDataConnectionDetails.ts';
+import { EaCInterfaceDetails } from '../eac/EaCInterfaceDetails.ts';
 import { EaCWarmQueryDetails } from './.deps.ts';
 import { EaCAgentDetails } from '../eac/EaCAgentDetails.ts';
 import { EaCSurfaceDetails } from '../eac/EaCSurfaceDetails.ts';
@@ -55,6 +57,12 @@ export type ResolvedImpulseContext =
       Source: 'SurfaceWarmQuery';
       Surface: EaCSurfaceDetails;
       WarmQuery: EaCWarmQueryDetails;
+    }
+    | {
+      Source: 'SurfaceInterface';
+      Interface: EaCInterfaceDetails;
+      Surface: EaCSurfaceDetails;
+      SurfaceInterface: SurfaceInterfaceSettings;
     }
     | {
       Source: 'System';
@@ -109,6 +117,16 @@ export function resolveImpulseContext(
       SurfaceConnection: eac.Surfaces?.[Metadata.SurfaceLookup!]?.DataConnections?.[
         Metadata.ConnectionLookup!
       ]!,
+    };
+  }
+
+  if (Source === 'SurfaceInterface') {
+    return {
+      Source,
+      Interface: eac.Interfaces?.[Metadata.InterfaceLookup!]?.Details!,
+      Surface: eac.Surfaces?.[Metadata.SurfaceLookup!]?.Details!,
+      SurfaceInterface: eac.Surfaces?.[Metadata.SurfaceLookup!]?.Interfaces
+        ?.[Metadata.InterfaceLookup!]!,
     };
   }
 

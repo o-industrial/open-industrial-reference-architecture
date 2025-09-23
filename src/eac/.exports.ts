@@ -20,4 +20,7 @@ export * from './EaCSimulatorAsCode.ts';
 export * from './EaCSimulatorDetails.ts';
 export * from './EaCSurfaceAsCode.ts';
 export * from './EaCSurfaceDetails.ts';
+export * from './EaCInterfaceAsCode.ts';
+export * from './EaCInterfaceDetails.ts';
+export * from './InterfaceSpec.ts';
 export * from './EverythingAsCodeOIWorkspace.ts';

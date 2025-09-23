@@ -50,6 +50,7 @@ type impulseSources =
   | SurfaceConnectionImpulse
   | SurfaceSchemaImpulse
   | SurfaceWarmQueryImpulse
+  | SurfaceInterfaceImpulse
   | SystemImpulse;
 
 export type RuntimeImpulseMetadata = impulseSources['Metadata'];

@@ -74,6 +74,18 @@ export const impulseSourceColorMap: Record<RuntimeImpulseSources, IntentStyleMap
       high: 'bg-neon-cyan-500/70 animate-ping-fast',
     },
   },
+  SurfaceInterface: {
+    text: 'text-sky-600 dark:text-sky-400',
+    border: 'border-sky-500',
+    background: 'bg-sky-100/30 dark:bg-sky-900/30',
+    ring: 'ring-sky-400/30',
+    glow: 'drop-shadow-[0_0_8px_rgba(56,189,248,0.4)]',
+    pulse: {
+      low: 'bg-sky-500/30 animate-ping-slow',
+      mid: 'bg-sky-500/50 animate-ping',
+      high: 'bg-sky-500/70 animate-ping-fast',
+    },
+  },
   System: {
     text: 'text-neutral-600 dark:text-neutral-200',
     border: 'border-neutral-500',

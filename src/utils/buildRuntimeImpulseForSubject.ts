@@ -17,6 +17,9 @@ function loadPatterns() {
     surfaceWarmQuery: new URLPattern({
       pathname: '/workspace/:workspace/surface/:surface/warmquery/:warmquery/impulse',
     }),
+    surfaceInterface: new URLPattern({
+      pathname: '/workspace/:workspace/surface/:surface/interface/:interface/impulse',
+    }),
     signal: new URLPattern({
       pathname: '/workspace/:workspace/surface/:surface/signal/:signal/impulse',
     }),
@@ -96,6 +99,14 @@ export function buildRuntimeImpulseForSubject(
         Metadata: {
           SurfaceLookup: surface,
           WarmQueryLookup: warmquery,
+        },
+      })) ??
+      matchAndBuild(patterns.surfaceInterface, ({ surface, interface: interfaceLookup }) => ({
+        ...base,
+        Source: 'SurfaceInterface',
+        Metadata: {
+          SurfaceLookup: surface,
+          InterfaceLookup: interfaceLookup,
         },
       })) ??
       matchAndBuild(patterns.surfaceConnection, ({ surface, connection }) => ({

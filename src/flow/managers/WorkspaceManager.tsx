@@ -81,6 +81,7 @@ export class WorkspaceManager {
   protected Jwt: string;
   protected EnterpriseLookup: string;
   protected AziWarmQueryCircuitUrl: string;
+  protected AziInterfaceCircuitUrl?: string;
 
   public Azi: AziManager;
   public EaC: EaCManager;
@@ -93,6 +94,7 @@ export class WorkspaceManager {
   public Simulators: SimulatorLibraryManager;
   public Team: TeamManager;
   public WarmQueryAzis: Record<string, AziManager> = Object.create(null);
+  public InterfaceAzis: Record<string, AziManager> = Object.create(null);
 
   constructor(
     eac: EverythingAsCodeOIWorkspace,
@@ -103,11 +105,13 @@ export class WorkspaceManager {
     scope: NodeScopeTypes = 'workspace',
     aziCircuitUrl: string,
     aziWarmQueryCircuitUrl: string,
+    aziInterfaceCircuitUrl?: string,
     protected accessRights?: string[],
     jwt?: string,
   ) {
     this.currentScope = { Scope: scope };
     this.AziWarmQueryCircuitUrl = aziWarmQueryCircuitUrl;
+    this.AziInterfaceCircuitUrl = aziInterfaceCircuitUrl ?? aziWarmQueryCircuitUrl;
     this.Azi = new AziManager({
       url: aziCircuitUrl,
       jwt,
@@ -158,6 +162,19 @@ export class WorkspaceManager {
       url: this.AziWarmQueryCircuitUrl,
       jwt: this.Jwt,
       threadId: threadId,
+    });
+  }
+  public CreateInterfaceAziIfNotExist(interfaceLookup: string) {
+    const threadId = `workspace-${this.EnterpriseLookup}-interface-${interfaceLookup}`;
+    const circuitUrl = this.AziInterfaceCircuitUrl ?? this.AziWarmQueryCircuitUrl;
+    if (!circuitUrl) {
+      return;
+    }
+
+    this.InterfaceAzis[interfaceLookup] ??= new AziManager({
+      url: circuitUrl,
+      jwt: this.Jwt,
+      threadId,
     });
   }
 
