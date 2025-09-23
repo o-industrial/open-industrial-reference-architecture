@@ -10,7 +10,7 @@ export type SectionHeaderProps = {
   overline?: ComponentChildren;
   align?: SectionHeaderAlignment;
   kicker?: ComponentChildren;
-} & JSX.HTMLAttributes<HTMLDivElement>;
+} & Omit<JSX.HTMLAttributes<HTMLDivElement>, 'title'>;
 
 export function SectionHeader({
   eyebrow,
