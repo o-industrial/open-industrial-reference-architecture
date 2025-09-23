@@ -25,40 +25,103 @@ export type FlowDiagramSectionProps = {
   content: FlowDiagramContent;
 } & Omit<SectionSurfaceProps, 'children' | 'tone'>;
 
-const inputPalette = [
-  'border-neon-purple-500/40 bg-gradient-to-br from-neon-purple-50 via-neon-purple-100 to-neon-purple-50 dark:border-neon-purple-400/25 dark:from-[rgba(26,22,60,1)] dark:via-[rgba(36,28,85,1)] dark:to-[rgba(18,19,53,1)]',
-  'border-neon-blue-500/40 bg-gradient-to-br from-neon-blue-50 via-neon-blue-100 to-neon-blue-50 dark:border-neon-blue-400/25 dark:from-[rgba(17,26,50,1)] dark:via-[rgba(26,38,72,1)] dark:to-[rgba(12,22,51,1)]',
+const inputDecor = [
+  {
+    card: 'border-white/10 bg-[radial-gradient(circle,_rgba(129,140,248,0.18),rgba(14,18,38,0.9)),linear-gradient(145deg,rgba(13,16,32,0.92),rgba(9,12,24,0.92))]',
+    glow: 'from-[rgba(129,140,248,0.35)] via-[rgba(96,165,250,0.22)] to-transparent',
+    icon: 'from-neon-purple-500 via-neon-blue-500 to-neon-cyan-400',
+  },
+  {
+    card: 'border-white/10 bg-[radial-gradient(circle,_rgba(34,211,238,0.16),rgba(10,16,32,0.92)),linear-gradient(145deg,rgba(9,14,28,0.92),rgba(6,10,22,0.92))]',
+    glow: 'from-[rgba(34,211,238,0.32)] via-[rgba(76,201,240,0.2)] to-transparent',
+    icon: 'from-neon-cyan-400 via-neon-blue-500 to-neon-green-400',
+  },
+  {
+    card: 'border-white/10 bg-[radial-gradient(circle,_rgba(236,72,153,0.18),rgba(18,16,36,0.9)),linear-gradient(145deg,rgba(16,18,36,0.92),rgba(9,11,24,0.92))]',
+    glow: 'from-[rgba(236,72,153,0.32)] via-[rgba(171,78,235,0.22)] to-transparent',
+    icon: 'from-neon-pink-500 via-neon-purple-500 to-neon-blue-500',
+  },
+  {
+    card: 'border-white/10 bg-[radial-gradient(circle,_rgba(244,214,67,0.16),rgba(14,16,30,0.9)),linear-gradient(145deg,rgba(13,17,30,0.92),rgba(8,10,22,0.92))]',
+    glow: 'from-[rgba(250,204,21,0.28)] via-[rgba(251,146,60,0.22)] to-transparent',
+    icon: 'from-neon-orange-500 via-neon-yellow-400 to-neon-orange-600',
+  },
 ];
 
-const outputPalette = [
-  'border-neon-green-500/40 bg-gradient-to-br from-neon-green-50 via-neon-green-100 to-neon-green-50 dark:border-neon-green-400/25 dark:from-[rgba(13,43,31,1)] dark:via-[rgba(21,59,41,1)] dark:to-[rgba(11,32,22,1)]',
-  'border-neon-orange-500/40 bg-gradient-to-br from-neon-orange-50 via-neon-yellow-50 to-neon-orange-50 dark:border-neon-orange-400/25 dark:from-[rgba(44,24,7,1)] dark:via-[rgba(59,31,11,1)] dark:to-[rgba(31,19,9,1)]',
+const outputDecor = [
+  {
+    card: 'border-white/10 bg-[radial-gradient(circle,_rgba(34,211,238,0.16),rgba(12,16,30,0.9)),linear-gradient(145deg,rgba(10,15,28,0.92),rgba(7,10,22,0.92))]',
+    glow: 'from-[rgba(45,212,191,0.3)] via-[rgba(34,211,238,0.2)] to-transparent',
+    icon: 'from-neon-cyan-400 via-neon-green-400 to-neon-teal-400',
+  },
+  {
+    card: 'border-white/10 bg-[radial-gradient(circle,_rgba(129,140,248,0.18),rgba(14,16,36,0.9)),linear-gradient(145deg,rgba(16,18,36,0.92),rgba(9,12,26,0.92))]',
+    glow: 'from-[rgba(129,140,248,0.32)] via-[rgba(76,132,255,0.2)] to-transparent',
+    icon: 'from-neon-indigo-500 via-neon-blue-500 to-neon-purple-500',
+  },
+  {
+    card: 'border-white/10 bg-[radial-gradient(circle,_rgba(236,72,153,0.18),rgba(16,16,34,0.9)),linear-gradient(145deg,rgba(15,16,34,0.92),rgba(9,12,26,0.92))]',
+    glow: 'from-[rgba(236,72,153,0.3)] via-[rgba(167,139,250,0.24)] to-transparent',
+    icon: 'from-neon-purple-500 via-neon-pink-500 to-neon-blue-500',
+  },
+  {
+    card: 'border-white/10 bg-[radial-gradient(circle,_rgba(250,204,21,0.16),rgba(12,16,28,0.9)),linear-gradient(145deg,rgba(12,16,28,0.92),rgba(8,10,20,0.92))]',
+    glow: 'from-[rgba(250,204,21,0.28)] via-[rgba(251,146,60,0.22)] to-transparent',
+    icon: 'from-neon-orange-500 via-neon-yellow-400 to-neon-orange-600',
+  },
 ];
 
-function renderNode(node: FlowNode, index: number, prefix: string): JSX.Element {
-  const palette = prefix === 'input'
-    ? inputPalette[index % inputPalette.length]
-    : outputPalette[index % outputPalette.length];
+const hubCardClass =
+  'relative overflow-hidden rounded-[32px] border border-white/15 bg-gradient-to-br from-neon-purple-500 via-neon-blue-500 to-neon-cyan-400 px-8 py-10 text-center text-white shadow-[0_55px_180px_-90px_rgba(18,28,76,0.68)] backdrop-blur-xl';
+
+const hubOverlayClass =
+  'pointer-events-none absolute -top-16 right-[-18%] h-48 w-48 rounded-full bg-white/20 blur-3xl opacity-70';
+
+function renderNode(node: FlowNode, index: number, prefix: 'input' | 'output'): JSX.Element {
+  const decor = prefix === 'input'
+    ? inputDecor[index % inputDecor.length]
+    : outputDecor[index % outputDecor.length];
+
+  const symbol = node.title.charAt(0).toUpperCase();
 
   return (
     <div
       key={`${prefix}-${index}-${node.title}`}
       class={classSet([
-        'space-y-2 rounded-2xl border p-4 text-center shadow-[0_18px_60px_-50px_rgba(62,45,171,0.45)] backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_28px_90px_-60px_rgba(62,45,171,0.5)]',
-        palette,
+        'group relative flex min-h-[180px] w-full flex-col items-center justify-between gap-5 overflow-hidden rounded-2xl border p-5 text-center shadow-[0_22px_65px_-60px_rgba(18,28,76,0.55)] backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_32px_90px_-70px_rgba(18,28,76,0.65)]',
+        decor.card,
       ])}
     >
-      <div class='flex items-center justify-between text-[10px] uppercase tracking-[0.35em] text-neutral-500 dark:text-neutral-400'>
-        <span>{prefix === 'input' ? 'Input' : 'Output'}</span>
-        <span>{String(index + 1).padStart(2, '0')}</span>
+      <div
+        aria-hidden='true'
+        class={classSet([
+          'pointer-events-none absolute -top-24 right-[-26%] h-48 w-48 rounded-full opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-100',
+          decor.glow,
+        ])}
+      />
+      <span
+        class={classSet([
+          'inline-flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-sm font-semibold text-white shadow-lg shadow-black/25',
+          decor.icon,
+        ])}
+      >
+        {symbol}
+      </span>
+      <div class='space-y-2 text-white'>
+        <h4 class='text-sm font-semibold'>{node.title}</h4>
+        {node.subtitle
+          ? <p class='text-xs text-white/70'>{node.subtitle}</p>
+          : null}
+        {node.description
+          ? <p class='text-[0.72rem] text-white/60'>{node.description}</p>
+          : null}
       </div>
-      <h4 class='text-sm font-semibold text-neutral-100 dark:text-white'>{node.title}</h4>
-      {node.subtitle
-        ? <div class='text-xs text-neutral-300 dark:text-neutral-300'>{node.subtitle}</div>
-        : null}
-      {node.description
-        ? <p class='mt-2 text-xs text-neutral-300 dark:text-neutral-300'>{node.description}</p>
-        : null}
+      <div class='flex items-center justify-center gap-3 text-[0.58rem] uppercase tracking-[0.3em] text-white/55'>
+        <span class='rounded-full bg-white/10 px-3 py-1 text-white/65 backdrop-blur-sm'>
+          {prefix === 'input' ? 'Input' : 'Output'}
+        </span>
+        <span class='text-white/35'>{String(index + 1).padStart(2, '0')}</span>
+      </div>
     </div>
   );
 }
@@ -69,6 +132,10 @@ export function FlowDiagramSection({
   class: className,
   ...rest
 }: FlowDiagramSectionProps): JSX.Element {
+  const hubDescriptionLines = content.hub.description
+    ? content.hub.description.split(',').map((line) => line.trim())
+    : [];
+
   return (
     <SectionSurface
       tone='muted'
@@ -80,36 +147,58 @@ export function FlowDiagramSection({
         class='pointer-events-none absolute inset-0'
       >
         <div class='absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(167,139,250,0.12),_rgba(255,255,255,0)_70%)] dark:bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.18),_rgba(8,13,35,0)_72%)]' />
-        <div class='absolute inset-0 bg-[linear-gradient(120deg,_rgba(255,255,255,0.2)_0%,_rgba(255,255,255,0)_35%)] opacity-60 dark:bg-[linear-gradient(120deg,_rgba(255,255,255,0.07)_0%,_rgba(255,255,255,0)_35%)]' />
+        <div class='absolute inset-0 bg-[linear-gradient(120deg,_rgba(255,255,255,0.18)_0%,_rgba(255,255,255,0)_35%)] opacity-50 dark:bg-[linear-gradient(120deg,_rgba(255,255,255,0.08)_0%,_rgba(255,255,255,0)_35%)]' />
       </div>
       <div class='space-y-12'>
         <SectionHeader {...header} align={header.align ?? 'center'} />
 
-        <div class='grid gap-8 lg:grid-cols-[1fr_auto_1fr] lg:items-start'>
-          <div class='relative space-y-4 lg:pr-8'>
-            <div class='pointer-events-none absolute inset-y-8 -right-3 hidden w-px bg-gradient-to-b from-transparent via-white/60 to-transparent dark:via-white/10 lg:block' />
-            {content.inputs.map((node, index) => renderNode(node, index, 'input'))}
+        <div class='space-y-16'>
+          <div class='space-y-4'>
+            <header class='text-center text-xs font-semibold uppercase tracking-[0.4em] text-white/60'>
+              Input Systems
+            </header>
+            <div class='grid w-full gap-4 grid-cols-2 sm:grid-cols-4'>
+              {content.inputs.map((node, index) => renderNode(node, index, 'input'))}
+            </div>
           </div>
 
-          <div class='flex flex-col items-center gap-4'>
-            <div class='h-12 w-px bg-gradient-to-b from-neon-purple-400/40 via-transparent to-neon-blue-400/40 lg:h-full lg:w-px lg:bg-gradient-to-r' />
-            <div class='relative overflow-hidden rounded-3xl border border-white/60 bg-gradient-to-br from-slate-950 via-[#181d34] to-slate-900 px-6 py-8 text-center text-white shadow-[0_40px_120px_-60px_rgba(15,23,42,0.65)] backdrop-blur-xl dark:border-white/20 dark:from-[rgba(26,20,82,1)] dark:via-[rgba(45,33,160,1)] dark:to-[rgba(18,74,148,1)]'>
-              <div
-                aria-hidden='true'
-                class='pointer-events-none absolute -top-10 right-1/2 h-40 w-40 translate-x-1/2 rounded-full bg-white/15 blur-3xl'
-              />
-              <div class='text-sm uppercase tracking-[0.35em] text-white/60'>Hub</div>
-              <h3 class='mt-3 text-xl font-semibold'>{content.hub.title}</h3>
-              {content.hub.description
-                ? <p class='mt-2 text-sm text-white/80'>{content.hub.description}</p>
+          <div class='relative flex flex-col items-center gap-6'>
+            <div class='h-16 w-px bg-gradient-to-b from-transparent via-white/35 to-transparent dark:from-transparent dark:via-white/10 dark:to-transparent sm:h-20' />
+            <div class={classSet([hubCardClass, 'w-full max-w-xl'])}>
+              <div aria-hidden='true' class={hubOverlayClass} />
+              <span class='inline-flex h-14 w-14 items-center justify-center rounded-full bg-white/15 text-lg font-semibold tracking-tight text-white shadow-[0_20px_90px_rgba(15,23,42,0.45)]'>
+                OI
+              </span>
+              <h3 class='mt-4 text-2xl font-semibold'>{content.hub.title}</h3>
+              {hubDescriptionLines.length
+                ? (
+                  <ul class='mt-5 space-y-2 text-sm text-white/85'>
+                    {hubDescriptionLines.map((line) => (
+                      <li key={line} class='flex items-center justify-center gap-2 text-sm'>
+                        <span class='h-1.5 w-1.5 rounded-full bg-white/70' />
+                        <span>{line}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )
+                : content.hub.description
+                ? (
+                  <p class='mt-4 text-[0.9rem] text-white/80'>
+                    {content.hub.description}
+                  </p>
+                )
                 : null}
             </div>
-            <div class='h-12 w-px bg-gradient-to-b from-neon-blue-400/40 via-transparent to-neon-green-400/40 lg:h-full lg:w-px lg:bg-gradient-to-r' />
+            <div class='h-16 w-px bg-gradient-to-b from-transparent via-white/35 to-transparent dark:from-transparent dark:via-white/10 dark:to-transparent sm:h-20' />
           </div>
 
-          <div class='relative space-y-4 lg:pl-8'>
-            <div class='pointer-events-none absolute inset-y-8 -left-3 hidden w-px bg-gradient-to-b from-transparent via-white/60 to-transparent dark:via-white/10 lg:block' />
-            {content.outputs.map((node, index) => renderNode(node, index, 'output'))}
+          <div class='space-y-4'>
+            <header class='text-center text-xs font-semibold uppercase tracking-[0.4em] text-white/60'>
+              Output Destinations
+            </header>
+            <div class='grid w-full gap-4 grid-cols-2 sm:grid-cols-4'>
+              {content.outputs.map((node, index) => renderNode(node, index, 'output'))}
+            </div>
           </div>
         </div>
       </div>
