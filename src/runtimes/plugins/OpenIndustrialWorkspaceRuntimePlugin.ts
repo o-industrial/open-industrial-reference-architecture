@@ -6,11 +6,14 @@ import {
 } from '../.deps.ts';
 import { EaCAgentAsCode } from '../../eac/EaCAgentAsCode.ts';
 import { EaCDataConnectionAsCode } from '../../eac/EaCDataConnectionAsCode.ts';
+import { EaCInterfaceDetails } from '../../eac/EaCInterfaceDetails.ts';
 import { EaCSchemaAsCode } from '../../eac/EaCSchemaAsCode.ts';
 import { EaCSurfaceAsCode } from '../../eac/EaCSurfaceAsCode.ts';
 import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
 import { EaCOIDataConnectionProcessorHandlerResolver } from '../processors/EaCOIDataConnectionProcessorHandlerResolver.ts';
+import { EaCInterfaceAppProcessorHandlerResolver } from '../processors/EaCInterfaceAppProcessorHandlerResolver.ts';
 import { EaCOIDataConnectionProcessor } from '../processors/EaCOIDataConnectionProcessor.ts';
+import { EaCInterfaceAppProcessor } from '../processors/EaCInterfaceAppProcessor.ts';
 
 export class OpenIndustrialWorkspaceRuntimePlugin implements EaCRuntimePlugin {
   constructor(
@@ -24,6 +27,9 @@ export class OpenIndustrialWorkspaceRuntimePlugin implements EaCRuntimePlugin {
     _ioc: IoCContainer,
     _pluginCfg?: EaCRuntimePluginConfig<EverythingAsCodeOIWorkspace>,
   ): Promise<void> {
+    this.ensureProjectScaffolding(eac);
+
+    await this.buildWorkspaceInterfaceApp(eac);
     await this.buildAppsForSurfaces(eac, eac.Surfaces || {});
   }
 
@@ -52,7 +58,66 @@ export class OpenIndustrialWorkspaceRuntimePlugin implements EaCRuntimePlugin {
       },
     );
 
+    pluginConfig.IoC!.Register(
+      () => EaCInterfaceAppProcessorHandlerResolver,
+      {
+        Name: 'EaCInterfaceAppProcessor',
+        Type: pluginConfig.IoC!.Symbol('ProcessorHandlerResolver'),
+      },
+    );
+
     return Promise.resolve(pluginConfig);
+  }
+
+  protected ensureProjectScaffolding(eac: EverythingAsCodeOIWorkspace): void {
+    eac.Applications ??= {};
+    eac.Projects ??= {};
+
+    if (!eac.Projects[this.projectLookup]) {
+      eac.Projects[this.projectLookup] = {
+        ResolverConfigs: {},
+        ApplicationResolvers: {},
+      };
+    }
+
+    const project = eac.Projects[this.projectLookup]!;
+    project.ResolverConfigs ??= {};
+    project.ApplicationResolvers ??= {};
+  }
+
+  protected async buildWorkspaceInterfaceApp(
+    eac: EverythingAsCodeOIWorkspace,
+  ): Promise<void> {
+    const interfaceEntries = Object.entries(eac.Interfaces ?? {})
+      .map(([lookup, iface]) => {
+        const details = iface?.Details;
+        return details?.Spec ? [lookup, { Details: details }] : undefined;
+      })
+      .filter((entry): entry is [string, { Details: EaCInterfaceDetails }] => Array.isArray(entry));
+
+    if (!interfaceEntries.length) {
+      return;
+    }
+
+    const project = eac.Projects![this.projectLookup]!;
+    const resolverKey = 'workspaceInterfaces';
+    const dfsLookup = `${this.projectLookup}-workspace-interfaces`;
+
+    project.ApplicationResolvers![resolverKey] = project.ApplicationResolvers![resolverKey] ?? {
+      PathPattern: '/w/:workspace/ui/:interface',
+      Priority: 450,
+    };
+
+    eac.Applications![resolverKey] = {
+      Metadata: {
+        Interfaces: Object.fromEntries(interfaceEntries),
+      },
+      Processor: {
+        Type: 'InterfaceApp',
+        AppDFSLookup: dfsLookup,
+        RoutesBase: 'w/:workspace/ui',
+      } as EaCInterfaceAppProcessor,
+    };
   }
 
   protected async buildAppForAgent(
@@ -98,20 +163,6 @@ export class OpenIndustrialWorkspaceRuntimePlugin implements EaCRuntimePlugin {
     _schema: EaCSchemaAsCode,
   ): Promise<void> {
     // TODO(AI): Create a NATS-based Schema Processor for this schema
-    // const key = `${surfaceLookup}-${schemaLookup}`;
-    // eac.Projects![this.projectLookup].ApplicationResolvers[key] = {
-    //   PathPattern: `/surfaces/${surfaceLookup}/schemas/${schemaLookup}`,
-    //   Priority: 500,
-    // };
-    // eac.Applications![key] = {
-    //   Processor: {
-    //     Type: 'OIDataConnection',
-    //     DataConnection: dataConn,
-    //     DataConnectionLookup: dataConnLookup,
-    //     SurfaceLookup: surfaceLookup,
-    //     NATSServer: 'http://localhost:4222',
-    //   } as EaCOIDataConnectionProcessor,
-    // };
   }
 
   protected async buildAppsForAgents(

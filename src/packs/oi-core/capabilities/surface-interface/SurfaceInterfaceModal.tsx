@@ -1,4 +1,5 @@
-import { Modal } from '../../../../../atomic/.exports.ts';
+import { IntentTypes } from '../../../../../atomic/.deps.ts';
+import { Action, ActionStyleTypes, Modal } from '../../../../../atomic/.exports.ts';
 import type { InterfaceSpec } from '../../../../eac/InterfaceSpec.ts';
 import type { EaCInterfaceDetails, SurfaceInterfaceSettings } from '../../../../eac/.exports.ts';
 import { InterfaceEditorHost } from './InterfaceEditorHost.tsx';
@@ -34,6 +35,14 @@ export function SurfaceInterfaceModal({
   const latestVersion = details.Version ?? 1;
   const enterpriseLookup = workspaceMgr.EaC.GetEaC().EnterpriseLookup ?? 'workspace';
   const draftPath = details.DraftState?.SpecPath;
+  const editorRoute = '/workspace/interface/' + interfaceLookup;
+  const quickModes: Array<{ key: 'overview' | 'visual' | 'code' | 'preview'; label: string }> = [
+    { key: 'overview', label: 'Overview' },
+    { key: 'visual', label: 'Visual' },
+    { key: 'code', label: 'Code' },
+    { key: 'preview', label: 'Preview' },
+  ];
+
 
   return (
     <Modal
@@ -79,6 +88,41 @@ export function SurfaceInterfaceModal({
           </div>
         </div>
 
+        <div class='flex flex-wrap items-center justify-between gap-2 border border-slate-800 bg-slate-900/40 px-4 py-3'>
+          <div class='flex flex-wrap gap-2'>
+            {quickModes.map((mode) => (
+              <Action
+                key={'interface-mode-' + mode.key}
+                href={editorRoute + '?mode=' + mode.key}
+                target='_blank'
+                rel='noreferrer'
+                styleType={
+                  ActionStyleTypes.Outline |
+                  ActionStyleTypes.UltraThin |
+                  ActionStyleTypes.Rounded
+                }
+                intentType={
+                  mode.key === 'visual'
+                    ? IntentTypes.Primary
+                    : mode.key === 'code'
+                    ? IntentTypes.Secondary
+                    : IntentTypes.Tertiary
+                }
+              >
+                {mode.label} Mode
+              </Action>
+            ))}
+          </div>
+          <Action
+            href={editorRoute}
+            target='_blank'
+            rel='noreferrer'
+            styleType={ActionStyleTypes.Solid | ActionStyleTypes.Rounded}
+            intentType={IntentTypes.Primary}
+          >
+            Open Full Editor
+          </Action>
+        </div>
         <InterfaceEditorHost
           spec={spec}
           draftSpec={draftSpec}

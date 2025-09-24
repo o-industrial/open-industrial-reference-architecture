@@ -1,7 +1,10 @@
 import { JSX } from '../../.deps.ts';
 import { EverythingAsCodeOIWorkspace } from '../../../src/eac/EverythingAsCodeOIWorkspace.ts';
 import { RuntimeImpulse } from '../../../src/types/RuntimeImpulse.ts';
-import { resolveImpulseContext } from '../../../src/utils/resolveImpulseContext.ts';
+import {
+  type ResolvedImpulseContext,
+  resolveImpulseContext,
+} from '../../../src/utils/resolveImpulseContext.ts';
 import { ImpulseDetailTemplate } from './ImpulseDetailTemplate.tsx';
 import { IntentStyleMap } from '../../utils/getIntentStyles.ts';
 
@@ -46,8 +49,7 @@ export function ImpulseEntry(props: {
 
     contextLine = (
       <div>
-        <strong>Connection:</strong>{' '}
-        {ctx.Connection?.Name ?? 'Unnamed Connection'}
+        <strong>Connection:</strong> {ctx.Connection?.Name ?? 'Unnamed Connection'}
       </div>
     );
   }

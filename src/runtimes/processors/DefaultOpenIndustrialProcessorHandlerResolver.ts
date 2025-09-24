@@ -6,6 +6,7 @@ import {
   ProcessorHandlerResolver,
 } from '../.deps.ts';
 import { isEaCGlobalDataIngestProcessor } from './EaCGlobalDataIngestProcessor.ts';
+import { isEaCInterfaceAppProcessor } from './EaCInterfaceAppProcessor.ts';
 import { isEaCOIDataConnectionProcessor } from './EaCOIDataConnectionProcessor.ts';
 import { isEaCOIImpulseStreamProcessor } from './EaCOIImpulseStreamProcessor.ts';
 
@@ -15,7 +16,7 @@ export class DefaultOpenIndustrialProcessorHandlerResolver implements ProcessorH
     appProcCfg: EaCApplicationProcessorConfig,
     eac: EverythingAsCode,
   ): Promise<EaCRuntimeHandler | undefined> {
-    let toResolveName: string = '';
+    let toResolveName = '';
 
     if (isEaCGlobalDataIngestProcessor(appProcCfg.Application.Processor)) {
       toResolveName = 'EaCGlobalDataIngestProcessor';
@@ -27,17 +28,21 @@ export class DefaultOpenIndustrialProcessorHandlerResolver implements ProcessorH
       isEaCOIImpulseStreamProcessor(appProcCfg.Application.Processor)
     ) {
       toResolveName = 'EaCOIImpulseStreamProcessor';
+    } else if (
+      isEaCInterfaceAppProcessor(appProcCfg.Application.Processor)
+    ) {
+      toResolveName = 'EaCInterfaceAppProcessor';
     }
 
-    if (toResolveName) {
-      const resolver = await ioc.Resolve<ProcessorHandlerResolver>(
-        ioc.Symbol('ProcessorHandlerResolver'),
-        toResolveName,
-      );
-
-      return await resolver.Resolve(ioc, appProcCfg, eac);
-    } else {
+    if (!toResolveName) {
       return undefined;
     }
+
+    const resolver = await ioc.Resolve<ProcessorHandlerResolver>(
+      ioc.Symbol('ProcessorHandlerResolver'),
+      toResolveName,
+    );
+
+    return await resolver.Resolve(ioc, appProcCfg, eac);
   }
 }

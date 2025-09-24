@@ -22,7 +22,7 @@ export type CTAContent = {
 
 export type CTADeepLinkSectionProps = {
   content: CTAContent;
-} & Omit<SectionSurfaceProps, 'children' | 'tone'>;
+} & Omit<SectionSurfaceProps, 'children' | 'tone' | 'content'>;
 
 function mapIntent(intent?: MarketingActionIntent): ActionStyleTypes {
   switch (intent) {

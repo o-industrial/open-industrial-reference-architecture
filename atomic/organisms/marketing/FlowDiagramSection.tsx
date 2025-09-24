@@ -1,8 +1,5 @@
 import { classSet, JSX } from '../../.deps.ts';
-import {
-  SectionSurface,
-  type SectionSurfaceProps,
-} from '../../atoms/marketing/SectionSurface.tsx';
+import { SectionSurface, type SectionSurfaceProps } from '../../atoms/marketing/SectionSurface.tsx';
 import {
   SectionHeader,
   type SectionHeaderProps,
@@ -23,26 +20,30 @@ export type FlowDiagramContent = {
 export type FlowDiagramSectionProps = {
   header: SectionHeaderProps;
   content: FlowDiagramContent;
-} & Omit<SectionSurfaceProps, 'children' | 'tone'>;
+} & Omit<SectionSurfaceProps, 'children' | 'tone' | 'content'>;
 
 const inputDecor = [
   {
-    card: 'border-white/10 bg-[radial-gradient(circle,_rgba(129,140,248,0.18),rgba(14,18,38,0.9)),linear-gradient(145deg,rgba(13,16,32,0.92),rgba(9,12,24,0.92))]',
+    card:
+      'border-white/10 bg-[radial-gradient(circle,_rgba(129,140,248,0.18),rgba(14,18,38,0.9)),linear-gradient(145deg,rgba(13,16,32,0.92),rgba(9,12,24,0.92))]',
     glow: 'from-[rgba(129,140,248,0.35)] via-[rgba(96,165,250,0.22)] to-transparent',
     icon: 'from-neon-purple-500 via-neon-blue-500 to-neon-cyan-400',
   },
   {
-    card: 'border-white/10 bg-[radial-gradient(circle,_rgba(34,211,238,0.16),rgba(10,16,32,0.92)),linear-gradient(145deg,rgba(9,14,28,0.92),rgba(6,10,22,0.92))]',
+    card:
+      'border-white/10 bg-[radial-gradient(circle,_rgba(34,211,238,0.16),rgba(10,16,32,0.92)),linear-gradient(145deg,rgba(9,14,28,0.92),rgba(6,10,22,0.92))]',
     glow: 'from-[rgba(34,211,238,0.32)] via-[rgba(76,201,240,0.2)] to-transparent',
     icon: 'from-neon-cyan-400 via-neon-blue-500 to-neon-green-400',
   },
   {
-    card: 'border-white/10 bg-[radial-gradient(circle,_rgba(236,72,153,0.18),rgba(18,16,36,0.9)),linear-gradient(145deg,rgba(16,18,36,0.92),rgba(9,11,24,0.92))]',
+    card:
+      'border-white/10 bg-[radial-gradient(circle,_rgba(236,72,153,0.18),rgba(18,16,36,0.9)),linear-gradient(145deg,rgba(16,18,36,0.92),rgba(9,11,24,0.92))]',
     glow: 'from-[rgba(236,72,153,0.32)] via-[rgba(171,78,235,0.22)] to-transparent',
     icon: 'from-neon-pink-500 via-neon-purple-500 to-neon-blue-500',
   },
   {
-    card: 'border-white/10 bg-[radial-gradient(circle,_rgba(244,214,67,0.16),rgba(14,16,30,0.9)),linear-gradient(145deg,rgba(13,17,30,0.92),rgba(8,10,22,0.92))]',
+    card:
+      'border-white/10 bg-[radial-gradient(circle,_rgba(244,214,67,0.16),rgba(14,16,30,0.9)),linear-gradient(145deg,rgba(13,17,30,0.92),rgba(8,10,22,0.92))]',
     glow: 'from-[rgba(250,204,21,0.28)] via-[rgba(251,146,60,0.22)] to-transparent',
     icon: 'from-neon-orange-500 via-neon-yellow-400 to-neon-orange-600',
   },
@@ -50,22 +51,26 @@ const inputDecor = [
 
 const outputDecor = [
   {
-    card: 'border-white/10 bg-[radial-gradient(circle,_rgba(34,211,238,0.16),rgba(12,16,30,0.9)),linear-gradient(145deg,rgba(10,15,28,0.92),rgba(7,10,22,0.92))]',
+    card:
+      'border-white/10 bg-[radial-gradient(circle,_rgba(34,211,238,0.16),rgba(12,16,30,0.9)),linear-gradient(145deg,rgba(10,15,28,0.92),rgba(7,10,22,0.92))]',
     glow: 'from-[rgba(45,212,191,0.3)] via-[rgba(34,211,238,0.2)] to-transparent',
     icon: 'from-neon-cyan-400 via-neon-green-400 to-neon-teal-400',
   },
   {
-    card: 'border-white/10 bg-[radial-gradient(circle,_rgba(129,140,248,0.18),rgba(14,16,36,0.9)),linear-gradient(145deg,rgba(16,18,36,0.92),rgba(9,12,26,0.92))]',
+    card:
+      'border-white/10 bg-[radial-gradient(circle,_rgba(129,140,248,0.18),rgba(14,16,36,0.9)),linear-gradient(145deg,rgba(16,18,36,0.92),rgba(9,12,26,0.92))]',
     glow: 'from-[rgba(129,140,248,0.32)] via-[rgba(76,132,255,0.2)] to-transparent',
     icon: 'from-neon-indigo-500 via-neon-blue-500 to-neon-purple-500',
   },
   {
-    card: 'border-white/10 bg-[radial-gradient(circle,_rgba(236,72,153,0.18),rgba(16,16,34,0.9)),linear-gradient(145deg,rgba(15,16,34,0.92),rgba(9,12,26,0.92))]',
+    card:
+      'border-white/10 bg-[radial-gradient(circle,_rgba(236,72,153,0.18),rgba(16,16,34,0.9)),linear-gradient(145deg,rgba(15,16,34,0.92),rgba(9,12,26,0.92))]',
     glow: 'from-[rgba(236,72,153,0.3)] via-[rgba(167,139,250,0.24)] to-transparent',
     icon: 'from-neon-purple-500 via-neon-pink-500 to-neon-blue-500',
   },
   {
-    card: 'border-white/10 bg-[radial-gradient(circle,_rgba(250,204,21,0.16),rgba(12,16,28,0.9)),linear-gradient(145deg,rgba(12,16,28,0.92),rgba(8,10,20,0.92))]',
+    card:
+      'border-white/10 bg-[radial-gradient(circle,_rgba(250,204,21,0.16),rgba(12,16,28,0.9)),linear-gradient(145deg,rgba(12,16,28,0.92),rgba(8,10,20,0.92))]',
     glow: 'from-[rgba(250,204,21,0.28)] via-[rgba(251,146,60,0.22)] to-transparent',
     icon: 'from-neon-orange-500 via-neon-yellow-400 to-neon-orange-600',
   },
@@ -141,12 +146,8 @@ function renderNode(node: FlowNode, index: number, prefix: 'input' | 'output'): 
       </span>
       <div class='space-y-2 text-white'>
         <h4 class='text-sm font-semibold'>{node.title}</h4>
-        {node.subtitle
-          ? <p class='text-xs text-white/70'>{node.subtitle}</p>
-          : null}
-        {node.description
-          ? <p class='text-[0.72rem] text-white/60'>{node.description}</p>
-          : null}
+        {node.subtitle ? <p class='text-xs text-white/70'>{node.subtitle}</p> : null}
+        {node.description ? <p class='text-[0.72rem] text-white/60'>{node.description}</p> : null}
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import { NodeProps } from '../../.deps.ts';
 import { SurfaceInterfaceNodeData } from './SurfaceInterfaceNodeData.tsx';
 
 export default function SurfaceInterfaceNodeRenderer({
+  id,
   data,
 }: NodeProps<SurfaceInterfaceNodeData>) {
   const providers = data.details?.Spec?.Data?.Providers?.length ?? 0;
@@ -13,6 +14,18 @@ export default function SurfaceInterfaceNodeRenderer({
   const actions = data.details?.Spec?.Actions?.length ?? 0;
   const layoutNodes = data.details?.Spec?.Layout?.length ?? 0;
   const apiPath = data.details.ApiPath ?? '/w/:workspace/ui/:interface';
+  const editorRoute = `/workspace/interface/${id}`;
+  const modeShortcuts: Array<{
+    key: 'overview' | 'visual' | 'code' | 'preview';
+    label: string;
+    href: string;
+    intent: IntentTypes;
+  }> = [
+    { key: 'overview', label: 'Overview', href: editorRoute, intent: IntentTypes.Tertiary },
+    { key: 'visual', label: 'Visual', href: `${editorRoute}?mode=visual`, intent: IntentTypes.Primary },
+    { key: 'code', label: 'Code', href: `${editorRoute}?mode=code`, intent: IntentTypes.Secondary },
+    { key: 'preview', label: 'Preview', href: `${editorRoute}?mode=preview`, intent: IntentTypes.Info },
+  ];
 
   return (
     <WorkspaceNodeRendererBase
@@ -62,14 +75,32 @@ export default function SurfaceInterfaceNodeRenderer({
           </div>
         </div>
 
-        <div class='flex justify-end'>
+        <div class='flex flex-wrap items-center justify-between gap-2'>
+          <div class='flex flex-wrap gap-2'>
+            {modeShortcuts.map((shortcut) => (
+              <Action
+                key={`interface-node-shortcut-${id}-${shortcut.key}`}
+                href={shortcut.href}
+                target='_blank'
+                rel='noreferrer'
+                styleType={
+                  ActionStyleTypes.Outline |
+                  ActionStyleTypes.UltraThin |
+                  ActionStyleTypes.Rounded
+                }
+                intentType={shortcut.intent}
+              >
+                {shortcut.label}
+              </Action>
+            ))}
+          </div>
           <Action
             title='Open Interface Inspector'
-            styleType={ActionStyleTypes.Secondary}
+            styleType={ActionStyleTypes.Solid | ActionStyleTypes.Rounded}
             intentType={IntentTypes.Primary}
             onClick={() => data.onDoubleClick?.()}
           >
-            Inspect
+            Manage
           </Action>
         </div>
       </div>

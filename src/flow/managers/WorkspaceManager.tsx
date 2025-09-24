@@ -1,4 +1,4 @@
-// deno-lint-ignore-file no-explicit-any
+﻿// deno-lint-ignore-file no-explicit-any
 import {
   ComponentType,
   Connection,
@@ -148,7 +148,7 @@ export class WorkspaceManager {
 
     this.Interaction.BindEaCManager(this.EaC);
 
-    console.log('🚀 FlowManager initialized:', {
+    console.log('ðŸš€ FlowManager initialized:', {
       scope: this.currentScope,
       nodes: this.Graph.GetNodes().length,
       edges: this.Graph.GetEdges().length,
@@ -176,6 +176,10 @@ export class WorkspaceManager {
       jwt: this.Jwt,
       threadId,
     });
+  }
+
+  public DispatchInterfaceAction(action: { lookup: string; type: string; payload?: unknown; workspace?: string }): void {
+    console.log('[WorkspaceManager] Interface action received', action);
   }
 
   public UseAppMenu(
@@ -282,7 +286,7 @@ export class WorkspaceManager {
       }
     };
 
-    // Icons — reuse your existing set; add a couple of lucide fallbacks where needed
+    // Icons â€” reuse your existing set; add a couple of lucide fallbacks where needed
     const I = {
       // existing
       save: 'https://api.iconify.design/lucide:save.svg',
@@ -329,7 +333,7 @@ export class WorkspaceManager {
       //         { type: 'item', id: 'file.new.surface', label: 'Surface', iconSrc: I.archive },
       //       ],
       //     },
-      //     { type: 'item', id: 'file.save', label: 'Save', shortcut: '⌘S', iconSrc: I.save },
+      //     { type: 'item', id: 'file.save', label: 'Save', shortcut: 'âŒ˜S', iconSrc: I.save },
       //     { type: 'item', id: 'file.fork', label: 'Fork Workspace', iconSrc: I.fork },
       //     { type: 'separator', id: 'file.sep1' },
       //     {
@@ -409,7 +413,7 @@ export class WorkspaceManager {
           {
             type: 'item',
             id: 'workspace.viewAll',
-            label: 'View All…',
+            label: 'View Allâ€¦',
             iconSrc: I.stack,
             payload: { target: 'workspace-index' },
           },
@@ -584,7 +588,7 @@ export class WorkspaceManager {
 
       await this.oiSvc.Users.DeleteAccount();
 
-      console.warn('🗑️ [UseAccountProfile] account deleted');
+      console.warn('ðŸ—‘ï¸ [UseAccountProfile] account deleted');
 
       await signOut();
     };
@@ -669,7 +673,7 @@ export class WorkspaceManager {
         container.scrollTo({ top: container.scrollHeight, behavior: 'auto' });
 
         console.log(
-          '[UseAzi] ✅ Initial scroll to bottom:',
+          '[UseAzi] âœ… Initial scroll to bottom:',
           container.scrollHeight,
         );
       });
@@ -679,17 +683,17 @@ export class WorkspaceManager {
     useLayoutEffect(() => {
       const container = scrollRef.current;
       if (!container) {
-        console.log('[UseAzi] ❌ No scroll container');
+        console.log('[UseAzi] âŒ No scroll container');
         return;
       }
 
       if (hasScrolledInitially.current) {
-        console.log('[UseAzi] ⚠️ Already scrolled initially — skipping');
+        console.log('[UseAzi] âš ï¸ Already scrolled initially â€” skipping');
         return;
       }
 
       if (state.Messages.length <= 1) {
-        console.log('[UseAzi] ⏳ No messages yet — waiting');
+        console.log('[UseAzi] â³ No messages yet â€” waiting');
         return;
       }
 
@@ -1078,7 +1082,7 @@ export class WorkspaceManager {
           });
 
           console.log(
-            `🟡 Toggled enabled state for node ${selectedId} → ${val}`,
+            `ðŸŸ¡ Toggled enabled state for node ${selectedId} â†’ ${val}`,
           );
           setEnabled(val);
         }
@@ -1093,7 +1097,7 @@ export class WorkspaceManager {
     const handleDeleteNode = useCallback(() => {
       if (!selectedId) return;
 
-      console.log(`🗑️ Deleting node ${selectedId}`);
+      console.log(`ðŸ—‘ï¸ Deleting node ${selectedId}`);
       this.EaC.DeleteNode(selectedId);
       this.Selection.ClearSelection();
     }, [selectedId]);
@@ -1462,7 +1466,7 @@ export class WorkspaceManager {
           setPresets(capabilityMgr.GetPresets());
           setNodeTypes(capabilityMgr.GetRendererMap());
         } catch (err) {
-          console.warn('⚠️ EaC scopeMgr not ready yet in UseUIContext:', err);
+          console.warn('âš ï¸ EaC scopeMgr not ready yet in UseUIContext:', err);
           setPresets({});
           setNodeTypes({});
         }
@@ -1638,7 +1642,7 @@ export class WorkspaceManager {
     const save = async () => {
       await this.Commit();
 
-      console.log('💾 Saved workspace details');
+      console.log('ðŸ’¾ Saved workspace details');
 
       // Refresh list so Manage Workspaces reflects latest name/desc
       listWorkspaces();
@@ -1775,7 +1779,7 @@ export class WorkspaceManager {
 
   public Fork(): void {
     const forked = this.History.ForkRuntime();
-    console.log('🌱 Forked runtime snapshot:', forked);
+    console.log('ðŸŒ± Forked runtime snapshot:', forked);
   }
 
   public HasUnsavedChanges(): boolean {
@@ -1786,7 +1790,7 @@ export class WorkspaceManager {
     const snapshot = this.History.RevertToLastCommit();
     if (snapshot) {
       this.EaC.ResetFromSnapshot(snapshot);
-      console.log('🔄 Reverted to last commit');
+      console.log('ðŸ”„ Reverted to last commit');
     }
   }
 
@@ -1794,7 +1798,7 @@ export class WorkspaceManager {
     const snapshot = this.History.Undo();
     if (snapshot) {
       this.EaC.ResetFromSnapshot(snapshot);
-      console.log('↩️ Undo successful');
+      console.log('â†©ï¸ Undo successful');
     }
   }
 
@@ -1802,7 +1806,7 @@ export class WorkspaceManager {
     const snapshot = this.History.Redo();
     if (snapshot) {
       this.EaC.ResetFromSnapshot(snapshot);
-      console.log('↪️ Redo successful');
+      console.log('â†ªï¸ Redo successful');
     }
   }
 
@@ -1823,7 +1827,7 @@ export class WorkspaceManager {
   }
 
   public SwitchToScope(scope: NodeScopeTypes, lookup?: string): void {
-    console.log(`🔀 Switching scope to: ${scope} (${lookup})`);
+    console.log(`ðŸ”€ Switching scope to: ${scope} (${lookup})`);
 
     // Update internal scope reference
     this.currentScope = { Scope: scope, Lookup: lookup };

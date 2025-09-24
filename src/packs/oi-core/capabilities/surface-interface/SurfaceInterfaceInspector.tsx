@@ -1,5 +1,6 @@
+import { IntentTypes } from '../../../../../atomic/.deps.ts';
 import { useCallback, useEffect, useMemo, useState } from '../../.deps.ts';
-import { Action, InspectorBase } from '../../../../../atomic/.exports.ts';
+import { Action, ActionStyleTypes, InspectorBase } from '../../../../../atomic/.exports.ts';
 import { InspectorCommonProps } from '../../../../flow/.exports.ts';
 import type { EaCInterfaceDetails, SurfaceInterfaceSettings } from '../../../../eac/.exports.ts';
 import type { SurfaceInterfaceStats } from './SurfaceInterfaceStats.tsx';
@@ -51,6 +52,14 @@ export function SurfaceInterfaceInspector({
   const lastPublished = stats?.lastPublishedAt
     ? new Date(stats.lastPublishedAt).toLocaleString()
     : 'Never';
+  const editorUrlBase = `/workspace/interface/${lookup}`;
+  const modeShortcuts: Array<{ key: 'overview' | 'visual' | 'code' | 'preview'; label: string; intent: IntentTypes }> = [
+    { key: 'overview', label: 'Overview', intent: IntentTypes.Tertiary },
+    { key: 'visual', label: 'Visual', intent: IntentTypes.Primary },
+    { key: 'code', label: 'Code', intent: IntentTypes.Secondary },
+    { key: 'preview', label: 'Preview', intent: IntentTypes.Info },
+  ];
+
 
   const bindingsCount = useMemo(() => Object.keys(details.Spec?.Data?.Bindings ?? {}).length, [
     details.Spec?.Data?.Bindings,
@@ -146,9 +155,28 @@ export function SurfaceInterfaceInspector({
             </ul>
           </section>
 
-          <div class='flex justify-end gap-2'>
+          <div class='flex flex-wrap items-center justify-between gap-2'>
+            <div class='flex flex-wrap gap-2'>
+              {modeShortcuts.map((shortcut) => (
+                <Action
+                  key={`interface-shortcut-${lookup}-${shortcut.key}`}
+                  href={`${editorUrlBase}?mode=${shortcut.key}`}
+                  target='_blank'
+                  rel='noreferrer'
+                  styleType={
+                    ActionStyleTypes.Outline |
+                    ActionStyleTypes.UltraThin |
+                    ActionStyleTypes.Rounded
+                  }
+                  intentType={shortcut.intent}
+                >
+                  {shortcut.label}
+                </Action>
+              ))}
+            </div>
             <Action
-              styleType='Secondary'
+              styleType={ActionStyleTypes.Solid | ActionStyleTypes.Rounded}
+              intentType={IntentTypes.Primary}
               title='Open Interface Manager'
               onClick={() => setModalOpen(true)}
             >
@@ -173,3 +201,4 @@ export function SurfaceInterfaceInspector({
     </>
   );
 }
+

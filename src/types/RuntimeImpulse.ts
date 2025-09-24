@@ -187,6 +187,13 @@ export type SurfaceWarmQueryImpulse = {
   };
 };
 
+export type SurfaceInterfaceImpulse = {
+  Source: 'SurfaceInterface';
+  Metadata?: {
+    SurfaceLookup: string;
+    InterfaceLookup: string;
+  };
+};
 /**
  * An impulse raised by an explicit Signal, triggered by agents or schemas.
  */

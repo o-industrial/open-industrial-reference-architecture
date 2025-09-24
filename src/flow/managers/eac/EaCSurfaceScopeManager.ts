@@ -44,6 +44,14 @@ export class EaCSurfaceScopeManager extends EaCScopeManager {
       }
     }
 
+    for (const interfaceKey of Object.keys(surface.Interfaces ?? {})) {
+      const node = this.capabilities.BuildNode(interfaceKey, 'interface', ctx);
+      if (node) {
+        nodes.push(node);
+        edges.push(...this.capabilities.BuildEdgesForNode(node, ctx));
+      }
+    }
+
     for (const connKey of Object.keys(surface.DataConnections ?? {})) {
       const node = this.capabilities.BuildNode(
         `${this.surfaceLookup}->${connKey}`,

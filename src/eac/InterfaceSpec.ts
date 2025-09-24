@@ -203,18 +203,19 @@ const InterfaceSpecActionHandlerRefSchema: z.ZodType<InterfaceSpecActionHandlerR
   .strict()
   .describe('Handler reference for interface actions.');
 
+const JsonSchemaLikeSchema: z.ZodType<JSONSchema7 | Record<string, unknown>> = z.custom();
+
 const InterfaceSpecActionSchema: z.ZodType<InterfaceSpecAction> = z
   .object({
     ID: z.string().min(1),
     Name: z.string().min(1),
     Description: z.string().optional(),
-    InputSchema: z.unknown().optional(),
+    InputSchema: JsonSchemaLikeSchema.optional(),
     Policy: InterfaceSpecActionPolicySchema.optional(),
     Handler: InterfaceSpecActionHandlerRefSchema,
   })
   .strict()
   .describe('Declarative definition for an interface action.');
-
 const InterfaceSpecThemeTokensSchema: z.ZodType<InterfaceSpecThemeTokens> = z
   .object({
     Colors: z.record(z.string()).optional(),

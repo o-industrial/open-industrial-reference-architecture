@@ -19,6 +19,7 @@ export type { EverythingAsCodeApplications } from 'jsr:@fathym/eac-applications@
 export {
   type EaCApplicationProcessorConfig,
   type EaCProcessor,
+  type EaCPreactAppProcessor,
   isEaCProcessor,
 } from 'jsr:@fathym/eac-applications@0.0.191/processors';
 export { establishJwtValidationMiddleware } from 'jsr:@fathym/eac-applications@0.0.191/runtime/modules';
@@ -43,3 +44,5 @@ export {
 export { EventHubConsumerClient } from 'npm:@azure/event-hubs@6.0.0';
 
 export { Registry as IoTRegistry, Twin } from 'npm:azure-iothub@1.16.5';
+
+
