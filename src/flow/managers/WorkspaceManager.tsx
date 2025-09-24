@@ -1,4 +1,4 @@
-﻿// deno-lint-ignore-file no-explicit-any
+// deno-lint-ignore-file no-explicit-any
 import {
   ComponentType,
   Connection,
@@ -1059,12 +1059,52 @@ export class WorkspaceManager {
               console.log('[UseInspector] Live-synced EaC details for node', selectedId);
             }
 
-            // If any keys were removed and this is a warmquery node, emit delete patch
-            if (removed.length && selected?.type === 'warmquery') {
-              const del: any = { WarmQueries: { [selectedId]: { Details: {} } } };
-              for (const k of removed) del.WarmQueries[selectedId].Details[k] = null;
-              this.EaC.MergeDelete(del);
-              console.log('[UseInspector] Deleted fields for', selectedId, removed);
+            // If any keys were removed, derive a delete patch generically via capability mapping
+            if (removed.length) {
+              try {
+                const sentinel = '__OI_DELETE__';
+                const detailsSentinel: Record<string, string> = {};
+                for (const k of removed) detailsSentinel[k] = sentinel;
+
+                // Build capability-scoped update patch to discover the placement of Details for this node
+                const graphNode = { ID: selectedId, Type: selected!.type! } as any;
+                const ctx = {
+                  GetEaC: () => this.EaC.GetEaC(),
+                  SurfaceLookup: currentScopeData.Lookup!,
+                } as any;
+                const cap = this.EaC.GetCapabilities();
+                const probe = cap.BuildUpdatePatch(
+                  graphNode,
+                  { Details: detailsSentinel },
+                  ctx,
+                ) as Record<string, unknown>;
+
+                // Project only the sentinel-bearing branch and convert to MergeDelete shape
+                const toDeleteOnly = (v: unknown): unknown => {
+                  if (v === sentinel) return null;
+                  if (Array.isArray(v)) return undefined;
+                  if (v && typeof v === 'object') {
+                    const out: Record<string, unknown> = {};
+                    for (const [k, val] of Object.entries(v as Record<string, unknown>)) {
+                      const child = toDeleteOnly(val);
+                      if (child !== undefined) out[k] = child;
+                    }
+                    return Object.keys(out).length ? out : undefined;
+                  }
+                  return undefined;
+                };
+
+                const del = toDeleteOnly(probe);
+                if (
+                  del && typeof del === 'object' &&
+                  Object.keys(del as Record<string, unknown>).length
+                ) {
+                  this.EaC.MergeDelete(del as any);
+                  console.log('[UseInspector] Deleted fields for', selectedId, removed);
+                }
+              } catch (err) {
+                console.warn('[UseInspector] Failed to compute generic delete patch', err);
+              }
             }
           }
 

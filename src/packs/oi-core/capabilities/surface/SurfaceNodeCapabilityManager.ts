@@ -15,6 +15,7 @@ import {
   SurfaceEventRouter,
   WorkspaceManager,
 } from '../../../../flow/.exports.ts';
+import { merge } from '../../../../flow/.deps.ts';
 import { ComponentType, FunctionComponent, memo, NullableArrayOrObject } from '../../.deps.ts';
 import { SurfaceInspector } from './SurfaceInspector.tsx';
 import SurfaceNodeRenderer from './SurfaceNodeRenderer.tsx';
@@ -219,10 +220,10 @@ export class SurfaceNodeCapabilityManager extends EaCNodeCapabilityManager {
   ): Partial<EverythingAsCodeOIWorkspace> {
     return {
       Surfaces: {
-        [node.ID]: this.mergeDetailsAndMetadata(
-          update.Details,
-          update.Metadata,
-        ),
+        [node.ID]: {
+          Details: merge(node.Details || {}, update.Details || {}),
+          Metadata: merge(node.Metadata || {}, update.Metadata || {}),
+        } as EaCSurfaceAsCode,
       },
     };
   }

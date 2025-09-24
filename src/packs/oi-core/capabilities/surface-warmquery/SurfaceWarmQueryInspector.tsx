@@ -5,7 +5,7 @@ import { Action, InspectorBase } from '../../../../../atomic/.exports.ts';
 import { InspectorCommonProps } from '../../../../flow/.exports.ts';
 import { SurfaceWarmQueryStats } from './SurfaceWarmQueryStats.tsx';
 import { EaCWarmQueryDetails } from '../../../../eac/.deps.ts';
-import { SurfaceWarmQueryModal } from './SurfaceWarmQueryModal.tsx';
+import { SurfaceWarmQueryModal } from '../../../../../atomic/organisms/modals/SurfaceWarmQueryModal.tsx';
 
 type SurfaceWarmQueryInspectorProps = InspectorCommonProps<
   EaCWarmQueryDetails,
