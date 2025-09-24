@@ -106,9 +106,9 @@ export const SurfaceWarmQueryModalResults: FunctionalComponent<
   };
 
   return (
-    <div class='pl-6 pr-6 pt-6 pb-0 rounded-sm h-full flex flex-col min-h-0'>
+    <div id='results1' class='pl-6 pr-6 pt-6 pb-0 rounded-sm flex-1 min-h-0 flex flex-col'>
       {/* Header */}
-      <div class='flex items-center justify-between mb-2'>
+      <div id='results2' class='flex items-center justify-between mb-2'>
         <label class='flex items-center gap-2 text-neutral-900 dark:text-white font-semibold'>
           Results
         </label>
