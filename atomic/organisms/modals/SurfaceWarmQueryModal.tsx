@@ -58,6 +58,15 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
     }, 300);
   };
 
+  // Persist any programmatic query changes (e.g., Azi suggestions)
+  // so they are saved even when no user input event fires.
+  useEffect(() => {
+    if (typeof query === 'string') {
+      persistQuery(query);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
+
   const onAziFinishSend = (state: AziState) => {
     setIsLoading(false);
     if (state && state.DataQuery && state.DataQuery != state.CurrentQuery) {
