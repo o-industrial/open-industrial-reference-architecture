@@ -114,6 +114,17 @@ export class EaCManager {
 
     this.graph.ResetGraph();
     this.reloadFromEaC();
+
+    // Establish a baseline snapshot the first time we switch scope so that
+    // dirty state compares current vs committed (original) rather than vs last.
+    try {
+      if (this.history.GetVersion() === 0) {
+        this.history.Push(this.eac, this.deleteEaC);
+        this.history.Commit();
+      }
+    } catch {
+      // best-effort; ignore if history is not ready
+    }
   }
 
   /** Returns the capability manager instance for the current scope. */

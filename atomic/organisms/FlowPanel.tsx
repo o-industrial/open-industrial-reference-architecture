@@ -11,6 +11,7 @@ import {
   IS_BROWSER,
   JSX,
 } from '../.deps.ts';
+import { createPortal } from 'npm:preact@10.20.1/compat';
 import {
   NodeChange,
   EdgeChange,
@@ -25,6 +26,7 @@ import {
   neonColors,
 } from '../.exports.ts';
 import { FlowPanelBank } from '../molecules/flows/FlowPanelBank.tsx';
+import { ValidationErrorsModal } from './modals/ValidationErrorsModal.tsx';
 import { FlowPanelTemplate } from '../templates/FlowPanelTemplate.tsx';
 
 export const IsIsland = true;
@@ -52,6 +54,20 @@ function FlowPanelInner({
   const { presets, nodeTypes } = workspaceMgr.UseUIContext();
 
   const history = workspaceMgr.UseHistory();
+  const [valErrors, setValErrors] = useState<
+    { node: { ID: string; Type: string; Label?: string }; issues: { code?: string; field?: string; message: string }[] }[]
+  >([]);
+  const [showValModal, setShowValModal] = useState(false);
+
+  const handleCommit = async () => {
+    const validation = workspaceMgr.ValidateGraph();
+    if (validation.errors.length > 0) {
+      setValErrors(validation.errors);
+      setShowValModal(true);
+      return;
+    }
+    await history.commit();
+  };
 
   return (
     <FlowPanelTemplate
@@ -64,7 +80,7 @@ function FlowPanelInner({
           hasChanges={history.hasChanges}
           onUndo={history.canUndo ? history.undo : undefined}
           onRedo={history.canRedo ? history.redo : undefined}
-          onCommit={history.commit}
+          onCommit={handleCommit}
           onRevert={history.revert}
           onFork={history.fork}
         />
@@ -134,6 +150,13 @@ function FlowPanelInner({
               </div>
             </div>
           </ReactFlow>
+          {showValModal && IS_BROWSER && createPortal(
+            <ValidationErrorsModal
+              errors={valErrors}
+              onClose={() => setShowValModal(false)}
+            />,
+            document.body
+          )}
         </div>
       }
     />
