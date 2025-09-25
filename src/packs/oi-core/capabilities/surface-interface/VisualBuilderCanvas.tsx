@@ -46,10 +46,10 @@ export function VisualBuilderCanvas({ spec, onSpecChange }: VisualBuilderCanvasP
       <div class='flex-1 overflow-auto rounded border border-slate-800 bg-slate-950/60 p-3 font-mono text-xs leading-6 text-slate-300'>
         {nodes.length === 0 && <p class='text-slate-500'>No layout nodes defined.</p>}
         {nodes.map((node) => (
-          <div key={node.ID} style={{ paddingLeft: `${node.depth * 16}px` }}>
-            <span class='text-slate-500'>+-</span> {node.Type}
+          <div key={node.id} style={{ paddingLeft: `${node.depth * 16}px` }}>
+            <span class='text-slate-500'>+-</span> {node.type}
             <span class='text-slate-500'>�</span>
-            <span class='text-slate-300'>{node.ID}</span>
+            <span class='text-slate-300'>{node.id}</span>
           </div>
         ))}
       </div>

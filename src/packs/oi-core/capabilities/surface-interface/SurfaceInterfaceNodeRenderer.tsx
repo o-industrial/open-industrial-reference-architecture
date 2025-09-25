@@ -22,9 +22,19 @@ export default function SurfaceInterfaceNodeRenderer({
     intent: IntentTypes;
   }> = [
     { key: 'overview', label: 'Overview', href: editorRoute, intent: IntentTypes.Tertiary },
-    { key: 'visual', label: 'Visual', href: `${editorRoute}?mode=visual`, intent: IntentTypes.Primary },
+    {
+      key: 'visual',
+      label: 'Visual',
+      href: `${editorRoute}?mode=visual`,
+      intent: IntentTypes.Primary,
+    },
     { key: 'code', label: 'Code', href: `${editorRoute}?mode=code`, intent: IntentTypes.Secondary },
-    { key: 'preview', label: 'Preview', href: `${editorRoute}?mode=preview`, intent: IntentTypes.Info },
+    {
+      key: 'preview',
+      label: 'Preview',
+      href: `${editorRoute}?mode=preview`,
+      intent: IntentTypes.Info,
+    },
   ];
 
   return (
@@ -83,11 +93,9 @@ export default function SurfaceInterfaceNodeRenderer({
                 href={shortcut.href}
                 target='_blank'
                 rel='noreferrer'
-                styleType={
-                  ActionStyleTypes.Outline |
+                styleType={ActionStyleTypes.Outline |
                   ActionStyleTypes.UltraThin |
-                  ActionStyleTypes.Rounded
-                }
+                  ActionStyleTypes.Rounded}
                 intentType={shortcut.intent}
               >
                 {shortcut.label}

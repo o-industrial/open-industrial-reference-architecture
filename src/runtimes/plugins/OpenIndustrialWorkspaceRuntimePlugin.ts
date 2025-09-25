@@ -85,7 +85,7 @@ export class OpenIndustrialWorkspaceRuntimePlugin implements EaCRuntimePlugin {
     project.ApplicationResolvers ??= {};
   }
 
-  protected async buildWorkspaceInterfaceApp(
+  protected buildWorkspaceInterfaceApp(
     eac: EverythingAsCodeOIWorkspace,
   ): Promise<void> {
     const interfaceEntries = Object.entries(eac.Interfaces ?? {})
@@ -96,7 +96,7 @@ export class OpenIndustrialWorkspaceRuntimePlugin implements EaCRuntimePlugin {
       .filter((entry): entry is [string, { Details: EaCInterfaceDetails }] => Array.isArray(entry));
 
     if (!interfaceEntries.length) {
-      return;
+      return Promise.resolve();
     }
 
     const project = eac.Projects![this.projectLookup]!;
@@ -118,6 +118,8 @@ export class OpenIndustrialWorkspaceRuntimePlugin implements EaCRuntimePlugin {
         RoutesBase: 'w/:workspace/ui',
       } as EaCInterfaceAppProcessor,
     };
+
+    return Promise.resolve();
   }
 
   protected async buildAppForAgent(

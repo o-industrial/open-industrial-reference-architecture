@@ -2,7 +2,11 @@ import { IntentTypes } from '../../../../../atomic/.deps.ts';
 import { useCallback, useEffect, useMemo, useState } from '../../.deps.ts';
 import { Action, ActionStyleTypes, InspectorBase } from '../../../../../atomic/.exports.ts';
 import { InspectorCommonProps } from '../../../../flow/.exports.ts';
-import type { EaCInterfaceDetails, SurfaceInterfaceSettings } from '../../../../eac/.exports.ts';
+import type {
+  EaCInterfaceDetails,
+  InterfaceSpec,
+  SurfaceInterfaceSettings,
+} from '../../../../eac/.exports.ts';
 import type { SurfaceInterfaceStats } from './SurfaceInterfaceStats.tsx';
 import { SurfaceInterfaceModal } from './SurfaceInterfaceModal.tsx';
 
@@ -24,6 +28,13 @@ export function SurfaceInterfaceInspector({
 }: SurfaceInterfaceInspectorProps) {
   const stats = useStats();
   const [isModalOpen, setModalOpen] = useState(false);
+
+  const resolvedDetails = useMemo(
+    () => ensureInterfaceDetails(details, lookup),
+    [details, lookup],
+  );
+
+  const resolvedSpec = resolvedDetails.Spec;
 
   const [name, setName] = useState(details.Name ?? '');
   const [description, setDescription] = useState(details.Description ?? '');
@@ -49,21 +60,23 @@ export function SurfaceInterfaceInspector({
   const connectedConnections = details.DataConnectionLookups?.length ?? 0;
   const connectedSchemas = details.SchemaLookups?.length ?? 0;
 
-  const lastPublished = stats?.lastPublishedAt
-    ? new Date(stats.lastPublishedAt).toLocaleString()
+  const lastPublished = stats?.LastPublishedAt
+    ? new Date(stats.LastPublishedAt).toLocaleString()
     : 'Never';
   const editorUrlBase = `/workspace/interface/${lookup}`;
-  const modeShortcuts: Array<{ key: 'overview' | 'visual' | 'code' | 'preview'; label: string; intent: IntentTypes }> = [
+  const modeShortcuts: Array<
+    { key: 'overview' | 'visual' | 'code' | 'preview'; label: string; intent: IntentTypes }
+  > = [
     { key: 'overview', label: 'Overview', intent: IntentTypes.Tertiary },
     { key: 'visual', label: 'Visual', intent: IntentTypes.Primary },
     { key: 'code', label: 'Code', intent: IntentTypes.Secondary },
     { key: 'preview', label: 'Preview', intent: IntentTypes.Info },
   ];
 
-
-  const bindingsCount = useMemo(() => Object.keys(details.Spec?.Data?.Bindings ?? {}).length, [
-    details.Spec?.Data?.Bindings,
-  ]);
+  const bindingsCount = useMemo(
+    () => Object.keys(resolvedSpec.Data?.Bindings ?? {}).length,
+    [resolvedSpec.Data?.Bindings],
+  );
 
   return (
     <>
@@ -163,11 +176,9 @@ export function SurfaceInterfaceInspector({
                   href={`${editorUrlBase}?mode=${shortcut.key}`}
                   target='_blank'
                   rel='noreferrer'
-                  styleType={
-                    ActionStyleTypes.Outline |
+                  styleType={ActionStyleTypes.Outline |
                     ActionStyleTypes.UltraThin |
-                    ActionStyleTypes.Rounded
-                  }
+                    ActionStyleTypes.Rounded}
                   intentType={shortcut.intent}
                 >
                   {shortcut.label}
@@ -191,9 +202,9 @@ export function SurfaceInterfaceInspector({
         onClose={() => setModalOpen(false)}
         interfaceLookup={lookup}
         surfaceLookup={surfaceLookup}
-        details={details}
-        settings={details}
-        spec={details.Spec}
+        details={resolvedDetails}
+        settings={details as SurfaceInterfaceSettings}
+        spec={resolvedSpec}
         draftSpec={undefined}
         workspaceMgr={workspaceMgr}
         onSpecChange={(next) => onDetailsChanged({ Spec: next })}
@@ -202,3 +213,92 @@ export function SurfaceInterfaceInspector({
   );
 }
 
+function ensureInterfaceDetails(
+  details: Partial<EaCInterfaceDetails>,
+  fallbackLookup: string,
+): EaCInterfaceDetails {
+  const fallbackName = details.Name?.trim()?.length ? details.Name : `Interface ${fallbackLookup}`;
+  const fallbackVersion = details.Version ?? 1;
+
+  return {
+    Name: fallbackName,
+    Description: details.Description,
+    Version: fallbackVersion,
+    ApiPath: details.ApiPath,
+    Spec: ensureInterfaceSpec(details.Spec, fallbackName, fallbackVersion),
+    ComponentTag: details.ComponentTag,
+    EmbedOptions: details.EmbedOptions,
+    Assets: details.Assets,
+    DraftState: details.DraftState,
+    Thumbnails: details.Thumbnails,
+  };
+}
+
+function ensureInterfaceSpec(
+  spec: InterfaceSpec | undefined,
+  fallbackName: string,
+  fallbackVersion: number,
+): InterfaceSpec {
+  const defaultSpec: InterfaceSpec = {
+    Meta: {
+      Name: fallbackName,
+      Version: fallbackVersion,
+      Theme: 'default',
+    },
+    Data: { Providers: [], Bindings: {} },
+    Layout: [
+      {
+        ID: 'root',
+        Type: 'Container',
+        IsContainer: true,
+        Props: {
+          className:
+            'flex min-h-[320px] flex-col gap-4 bg-slate-950/80 p-6 rounded-xl border border-slate-800',
+        },
+        Children: [
+          {
+            ID: 'headline',
+            Type: 'Text',
+            Props: {
+              value: 'Interface title',
+              className: 'text-2xl font-semibold text-slate-100',
+            },
+          },
+          {
+            ID: 'subtitle',
+            Type: 'Text',
+            Props: {
+              value: 'Describe the purpose of this HMI page',
+              className: 'text-sm text-slate-400',
+            },
+          },
+        ],
+      },
+    ],
+    Actions: [],
+  };
+
+  if (!spec) {
+    return defaultSpec;
+  }
+
+  const meta = spec.Meta ?? {
+    Name: fallbackName,
+    Version: fallbackVersion,
+  };
+
+  const layout = spec.Layout?.length ? spec.Layout : defaultSpec.Layout;
+
+  return {
+    ...spec,
+    Meta: {
+      ...meta,
+      Name: meta.Name ?? fallbackName,
+      Version: meta.Version ?? fallbackVersion,
+      Theme: meta.Theme ?? defaultSpec.Meta.Theme,
+    },
+    Data: spec.Data ?? defaultSpec.Data,
+    Layout: layout,
+    Actions: spec.Actions ?? defaultSpec.Actions,
+  };
+}

@@ -10,7 +10,10 @@ export {
 export { type EaCApplicationProcessorConfig } from '../.deps.ts';
 export { type EaCInterfaceAppProcessor } from '../processors/EaCInterfaceAppProcessor.ts';
 
-export { EaCPreactAppHandler, PreactRenderHandler } from 'jsr:@fathym/eac-applications@0.0.191/preact';
+export {
+  EaCPreactAppHandler,
+  PreactRenderHandler,
+} from 'jsr:@fathym/eac-applications@0.0.191/preact';
 export { options as preactOptions } from 'npm:preact@10.20.1';
 export { type EaCPreactAppProcessor } from 'jsr:@fathym/eac-applications@0.0.191/processors';
 

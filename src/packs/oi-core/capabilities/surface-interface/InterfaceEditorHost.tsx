@@ -22,6 +22,32 @@ function countLayoutNodes(nodes: InterfaceSpec['Layout']): number {
   return walk(nodes ?? []);
 }
 
+function ensureInterfaceSpec(spec?: InterfaceSpec): InterfaceSpec {
+  if (!spec) {
+    return {
+      Meta: { Name: 'Untitled Interface', Version: 1, Theme: 'default' },
+      Layout: [],
+      Data: { Providers: [], Bindings: {} },
+      Actions: [],
+    };
+  }
+
+  const meta = spec.Meta ?? { Name: 'Untitled Interface', Version: 1 };
+
+  return {
+    ...spec,
+    Meta: {
+      ...meta,
+      Name: meta.Name ?? 'Untitled Interface',
+      Version: meta.Version ?? 1,
+      Theme: meta.Theme ?? 'default',
+    },
+    Data: spec.Data ?? { Providers: [], Bindings: {} },
+    Layout: spec.Layout ?? [],
+    Actions: spec.Actions ?? [],
+  };
+}
+
 export function InterfaceEditorHost({
   spec,
   draftSpec,
@@ -31,10 +57,12 @@ export function InterfaceEditorHost({
   const [mode, setMode] = useState<InterfaceEditorMode>(defaultMode);
   const [editorValue, setEditorValue] = useState<string>('');
   const [lastError, setLastError] = useState<string>('');
-  const [currentSpec, setCurrentSpec] = useState<InterfaceSpec>(draftSpec ?? spec);
+  const [currentSpec, setCurrentSpec] = useState<InterfaceSpec>(
+    ensureInterfaceSpec(draftSpec ?? spec),
+  );
 
   useEffect(() => {
-    setCurrentSpec(draftSpec ?? spec);
+    setCurrentSpec(ensureInterfaceSpec(draftSpec ?? spec));
   }, [draftSpec, spec]);
 
   useEffect(() => {
@@ -57,6 +85,13 @@ export function InterfaceEditorHost({
     };
   }, [currentSpec]);
 
+  const meta = currentSpec.Meta ?? {
+    Name: 'Untitled Interface',
+    Version: 1,
+    Theme: 'default',
+  };
+  const themeName = meta.Theme ?? 'default';
+
   const modes: Array<{ key: InterfaceEditorMode; label: string }> = [
     { key: 'overview', label: 'Overview' },
     { key: 'visual', label: 'Visual' },
@@ -69,8 +104,9 @@ export function InterfaceEditorHost({
     try {
       const parsed = JSON.parse(value) as InterfaceSpec;
       setLastError('');
-      setCurrentSpec(parsed);
-      onSpecChange?.(parsed);
+      const sanitized = ensureInterfaceSpec(parsed);
+      setCurrentSpec(sanitized);
+      onSpecChange?.(sanitized);
     } catch (err) {
       setLastError(err instanceof Error ? err.message : String(err));
     }
@@ -101,7 +137,7 @@ export function InterfaceEditorHost({
             <header>
               <h2 class='text-lg font-semibold text-slate-50'>Spec Snapshot</h2>
               <p class='text-sm text-slate-400'>
-                Version {currentSpec.Meta.Version} | Theme {currentSpec.Meta.Theme ?? 'default'}
+                Version {meta.Version} | Theme {themeName}
               </p>
             </header>
             <dl class='grid grid-cols-2 gap-4 text-sm text-slate-300 md:grid-cols-4'>
@@ -144,8 +180,9 @@ export function InterfaceEditorHost({
           <VisualBuilderCanvas
             spec={currentSpec}
             onSpecChange={(next) => {
-              setCurrentSpec(next);
-              onSpecChange?.(next);
+              const sanitizedNext = ensureInterfaceSpec(next);
+              setCurrentSpec(sanitizedNext);
+              onSpecChange?.(sanitizedNext);
             }}
           />
         )}

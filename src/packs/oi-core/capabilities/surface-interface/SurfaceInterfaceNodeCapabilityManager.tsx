@@ -28,6 +28,30 @@ export type SurfaceInterfaceNodeDetails =
 
 const INTERFACE_PRESET_THEME = 'oi-default';
 
+function ensureInterfaceSpecValue(
+  spec: InterfaceSpec | undefined,
+  fallbackId: string,
+): InterfaceSpec {
+  if (!spec) {
+    return createDefaultInterfaceSpec(fallbackId);
+  }
+
+  const meta = spec.Meta ?? { Name: 'Untitled Interface', Version: 1 };
+
+  return {
+    ...spec,
+    Meta: {
+      ...meta,
+      Name: meta.Name ?? 'Untitled Interface',
+      Version: meta.Version ?? 1,
+      Theme: meta.Theme ?? 'default',
+    },
+    Data: spec.Data ?? { Providers: [], Bindings: {} },
+    Layout: spec.Layout ?? [],
+    Actions: spec.Actions ?? [],
+  };
+}
+
 function createDefaultInterfaceSpec(id: string): InterfaceSpec {
   return {
     Meta: {
@@ -108,6 +132,8 @@ export class SurfaceInterfaceNodeCapabilityManager
       Spec: createDefaultInterfaceSpec(node.ID),
     };
 
+    const safeSpec = ensureInterfaceSpecValue(interfaceDetails.Spec, node.ID);
+
     const mergedMetadata = {
       ...(interfaceEntry.Metadata ?? {}),
       ...(settings?.Metadata ?? {}),
@@ -116,6 +142,7 @@ export class SurfaceInterfaceNodeCapabilityManager
     const mergedDetails: SurfaceInterfaceNodeDetails = {
       ...interfaceDetails,
       ...(settings ?? {}),
+      Spec: safeSpec,
       SurfaceLookup: surfaceLookup,
     };
 
@@ -138,7 +165,7 @@ export class SurfaceInterfaceNodeCapabilityManager
       Name: `Interface ${id}`,
       Description: 'Auto-generated interface stub',
       Version: 1,
-      Spec: initialSpec,
+      Spec: ensureInterfaceSpecValue(initialSpec, id),
     };
 
     return {
@@ -174,17 +201,18 @@ export class SurfaceInterfaceNodeCapabilityManager
       Interfaces: {
         [node.ID]: null,
       },
-    };
-
-    if (surfaceLookup) {
-      patch.Surfaces = {
-        [surfaceLookup]: {
-          Interfaces: {
-            [node.ID]: null,
+      ...(surfaceLookup
+        ? {
+          Surfaces: {
+            [surfaceLookup]: {
+              Interfaces: {
+                [node.ID]: null,
+              },
+            },
           },
-        },
-      };
-    }
+        }
+        : {}),
+    } as unknown as NullableArrayOrObject<EverythingAsCodeOIWorkspace>;
 
     return patch;
   }
@@ -448,10 +476,12 @@ export class SurfaceInterfaceNodeCapabilityManager
     if (!interfaceEntry?.Details) {
       return {
         valid: false,
-        errors: [{
-          field: `Interfaces.${node.ID}`,
-          message: 'Interface details not found in workspace EaC.',
-        }],
+        errors: [
+          {
+            field: `Interfaces.${node.ID}`,
+            message: 'Interface details not found in workspace EaC.',
+          },
+        ],
       };
     }
 
@@ -500,8 +530,7 @@ export class SurfaceInterfaceNodeCapabilityManager
     const eac = context.GetEaC() as EverythingAsCodeOIWorkspace;
 
     if (context.SurfaceLookup) {
-      const surfaceSettings = eac.Surfaces?.[context.SurfaceLookup]
-        ?.Interfaces?.[interfaceLookup];
+      const surfaceSettings = eac.Surfaces?.[context.SurfaceLookup]?.Interfaces?.[interfaceLookup];
       return {
         surfaceLookup: surfaceSettings ? context.SurfaceLookup : undefined,
         settings: surfaceSettings,
@@ -518,9 +547,7 @@ export class SurfaceInterfaceNodeCapabilityManager
     return {};
   }
 
-  private ensureSurfaceLookup(
-    context: EaCNodeCapabilityContext,
-  ): string {
+  private ensureSurfaceLookup(context: EaCNodeCapabilityContext): string {
     if (context.SurfaceLookup) return context.SurfaceLookup;
 
     throw new Error(

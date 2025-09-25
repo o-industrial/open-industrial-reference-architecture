@@ -7,10 +7,7 @@ import {
   ProcessorHandlerResolver,
 } from '../.deps.ts';
 import { EaCInterfaceAppHandler } from '../interface/EaCInterfaceAppHandler.ts';
-import {
-  EaCInterfaceAppProcessor,
-  isEaCInterfaceAppProcessor,
-} from './EaCInterfaceAppProcessor.ts';
+import { isEaCInterfaceAppProcessor } from './EaCInterfaceAppProcessor.ts';
 
 export const EaCInterfaceAppProcessorHandlerResolver: ProcessorHandlerResolver = {
   async Resolve(

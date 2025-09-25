@@ -9,8 +9,8 @@ import {
   IoCContainer,
   type Logger,
   path,
-  PreactRenderHandler,
   preactOptions,
+  PreactRenderHandler,
 } from './.deps.ts';
 import { EaCInterfaceDetails } from '../../eac/EaCInterfaceDetails.ts';
 import { InterfaceSpec } from '../../eac/InterfaceSpec.ts';
@@ -206,24 +206,24 @@ class VirtualInterfaceDFSHandler extends DFSFileHandler {
     return persisted;
   }
 
-  public override async RemoveFile(): Promise<void> {
+  public override RemoveFile(): Promise<void> {
     throw new Deno.errors.NotSupported(
       'RemoveFile not supported for the virtual interface DFS handler.',
     );
   }
 
-  public override async WriteFile(): Promise<void> {
+  public override WriteFile(): Promise<void> {
     throw new Deno.errors.NotSupported(
       'WriteFile not supported for the virtual interface DFS handler.',
     );
   }
 
-  private async ensureFilePersisted(requestPath: string): Promise<string> {
+  private ensureFilePersisted(requestPath: string): Promise<string> {
     const relative = this.normalizeRelative(requestPath);
     const cached = this.persisted.get(relative);
-    if (cached) return cached;
+    if (cached) return Promise.resolve(cached);
 
-    return this.persistFile(relative);
+    return Promise.resolve(this.persistFile(relative));
   }
 
   private async persistFile(relativePath: string): Promise<string> {
@@ -413,5 +413,3 @@ export default async function handler(_req: Request, ctx: { Params?: Record<stri
 }
 `;
 }
-
-

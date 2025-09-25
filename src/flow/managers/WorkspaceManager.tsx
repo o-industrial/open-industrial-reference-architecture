@@ -178,7 +178,9 @@ export class WorkspaceManager {
     });
   }
 
-  public DispatchInterfaceAction(action: { lookup: string; type: string; payload?: unknown; workspace?: string }): void {
+  public DispatchInterfaceAction(
+    action: { lookup: string; type: string; payload?: unknown; workspace?: string },
+  ): void {
     console.log('[WorkspaceManager] Interface action received', action);
   }
 
