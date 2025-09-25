@@ -6,6 +6,10 @@ import { InspectorCommonProps } from '../../../../flow/.exports.ts';
 import { SurfaceWarmQueryStats } from './SurfaceWarmQueryStats.tsx';
 import { EaCWarmQueryDetails } from '../../../../eac/.deps.ts';
 import { SurfaceWarmQueryModal } from '../../../../../atomic/organisms/modals/SurfaceWarmQueryModal.tsx';
+import { EverythingAsCodeOIWorkspace } from '../../../../eac/EverythingAsCodeOIWorkspace.ts';
+import { EaCDataConnectionAsCode } from '../../../../eac/EaCDataConnectionAsCode.ts';
+import { EaCAzureIoTHubDataConnectionDetails } from '../../../../eac/EaCAzureIoTHubDataConnectionDetails.ts';
+import { shaHash } from '../../../../utils/shaHash.ts';
 
 type SurfaceWarmQueryInspectorProps = InspectorCommonProps<
   EaCWarmQueryDetails,
@@ -30,9 +34,62 @@ export function SurfaceWarmQueryInspector({
 
   workspaceMgr.CreateWarmQueryAziIfNotExist(lookup);
 
+  async function getDeviceIDsForWarmQuery(): Promise<string[]> {
+    debugger;
+    const workspace = workspaceMgr.UseEaC();
+    // workspace.
+    // // 1) Pull "AAAA->BBBB" entries and keep the BBBB side
+    // const rawLookups: string[] =
+    //   workspace?.Surfaces?.[surfaceLookup]?.WarmQueries?.[warmQueryLookup]
+    //     ?.DataConnectionLookups ?? [];
+
+    // const rightLookups = rawLookups
+    //   .map((s) => {
+    //     const i = s.lastIndexOf('->');
+    //     return i >= 0 ? s.slice(i + 2).trim() : undefined;
+    //   })
+    //   .filter((v): v is string => !!v && v.length > 0);
+
+    // if (rightLookups.length === 0) return [];
+
+    // const lookupSet = new Set(rightLookups);
+    // const results: string[] = [];
+
+    // const dcRaw = workspace.DataConnections;
+
+    // // 2) Join with DataConnections to collect DeviceIDs
+    // if (Array.isArray(dcRaw)) {
+    //   // Array form: need a lookup field on the wrapper (commonly dc.Lookup)
+    //   for (const dc of dcRaw as EaCDataConnectionAsCode[]) {
+    //     const details = dc.Details as EaCAzureIoTHubDataConnectionDetails;
+    //     const lookup =
+    //       (dc as any).Lookup ??
+    //       (dc as any).lookup ??
+    //       details.Name ?? // fallback if you used Name as a pseudo-lookup
+    //       '';
+
+    //     if (lookup && lookupSet.has(lookup)) {
+    //       results.push(await shaHash(wsLookup, lookup));
+    //     }
+    //   }
+    // } else {
+    //   // Map form: lookups are the keys
+    //   for (const [lookup, dc] of Object.entries(dcRaw ?? {})) {
+    //     if (!lookupSet.has(lookup)) continue;
+
+    //     if (lookup) results.push(await shaHash(wsLookup, lookup));
+    //   }
+    // }
+
+    // // 3) Dedupe + return
+    // return Array.from(new Set(results));
+    return [];
+  }
+
+  const deviceIds = getDeviceIDsForWarmQuery();
+
   const aziExtraInputs = useMemo(() => ({
-    WarmQueryLookup: lookup,
-    SurfaceLookup: surfaceLookup,
+    DeviceIds: deviceIds,
   }), [lookup, surfaceLookup]);
 
   const handleOpenModal = () => {
