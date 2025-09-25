@@ -13,7 +13,7 @@ export default function SurfaceInterfaceNodeRenderer({
   const bindings = Object.keys(data.details?.Spec?.Data?.Bindings ?? {}).length;
   const actions = data.details?.Spec?.Actions?.length ?? 0;
   const layoutNodes = data.details?.Spec?.Layout?.length ?? 0;
-  const apiPath = data.details.ApiPath ?? '/w/:workspace/ui/:interface';
+  const webPath = data.details.WebPath ?? '/w/:workspace/ui/:interface';
   const editorRoute = `/workspace/interface/${id}`;
   const modeShortcuts: Array<{
     key: 'overview' | 'visual' | 'code' | 'preview';
@@ -63,7 +63,7 @@ export default function SurfaceInterfaceNodeRenderer({
       <div class='flex w-full flex-col gap-2 px-3 pb-3 pt-2 text-xs text-slate-200'>
         <div class='rounded border border-slate-800 bg-slate-900/70 px-3 py-2 text-[11px] text-slate-300'>
           <span class='font-semibold text-slate-100'>Route:</span>
-          <span class='ml-2 font-mono text-teal-200'>{apiPath}</span>
+          <span class='ml-2 font-mono text-teal-200'>{webPath}</span>
         </div>
 
         <div class='grid grid-cols-2 gap-2'>

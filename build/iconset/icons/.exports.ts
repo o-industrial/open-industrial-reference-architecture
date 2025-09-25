@@ -11,6 +11,7 @@ export * from './SchemaIcon.tsx';
 export * from './SignalIcon.tsx';
 export * from './SimulatorIcon.tsx';
 export * from './SurfaceIcon.tsx';
+export * from './InterfaceIcon.tsx';
 export * from './TriggerMatchIcon.tsx';
 export * from './ArchiveIcon.tsx';
 export * from './CommitIcon.tsx';

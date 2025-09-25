@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from '../../.deps.ts';
+import { IntentTypes } from '../../../../../atomic/.deps.ts';
+import { Action, ActionStyleTypes, Input } from '../../../../../atomic/.exports.ts';
+import { useEffect, useMemo, useState, JSX } from '../../.deps.ts';
 import type { InterfaceSpec } from '../../../../eac/InterfaceSpec.ts';
 import { VisualBuilderCanvas } from './VisualBuilderCanvas.tsx';
 
@@ -115,20 +117,22 @@ export function InterfaceEditorHost({
   return (
     <div class='flex h-full flex-col gap-4 text-slate-100'>
       <nav class='flex gap-2 rounded-md border border-slate-700 bg-slate-900/60 p-2'>
-        {modes.map((item) => (
-          <button
-            key={item.key}
-            class={`rounded px-3 py-1 text-sm font-medium transition ${
-              mode === item.key
-                ? 'bg-teal-600 text-white shadow'
-                : 'bg-transparent text-slate-300 hover:bg-slate-800'
-            }`}
-            type='button'
-            onClick={() => setMode(item.key)}
-          >
-            {item.label}
-          </button>
-        ))}
+        {modes.map((item) => {
+          const isActive = mode === item.key;
+          return (
+            <Action
+              key={item.key}
+              type='button'
+              styleType={isActive
+                ? ActionStyleTypes.Solid | ActionStyleTypes.Rounded
+                : ActionStyleTypes.Outline | ActionStyleTypes.UltraThin | ActionStyleTypes.Rounded}
+              intentType={isActive ? IntentTypes.Primary : IntentTypes.Secondary}
+              onClick={() => setMode(item.key)}
+            >
+              {item.label}
+            </Action>
+          );
+        })}
       </nav>
 
       <section class='flex-1 overflow-hidden rounded-md border border-slate-800 bg-slate-950/70 p-4'>
@@ -189,10 +193,11 @@ export function InterfaceEditorHost({
 
         {mode === 'code' && (
           <div class='flex h-full flex-col gap-3'>
-            <textarea
+            <Input
+              multiline
               class='h-full w-full flex-1 resize-none rounded border border-slate-800 bg-slate-900/80 p-3 font-mono text-xs text-slate-200 shadow-inner focus:outline-none focus:ring-2 focus:ring-teal-500'
               value={editorValue}
-              onInput={(event) =>
+              onInput={(event: JSX.TargetedEvent<HTMLTextAreaElement, Event>) =>
                 handleEditorChange((event.currentTarget as HTMLTextAreaElement).value)}
             />
             {lastError && (
@@ -218,3 +223,6 @@ export function InterfaceEditorHost({
     </div>
   );
 }
+
+
+
