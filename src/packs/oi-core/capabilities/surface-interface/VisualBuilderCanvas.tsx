@@ -34,7 +34,9 @@ export function VisualBuilderCanvas({ spec, onSpecChange }: VisualBuilderCanvasP
       <header class='mb-3 flex items-center justify-between'>
         <div>
           <h3 class='text-base font-semibold text-slate-100'>Layout Preview</h3>
-          <p class='text-xs text-slate-400'>Draft canvas stub -{'>'} future WYSIWYG hooks land here.</p>
+          <p class='text-xs text-slate-400'>
+            Draft canvas stub -{'>'} future WYSIWYG hooks land here.
+          </p>
         </div>
         <Action
           type='button'

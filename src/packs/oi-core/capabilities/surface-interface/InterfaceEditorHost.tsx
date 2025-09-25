@@ -1,6 +1,6 @@
 import { IntentTypes } from '../../../../../atomic/.deps.ts';
 import { Action, ActionStyleTypes, Input } from '../../../../../atomic/.exports.ts';
-import { useEffect, useMemo, useState, JSX } from '../../.deps.ts';
+import { JSX, useEffect, useMemo, useState } from '../../.deps.ts';
 import type { InterfaceSpec } from '../../../../eac/InterfaceSpec.ts';
 import { VisualBuilderCanvas } from './VisualBuilderCanvas.tsx';
 
@@ -223,6 +223,3 @@ export function InterfaceEditorHost({
     </div>
   );
 }
-
-
-
