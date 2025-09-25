@@ -1,5 +1,5 @@
 import { IntentTypes } from '../../../../../atomic/.deps.ts';
-import { JSX, useCallback, useEffect, useMemo, useState } from '../../.deps.ts';
+import { JSX, useEffect, useMemo, useRef, useState } from '../../.deps.ts';
 import { Action, ActionStyleTypes, Input, InspectorBase } from '../../../../../atomic/.exports.ts';
 import { InspectorCommonProps } from '../../../../flow/.exports.ts';
 import type {
@@ -8,11 +8,16 @@ import type {
   SurfaceInterfaceSettings,
 } from '../../../../eac/.exports.ts';
 import type { SurfaceInterfaceStats } from './SurfaceInterfaceStats.tsx';
+import { SurfaceInterfaceModal } from './SurfaceInterfaceModal.tsx';
 
 type SurfaceInterfaceInspectorProps = InspectorCommonProps<
   EaCInterfaceDetails & SurfaceInterfaceSettings,
   SurfaceInterfaceStats
 >;
+
+const NAME_MAX_LENGTH = 30;
+const DESCRIPTION_MAX_LENGTH = 200;
+const WEB_PATH_MAX_LENGTH = 30;
 
 export function SurfaceInterfaceInspector({
   lookup,
@@ -26,32 +31,59 @@ export function SurfaceInterfaceInspector({
   workspaceMgr,
 }: SurfaceInterfaceInspectorProps) {
   const stats = useStats();
+  const [isModalOpen, setModalOpen] = useState(false);
 
   const resolvedDetails = useMemo(
     () => ensureInterfaceDetails(details, lookup),
     [details, lookup],
   );
+  const resolvedSpec = resolvedDetails.Spec;
 
   const [name, setName] = useState(details.Name ?? '');
   const [description, setDescription] = useState(details.Description ?? '');
   const [webPath, setWebPath] = useState(details.WebPath ?? '');
 
+  const userEditedRef = useRef(false);
+  const debounceRef = useRef<number | null>(null);
+
   useEffect(() => setName(details.Name ?? ''), [details.Name]);
   useEffect(() => setDescription(details.Description ?? ''), [details.Description]);
-  useEffect(() => setWebPath(details.WebPath ?? ''), [details.WebPath]);
+  useEffect(() => setWebPath(details.WebPath ? sanitizeWebPath(details.WebPath) : ''), [
+    details.WebPath,
+  ]);
 
   useEffect(() => {
     workspaceMgr.CreateInterfaceAziIfNotExist?.(lookup);
   }, [workspaceMgr, lookup]);
 
-  const handlePersist = useCallback(() => {
-    onDetailsChanged({
-      Name: name,
-      Description: description,
-      WebPath: webPath,
-    });
+  useEffect(() => {
+    if (!onDetailsChanged || !userEditedRef.current) {
+      return;
+    }
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = globalThis.setTimeout(() => {
+      onDetailsChanged({
+        Name: name,
+        Description: description,
+        WebPath: webPath,
+      });
+      debounceRef.current = null;
+    }, 300);
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
   }, [name, description, webPath, onDetailsChanged]);
 
+  const nameInvalid = name.trim().length === 0;
+  const descriptionInvalid = description.trim().length === 0;
+  const webPathInvalid = webPath.trim().length === 0;
   const lastPublished = stats?.LastPublishedAt
     ? new Date(stats.LastPublishedAt).toLocaleString()
     : 'Never';
@@ -71,10 +103,13 @@ export function SurfaceInterfaceInspector({
             <Input
               label='Name'
               value={name}
+              maxLength={NAME_MAX_LENGTH}
+              intentType={nameInvalid ? IntentTypes.Error : undefined}
               placeholder='interface-your-node'
-              onInput={(event: JSX.TargetedEvent<HTMLInputElement, Event>) =>
-                setName((event.currentTarget as HTMLInputElement).value)}
-              onBlur={handlePersist}
+              onInput={(event: JSX.TargetedEvent<HTMLInputElement, Event>) => {
+                userEditedRef.current = true;
+                setName((event.currentTarget as HTMLInputElement).value);
+              }}
             />
           </section>
 
@@ -84,10 +119,13 @@ export function SurfaceInterfaceInspector({
               multiline
               rows={3}
               value={description}
+              maxLength={DESCRIPTION_MAX_LENGTH}
+              intentType={descriptionInvalid ? IntentTypes.Error : undefined}
               placeholder='Describe the purpose of this HMI page'
-              onInput={(event: JSX.TargetedEvent<HTMLTextAreaElement, Event>) =>
-                setDescription((event.currentTarget as HTMLTextAreaElement).value)}
-              onBlur={handlePersist}
+              onInput={(event: JSX.TargetedEvent<HTMLTextAreaElement, Event>) => {
+                userEditedRef.current = true;
+                setDescription((event.currentTarget as HTMLTextAreaElement).value);
+              }}
             />
           </section>
 
@@ -95,10 +133,34 @@ export function SurfaceInterfaceInspector({
             <Input
               label='Web Path'
               value={webPath}
+              maxLength={WEB_PATH_MAX_LENGTH}
+              intentType={webPathInvalid ? IntentTypes.Error : undefined}
               placeholder='/w/:workspace/ui/:interface'
-              onInput={(event: JSX.TargetedEvent<HTMLInputElement, Event>) =>
-                setWebPath((event.currentTarget as HTMLInputElement).value)}
-              onBlur={handlePersist}
+              onInput={(event: JSX.TargetedEvent<HTMLInputElement, Event>) => {
+                userEditedRef.current = true;
+                const input = event.currentTarget as HTMLInputElement;
+                const filtered = sanitizeWebPath(input.value).slice(0, WEB_PATH_MAX_LENGTH);
+                input.value = filtered;
+                setWebPath(filtered);
+              }}
+              onKeyDown={(event) => {
+                const allowed = [
+                  'Backspace',
+                  'Delete',
+                  'ArrowLeft',
+                  'ArrowRight',
+                  'ArrowUp',
+                  'ArrowDown',
+                  'Tab',
+                  'Home',
+                  'End',
+                ];
+                const key = event.key;
+                const ctrl = event.ctrlKey || event.metaKey;
+                if (!/^[a-z0-9-]$/.test(key) && !ctrl && !allowed.includes(key)) {
+                  event.preventDefault();
+                }
+              }}
             />
           </section>
 
@@ -121,21 +183,51 @@ export function SurfaceInterfaceInspector({
             </ul>
           </section>
 
-          {resolvedDetails.WebPath && (
+          <div class='flex flex-col gap-2'>
+            {resolvedDetails.WebPath && !webPathInvalid && (
+              <Action
+                href={resolvedDetails.WebPath}
+                target='_blank'
+                rel='noreferrer'
+                styleType={ActionStyleTypes.Outline | ActionStyleTypes.Rounded}
+                intentType={IntentTypes.Secondary}
+              >
+                Open Interface
+              </Action>
+            )}
             <Action
-              href={resolvedDetails.WebPath}
-              target='_blank'
-              rel='noreferrer'
-              styleType={ActionStyleTypes.Outline | ActionStyleTypes.Rounded}
-              intentType={IntentTypes.Secondary}
+              type='button'
+              styleType={ActionStyleTypes.Solid | ActionStyleTypes.Rounded}
+              intentType={IntentTypes.Primary}
+              disabled={nameInvalid || descriptionInvalid || webPathInvalid}
+              onClick={() => setModalOpen(true)}
             >
-              Open Interface
+              Manage Interface
             </Action>
-          )}
+          </div>
         </div>
       </InspectorBase>
+
+      {isModalOpen && (
+        <SurfaceInterfaceModal
+          isOpen={isModalOpen}
+          onClose={() => setModalOpen(false)}
+          interfaceLookup={lookup}
+          surfaceLookup={surfaceLookup}
+          details={resolvedDetails}
+          settings={details as SurfaceInterfaceSettings}
+          spec={resolvedSpec}
+          draftSpec={undefined}
+          workspaceMgr={workspaceMgr}
+          onSpecChange={(next) => onDetailsChanged({ Spec: next })}
+        />
+      )}
     </>
   );
+}
+
+function sanitizeWebPath(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9-]/g, '');
 }
 
 function ensureInterfaceDetails(
