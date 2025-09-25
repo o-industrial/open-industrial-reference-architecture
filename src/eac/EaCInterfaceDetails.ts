@@ -29,7 +29,7 @@ export type EaCInterfaceDetails = {
   Name: string;
   Description?: string;
   Version: number;
-  ApiPath?: string;
+  WebPath?: string;
   Spec: InterfaceSpec;
   ComponentTag?: string;
   EmbedOptions?: EaCInterfaceEmbedOptions;
@@ -76,7 +76,7 @@ export const EaCInterfaceDetailsSchema: z.ZodType<EaCInterfaceDetails> = z
     Name: z.string().min(1, 'Interface name is required.'),
     Description: z.string().optional(),
     Version: z.number().int().nonnegative(),
-    ApiPath: z.string().optional(),
+    WebPath: z.string().optional(),
     Spec: InterfaceSpecSchema,
     ComponentTag: z.string().optional(),
     EmbedOptions: EaCInterfaceEmbedOptionsSchema.optional(),

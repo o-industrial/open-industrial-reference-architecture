@@ -388,7 +388,7 @@ export function SurfaceInterfaceModal({
   const themeName = currentSpec.Meta.Theme ?? 'default';
   const versionLabel = `v${details.Version ?? 1}`;
   const draftPath = details.DraftState?.SpecPath ?? 'N/A';
-  const apiPath = details.ApiPath ?? 'N/A';
+  const webPath = details.WebPath ?? 'N/A';
   const refreshSummary = settings?.RefreshMs ? `${settings.RefreshMs} ms` : 'disabled';
   const editorRoute = `/workspace/interface/${interfaceLookup}`;
 
@@ -398,7 +398,7 @@ export function SurfaceInterfaceModal({
         { label: 'Lookup', value: interfaceLookup },
         { label: 'Version', value: versionLabel },
         { label: 'Theme', value: themeName },
-        { label: 'API Path', value: apiPath },
+        { label: 'Web Path', value: webPath },
         { label: 'Draft Path', value: draftPath },
         { label: 'Refresh', value: refreshSummary },
       ];
@@ -414,7 +414,7 @@ export function SurfaceInterfaceModal({
       surfaceLookup,
       versionLabel,
       themeName,
-      apiPath,
+      webPath,
       draftPath,
       refreshSummary,
     ],

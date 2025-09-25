@@ -162,7 +162,7 @@ export class SurfaceInterfaceNodeCapabilityManager
     const initialSpec = createDefaultInterfaceSpec(id);
 
     const interfaceDetails: EaCInterfaceDetails = {
-      Name: `Interface ${id}`,
+      Name: `${id}`,
       Description: 'Auto-generated interface stub',
       Version: 1,
       Spec: ensureInterfaceSpecValue(initialSpec, id),
@@ -227,7 +227,7 @@ export class SurfaceInterfaceNodeCapabilityManager
     const interfaceKeys: Array<keyof EaCInterfaceDetails> = [
       'Name',
       'Description',
-      'ApiPath',
+      'WebPath',
       'ComponentTag',
       'EmbedOptions',
       'Spec',

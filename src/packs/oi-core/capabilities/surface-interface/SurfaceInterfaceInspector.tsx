@@ -1,6 +1,6 @@
 import { IntentTypes } from '../../../../../atomic/.deps.ts';
-import { useCallback, useEffect, useMemo, useState } from '../../.deps.ts';
-import { Action, ActionStyleTypes, InspectorBase } from '../../../../../atomic/.exports.ts';
+import { JSX, useEffect, useMemo, useRef, useState } from '../../.deps.ts';
+import { Action, ActionStyleTypes, Input, InspectorBase } from '../../../../../atomic/.exports.ts';
 import { InspectorCommonProps } from '../../../../flow/.exports.ts';
 import type {
   EaCInterfaceDetails,
@@ -14,6 +14,10 @@ type SurfaceInterfaceInspectorProps = InspectorCommonProps<
   EaCInterfaceDetails & SurfaceInterfaceSettings,
   SurfaceInterfaceStats
 >;
+
+const NAME_MAX_LENGTH = 30;
+const DESCRIPTION_MAX_LENGTH = 200;
+const WEB_PATH_MAX_LENGTH = 30;
 
 export function SurfaceInterfaceInspector({
   lookup,
@@ -33,50 +37,56 @@ export function SurfaceInterfaceInspector({
     () => ensureInterfaceDetails(details, lookup),
     [details, lookup],
   );
-
   const resolvedSpec = resolvedDetails.Spec;
 
   const [name, setName] = useState(details.Name ?? '');
   const [description, setDescription] = useState(details.Description ?? '');
-  const [apiPath, setApiPath] = useState(details.ApiPath ?? '');
+  const [webPath, setWebPath] = useState(details.WebPath ?? '');
+
+  const userEditedRef = useRef(false);
+  const debounceRef = useRef<number | null>(null);
 
   useEffect(() => setName(details.Name ?? ''), [details.Name]);
   useEffect(() => setDescription(details.Description ?? ''), [details.Description]);
-  useEffect(() => setApiPath(details.ApiPath ?? ''), [details.ApiPath]);
+  useEffect(() => setWebPath(details.WebPath ? sanitizeWebPath(details.WebPath) : ''), [
+    details.WebPath,
+  ]);
 
   useEffect(() => {
     workspaceMgr.CreateInterfaceAziIfNotExist?.(lookup);
   }, [workspaceMgr, lookup]);
 
-  const handlePersist = useCallback(() => {
-    onDetailsChanged({
-      Name: name,
-      Description: description,
-      ApiPath: apiPath,
-    });
-  }, [name, description, apiPath, onDetailsChanged]);
+  useEffect(() => {
+    if (!onDetailsChanged || !userEditedRef.current) {
+      return;
+    }
 
-  const connectedWarmQueries = details.WarmQueryLookups?.length ?? 0;
-  const connectedConnections = details.DataConnectionLookups?.length ?? 0;
-  const connectedSchemas = details.SchemaLookups?.length ?? 0;
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
 
+    debounceRef.current = globalThis.setTimeout(() => {
+      onDetailsChanged({
+        Name: name,
+        Description: description,
+        WebPath: webPath,
+      });
+      debounceRef.current = null;
+    }, 300);
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, [name, description, webPath, onDetailsChanged]);
+
+  const nameInvalid = name.trim().length === 0;
+  const descriptionInvalid = description.trim().length === 0;
+  const webPathInvalid = webPath.trim().length === 0;
   const lastPublished = stats?.LastPublishedAt
     ? new Date(stats.LastPublishedAt).toLocaleString()
     : 'Never';
-  const editorUrlBase = `/workspace/interface/${lookup}`;
-  const modeShortcuts: Array<
-    { key: 'overview' | 'visual' | 'code' | 'preview'; label: string; intent: IntentTypes }
-  > = [
-    { key: 'overview', label: 'Overview', intent: IntentTypes.Tertiary },
-    { key: 'visual', label: 'Visual', intent: IntentTypes.Primary },
-    { key: 'code', label: 'Code', intent: IntentTypes.Secondary },
-    { key: 'preview', label: 'Preview', intent: IntentTypes.Info },
-  ];
-
-  const bindingsCount = useMemo(
-    () => Object.keys(resolvedSpec.Data?.Bindings ?? {}).length,
-    [resolvedSpec.Data?.Bindings],
-  );
 
   return (
     <>
@@ -90,63 +100,68 @@ export function SurfaceInterfaceInspector({
       >
         <div class='space-y-4 text-sm text-slate-200'>
           <section class='space-y-2'>
-            <label class='block text-xs font-semibold uppercase tracking-wide text-slate-400'>
-              Name
-            </label>
-            <input
-              type='text'
+            <Input
+              label='Name'
               value={name}
-              onInput={(event) => setName((event.currentTarget as HTMLInputElement).value)}
-              onBlur={handlePersist}
-              class='w-full rounded border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-teal-500 focus:outline-none'
+              maxLength={NAME_MAX_LENGTH}
+              intentType={nameInvalid ? IntentTypes.Error : undefined}
+              placeholder='interface-your-node'
+              onInput={(event: JSX.TargetedEvent<HTMLInputElement, Event>) => {
+                userEditedRef.current = true;
+                setName((event.currentTarget as HTMLInputElement).value);
+              }}
             />
           </section>
 
           <section class='space-y-2'>
-            <label class='block text-xs font-semibold uppercase tracking-wide text-slate-400'>
-              Description
-            </label>
-            <textarea
-              value={description}
+            <Input
+              label='Description'
+              multiline
               rows={3}
-              onInput={(event) =>
-                setDescription((event.currentTarget as HTMLTextAreaElement).value)}
-              onBlur={handlePersist}
-              class='w-full rounded border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-teal-500 focus:outline-none'
+              value={description}
+              maxLength={DESCRIPTION_MAX_LENGTH}
+              intentType={descriptionInvalid ? IntentTypes.Error : undefined}
+              placeholder='Describe the purpose of this HMI page'
+              onInput={(event: JSX.TargetedEvent<HTMLTextAreaElement, Event>) => {
+                userEditedRef.current = true;
+                setDescription((event.currentTarget as HTMLTextAreaElement).value);
+              }}
             />
           </section>
 
           <section class='space-y-2'>
-            <label class='block text-xs font-semibold uppercase tracking-wide text-slate-400'>
-              API Path
-            </label>
-            <input
-              type='text'
-              value={apiPath}
+            <Input
+              label='Web Path'
+              value={webPath}
+              maxLength={WEB_PATH_MAX_LENGTH}
+              intentType={webPathInvalid ? IntentTypes.Error : undefined}
               placeholder='/w/:workspace/ui/:interface'
-              onInput={(event) => setApiPath((event.currentTarget as HTMLInputElement).value)}
-              onBlur={handlePersist}
-              class='w-full rounded border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-teal-500 focus:outline-none'
+              onInput={(event: JSX.TargetedEvent<HTMLInputElement, Event>) => {
+                userEditedRef.current = true;
+                const input = event.currentTarget as HTMLInputElement;
+                const filtered = sanitizeWebPath(input.value).slice(0, WEB_PATH_MAX_LENGTH);
+                input.value = filtered;
+                setWebPath(filtered);
+              }}
+              onKeyDown={(event) => {
+                const allowed = [
+                  'Backspace',
+                  'Delete',
+                  'ArrowLeft',
+                  'ArrowRight',
+                  'ArrowUp',
+                  'ArrowDown',
+                  'Tab',
+                  'Home',
+                  'End',
+                ];
+                const key = event.key;
+                const ctrl = event.ctrlKey || event.metaKey;
+                if (!/^[a-z0-9-]$/.test(key) && !ctrl && !allowed.includes(key)) {
+                  event.preventDefault();
+                }
+              }}
             />
-          </section>
-
-          <section class='grid grid-cols-2 gap-3 text-xs text-slate-300'>
-            <div class='rounded border border-slate-700/80 bg-slate-900/70 p-3'>
-              <p class='text-[10px] uppercase tracking-wide text-slate-500'>Bindings</p>
-              <p class='text-lg font-semibold text-slate-100'>{bindingsCount}</p>
-            </div>
-            <div class='rounded border border-slate-700/80 bg-slate-900/70 p-3'>
-              <p class='text-[10px] uppercase tracking-wide text-slate-500'>Warm Queries</p>
-              <p class='text-lg font-semibold text-slate-100'>{connectedWarmQueries}</p>
-            </div>
-            <div class='rounded border border-slate-700/80 bg-slate-900/70 p-3'>
-              <p class='text-[10px] uppercase tracking-wide text-slate-500'>Data Connections</p>
-              <p class='text-lg font-semibold text-slate-100'>{connectedConnections}</p>
-            </div>
-            <div class='rounded border border-slate-700/80 bg-slate-900/70 p-3'>
-              <p class='text-[10px] uppercase tracking-wide text-slate-500'>Schemas</p>
-              <p class='text-lg font-semibold text-slate-100'>{connectedSchemas}</p>
-            </div>
           </section>
 
           <section class='rounded border border-slate-800 bg-slate-900/60 p-3 text-xs text-slate-400'>
@@ -168,27 +183,23 @@ export function SurfaceInterfaceInspector({
             </ul>
           </section>
 
-          <div class='flex flex-wrap items-center justify-between gap-2'>
-            <div class='flex flex-wrap gap-2'>
-              {modeShortcuts.map((shortcut) => (
-                <Action
-                  key={`interface-shortcut-${lookup}-${shortcut.key}`}
-                  href={`${editorUrlBase}?mode=${shortcut.key}`}
-                  target='_blank'
-                  rel='noreferrer'
-                  styleType={ActionStyleTypes.Outline |
-                    ActionStyleTypes.UltraThin |
-                    ActionStyleTypes.Rounded}
-                  intentType={shortcut.intent}
-                >
-                  {shortcut.label}
-                </Action>
-              ))}
-            </div>
+          <div class='flex flex-col gap-2'>
+            {resolvedDetails.WebPath && !webPathInvalid && (
+              <Action
+                href={resolvedDetails.WebPath}
+                target='_blank'
+                rel='noreferrer'
+                styleType={ActionStyleTypes.Outline | ActionStyleTypes.Rounded}
+                intentType={IntentTypes.Secondary}
+              >
+                Open Interface
+              </Action>
+            )}
             <Action
+              type='button'
               styleType={ActionStyleTypes.Solid | ActionStyleTypes.Rounded}
               intentType={IntentTypes.Primary}
-              title='Open Interface Manager'
+              disabled={nameInvalid || descriptionInvalid || webPathInvalid}
               onClick={() => setModalOpen(true)}
             >
               Manage Interface
@@ -197,34 +208,40 @@ export function SurfaceInterfaceInspector({
         </div>
       </InspectorBase>
 
-      <SurfaceInterfaceModal
-        isOpen={isModalOpen}
-        onClose={() => setModalOpen(false)}
-        interfaceLookup={lookup}
-        surfaceLookup={surfaceLookup}
-        details={resolvedDetails}
-        settings={details as SurfaceInterfaceSettings}
-        spec={resolvedSpec}
-        draftSpec={undefined}
-        workspaceMgr={workspaceMgr}
-        onSpecChange={(next) => onDetailsChanged({ Spec: next })}
-      />
+      {isModalOpen && (
+        <SurfaceInterfaceModal
+          isOpen={isModalOpen}
+          onClose={() => setModalOpen(false)}
+          interfaceLookup={lookup}
+          surfaceLookup={surfaceLookup}
+          details={resolvedDetails}
+          settings={details as SurfaceInterfaceSettings}
+          spec={resolvedSpec}
+          draftSpec={undefined}
+          workspaceMgr={workspaceMgr}
+          onSpecChange={(next) => onDetailsChanged({ Spec: next })}
+        />
+      )}
     </>
   );
+}
+
+function sanitizeWebPath(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9-]/g, '');
 }
 
 function ensureInterfaceDetails(
   details: Partial<EaCInterfaceDetails>,
   fallbackLookup: string,
 ): EaCInterfaceDetails {
-  const fallbackName = details.Name?.trim()?.length ? details.Name : `Interface ${fallbackLookup}`;
+  const fallbackName = details.Name?.trim()?.length ? details.Name : fallbackLookup;
   const fallbackVersion = details.Version ?? 1;
 
   return {
     Name: fallbackName,
     Description: details.Description,
     Version: fallbackVersion,
-    ApiPath: details.ApiPath,
+    WebPath: details.WebPath,
     Spec: ensureInterfaceSpec(details.Spec, fallbackName, fallbackVersion),
     ComponentTag: details.ComponentTag,
     EmbedOptions: details.EmbedOptions,
