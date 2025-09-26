@@ -44,3 +44,6 @@ export {
 export { EventHubConsumerClient } from 'npm:@azure/event-hubs@6.0.0';
 
 export { Registry as IoTRegistry, Twin } from 'npm:azure-iothub@1.16.5';
+export type { EaCStripeProcessor } from 'jsr:@fathym/eac-applications@0.0.191/processors';
+export { loadEaCLicensingSvc } from 'jsr:@fathym/eac-licensing@0.0.56/clients';
+export { createOAuthHelpers } from 'jsr:@fathym/common@0.2.266/oauth';
