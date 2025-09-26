@@ -47,3 +47,16 @@ export { Registry as IoTRegistry, Twin } from 'npm:azure-iothub@1.16.5';
 export type { EaCStripeProcessor } from 'jsr:@fathym/eac-applications@0.0.191/processors';
 export { loadEaCLicensingSvc } from 'jsr:@fathym/eac-licensing@0.0.56/clients';
 export { createOAuthHelpers } from 'jsr:@fathym/common@0.2.266/oauth';
+export { loadOAuth2ClientConfig } from 'jsr:@fathym/eac-applications@0.0.191/runtime/modules';
+export { MSALPlugin } from 'jsr:@fathym/msal@0.0.56';
+export type { EaCMSALProcessor } from 'jsr:@fathym/msal@0.0.56';
+export type { EverythingAsCodeDenoKV } from 'jsr:@fathym/eac-deno-kv@0.0.23';
+export type { EverythingAsCodeIdentity } from 'jsr:@fathym/eac-identity@0.0.26';
+export type {
+  EaCLicensePlanAsCode,
+  EaCUserLicense,
+  EverythingAsCodeLicensing,
+} from 'jsr:@fathym/eac-licensing@0.0.56';
+export type { EaCApplicationsRuntimeContext } from 'jsr:@fathym/eac-applications@0.0.191/runtime';
+export { EaCRefreshController } from 'jsr:@fathym/eac-applications@0.0.191/runtime/refresh';
+export type { EaCUserRecord } from 'jsr:@fathym/eac@0.2.122';

@@ -1,12 +1,15 @@
 // deno-lint-ignore-file no-explicit-any
-import { EaCApplicationsRuntimeContext } from '@fathym/eac-applications/runtime';
-import type { EverythingAsCodeIdentity } from '@fathym/eac-identity';
-import type { EaCLicensePlanAsCode, EverythingAsCodeLicensing } from '@fathym/eac-licensing';
-import type { EverythingAsCodeOIWorkspace } from '@o-industrial/common/eac';
+import {
+  type EaCApplicationsRuntimeContext,
+  type EaCLicensePlanAsCode,
+  type EverythingAsCodeIdentity,
+  type EverythingAsCodeLicensing,
+  loadJwtConfig,
+} from '../.deps.ts';
+import type { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
 import type { OpenIndustrialWebState } from '../state/OpenIndustrialWebState.ts';
-import { loadJwtConfig } from '@fathym/common';
-import { OpenIndustrialJWTPayload } from '@o-industrial/common/types';
-import { OpenIndustrialAPIClient } from '@o-industrial/common/api';
+import { OpenIndustrialJWTPayload } from '../../types/OpenIndustrialJWTPayload.ts';
+import { OpenIndustrialAPIClient } from '../../api/clients/OpenIndustrialAPIClient.ts';
 
 /**
  * Resolve effective access rights for the current user by:
@@ -99,4 +102,3 @@ export async function resolveAccessRights(
     },
   };
 }
-

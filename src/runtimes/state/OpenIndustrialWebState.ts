@@ -1,9 +1,7 @@
-import { OpenIndustrialAPIClient } from '@o-industrial/common/api';
-import { EverythingAsCodeOIWorkspace } from '@o-industrial/common/eac';
-import { OpenIndustrialJWTPayload } from '@o-industrial/common/types';
-import { EaCUserRecord } from '@fathym/eac';
-import { EaCUserLicense } from '@fathym/eac-licensing';
-import { EaCRefreshController } from '@fathym/eac-applications/runtime/refresh';
+import { EaCRefreshController, type EaCUserLicense, type EaCUserRecord } from '../.deps.ts';
+import { OpenIndustrialAPIClient } from '../../api/clients/OpenIndustrialAPIClient.ts';
+import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
+import { OpenIndustrialJWTPayload } from '../../types/OpenIndustrialJWTPayload.ts';
 import { CurrentUserManager } from '../managers/CurrentUserManager.ts';
 
 export type OpenIndustrialWebState = {
@@ -25,4 +23,3 @@ export type OpenIndustrialWebState = {
 
   Workspace: EverythingAsCodeOIWorkspace;
 } & OpenIndustrialJWTPayload;
-

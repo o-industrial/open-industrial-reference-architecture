@@ -16,4 +16,3 @@ export class CurrentUserManager {
     await this.kv.set(['User', username, 'Current', 'WorkspaceLookup'], workspaceLookup);
   }
 }
-

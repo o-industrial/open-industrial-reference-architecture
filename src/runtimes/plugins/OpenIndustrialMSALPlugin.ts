@@ -1,12 +1,17 @@
-import { EaCRuntimeConfig, EaCRuntimePluginConfig } from '@fathym/eac/runtime/config';
-import { EaCRuntimePlugin } from '@fathym/eac/runtime/plugins';
-import { MSALPlugin } from '@fathym/msal';
-import { createOAuthHelpers } from '@fathym/common/oauth';
-import { loadOAuth2ClientConfig } from '@fathym/eac-applications/runtime/modules';
-import { EverythingAsCode } from '@fathym/eac';
-import { EverythingAsCodeApplications } from '@fathym/eac-applications';
-import { EverythingAsCodeDenoKV } from '@fathym/eac-deno-kv';
-import { EverythingAsCodeIdentity } from '@fathym/eac-identity';
+import {
+  createOAuthHelpers,
+  EaCMSALProcessor,
+  type EaCRuntimeConfig,
+  type EaCRuntimePlugin,
+  type EaCRuntimePluginConfig,
+  type EverythingAsCode,
+  type EverythingAsCodeApplications,
+  type EverythingAsCodeDenoKV,
+  type EverythingAsCodeIdentity,
+  type IoCContainer,
+  loadOAuth2ClientConfig,
+  MSALPlugin,
+} from '../.deps.ts';
 
 export default class OpenIndustrialMSALPlugin implements EaCRuntimePlugin {
   constructor() {}
@@ -22,8 +27,8 @@ export default class OpenIndustrialMSALPlugin implements EaCRuntimePlugin {
       Plugins: [
         new MSALPlugin({
           async Resolve(
-            ioc,
-            _processor,
+            ioc: IoCContainer,
+            _processor: unknown,
             eac: EverythingAsCode & EverythingAsCodeIdentity,
           ) {
             const primaryProviderLookup = Object.keys(eac.Providers || {}).find(
@@ -44,7 +49,7 @@ export default class OpenIndustrialMSALPlugin implements EaCRuntimePlugin {
             const keyRoot = ['MSAL', 'Session'];
 
             return {
-              async Clear(req) {
+              async Clear(req: Request) {
                 const sessionId = await helpers.getSessionId(req);
 
                 const kvKey = [...keyRoot, sessionId!];
@@ -55,7 +60,7 @@ export default class OpenIndustrialMSALPlugin implements EaCRuntimePlugin {
                   await kv.delete(result.key);
                 }
               },
-              async Load(req, key) {
+              async Load(req: Request, key: string) {
                 const sessionId = await helpers.getSessionId(req);
 
                 const kvKey = [...keyRoot, sessionId!, key];
@@ -64,7 +69,7 @@ export default class OpenIndustrialMSALPlugin implements EaCRuntimePlugin {
 
                 return res.value;
               },
-              async Set(req, key, value) {
+              async Set(req: Request, key: string, value: unknown) {
                 const sessionId = await helpers.getSessionId(req);
 
                 const kvKey = [...keyRoot, sessionId!, key];
@@ -82,4 +87,3 @@ export default class OpenIndustrialMSALPlugin implements EaCRuntimePlugin {
     return Promise.resolve(pluginConfig);
   }
 }
-

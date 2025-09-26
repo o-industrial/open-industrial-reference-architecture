@@ -1,9 +1,11 @@
-import { EaCRuntimeConfig, EaCRuntimePluginConfig } from '@fathym/eac/runtime/config';
-import { EaCRuntimePlugin } from '@fathym/eac/runtime/plugins';
-
-import { EaCStripeProcessor } from '@fathym/eac-applications/processors';
-import { loadEaCLicensingSvc } from '@fathym/eac-licensing/clients';
-import { loadJwtConfig } from '@fathym/common';
+import {
+  type EaCRuntimeConfig,
+  type EaCRuntimePlugin,
+  type EaCRuntimePluginConfig,
+  type EaCStripeProcessor,
+  loadEaCLicensingSvc,
+  loadJwtConfig,
+} from '../.deps.ts';
 
 export default class OpenIndustrialLicensingPlugin implements EaCRuntimePlugin {
   constructor() {}
@@ -346,4 +348,3 @@ export default class OpenIndustrialLicensingPlugin implements EaCRuntimePlugin {
   //   }
   // }
 }
-
