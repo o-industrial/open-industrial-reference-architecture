@@ -6,7 +6,6 @@ import { InspectorCommonProps } from '../../../../flow/.exports.ts';
 import { SurfaceWarmQueryStats } from './SurfaceWarmQueryStats.tsx';
 import { EaCWarmQueryDetails } from '../../../../eac/.deps.ts';
 import { SurfaceWarmQueryModal } from '../../../../../atomic/organisms/modals/SurfaceWarmQueryModal.tsx';
-import { EverythingAsCodeOIWorkspace } from '../../../../eac/EverythingAsCodeOIWorkspace.ts';
 import { EaCDataConnectionAsCode } from '../../../../eac/EaCDataConnectionAsCode.ts';
 import { EaCAzureIoTHubDataConnectionDetails } from '../../../../eac/EaCAzureIoTHubDataConnectionDetails.ts';
 import { shaHash } from '../../../../utils/shaHash.ts';
