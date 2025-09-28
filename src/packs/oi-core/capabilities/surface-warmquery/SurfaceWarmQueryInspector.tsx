@@ -33,64 +33,76 @@ export function SurfaceWarmQueryInspector({
   const eac = workspaceMgr.EaC.GetEaC();
 
   workspaceMgr.CreateWarmQueryAziIfNotExist(lookup);
+  const workspace = workspaceMgr.UseEaC();
+  const [deviceIds, setDeviceIds] = useState<string[]>([]);
 
-  async function getDeviceIDsForWarmQuery(): Promise<string[]> {
-    debugger;
-    const workspace = workspaceMgr.UseEaC();
-    // workspace.
-    // // 1) Pull "AAAA->BBBB" entries and keep the BBBB side
-    // const rawLookups: string[] =
-    //   workspace?.Surfaces?.[surfaceLookup]?.WarmQueries?.[warmQueryLookup]
-    //     ?.DataConnectionLookups ?? [];
+  useEffect(() => {
+    let cancelled = false;
 
-    // const rightLookups = rawLookups
-    //   .map((s) => {
-    //     const i = s.lastIndexOf('->');
-    //     return i >= 0 ? s.slice(i + 2).trim() : undefined;
-    //   })
-    //   .filter((v): v is string => !!v && v.length > 0);
+    const getDeviceIDsForWarmQuery = async (): Promise<string[]> => {
+      // 1) Pull "AAAA->BBBB" entries and keep BBBB
+      const rawLookups: string[] = workspace?.Surfaces?.[surfaceLookup!]?.WarmQueries?.[lookup]
+        ?.DataConnectionLookups ?? [];
 
-    // if (rightLookups.length === 0) return [];
+      const rightLookups = rawLookups
+        .map((s) => {
+          const i = s.lastIndexOf('->');
+          return i >= 0 ? s.slice(i + 2).trim() : undefined;
+        })
+        .filter((v): v is string => !!v && v.length > 0);
 
-    // const lookupSet = new Set(rightLookups);
-    // const results: string[] = [];
+      if (rightLookups.length === 0) return [];
 
-    // const dcRaw = workspace.DataConnections;
+      const lookupSet = new Set(rightLookups);
+      const dcRaw = workspace?.DataConnections;
 
-    // // 2) Join with DataConnections to collect DeviceIDs
-    // if (Array.isArray(dcRaw)) {
-    //   // Array form: need a lookup field on the wrapper (commonly dc.Lookup)
-    //   for (const dc of dcRaw as EaCDataConnectionAsCode[]) {
-    //     const details = dc.Details as EaCAzureIoTHubDataConnectionDetails;
-    //     const lookup =
-    //       (dc as any).Lookup ??
-    //       (dc as any).lookup ??
-    //       details.Name ?? // fallback if you used Name as a pseudo-lookup
-    //       '';
+      // 2) Identify which lookups to hash
+      let lookupsToHash: string[] = [];
 
-    //     if (lookup && lookupSet.has(lookup)) {
-    //       results.push(await shaHash(wsLookup, lookup));
-    //     }
-    //   }
-    // } else {
-    //   // Map form: lookups are the keys
-    //   for (const [lookup, dc] of Object.entries(dcRaw ?? {})) {
-    //     if (!lookupSet.has(lookup)) continue;
+      if (Array.isArray(dcRaw)) {
+        lookupsToHash = (dcRaw as EaCDataConnectionAsCode[])
+          .map((dc) => {
+            const details = dc.Details as EaCAzureIoTHubDataConnectionDetails;
+            const lk = (dc as any).Lookup ??
+              (dc as any).lookup ??
+              details?.Name ??
+              '';
+            return lk && lookupSet.has(lk) ? lk : undefined;
+          })
+          .filter((v): v is string => !!v);
+      } else if (dcRaw) {
+        lookupsToHash = Object.keys(dcRaw).filter(
+          (lk) => lk && lookupSet.has(lk),
+        );
+      }
 
-    //     if (lookup) results.push(await shaHash(wsLookup, lookup));
-    //   }
-    // }
+      // 3) Hash in parallel, then dedupe
+      const hashed = await Promise.all(
+        Array.from(new Set(lookupsToHash)).map((lk) => shaHash(workspace!.EnterpriseLookup!, lk)),
+      );
 
-    // // 3) Dedupe + return
-    // return Array.from(new Set(results));
-    return [];
-  }
+      return Array.from(new Set(hashed));
+    };
 
-  const deviceIds = getDeviceIDsForWarmQuery();
+    (async () => {
+      try {
+        const ids = await getDeviceIDsForWarmQuery();
+        if (!cancelled) setDeviceIds(ids);
+      } catch {
+        if (!cancelled) setDeviceIds([]); // fail-safe
+      }
+    })();
 
-  const aziExtraInputs = useMemo(() => ({
-    DeviceIds: deviceIds,
-  }), [lookup, surfaceLookup]);
+    return () => {
+      cancelled = true;
+    };
+  }, [workspace, lookup, surfaceLookup]); // include everything the fetch depends on
+
+  // You can skip useMemo entirely, but if you want it:
+  const aziExtraInputs = useMemo(
+    () => ({ DeviceIds: deviceIds }),
+    [deviceIds],
+  );
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
