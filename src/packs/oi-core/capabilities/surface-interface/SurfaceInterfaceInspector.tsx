@@ -47,10 +47,14 @@ export function SurfaceInterfaceInspector({
   const debounceRef = useRef<number | null>(null);
 
   useEffect(() => setName(details.Name ?? ''), [details.Name]);
-  useEffect(() => setDescription(details.Description ?? ''), [details.Description]);
-  useEffect(() => setWebPath(details.WebPath ? sanitizeWebPath(details.WebPath) : ''), [
-    details.WebPath,
-  ]);
+  useEffect(
+    () => setDescription(details.Description ?? ''),
+    [details.Description],
+  );
+  useEffect(
+    () => setWebPath(details.WebPath ? sanitizeWebPath(details.WebPath) : ''),
+    [details.WebPath],
+  );
 
   useEffect(() => {
     workspaceMgr.CreateInterfaceAziIfNotExist?.(lookup);
@@ -122,9 +126,13 @@ export function SurfaceInterfaceInspector({
               maxLength={DESCRIPTION_MAX_LENGTH}
               intentType={descriptionInvalid ? IntentTypes.Error : undefined}
               placeholder='Describe the purpose of this HMI page'
-              onInput={(event: JSX.TargetedEvent<HTMLTextAreaElement, Event>) => {
+              onInput={(
+                event: JSX.TargetedEvent<HTMLTextAreaElement, Event>,
+              ) => {
                 userEditedRef.current = true;
-                setDescription((event.currentTarget as HTMLTextAreaElement).value);
+                setDescription(
+                  (event.currentTarget as HTMLTextAreaElement).value,
+                );
               }}
             />
           </section>
@@ -139,11 +147,16 @@ export function SurfaceInterfaceInspector({
               onInput={(event: JSX.TargetedEvent<HTMLInputElement, Event>) => {
                 userEditedRef.current = true;
                 const input = event.currentTarget as HTMLInputElement;
-                const filtered = sanitizeWebPath(input.value).slice(0, WEB_PATH_MAX_LENGTH);
+                const filtered = sanitizeWebPath(input.value).slice(
+                  0,
+                  WEB_PATH_MAX_LENGTH,
+                );
                 input.value = filtered;
                 setWebPath(filtered);
               }}
-              onKeyDown={(event) => {
+              onKeyDown={(
+                event: JSX.TargetedKeyboardEvent<HTMLInputElement>,
+              ) => {
                 const allowed = [
                   'Backspace',
                   'Delete',
@@ -157,7 +170,11 @@ export function SurfaceInterfaceInspector({
                 ];
                 const key = event.key;
                 const ctrl = event.ctrlKey || event.metaKey;
-                if (!/^[a-z0-9-]$/.test(key) && !ctrl && !allowed.includes(key)) {
+                if (
+                  !/^[a-z0-9-]$/.test(key) &&
+                  !ctrl &&
+                  !allowed.includes(key)
+                ) {
                   event.preventDefault();
                 }
               }}
@@ -169,10 +186,15 @@ export function SurfaceInterfaceInspector({
             <ul class='mt-2 space-y-1'>
               <li>
                 Published Version:{' '}
-                <span class='font-semibold text-slate-100'>v{details.Version ?? 1}</span>
+                <span class='font-semibold text-slate-100'>
+                  v{details.Version ?? 1}
+                </span>
               </li>
               <li>
-                Last Published: <span class='font-semibold text-slate-100'>{lastPublished}</span>
+                Last Published:{' '}
+                <span class='font-semibold text-slate-100'>
+                  {lastPublished}
+                </span>
               </li>
               <li>
                 Draft Path:{' '}
