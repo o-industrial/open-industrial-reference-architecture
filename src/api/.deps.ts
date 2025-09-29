@@ -1,5 +1,5 @@
-export { merge } from 'jsr:@fathym/common@0.2.266/merge';
-export { type NullableArrayOrObject } from 'jsr:@fathym/common@0.2.266/types';
+export { merge } from 'jsr:@fathym/common@0.2.272/merge';
+export { type NullableArrayOrObject } from 'jsr:@fathym/common@0.2.272/types';
 
 export type { EaCRuntimeHandler } from 'jsr:@fathym/eac@0.2.122/runtime/pipelines';
 export type { EaCCommitResponse } from 'jsr:@fathym/eac@0.2.122/steward';

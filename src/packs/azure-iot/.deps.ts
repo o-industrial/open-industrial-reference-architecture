@@ -6,7 +6,7 @@ export { ClientSecretCredential, type TokenCredential } from 'npm:@azure/identit
 
 export { ConfidentialClientApplication } from 'npm:@azure/msal-node@3.6.0';
 
-export type { Status } from 'jsr:@fathym/common@0.2.266';
-export { z } from 'jsr:@fathym/common@0.2.266/third-party/zod';
+export type { Status } from 'jsr:@fathym/common@0.2.272';
+export { z } from 'jsr:@fathym/common@0.2.272/third-party/zod';
 
 export type { EaCWarmQueryAsCode } from 'jsr:@fathym/eac-azure@0.0.113';

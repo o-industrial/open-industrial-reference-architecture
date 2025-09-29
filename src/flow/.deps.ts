@@ -1,4 +1,4 @@
-export { jsonMapSetClone, merge, type NullableArrayOrObject } from 'jsr:@fathym/common@0.2.266';
+export { jsonMapSetClone, merge, type NullableArrayOrObject } from 'jsr:@fathym/common@0.2.272';
 
 export type {
   EaCEnterpriseDetails,
