@@ -18,7 +18,6 @@ import { AziPanelTemplate } from '../templates/AziPanelTemplate.tsx';
 import { AziChatInput } from '../molecules/azi/AziChatInput.tsx';
 import { AziChatMessage } from '../molecules/azi/AziChatMessage.tsx';
 import { AziManager, AziState } from '../../src/flow/managers/AziManager.ts';
-import { string } from 'jsr:@fathym/common@0.2.272/third-party/zod';
 
 export const IsIsland = true;
 
