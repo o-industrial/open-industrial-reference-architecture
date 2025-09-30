@@ -1,11 +1,11 @@
 export * as path from 'jsr:@std/path@1.0.8';
 
-export { DFSFileHandler } from 'jsr:@fathym/eac@0.2.122/dfs/handlers';
+export { DFSFileHandler } from 'jsr:@fathym/eac@0.2.127-integration/dfs/handlers';
 export {
   type DistributedFileSystemOptions,
   type EaCDistributedFileSystemAsCode,
   type EaCDistributedFileSystemDetails,
-} from 'jsr:@fathym/eac@0.2.122/dfs';
+} from 'jsr:@fathym/eac@0.2.127-integration/dfs';
 
 export { type EaCApplicationProcessorConfig } from '../.deps.ts';
 export { type EaCInterfaceAppProcessor } from '../processors/EaCInterfaceAppProcessor.ts';

@@ -1,10 +1,10 @@
 export { merge } from 'jsr:@fathym/common@0.2.273/merge';
 export { type NullableArrayOrObject } from 'jsr:@fathym/common@0.2.273/types';
 
-export type { EaCRuntimeHandler } from 'jsr:@fathym/eac@0.2.122/runtime/pipelines';
-export type { EaCCommitResponse } from 'jsr:@fathym/eac@0.2.122/steward';
-export { EaCBaseClient } from 'jsr:@fathym/eac@0.2.122/steward/clients';
-export type { EaCStatus } from 'jsr:@fathym/eac@0.2.122/steward/status';
+export type { EaCRuntimeHandler } from 'jsr:@fathym/eac@0.2.127-integration/runtime/pipelines';
+export type { EaCCommitResponse } from 'jsr:@fathym/eac@0.2.127-integration/steward';
+export { EaCBaseClient } from 'jsr:@fathym/eac@0.2.127-integration/steward/clients';
+export type { EaCStatus } from 'jsr:@fathym/eac@0.2.127-integration/steward/status';
 
 export type { EaCWarmQueryAsCode, EaCWarmQueryDetails } from 'jsr:@fathym/eac-azure@0.0.113';
 

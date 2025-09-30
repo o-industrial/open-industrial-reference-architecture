@@ -1,5 +1,5 @@
 // src/api/clients/OpenIndustrialAdminAPI.ts
-import { EverythingAsCode } from 'jsr:@fathym/eac@0.2.122';
+import { EverythingAsCode } from 'jsr:@fathym/eac@0.2.127-integration';
 import { EaCUserLicense, EaCUserRecord } from '../.client.deps.ts';
 import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
 import { ClientHelperBridge } from './ClientHelperBridge.ts';

@@ -1,4 +1,4 @@
-export type { EaCVertexDetails } from 'jsr:@fathym/eac@0.2.122';
+export type { EaCVertexDetails } from 'jsr:@fathym/eac@0.2.127-integration';
 export type { EaCWarmQueryDetails } from 'jsr:@fathym/eac-azure@0.0.113';
 
 export { Client, Message } from 'npm:azure-iot-device@1.18.3';

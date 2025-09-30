@@ -6,7 +6,7 @@ export {
   type EaCVertexDetails,
   EaCVertexDetailsSchema,
   type EverythingAsCode,
-} from 'jsr:@fathym/eac@0.2.122';
+} from 'jsr:@fathym/eac@0.2.127-integration';
 
 export type { EverythingAsCodeApplications } from 'jsr:@fathym/eac-applications@0.0.191';
 

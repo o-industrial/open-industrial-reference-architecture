@@ -3,17 +3,17 @@ export { IoCContainer } from 'jsr:@fathym/ioc@0.0.14';
 export { loadJwtConfig } from 'jsr:@fathym/common@0.2.273/jwt';
 export { getPackageLogger } from 'jsr:@fathym/common@0.2.273/log';
 
-export type { EverythingAsCode } from 'jsr:@fathym/eac@0.2.122';
-export type { EaCRuntimeContext } from 'jsr:@fathym/eac@0.2.122/runtime';
+export type { EverythingAsCode } from 'jsr:@fathym/eac@0.2.127-integration';
+export type { EaCRuntimeContext } from 'jsr:@fathym/eac@0.2.127-integration/runtime';
 export type {
   EaCRuntimeConfig,
   EaCRuntimePluginConfig,
-} from 'jsr:@fathym/eac@0.2.122/runtime/config';
-export type { EaCRuntimePlugin } from 'jsr:@fathym/eac@0.2.122/runtime/plugins';
+} from 'jsr:@fathym/eac@0.2.127-integration/runtime/config';
+export type { EaCRuntimePlugin } from 'jsr:@fathym/eac@0.2.127-integration/runtime/plugins';
 export {
   type EaCRuntimeHandler,
   EaCRuntimeHandlerPipeline,
-} from 'jsr:@fathym/eac@0.2.122/runtime/pipelines';
+} from 'jsr:@fathym/eac@0.2.127-integration/runtime/pipelines';
 
 export type { EverythingAsCodeApplications } from 'jsr:@fathym/eac-applications@0.0.191';
 export {
@@ -59,4 +59,4 @@ export type {
 } from 'jsr:@fathym/eac-licensing@0.0.56';
 export type { EaCApplicationsRuntimeContext } from 'jsr:@fathym/eac-applications@0.0.191/runtime';
 export { EaCRefreshController } from 'jsr:@fathym/eac-applications@0.0.191/runtime/refresh';
-export type { EaCUserRecord } from 'jsr:@fathym/eac@0.2.122';
+export type { EaCUserRecord } from 'jsr:@fathym/eac@0.2.127-integration';

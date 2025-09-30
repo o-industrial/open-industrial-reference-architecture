@@ -1,5 +1,5 @@
 // src/flow/managers/admin/AdminManager.ts
-import { EaCUserRecord } from 'jsr:@fathym/eac@0.2.122';
+import { EaCUserRecord } from 'jsr:@fathym/eac@0.2.127-integration';
 import { OpenIndustrialAPIClient } from '../../../api/clients/OpenIndustrialAPIClient.ts';
 import { EaCUserLicense } from '../../.deps.ts';
 import { EverythingAsCodeOIWorkspace } from '../../../eac/EverythingAsCodeOIWorkspace.ts';
