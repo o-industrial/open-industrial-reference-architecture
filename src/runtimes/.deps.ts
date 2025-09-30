@@ -45,7 +45,7 @@ export { EventHubConsumerClient } from 'npm:@azure/event-hubs@6.0.0';
 
 export { Registry as IoTRegistry, Twin } from 'npm:azure-iothub@1.16.5';
 export type { EaCStripeProcessor } from 'jsr:@fathym/eac-applications@0.0.203/processors';
-export { loadEaCLicensingSvc } from 'jsr:@fathym/eac-licensing@0.0.56/clients';
+export { loadEaCLicensingSvc } from 'jsr:@fathym/eac-licensing@0.0.57/clients';
 export { createOAuthHelpers } from 'jsr:@fathym/common@0.2.273/oauth';
 export { loadOAuth2ClientConfig } from 'jsr:@fathym/eac-applications@0.0.203/runtime/modules';
 export { MSALPlugin } from 'jsr:@fathym/msal@0.0.57';
@@ -56,7 +56,7 @@ export type {
   EaCLicensePlanAsCode,
   EaCUserLicense,
   EverythingAsCodeLicensing,
-} from 'jsr:@fathym/eac-licensing@0.0.56';
+} from 'jsr:@fathym/eac-licensing@0.0.57';
 export type { EaCApplicationsRuntimeContext } from 'jsr:@fathym/eac-applications@0.0.203/runtime';
 export { EaCRefreshController } from 'jsr:@fathym/eac-applications@0.0.203/runtime/refresh';
 export type { EaCUserRecord } from 'jsr:@fathym/eac@0.2.130';
