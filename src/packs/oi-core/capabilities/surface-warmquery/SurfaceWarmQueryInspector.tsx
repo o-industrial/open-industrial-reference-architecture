@@ -6,6 +6,9 @@ import { InspectorCommonProps } from '../../../../flow/.exports.ts';
 import { SurfaceWarmQueryStats } from './SurfaceWarmQueryStats.tsx';
 import { EaCWarmQueryDetails } from '../../../../eac/.deps.ts';
 import { SurfaceWarmQueryModal } from '../../../../../atomic/organisms/modals/SurfaceWarmQueryModal.tsx';
+import { EaCDataConnectionAsCode } from '../../../../eac/EaCDataConnectionAsCode.ts';
+import { EaCAzureIoTHubDataConnectionDetails } from '../../../../eac/EaCAzureIoTHubDataConnectionDetails.ts';
+import { shaHash } from '../../../../utils/shaHash.ts';
 
 type SurfaceWarmQueryInspectorProps = InspectorCommonProps<
   EaCWarmQueryDetails,
@@ -29,11 +32,76 @@ export function SurfaceWarmQueryInspector({
   const eac = workspaceMgr.EaC.GetEaC();
 
   workspaceMgr.CreateWarmQueryAziIfNotExist(lookup);
+  const workspace = workspaceMgr.UseEaC();
+  const [deviceIds, setDeviceIds] = useState<string[]>([]);
 
-  const aziExtraInputs = useMemo(() => ({
-    WarmQueryLookup: lookup,
-    SurfaceLookup: surfaceLookup,
-  }), [lookup, surfaceLookup]);
+  useEffect(() => {
+    let cancelled = false;
+
+    const getDeviceIDsForWarmQuery = async (): Promise<string[]> => {
+      // 1) Pull "AAAA->BBBB" entries and keep BBBB
+      const rawLookups: string[] = workspace?.Surfaces?.[surfaceLookup!]?.WarmQueries?.[lookup]
+        ?.DataConnectionLookups ?? [];
+
+      const rightLookups = rawLookups
+        .map((s) => {
+          const i = s.lastIndexOf('->');
+          return i >= 0 ? s.slice(i + 2).trim() : undefined;
+        })
+        .filter((v): v is string => !!v && v.length > 0);
+
+      if (rightLookups.length === 0) return [];
+
+      const lookupSet = new Set(rightLookups);
+      const dcRaw = workspace?.DataConnections;
+
+      // 2) Identify which lookups to hash
+      let lookupsToHash: string[] = [];
+
+      if (Array.isArray(dcRaw)) {
+        lookupsToHash = (dcRaw as EaCDataConnectionAsCode[])
+          .map((dc) => {
+            const details = dc.Details as EaCAzureIoTHubDataConnectionDetails;
+            const lk = (dc as any).Lookup ??
+              (dc as any).lookup ??
+              details?.Name ??
+              '';
+            return lk && lookupSet.has(lk) ? lk : undefined;
+          })
+          .filter((v): v is string => !!v);
+      } else if (dcRaw) {
+        lookupsToHash = Object.keys(dcRaw).filter(
+          (lk) => lk && lookupSet.has(lk),
+        );
+      }
+
+      // 3) Hash in parallel, then dedupe
+      const hashed = await Promise.all(
+        Array.from(new Set(lookupsToHash)).map((lk) => shaHash(workspace!.EnterpriseLookup!, lk)),
+      );
+
+      return Array.from(new Set(hashed));
+    };
+
+    (async () => {
+      try {
+        const ids = await getDeviceIDsForWarmQuery();
+        if (!cancelled) setDeviceIds(ids);
+      } catch {
+        if (!cancelled) setDeviceIds([]); // fail-safe
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [workspace, lookup, surfaceLookup]); // include everything the fetch depends on
+
+  // You can skip useMemo entirely, but if you want it:
+  const aziExtraInputs = useMemo(
+    () => ({ DeviceIds: deviceIds }),
+    [deviceIds],
+  );
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
