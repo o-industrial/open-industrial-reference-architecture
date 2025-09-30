@@ -8,6 +8,8 @@
     "./atomic/organisms": "./atomic/organisms/.exports.ts",
     "./atomic/templates": "./atomic/templates/.exports.ts",
     "./atomic/utils": "./atomic/utils/.exports.ts",
+    "./tailwind/preset": "./configs/tailwind/preset.ts",
+    "./tailwind/preset.ts": "./configs/tailwind/preset.ts",
 
     "./api": "./src/api/.exports.ts",
     "./eac": "./src/eac/.exports.ts",
@@ -80,3 +82,5 @@
   },
   "lock": false
 }
+
+
