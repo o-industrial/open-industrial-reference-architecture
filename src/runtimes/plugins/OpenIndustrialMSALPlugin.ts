@@ -1,6 +1,5 @@
 import {
   createOAuthHelpers,
-  EaCMSALProcessor,
   type EaCRuntimeConfig,
   type EaCRuntimePlugin,
   type EaCRuntimePluginConfig,

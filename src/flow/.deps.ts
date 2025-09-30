@@ -4,8 +4,8 @@ export type {
   EaCEnterpriseDetails,
   EaCVertexDetails,
   EverythingAsCode,
-} from 'jsr:@fathym/eac@0.2.127-integration';
-export { type EaCStatus, EaCStatusProcessingTypes } from 'jsr:@fathym/eac@0.2.127-integration/steward/status';
+} from 'jsr:@fathym/eac@0.2.130';
+export { type EaCStatus, EaCStatusProcessingTypes } from 'jsr:@fathym/eac@0.2.130/steward/status';
 
 export type { EaCLicenseAsCode, EaCUserLicense } from 'jsr:@fathym/eac-licensing@0.0.56';
 

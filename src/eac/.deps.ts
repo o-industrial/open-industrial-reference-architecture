@@ -6,9 +6,9 @@ export {
   type EaCVertexDetails,
   EaCVertexDetailsSchema,
   type EverythingAsCode,
-} from 'jsr:@fathym/eac@0.2.127-integration';
+} from 'jsr:@fathym/eac@0.2.130';
 
-export type { EverythingAsCodeApplications } from 'jsr:@fathym/eac-applications@0.0.191';
+export type { EverythingAsCodeApplications } from 'jsr:@fathym/eac-applications@0.0.203';
 
 export {
   type EaCWarmQueryAsCode,
@@ -16,9 +16,9 @@ export {
   type EaCWarmQueryDetails,
   type EverythingAsCodeClouds,
   EverythingAsCodeCloudsSchema,
-} from 'jsr:@fathym/eac-azure@0.0.113';
+} from 'jsr:@fathym/eac-azure@0.0.114';
 
-export { type EverythingAsCodeIdentity } from 'jsr:@fathym/eac-identity@0.0.26';
+export { type EverythingAsCodeIdentity } from 'jsr:@fathym/eac-identity@0.0.27';
 
 export { type EverythingAsCodeLicensing } from 'jsr:@fathym/eac-licensing@0.0.56';
 
