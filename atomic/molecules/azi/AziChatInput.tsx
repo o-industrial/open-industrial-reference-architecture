@@ -1,5 +1,5 @@
 import { IntentTypes, JSX, useState, useRef, useEffect } from '../../.deps.ts';
-import { SendIcon, Input, Action, ActionStyleTypes } from '../../.exports.ts';
+import { SendIcon, EmptyIcon, Input, Action, ActionStyleTypes } from '../../.exports.ts';
 
 export type AziChatInputProps = {
   placeholder?: string;
@@ -8,8 +8,10 @@ export type AziChatInputProps = {
   inputIntentType?: IntentTypes;
   actionIntentType?: IntentTypes;
   sendIcon?: JSX.Element;
+  resetIcon?: JSX.Element;
   maxHeight?: number; // in pixels
   extraInputs?: Record<string, unknown>;
+  onReset?: () => void | Promise<void>;
 };
 
 export function AziChatInput({
@@ -19,8 +21,10 @@ export function AziChatInput({
   inputIntentType = IntentTypes.None,
   actionIntentType = IntentTypes.Primary,
   sendIcon = <SendIcon class="w-5 h-5" />,
-  maxHeight = 200,
-  extraInputs = {}
+  resetIcon = <EmptyIcon class="w-5 h-5" />,
+  maxHeight = 50,
+  extraInputs = {},
+  onReset
 }: AziChatInputProps): JSX.Element {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -41,10 +45,8 @@ export function AziChatInput({
     const value = e.currentTarget.value;
     setInput(value);
   };
-    
-
-  const handleSubmit = async (e: JSX.TargetedEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  
+  const sendNow = async () => {
     const trimmed = input.trim();
     if (!trimmed || sending || disabled) return;
 
@@ -55,6 +57,20 @@ export function AziChatInput({
     } finally {
       setSending(false);
     }
+  };
+  
+  const handleKeyDown = async (
+    e: JSX.TargetedKeyboardEvent<HTMLTextAreaElement>,
+  ) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      await sendNow();
+    }
+  };
+
+  const handleSubmit = async (e: JSX.TargetedEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await sendNow();
   };
 
   useEffect(() => {
@@ -71,21 +87,45 @@ export function AziChatInput({
         rows={1}
         value={input}
         onInput={handleInput}
+        onKeyDown={handleKeyDown}
         placeholder={placeholder}
         disabled={isDisabled}
         intentType={inputIntentType}
         class="flex-grow resize-none overflow-hidden"
       />
 
-      <Action
-        type="submit"
-        styleType={ActionStyleTypes.Solid | ActionStyleTypes.Thin}
-        intentType={actionIntentType}
-        disabled={isDisabled}
-        class="text-xs"
-      >
-        {sendIcon}
-      </Action>
+      <div class="flex items-stretch gap-1">
+        <Action
+          type="submit"
+          styleType={ActionStyleTypes.Solid | ActionStyleTypes.Thin}
+          intentType={actionIntentType}
+          disabled={isDisabled}
+          class="text-xs px-3"
+          title="Send"
+        >
+          {sendIcon}
+        </Action>
+
+        {onReset && (
+          <Action
+            type="button"
+            onClick={() => {
+              if (isDisabled) return;
+              const result = onReset();
+              if (result && typeof (result as Promise<void>).then === 'function') {
+                (result as Promise<void>).catch(() => {});
+              }
+            }}
+            styleType={ActionStyleTypes.Outline | ActionStyleTypes.Thin}
+            intentType={IntentTypes.Secondary}
+            disabled={isDisabled}
+            class="text-xs px-3"
+            title="Reset"
+          >
+            {resetIcon}
+          </Action>
+        )}
+      </div>
     </form>
   );
 }

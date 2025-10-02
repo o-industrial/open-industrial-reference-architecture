@@ -283,7 +283,7 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
         </div>
 
         {/* Right Side: AziPanel */}
-        <div class='w-1/3 border-l border-gray-700 pl-4 overflow-y-auto'>
+        <div class='w-1/3 min-h-0 border-l border-gray-700 pl-4'>
           <AziPanel
             workspaceMgr={workspace}
             onStartSend={onAziStartSend}

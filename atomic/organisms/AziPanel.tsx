@@ -222,10 +222,46 @@ export function AziPanel({
     );
   });
 
+  const handleReset = useCallback(async () => {
+    try {
+      const threadId = aziMgr.GetThreadId?.() ?? '';
+      const aziType = threadId.includes('warmquery') ? 'azi-warm-query' : 'azi';
+
+      if (!threadId) {
+        console.warn('[AziPanel] No thread id available for reset');
+        return;
+      }
+
+      const url = `/api/synaptic/azi/reset-ai/${encodeURIComponent(threadId)}/${aziType}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: workspaceMgr.GetAuthHeaders(),
+      });
+      if (!res.ok) {
+        console.error('[AziPanel] Reset failed', res.status, await res.text().catch(() => ''));
+      }
+
+      // Allow auto-greet to fire again after reset
+      autoGreetSentRef.current = false;
+
+      // Reload conversation state
+      await peek();
+    } catch (err) {
+      console.error('[AziPanel] Reset error', err);
+    }
+  }, [aziMgr, peek, workspaceMgr]);
+
   return (
     <AziPanelTemplate
       onClose={onClose}
-      input={<AziChatInput onSend={wrappedSend} extraInputs={extraInputs} disabled={isSending} />}
+      input={
+        <AziChatInput
+          onSend={wrappedSend}
+          extraInputs={extraInputs}
+          disabled={isSending}
+          onReset={handleReset}
+        />
+      }
     >
       <div ref={scrollRef} class="overflow-y-auto h-full">
         {renderedMessages}
