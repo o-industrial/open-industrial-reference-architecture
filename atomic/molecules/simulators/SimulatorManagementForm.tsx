@@ -1,13 +1,16 @@
-import { JSX } from '../.deps.ts';
-import { EaCAzureDockerSimulatorDetails } from '../../src/eac/EaCAzureDockerSimulatorDetails.ts';
-import { Input } from '../atoms/forms/Input.tsx';
+import { JSX } from '../../.deps.ts';
+import { EaCAzureDockerSimulatorDetails } from '../../../src/eac/EaCAzureDockerSimulatorDetails.ts';
+import { Input } from '../../atoms/forms/Input.tsx';
 
 type Props = {
   details: EaCAzureDockerSimulatorDetails;
   onChange: (next: Partial<EaCAzureDockerSimulatorDetails>) => void;
 };
 
-export function SimulatorManagementForm({ details, onChange }: Props) {
+export function SimulatorManagementForm({
+  details,
+  onChange,
+}: Props): JSX.Element {
   const handleStringChange =
     (key: keyof EaCAzureDockerSimulatorDetails) =>
     (e: JSX.TargetedEvent<HTMLInputElement, Event>) =>

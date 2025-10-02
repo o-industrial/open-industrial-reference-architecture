@@ -4,6 +4,7 @@ export * from './azure/.exports.ts';
 export * from './flows/.exports.ts';
 export * from './eac/.exports.ts';
 export * from './licensing/.exports.ts';
+export * from './simulators/.exports.ts';
 export * from './writing-devices/.exports.ts';
 
 export * from './AdminNav.tsx';
