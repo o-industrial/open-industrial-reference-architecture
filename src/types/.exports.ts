@@ -1,4 +1,5 @@
 export * from './AccountProfile.ts';
+export * from './AzureDataExplorerOutput.ts';
 export * from './RuntimeStatsSchema.ts';
 export * from './EaCHistorySnapshot.ts';
 export * from './IngestOption.ts';

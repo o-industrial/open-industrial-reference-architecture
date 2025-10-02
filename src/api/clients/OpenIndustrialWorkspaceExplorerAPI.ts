@@ -1,4 +1,4 @@
-import { AzureDataExplorerOutput } from '../../packs/azure-iot/sop/AzureDataExplorerWarmQuery.ts';
+import { AzureDataExplorerOutput } from '../../types/AzureDataExplorerOutput.ts';
 import { EaCWarmQueryDetails } from '../.deps.ts';
 import { ClientHelperBridge } from './ClientHelperBridge.ts';
 

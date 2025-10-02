@@ -1,3 +1,2 @@
-export * from './DataConnection.ts';
-export * from './DataConnectionModuleBuilder.ts';
-export * from '../../packs/oi-core/capabilities/connection/DataConnectionStats.ts';
+export * from './WarmQuery.ts';
+export * from './WarmQueryModuleBuilder.ts';

@@ -26,10 +26,8 @@
     "./fluent/steps": "./src/fluent/steps/.exports.ts",
     "./fluent/types": "./src/fluent/types/.exports.ts",
     "./fluent/utils": "./src/fluent/utils/.exports.ts",
+    "./fluent/warm-queries": "./src/fluent/warm-queries/.exports.ts",
     "./fluent/workspaces": "./src/fluent/workspaces/.exports.ts",
-
-    "./packs/azure-iot": "./src/packs/azure-iot/.pack.ts",
-    "./packs/oi-core": "./src/packs/oi-core/.pack.ts",
 
     "./runtimes": "./src/runtimes/.exports.ts"
   },
@@ -54,6 +52,7 @@
     // "reactflow": "npm:reactflow@11.11.4"
 
     // "jsr:@fathym/eac-identity@0.0.28": "../../fathym-deno/eac-identity/src/identity/.exports.ts"
+    // "@o-industrial/azure-iot-pack": "../azure-iot-pack/src/.pack.ts"
   },
   "exclude": ["**/_eac-runtime/*", "!src/**/.exports.ts", "!src/**/.deps.ts", "!mod.ts"],
   "lint": {
@@ -82,5 +81,3 @@
   },
   "lock": false
 }
-
-
