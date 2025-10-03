@@ -17,6 +17,7 @@
     "./sop": "./src/sop/.exports.ts",
     "./types": "./src/types/.exports.ts",
     "./utils": "./src/utils/.exports.ts",
+    "./utils/kusto": "./src/utils/.exports.kusto.ts",
 
     "./flow": "./src/flow/.exports.ts",
     "./fluent": "./src/fluent/_/.exports.ts",
@@ -50,11 +51,15 @@
     // "react/jsx-runtime": "npm:preact@10.20.1/jsx-runtime",
     // "react/jsx-dev-runtime": "npm:preact@10.20.1/jsx-dev-runtime",
     // "reactflow": "npm:reactflow@11.11.4"
-
     // "jsr:@fathym/eac-identity@0.0.28": "../../fathym-deno/eac-identity/src/identity/.exports.ts"
     // "@o-industrial/azure-iot-pack": "../azure-iot-pack/src/.pack.ts"
   },
-  "exclude": ["**/_eac-runtime/*", "!src/**/.exports.ts", "!src/**/.deps.ts", "!mod.ts"],
+  "exclude": [
+    "**/_eac-runtime/*",
+    "!src/**/.exports.ts",
+    "!src/**/.deps.ts",
+    "!mod.ts"
+  ],
   "lint": {
     "include": ["apps/", "configs/", "src/", "tests/"],
     "exclude": [],
