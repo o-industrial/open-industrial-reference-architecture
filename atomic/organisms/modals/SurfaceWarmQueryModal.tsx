@@ -1,16 +1,16 @@
 // deno-lint-ignore-file no-explicit-any
-
-// SurfaceWarmQueryModal.tsx
-import { Modal, TabbedPanel } from '../../.exports.ts';
 import { marked } from 'npm:marked@15.0.1';
 import { useEffect, useRef, useState } from 'npm:preact@10.20.1/hooks';
-import { Action } from '../../.exports.ts';
 import type { FunctionalComponent } from 'npm:preact@10.20.1';
-import { AziPanel } from '../.exports.ts';
 import { SurfaceWarmQueryModalQuery } from './SurfaceWarmQueryModalQuery.tsx';
 import { SurfaceWarmQueryModalResults } from './SurfaceWarmQueryModalResults.tsx';
-import { AziState, WorkspaceManager } from '../../../src/flow/.exports.ts';
-import { AzureDataExplorerOutput } from '@o-industrial/common/types';
+import { AzureDataExplorerOutput } from '../../../src/types/AzureDataExplorerOutput.ts';
+import { AziState } from '@o-industrial/common/flow';
+import { WorkspaceManager } from '../../.deps.ts';
+import { AziPanel } from '../AziPanel.tsx';
+import { Modal } from '../../molecules/Modal.tsx';
+import { TabbedPanel } from '../../molecules/TabbedPanel.tsx';
+import { Action } from '../../atoms/Action.tsx';
 
 interface SurfaceWarmQueryModalProps {
   workspace: WorkspaceManager;
@@ -22,7 +22,9 @@ interface SurfaceWarmQueryModalProps {
   warmQueryLookup: string;
 }
 
-export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalProps> = ({
+export const SurfaceWarmQueryModal: FunctionalComponent<
+  SurfaceWarmQueryModalProps
+> = ({
   workspace: workspace,
   queryName,
   queryText: initialQuery,
@@ -45,14 +47,18 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
   // Debounced persistence of Query edits back to EaC so main Save commits them
   const persistTimerRef = useRef<number | null>(null);
   const persistQuery = (value: string) => {
-    if (persistTimerRef.current) globalThis.clearTimeout(persistTimerRef.current);
+    if (persistTimerRef.current)
+      globalThis.clearTimeout(persistTimerRef.current);
     persistTimerRef.current = globalThis.setTimeout(() => {
       try {
         workspace.EaC.UpdateNodePatch(warmQueryLookup, {
           Details: { Query: value } as any,
         });
       } catch (err) {
-        console.warn('[SurfaceWarmQueryModal] Failed to persist query change', err);
+        console.warn(
+          '[SurfaceWarmQueryModal] Failed to persist query change',
+          err
+        );
       }
       persistTimerRef.current = null;
     }, 300);
@@ -125,7 +131,8 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
         return lead + `> ERROR : ${msg}`;
       } else {
         // Subsequent errors: add resolved banner first
-        const final = lead +
+        const final =
+          lead +
           `> Azi Resolved Error: ${lastAppendedErrorCodeRef.current}\n\n> ERROR : ${msg}`;
         lastAppendedErrorCodeRef.current = errCode;
         return final;
@@ -160,7 +167,7 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
     } else {
       setErrors('> Query Executed Successfully');
       const table = result?.tables?.find((t) => t.name === 'PrimaryResult');
-      const data = (table && 'data' in table) ? (table as QueryTable).data : [];
+      const data = table && 'data' in table ? (table as QueryTable).data : [];
       setQueryResults(data);
       setActiveTabKey('results');
     }
@@ -178,21 +185,28 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
       label: 'Query',
       icon: (
         <svg
-          xmlns='http://www.w3.org/2000/svg'
-          viewBox='0 0 20 20'
-          fill='currentColor'
-          class='h-5 w-5'
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          class="h-5 w-5"
         >
-          <path d='M18.68 12.32a4.49 4.49 0 0 0-6.36.01a4.49 4.49 0 0 0 0 6.36a4.51 4.51 0 0 0 5.57.63L21 22.39L22.39 21l-3.09-3.11c1.13-1.77.87-4.09-.62-5.57m-1.41 4.95c-.98.98-2.56.97-3.54 0c-.97-.98-.97-2.56.01-3.54c.97-.97 2.55-.97 3.53 0c.97.98.97 2.56 0 3.54M10.9 20.1a6.5 6.5 0 0 1-1.48-2.32C6.27 17.25 4 15.76 4 14v3c0 2.21 3.58 4 8 4c-.4-.26-.77-.56-1.1-.9M4 9v3c0 1.68 2.07 3.12 5 3.7v-.2c0-.93.2-1.85.58-2.69C6.34 12.3 4 10.79 4 9m8-6C7.58 3 4 4.79 4 7c0 2 3 3.68 6.85 4h.05c1.2-1.26 2.86-2 4.6-2c.91 0 1.81.19 2.64.56A3.22 3.22 0 0 0 20 7c0-2.21-3.58-4-8-4' />
+          <path d="M18.68 12.32a4.49 4.49 0 0 0-6.36.01a4.49 4.49 0 0 0 0 6.36a4.51 4.51 0 0 0 5.57.63L21 22.39L22.39 21l-3.09-3.11c1.13-1.77.87-4.09-.62-5.57m-1.41 4.95c-.98.98-2.56.97-3.54 0c-.97-.98-.97-2.56.01-3.54c.97-.97 2.55-.97 3.53 0c.97.98.97 2.56 0 3.54M10.9 20.1a6.5 6.5 0 0 1-1.48-2.32C6.27 17.25 4 15.76 4 14v3c0 2.21 3.58 4 8 4c-.4-.26-.77-.56-1.1-.9M4 9v3c0 1.68 2.07 3.12 5 3.7v-.2c0-.93.2-1.85.58-2.69C6.34 12.3 4 10.79 4 9m8-6C7.58 3 4 4.79 4 7c0 2 3 3.68 6.85 4h.05c1.2-1.26 2.86-2 4.6-2c.91 0 1.81.19 2.64.56A3.22 3.22 0 0 0 20 7c0-2.21-3.58-4-8-4" />
         </svg>
       ),
       content: (
         <SurfaceWarmQueryModalQuery
           query={query}
           onQueryChange={(val) => {
-            setQuery(typeof val === 'string' ? val : (val as any).currentTarget?.value ?? '');
+            setQuery(
+              typeof val === 'string'
+                ? val
+                : (val as any).currentTarget?.value ?? ''
+            );
             // Normalize string value for persistence
-            const next = typeof val === 'string' ? val : (val as any).currentTarget?.value ?? '';
+            const next =
+              typeof val === 'string'
+                ? val
+                : (val as any).currentTarget?.value ?? '';
             persistQuery(next);
           }}
           errors={errors}
@@ -205,16 +219,16 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
       label: 'Results',
       icon: (
         <svg
-          xmlns='http://www.w3.org/2000/svg'
-          viewBox='0 0 20 20'
-          fill='currentColor'
-          class='h-5 w-5'
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          class="h-5 w-5"
         >
-          <path d='M11 16H3v3q0 .825.588 1.413T5 21h6zm2 0v5h6q.825 0 1.413-.587T21 19v-3zm-2-2V9H3v5zm2 0h8V9h-8zM3 7h18V5q0-.825-.587-1.412T19 3H5q-.825 0-1.412.588T3 5z' />
+          <path d="M11 16H3v3q0 .825.588 1.413T5 21h6zm2 0v5h6q.825 0 1.413-.587T21 19v-3zm-2-2V9H3v5zm2 0h8V9h-8zM3 7h18V5q0-.825-.587-1.412T19 3H5q-.825 0-1.412.588T3 5z" />
         </svg>
       ),
       content: (
-        <div class='h-full min-h-0 flex flex-col'>
+        <div class="h-full min-h-0 flex flex-col">
           <SurfaceWarmQueryModalResults
             isLoading={isLoading}
             queryName={queryName}
@@ -229,26 +243,26 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
     <Modal
       title={`Query: ${queryName}`}
       onClose={onClose}
-      class='max-w-[1200px] border border-neutral-700 bg-neutral-900'
+      class="max-w-[1200px] border border-neutral-700 bg-neutral-900"
       style={{ height: '90vh' }}
     >
       <div
-        id='modalstart'
-        class='flex flex-row gap-4 h-full min-h-0 bg-neutral-900'
+        id="modalstart"
+        class="flex flex-row gap-4 h-full min-h-0 bg-neutral-900"
         style={{ height: '75vh' }}
       >
         {/* Left Side: Tabs and Buttons */}
-        <div class='w-2/3 flex flex-col overflow-hidden pr-2 min-h-0'>
+        <div class="w-2/3 flex flex-col overflow-hidden pr-2 min-h-0">
           {/* Tabs Section */}
           <div
-            id='tabs1'
-            class='flex-1 min-h-0 overflow-hidden bg-neutral-900 p-4 flex flex-col'
+            id="tabs1"
+            class="flex-1 min-h-0 overflow-hidden bg-neutral-900 p-4 flex flex-col"
             style={{ height: '82vh' }}
           >
-            <div id='tabs2' class='mt-2 flex-1 min-h-0 flex flex-col'>
+            <div id="tabs2" class="mt-2 flex-1 min-h-0 flex flex-col">
               <TabbedPanel
-                id='tabpanel'
-                class='flex-1 min-h-0 flex flex-col h-full overflow-hidden'
+                id="tabpanel"
+                class="flex-1 min-h-0 flex flex-col h-full overflow-hidden"
                 /* if your TabbedPanel supports a body/content class, add it too: */
                 /* contentClassName="flex-1 min-h-0 overflow-hidden" */
                 tabs={tabData}
@@ -261,12 +275,12 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
           </div>
 
           {/* Buttons at the bottom */}
-          <div class='mt-3 flex justify-end'>
-            <div class='flex space-x-4'>
-              <div id='runWrap' tabIndex={0} aria-disabled='true'>
+          <div class="mt-3 flex justify-end">
+            <div class="flex space-x-4">
+              <div id="runWrap" tabIndex={0} aria-disabled="true">
                 <Action
-                  type='button'
-                  id='run'
+                  type="button"
+                  id="run"
                   onClick={handleRunClick}
                   disabled={isRunDisabled}
                   class={`font-bold py-2 px-4 rounded ${
@@ -283,7 +297,7 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
         </div>
 
         {/* Right Side: AziPanel */}
-        <div class='w-1/3 border-l border-gray-700 pl-4 overflow-y-auto'>
+        <div class="w-1/3 border-l border-gray-700 pl-4 overflow-y-auto">
           <AziPanel
             workspaceMgr={workspace}
             onStartSend={onAziStartSend}
