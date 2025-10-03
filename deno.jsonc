@@ -17,6 +17,7 @@
     "./sop": "./src/sop/.exports.ts",
     "./types": "./src/types/.exports.ts",
     "./utils": "./src/utils/.exports.ts",
+    "./utils/client": "./src/utils/.exports.client.ts",
     "./utils/kusto": "./src/utils/.exports.kusto.ts",
 
     "./flow": "./src/flow/.exports.ts",
