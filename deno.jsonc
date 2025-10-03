@@ -2,14 +2,6 @@
   "name": "@o-industrial/common",
   "version": "0.0.0",
   "exports": {
-    "./atomic/atoms": "./atomic/atoms/.exports.ts",
-    "./atomic/icons": "./build/iconset/icons/.exports.ts",
-    "./atomic/molecules": "./atomic/molecules/.exports.ts",
-    "./atomic/organisms": "./atomic/organisms/.exports.ts",
-    "./atomic/templates": "./atomic/templates/.exports.ts",
-    "./atomic/utils": "./atomic/utils/.exports.ts",
-    "./tailwind/preset": "./configs/tailwind/preset.ts",
-    "./tailwind/preset.ts": "./configs/tailwind/preset.ts",
 
     "./api": "./src/api/.exports.ts",
     "./eac": "./src/eac/.exports.ts",
@@ -81,9 +73,6 @@
     "useTabs": false
   },
   "unstable": ["kv"],
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "jsxImportSource": "npm:preact@10.20.1"
-  },
   "lock": false
 }
+

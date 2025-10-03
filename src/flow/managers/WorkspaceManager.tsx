@@ -46,9 +46,7 @@ import { BreadcrumbPart } from '../types/BreadcrumbPart.ts';
 import { IntentTypes } from '../../types/IntentTypes.ts';
 import { EaCNodeCapabilityManager, NodePreset } from '../.exports.ts';
 import { OpenIndustrialAPIClient } from '../../api/clients/OpenIndustrialAPIClient.ts';
-import { RuntimeImpulse, RuntimeImpulseSources } from '../../types/RuntimeImpulse.ts';
-import { IntentStyleMap } from '../../../atomic/utils/getIntentStyles.ts';
-import { impulseSourceColorMap } from '../../../atomic/utils/impulseSourceColorMap.ts';
+import { RuntimeImpulse } from '../../types/RuntimeImpulse.ts';
 import {
   AccountProfileModal,
   APIKeysModal,
@@ -63,7 +61,6 @@ import {
   WarmQueryAPIsModal,
   WorkspaceSettingsModal,
 } from '../../../atomic/organisms/modals/.exports.ts';
-import { MenuActionItem, MenuRoot } from '../../../atomic/molecules/FlyoutMenu.tsx';
 import {
   EverythingAsCodeClouds,
   EverythingAsCodeIdentity,
@@ -178,18 +175,20 @@ export class WorkspaceManager {
     });
   }
 
-  public DispatchInterfaceAction(
-    action: { lookup: string; type: string; payload?: unknown; workspace?: string },
-  ): void {
+  public DispatchInterfaceAction(action: {
+    lookup: string;
+    type: string;
+    payload?: unknown;
+    workspace?: string;
+  }): void {
     console.log('[WorkspaceManager] Interface action received', action);
   }
 
   public UseAppMenu(
     eac: EverythingAsCode & EverythingAsCodeLicensing & EverythingAsCodeClouds,
   ): {
-    handleMenu: (item: MenuActionItem) => void;
+    handleMenu: (item: { id: string }) => void;
     modals: JSX.Element;
-    runtimeMenus: MenuRoot[];
     showWkspSets: () => void;
     showTeamMgmt: () => void;
     showSimLib: () => void;
@@ -232,7 +231,7 @@ export class WorkspaceManager {
       </>
     );
 
-    const handleMenu = (item: MenuActionItem) => {
+    const handleMenu = (item: { id: string }) => {
       console.log('menu', item);
 
       switch (item.id) {
@@ -288,228 +287,9 @@ export class WorkspaceManager {
       }
     };
 
-    // Icons — reuse your existing set; add a couple of lucide fallbacks where needed
-    const I = {
-      // existing
-      save: 'https://api.iconify.design/lucide:save.svg',
-      fork: 'https://api.iconify.design/lucide:git-fork.svg',
-      archive: 'https://api.iconify.design/lucide:archive.svg',
-      export: 'https://api.iconify.design/lucide:download.svg',
-      eye: 'https://api.iconify.design/lucide:eye.svg',
-      check: 'https://api.iconify.design/lucide:check.svg',
-      commit: 'https://api.iconify.design/lucide:git-commit.svg',
-
-      // from your icon map
-      settings: 'https://api.iconify.design/lucide:settings.svg',
-      users: 'https://api.iconify.design/lucide:users.svg',
-      link: 'https://api.iconify.design/mdi:link-variant.svg',
-      lock: 'https://api.iconify.design/lucide:lock.svg',
-      warmQuery: 'https://api.iconify.design/mdi:sql-query.svg',
-      key: 'https://api.iconify.design/lucide:key.svg',
-      stack: 'https://api.iconify.design/lucide:layers-3.svg',
-      dollar: 'https://api.iconify.design/lucide:dollar-sign.svg',
-
-      // sensible additions (lucide)
-      cloud: 'https://api.iconify.design/lucide:cloud.svg',
-      cloudAttach: 'https://api.iconify.design/lucide:cloud-upload.svg',
-      privateCloud: 'https://api.iconify.design/lucide:server.svg',
-      license: 'https://api.iconify.design/lucide:badge-check.svg',
-      creditCard: 'https://api.iconify.design/lucide:credit-card.svg',
-    } as const;
-
-    const hasWorkspaceCloud = !!eac.Clouds?.Workspace?.Details ||
-      Object.keys(eac.Clouds || {}).length > 0;
-
-    const runtimeMenus: MenuRoot[] = [
-      // // ===== File (unchanged example) =====
-      // {
-      //   id: 'file',
-      //   label: 'File',
-      //   items: [
-      //     {
-      //       type: 'submenu',
-      //       id: 'file.new',
-      //       label: 'New',
-      //       items: [
-      //         { type: 'item', id: 'file.new.workspace', label: 'Workspace', iconSrc: I.archive },
-      //         { type: 'item', id: 'file.new.surface', label: 'Surface', iconSrc: I.archive },
-      //       ],
-      //     },
-      //     { type: 'item', id: 'file.save', label: 'Save', shortcut: '⌘S', iconSrc: I.save },
-      //     { type: 'item', id: 'file.fork', label: 'Fork Workspace', iconSrc: I.fork },
-      //     { type: 'separator', id: 'file.sep1' },
-      //     {
-      //       type: 'submenu',
-      //       id: 'file.export',
-      //       label: 'Export',
-      //       items: [
-      //         { type: 'item', id: 'file.export.json', label: 'Export JSON', iconSrc: I.export, payload: { format: 'json' } },
-      //         { type: 'item', id: 'file.export.png', label: 'Export PNG', iconSrc: I.export, payload: { format: 'png' } },
-      //       ],
-      //     },
-      //   ],
-      // },
-
-      // ===== View (unchanged example) =====
-      // {
-      //   id: 'view',
-      //   label: 'View',
-      //   items: [
-      //     {
-      //       type: 'submenu',
-      //       id: 'view.panels',
-      //       label: 'Panels',
-      //       items: [
-      //         {
-      //           type: 'item',
-      //           id: 'view.toggle.azi',
-      //           label: 'Azi',
-      //           iconSrc: I.eye,
-      //           checked: true,
-      //         },
-      //         {
-      //           type: 'item',
-      //           id: 'view.toggle.inspector',
-      //           label: 'Inspector',
-      //           iconSrc: I.eye,
-      //           checked: true,
-      //         },
-      //         {
-      //           type: 'item',
-      //           id: 'view.toggle.stream',
-      //           label: 'Stream',
-      //           iconSrc: I.eye,
-      //           checked: true,
-      //         },
-      //         {
-      //           type: 'item',
-      //           id: 'view.toggle.timeline',
-      //           label: 'Timeline',
-      //           iconSrc: I.eye,
-      //           checked: true,
-      //         },
-      //       ],
-      //     },
-      //     { type: 'item', id: 'view.fullscreen', label: 'Enter Fullscreen' },
-      //     { type: 'item', id: 'view.reset', label: 'Reset Layout' },
-      //   ],
-      // },
-
-      // ===== Workspace =====
-      {
-        id: 'workspace',
-        label: 'Workspace',
-        items: [
-          {
-            type: 'item',
-            id: 'workspace.settings',
-            label: 'Settings',
-            iconSrc: I.settings,
-          },
-          {
-            type: 'item',
-            id: 'workspace.team',
-            label: 'Team Members',
-            iconSrc: I.users,
-          },
-          {
-            type: 'item',
-            id: 'workspace.viewAll',
-            label: 'View All…',
-            iconSrc: I.stack,
-            payload: { target: 'workspace-index' },
-          },
-        ],
-      },
-
-      // ===== Environment =====
-      {
-        id: 'environment',
-        label: 'Environment',
-        items: [
-          {
-            type: 'item',
-            id: 'env.connections',
-            label: 'Cloud Connections',
-            iconSrc: I.link,
-          },
-          ...(hasWorkspaceCloud
-            ? [
-              {
-                type: 'item' as const,
-                id: 'env.calz',
-                label: 'Manage Private CALZ',
-                iconSrc: I.privateCloud,
-              },
-            ]
-            : []),
-          // Future: Cloud submenus
-          // { type: 'item', id: 'env.secrets', label: 'Manage Secrets', iconSrc: I.lock },
-          // {
-          //   type: 'submenu',
-          //   id: 'env.cloud',
-          //   label: 'Cloud',
-          //   iconSrc: I.cloud,
-          //   items: [
-          //     { type: 'item', id: 'env.cloud.attachManaged', label: 'Attach Managed Cloud', iconSrc: I.cloudAttach },
-          //     { type: 'item', id: 'env.cloud.addPrivate', label: 'Add Private Cloud', iconSrc: I.privateCloud },
-          //   ],
-          // },
-        ],
-      },
-
-      // ===== APIs =====
-      {
-        id: 'apis',
-        label: 'APIs',
-        items: [
-          {
-            type: 'item',
-            id: 'apis.apiKeys',
-            label: 'API Keys',
-            iconSrc: I.key,
-          },
-          {
-            type: 'item',
-            id: 'apis.dataSuite',
-            label: 'Data API Suite',
-            iconSrc: I.stack,
-            payload: { section: 'data' },
-          },
-          {
-            type: 'item',
-            id: 'apis.warmQuery',
-            label: 'Warm Query Management',
-            iconSrc: I.warmQuery,
-          },
-        ],
-      },
-
-      // ===== Billing =====
-      {
-        id: 'billing',
-        label: 'Billing',
-        items: [
-          {
-            type: 'item',
-            id: 'billing.license',
-            label: 'Current License',
-            iconSrc: I.license,
-          },
-          // {
-          //   type: 'item',
-          //   id: 'billing.details',
-          //   label: 'Billing Details',
-          //   iconSrc: I.creditCard, /* or I.dollar */
-          // },
-        ],
-      },
-    ];
-
     return {
       handleMenu,
       modals,
-      runtimeMenus,
       showWkspSets,
       showTeamMgmt,
       showSimLib,
@@ -944,7 +724,10 @@ export class WorkspaceManager {
       commit: async () => {
         const validation = this.ValidateGraph();
         if (validation.errors.length > 0) {
-          console.warn('[WorkspaceManager] Validation failed before commit:', validation);
+          console.warn(
+            '[WorkspaceManager] Validation failed before commit:',
+            validation,
+          );
           // Do not commit here; caller UI should show a modal using ValidateGraph()
           return;
         }
@@ -966,7 +749,6 @@ export class WorkspaceManager {
 
   public UseImpulseStream(filters?: Partial<ImpulseStreamFilter>): {
     impulses: RuntimeImpulse[];
-    impulseSourceColorMap: Record<RuntimeImpulseSources, IntentStyleMap>;
     connect: () => void;
     disconnect: () => void;
     setFilters: (filters: Partial<ImpulseStreamFilter>) => void;
@@ -989,7 +771,6 @@ export class WorkspaceManager {
 
     return {
       impulses,
-      impulseSourceColorMap,
       connect: () => this.Impulses.Connect(),
       disconnect: () => this.Impulses.Disconnect(),
       setFilters: (f) => this.Impulses.SetFilters(f),
@@ -1058,7 +839,10 @@ export class WorkspaceManager {
 
             if (stable(current) !== stable(normalized)) {
               this.EaC.UpdateNodePatch(selectedId, { Details: normalized });
-              console.log('[UseInspector] Live-synced EaC details for node', selectedId);
+              console.log(
+                '[UseInspector] Live-synced EaC details for node',
+                selectedId,
+              );
             }
 
             // If any keys were removed, derive a delete patch generically via capability mapping
@@ -1069,7 +853,10 @@ export class WorkspaceManager {
                 for (const k of removed) detailsSentinel[k] = sentinel;
 
                 // Build capability-scoped update patch to discover the placement of Details for this node
-                const graphNode = { ID: selectedId, Type: selected!.type! } as any;
+                const graphNode = {
+                  ID: selectedId,
+                  Type: selected!.type!,
+                } as any;
                 const ctx = {
                   GetEaC: () => this.EaC.GetEaC(),
                   SurfaceLookup: currentScopeData.Lookup!,
@@ -1087,7 +874,11 @@ export class WorkspaceManager {
                   if (Array.isArray(v)) return undefined;
                   if (v && typeof v === 'object') {
                     const out: Record<string, unknown> = {};
-                    for (const [k, val] of Object.entries(v as Record<string, unknown>)) {
+                    for (
+                      const [k, val] of Object.entries(
+                        v as Record<string, unknown>,
+                      )
+                    ) {
                       const child = toDeleteOnly(val);
                       if (child !== undefined) out[k] = child;
                     }
@@ -1098,14 +889,22 @@ export class WorkspaceManager {
 
                 const del = toDeleteOnly(probe);
                 if (
-                  del && typeof del === 'object' &&
+                  del &&
+                  typeof del === 'object' &&
                   Object.keys(del as Record<string, unknown>).length
                 ) {
                   this.EaC.MergeDelete(del as any);
-                  console.log('[UseInspector] Deleted fields for', selectedId, removed);
+                  console.log(
+                    '[UseInspector] Deleted fields for',
+                    selectedId,
+                    removed,
+                  );
                 }
               } catch (err) {
-                console.warn('[UseInspector] Failed to compute generic delete patch', err);
+                console.warn(
+                  '[UseInspector] Failed to compute generic delete patch',
+                  err,
+                );
               }
             }
           }
@@ -1803,8 +1602,16 @@ export class WorkspaceManager {
       if (!hasValidate) continue;
 
       const res = (cap as any).Validate(n, ctx);
-      if (res && res.valid === false && Array.isArray(res.errors) && res.errors.length) {
-        errors.push({ node: { ID: n.ID, Type: n.Type, Label: n.Label }, issues: res.errors });
+      if (
+        res &&
+        res.valid === false &&
+        Array.isArray(res.errors) &&
+        res.errors.length
+      ) {
+        errors.push({
+          node: { ID: n.ID, Type: n.Type, Label: n.Label },
+          issues: res.errors,
+        });
       }
     }
 

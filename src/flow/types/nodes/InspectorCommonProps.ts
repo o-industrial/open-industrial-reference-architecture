@@ -1,7 +1,7 @@
 import { EaCVertexDetails } from '../../.deps.ts';
-import { WorkspaceManager } from '../../../../atomic/.deps.ts';
 import { OpenIndustrialAPIClient } from '../../../api/clients/OpenIndustrialAPIClient.ts';
 import { BaseNodeEvent } from '../react/BaseNodeEvent.ts';
+import { WorkspaceManager } from '../../managers/WorkspaceManager.tsx';
 
 export type InspectorCommonProps<
   TDetails extends EaCVertexDetails = EaCVertexDetails,
