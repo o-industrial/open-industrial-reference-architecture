@@ -10,14 +10,14 @@ import { AziPanel } from '../.exports.ts';
 import { SurfaceWarmQueryModalQuery } from './SurfaceWarmQueryModalQuery.tsx';
 import { SurfaceWarmQueryModalResults } from './SurfaceWarmQueryModalResults.tsx';
 import { AziState, WorkspaceManager } from '../../../src/flow/.exports.ts';
-import { KustoResponseDataSet } from 'npm:azure-kusto-data@6.0.2';
+import { AzureDataExplorerOutput } from '@o-industrial/common/types';
 
 interface SurfaceWarmQueryModalProps {
   workspace: WorkspaceManager;
   queryName: string;
   queryText: string;
   onClose: () => void;
-  onRun: (query: string) => Promise<KustoResponseDataSet>;
+  onRun: (query: string) => Promise<AzureDataExplorerOutput>;
   aziExtraInputs?: Record<string, unknown>;
   warmQueryLookup: string;
 }
