@@ -14,3 +14,4 @@ export * from './APIKeysModal.tsx';
 export * from './CloudConnectionsModal.tsx';
 export * from './PrivateCALZModal.tsx';
 export * from './SignOutModal.tsx';
+export * from './SurfaceWarmQueryModal.tsx'
