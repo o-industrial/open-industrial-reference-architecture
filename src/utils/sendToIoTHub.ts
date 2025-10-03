@@ -1,4 +1,5 @@
-import { Client, Message, Mqtt } from './.deps.ts';
+import { Client, Message } from 'npm:azure-iot-device@1.18.3';
+import { Mqtt } from 'npm:azure-iot-device-mqtt@1.16.3';
 
 /**
  * Sends telemetry to Azure IoT Hub using the provided connection string.
