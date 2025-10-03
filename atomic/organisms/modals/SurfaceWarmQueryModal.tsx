@@ -5,12 +5,12 @@ import type { FunctionalComponent } from 'npm:preact@10.20.1';
 import { SurfaceWarmQueryModalQuery } from './SurfaceWarmQueryModalQuery.tsx';
 import { SurfaceWarmQueryModalResults } from './SurfaceWarmQueryModalResults.tsx';
 import { AzureDataExplorerOutput } from '../../../src/types/AzureDataExplorerOutput.ts';
-import { AziState } from '@o-industrial/common/flow';
 import { WorkspaceManager } from '../../.deps.ts';
 import { AziPanel } from '../AziPanel.tsx';
 import { Modal } from '../../molecules/Modal.tsx';
 import { TabbedPanel } from '../../molecules/TabbedPanel.tsx';
 import { Action } from '../../atoms/Action.tsx';
+import { AziState } from '../../../src/flow/managers/AziManager.ts';
 
 interface SurfaceWarmQueryModalProps {
   workspace: WorkspaceManager;
