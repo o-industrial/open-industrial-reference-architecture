@@ -12,7 +12,6 @@ import {
   Edge,
   EdgeChange,
   EverythingAsCode,
-  JSX,
   merge,
   Node,
   NodeChange,
@@ -47,25 +46,7 @@ import { IntentTypes } from '../../types/IntentTypes.ts';
 import { EaCNodeCapabilityManager, NodePreset } from '../.exports.ts';
 import { OpenIndustrialAPIClient } from '../../api/clients/OpenIndustrialAPIClient.ts';
 import { RuntimeImpulse } from '../../types/RuntimeImpulse.ts';
-import {
-  AccountProfileModal,
-  APIKeysModal,
-  BillingDetailsModal,
-  CloudConnectionsModal,
-  CurrentLicenseModal,
-  DataAPISuiteModal,
-  ManageWorkspacesModal,
-  PrivateCALZModal,
-  SimulatorLibraryModal,
-  TeamManagementModal,
-  WarmQueryAPIsModal,
-  WorkspaceSettingsModal,
-} from '../../../atomic/organisms/modals/.exports.ts';
-import {
-  EverythingAsCodeClouds,
-  EverythingAsCodeIdentity,
-  EverythingAsCodeLicensing,
-} from '../../eac/.deps.ts';
+import { EverythingAsCodeIdentity, EverythingAsCodeLicensing } from '../../eac/.deps.ts';
 import { AccountProfile } from '../../types/AccountProfile.ts';
 import { EaCUserRecord } from '../../api/.client.deps.ts';
 
@@ -182,126 +163,6 @@ export class WorkspaceManager {
     workspace?: string;
   }): void {
     console.log('[WorkspaceManager] Interface action received', action);
-  }
-
-  public UseAppMenu(
-    eac: EverythingAsCode & EverythingAsCodeLicensing & EverythingAsCodeClouds,
-  ): {
-    handleMenu: (item: { id: string }) => void;
-    modals: JSX.Element;
-    showWkspSets: () => void;
-    showTeamMgmt: () => void;
-    showSimLib: () => void;
-    showMngWksps: () => void;
-    showAccProf: () => void;
-    showWarmQuery: () => void;
-    showApiKeys: () => void;
-    showDataSuite: () => void;
-    showBilling: () => void;
-    showLicense: () => void;
-    showCloudConns: () => void;
-  } {
-    const { Modal: accProfModal, Show: showAccProf } = AccountProfileModal.Modal(this);
-    const { Modal: mngWkspsModal, Show: showMngWksps } = ManageWorkspacesModal.Modal(this);
-    const { Modal: simLibModal, Show: showSimLib } = SimulatorLibraryModal.Modal(this);
-    const { Modal: teamMgmtModal, Show: showTeamMgmt } = TeamManagementModal.Modal(this);
-    const { Modal: wkspSetsModal, Show: showWkspSets } = WorkspaceSettingsModal.Modal(this);
-    const { Modal: warmQueryModal, Show: showWarmQuery } = WarmQueryAPIsModal.Modal(this);
-    const { Modal: apiKeysModal, Show: showApiKeys } = APIKeysModal.Modal(this);
-    const { Modal: dataSuiteModal, Show: showDataSuite } = DataAPISuiteModal.Modal(this);
-    const { Modal: billingModal, Show: showBilling } = BillingDetailsModal.Modal(this);
-    const { Modal: licenseModal, Show: showLicense } = CurrentLicenseModal.Modal(eac, this);
-    const { Modal: cloudConnsModal, Show: showCloudConns } = CloudConnectionsModal.Modal(this);
-    const { Modal: privateCalzModal, Show: showPrivateCalz } = PrivateCALZModal.Modal(this);
-
-    const modals = (
-      <>
-        {simLibModal}
-        {accProfModal}
-        {mngWkspsModal}
-        {teamMgmtModal}
-        {wkspSetsModal}
-        {cloudConnsModal}
-        {privateCalzModal}
-        {warmQueryModal}
-        {apiKeysModal}
-        {dataSuiteModal}
-        {billingModal}
-        {licenseModal}
-      </>
-    );
-
-    const handleMenu = (item: { id: string }) => {
-      console.log('menu', item);
-
-      switch (item.id) {
-        case 'workspace.settings': {
-          showWkspSets();
-          break;
-        }
-
-        case 'workspace.team': {
-          showTeamMgmt();
-          break;
-        }
-
-        case 'workspace.viewAll': {
-          showMngWksps();
-          break;
-        }
-
-        case 'apis.warmQuery': {
-          showWarmQuery();
-          break;
-        }
-
-        case 'apis.apiKeys': {
-          showApiKeys();
-          break;
-        }
-
-        case 'apis.dataSuite': {
-          showDataSuite();
-          break;
-        }
-
-        case 'env.connections': {
-          showCloudConns();
-          break;
-        }
-
-        case 'env.calz': {
-          showPrivateCalz();
-          break;
-        }
-
-        case 'billing.details': {
-          showBilling();
-          break;
-        }
-
-        case 'billing.license': {
-          showLicense();
-          break;
-        }
-      }
-    };
-
-    return {
-      handleMenu,
-      modals,
-      showWkspSets,
-      showTeamMgmt,
-      showSimLib,
-      showMngWksps,
-      showAccProf,
-      showWarmQuery,
-      showApiKeys,
-      showCloudConns,
-      showDataSuite,
-      showBilling,
-      showLicense,
-    };
   }
 
   public UseAccountProfile(): {
