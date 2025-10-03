@@ -1,4 +1,4 @@
-import { JetStreamManager, RetentionPolicy, StorageType, StreamConfig } from './.deps.ts';
+import { JetStreamManager, RetentionPolicy, StorageType, StreamConfig } from 'npm:nats@2.29.2';
 import { sanitizeStreamName } from './sanitizeStreamName.ts';
 
 /**
