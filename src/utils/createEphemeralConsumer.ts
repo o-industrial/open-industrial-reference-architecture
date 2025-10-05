@@ -1,4 +1,4 @@
-import { AckPolicy, ConsumerConfig, JetStreamClient, JetStreamManager } from './.deps.ts';
+import { AckPolicy, ConsumerConfig, JetStreamClient, JetStreamManager } from 'npm:nats@2.29.2';
 import { sanitizeStreamName } from './sanitizeStreamName.ts';
 
 export async function createEphemeralConsumer(

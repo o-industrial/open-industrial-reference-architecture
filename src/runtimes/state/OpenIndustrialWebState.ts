@@ -1,8 +1,8 @@
-import { EaCRefreshController, type EaCUserLicense, type EaCUserRecord } from '../.deps.ts';
-import { OpenIndustrialAPIClient } from '../../api/clients/OpenIndustrialAPIClient.ts';
-import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
-import { OpenIndustrialJWTPayload } from '../../types/OpenIndustrialJWTPayload.ts';
-import { CurrentUserManager } from '../managers/CurrentUserManager.ts';
+import type { EaCRefreshController, EaCUserLicense, EaCUserRecord } from '../.deps.ts';
+import type { OpenIndustrialAPIClient } from '../../api/clients/OpenIndustrialAPIClient.ts';
+import type { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
+import type { OpenIndustrialJWTPayload } from '../../types/OpenIndustrialJWTPayload.ts';
+import type { CurrentUserManager } from '../managers/CurrentUserManager.ts';
 
 export type OpenIndustrialWebState = {
   AzureAccessToken?: () => Promise<string | undefined>;

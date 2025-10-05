@@ -1,4 +1,4 @@
-import { JetStreamManager, StreamConfig } from './.deps.ts';
+import { type JetStreamManager, type StreamConfig } from 'npm:nats@2.29.2';
 import { ensureJetStreamStream } from './ensureJetStreamStream.ts';
 
 export function ensureWorkspaceSurfaceJetStream(

@@ -2,14 +2,6 @@
   "name": "@o-industrial/common",
   "version": "0.0.0",
   "exports": {
-    "./atomic/atoms": "./atomic/atoms/.exports.ts",
-    "./atomic/icons": "./build/iconset/icons/.exports.ts",
-    "./atomic/molecules": "./atomic/molecules/.exports.ts",
-    "./atomic/organisms": "./atomic/organisms/.exports.ts",
-    "./atomic/templates": "./atomic/templates/.exports.ts",
-    "./atomic/utils": "./atomic/utils/.exports.ts",
-    "./tailwind/preset": "./configs/tailwind/preset.ts",
-    "./tailwind/preset.ts": "./configs/tailwind/preset.ts",
 
     "./api": "./src/api/.exports.ts",
     "./eac": "./src/eac/.exports.ts",
@@ -17,6 +9,8 @@
     "./sop": "./src/sop/.exports.ts",
     "./types": "./src/types/.exports.ts",
     "./utils": "./src/utils/.exports.ts",
+    "./utils/client": "./src/utils/.exports.client.ts",
+    "./utils/kusto": "./src/utils/.exports.kusto.ts",
 
     "./flow": "./src/flow/.exports.ts",
     "./fluent": "./src/fluent/_/.exports.ts",
@@ -26,10 +20,8 @@
     "./fluent/steps": "./src/fluent/steps/.exports.ts",
     "./fluent/types": "./src/fluent/types/.exports.ts",
     "./fluent/utils": "./src/fluent/utils/.exports.ts",
+    "./fluent/warm-queries": "./src/fluent/warm-queries/.exports.ts",
     "./fluent/workspaces": "./src/fluent/workspaces/.exports.ts",
-
-    "./packs/azure-iot": "./src/packs/azure-iot/.pack.ts",
-    "./packs/oi-core": "./src/packs/oi-core/.pack.ts",
 
     "./runtimes": "./src/runtimes/.exports.ts"
   },
@@ -45,17 +37,15 @@
     "version": "deno run -A jsr:@fathym/common@0/build/version"
   },
   "imports": {
-    //"preact": "npm:preact@10.20.1",
-    //"preact/hooks": "npm:preact@10.20.1/hooks",
-    // "react": "npm:preact@10.20.1/compat",
-    // "react-dom": "npm:preact@10.20.1/compat",
-    // "react/jsx-runtime": "npm:preact@10.20.1/jsx-runtime",
-    // "react/jsx-dev-runtime": "npm:preact@10.20.1/jsx-dev-runtime",
-    // "reactflow": "npm:reactflow@11.11.4"
-
     // "jsr:@fathym/eac-identity@0.0.28": "../../fathym-deno/eac-identity/src/identity/.exports.ts"
+    // "@o-industrial/azure-iot-pack": "../azure-iot-pack/src/.pack.ts"
   },
-  "exclude": ["**/_eac-runtime/*", "!src/**/.exports.ts", "!src/**/.deps.ts", "!mod.ts"],
+  "exclude": [
+    "**/_eac-runtime/*",
+    "!src/**/.exports.ts",
+    "!src/**/.deps.ts",
+    "!mod.ts"
+  ],
   "lint": {
     "include": ["apps/", "configs/", "src/", "tests/"],
     "exclude": [],
@@ -76,11 +66,6 @@
     "useTabs": false
   },
   "unstable": ["kv"],
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "jsxImportSource": "npm:preact@10.20.1"
-  },
   "lock": false
 }
-
 
