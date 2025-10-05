@@ -29,6 +29,7 @@ export function AziChatInput({
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const minHeightRef = useRef<number | null>(null);
 
   const resizeTextarea = () => {
     const el = textareaRef.current;
@@ -36,8 +37,12 @@ export function AziChatInput({
 
     el.style.height = 'auto';
 
-    const newHeight = Math.min(el.scrollHeight, maxHeight);
-    el.style.height = `${newHeight}px`;
+    const measured = el.scrollHeight;
+    if (minHeightRef.current == null) {
+      minHeightRef.current = measured;
+    }
+    const target = Math.min(Math.max(measured, minHeightRef.current), maxHeight);
+    el.style.height = `${target}px`;
     el.style.overflowY = el.scrollHeight > maxHeight ? 'scroll' : 'hidden';
   };
 
@@ -74,7 +79,9 @@ export function AziChatInput({
   };
 
   useEffect(() => {
+    // Initialize baseline height on mount and adjust on content change
     resizeTextarea();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [input]);
 
   const isDisabled = disabled || sending;

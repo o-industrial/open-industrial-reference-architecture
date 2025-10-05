@@ -97,7 +97,17 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
   const lastAppendedDataQueryRef = useRef<string | undefined>(undefined);
 
   const onAziStateChange = (state: AziState) => {
-    // Ignore hydrated errors from initial Peek; only append during an active send
+    // Always reflect DataQuery updates into the editor (e.g., after initial Peek)
+    try {
+      const dq = (state as any)?.DataQuery as string | undefined;
+      const cq = (state as any)?.CurrentQuery as string | undefined;
+      if (dq && dq !== cq) {
+        setQuery(dq);
+        setActiveTabKey('query');
+      }
+    } catch {}
+
+    // Only append streaming error logs while a send is active
     if (!isLoading) return;
 
     const err = (state as any)?.Error;
@@ -229,7 +239,7 @@ export const SurfaceWarmQueryModal: FunctionalComponent<SurfaceWarmQueryModalPro
     <Modal
       title={`Query: ${queryName}`}
       onClose={onClose}
-      class='max-w-[1200px] border border-neutral-700 bg-neutral-900'
+      class='w-full max-w-[1200px] border border-neutral-700 bg-neutral-900'
       style={{ height: '90vh' }}
     >
       <div
