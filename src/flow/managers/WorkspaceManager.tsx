@@ -50,6 +50,81 @@ import { EverythingAsCodeIdentity, EverythingAsCodeLicensing } from '../../eac/.
 import { AccountProfile } from '../../types/AccountProfile.ts';
 import { EaCUserRecord } from '../../api/.client.deps.ts';
 
+export type CommitBadgeState = 'error' | 'processing' | 'success';
+
+export type CommitStoreSnapshot = {
+  commits: EaCStatus[];
+  badgeState: CommitBadgeState;
+};
+
+export class CommitStatusStore {
+  protected listeners: Set<() => void> = new Set();
+  protected snapshot: CommitStoreSnapshot = {
+    commits: [],
+    badgeState: 'success',
+  };
+  protected isLoading = false;
+
+  constructor(
+    protected readonly loader: () => Promise<EaCStatus[]>,
+  ) {}
+
+  public subscribe(listener: () => void): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  public getSnapshot(): CommitStoreSnapshot {
+    return this.snapshot;
+  }
+
+  public async load(): Promise<void> {
+    if (this.isLoading) return;
+    this.isLoading = true;
+    try {
+      const statuses = await this.loader();
+      const badgeState = this.resolveBadgeState(statuses);
+      this.snapshot = {
+        commits: statuses,
+        badgeState,
+      };
+      this.emit();
+    } catch (err) {
+      console.warn('[CommitStatusStore] Failed to load commit statuses', err);
+      if (this.snapshot.badgeState !== 'error') {
+        this.snapshot = {
+          ...this.snapshot,
+          badgeState: 'error',
+        };
+        this.emit();
+      }
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  protected resolveBadgeState(statuses: EaCStatus[]): CommitBadgeState {
+    const hasError = statuses.some((status) =>
+      status.Processing === EaCStatusProcessingTypes.ERROR
+    );
+    if (hasError) return 'error';
+
+    const isProcessing = statuses.some((status) =>
+      status.Processing !== EaCStatusProcessingTypes.COMPLETE &&
+      status.Processing !== EaCStatusProcessingTypes.ERROR
+    );
+    if (isProcessing) return 'processing';
+
+    return 'success';
+  }
+
+  protected emit(): void {
+    for (const listener of this.listeners) listener();
+  }
+}
+
 export class WorkspaceManager {
   protected currentScope: {
     Scope: NodeScopeTypes;
@@ -73,6 +148,7 @@ export class WorkspaceManager {
   public Team: TeamManager;
   public WarmQueryAzis: Record<string, AziManager> = Object.create(null);
   public InterfaceAzis: Record<string, AziManager> = Object.create(null);
+  protected commitsStore: CommitStatusStore;
 
   constructor(
     eac: EverythingAsCodeOIWorkspace,
@@ -125,6 +201,8 @@ export class WorkspaceManager {
     this.Team = new TeamManager(this.oiSvc, this.EaC);
 
     this.Interaction.BindEaCManager(this.EaC);
+
+    this.commitsStore = new CommitStatusStore(async () => await this.ListCommits());
 
     console.log('🚀 FlowManager initialized:', {
       scope: this.currentScope,
@@ -443,78 +521,8 @@ export class WorkspaceManager {
     return pathParts;
   }
 
-  public UseCommits(): {
-    commits: EaCStatus[];
-    badgeState: 'error' | 'processing' | 'success';
-    showCommitPanel: boolean;
-    selectedCommitId: string | undefined;
-    toggleCommitPanel: () => void;
-    selectCommit: (id: string | undefined) => void;
-  } {
-    const [commits, setCommits] = useState<EaCStatus[]>([]);
-    const [badgeState, setBadgeState] = useState<
-      'error' | 'processing' | 'success'
-    >('success');
-    const [showCommitPanel, setShowCommitPanel] = useState(false);
-    const [selectedCommitId, setSelectedCommitId] = useState<
-      string | undefined
-    >(undefined);
-
-    const load = useCallback(async () => {
-      try {
-        const listed = await this.ListCommits();
-        const statuses = listed;
-        // const statuses = await Promise.all(
-        //   listed.map((c) => this.GetCommitStatus(c.ID)),
-        // );
-
-        setCommits(statuses);
-
-        const hasError = statuses.some(
-          (s) => s.Processing === EaCStatusProcessingTypes.ERROR,
-        );
-        const isProcessing = statuses.some(
-          (s) =>
-            s.Processing !== EaCStatusProcessingTypes.COMPLETE &&
-            s.Processing !== EaCStatusProcessingTypes.ERROR,
-        );
-
-        setBadgeState(
-          hasError ? 'error' : isProcessing ? 'processing' : 'success',
-        );
-      } catch (_err) {
-        setBadgeState('error');
-      }
-    }, []);
-
-    useEffect(() => {
-      load();
-      const id = setInterval(load, 4000);
-      return () => clearInterval(id);
-    }, [load]);
-
-    const toggleCommitPanel = () => {
-      setShowCommitPanel((p) => {
-        console.log(`Toggled to: ${!p}`);
-        return !p;
-      });
-    };
-    const selectCommit = (id: string | undefined) => {
-      if (id !== selectedCommitId) {
-        setSelectedCommitId(id);
-      } else {
-        setSelectedCommitId(undefined);
-      }
-    };
-
-    return {
-      commits,
-      badgeState,
-      showCommitPanel,
-      selectedCommitId,
-      toggleCommitPanel,
-      selectCommit,
-    };
+  public UseCommits(): CommitStatusStore {
+    return this.commitsStore;
   }
 
   public UseEaC(): EverythingAsCodeOIWorkspace {
