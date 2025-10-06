@@ -1,7 +1,7 @@
-import { IoCContainer } from './.deps.ts';
-import { PackModule } from '../../types/PackModule.ts';
-import { StepModule } from '../steps/StepModule.ts';
-import { MaybeAsync } from '../types/MaybeAsync.ts';
+import type { IoCContainer } from './.deps.ts';
+import type { PackModule } from '../../types/PackModule.ts';
+import type { StepModule } from '../steps/StepModule.ts';
+import type { MaybeAsync } from '../types/MaybeAsync.ts';
 
 type CapabilitiesResolver = (
   ioc: IoCContainer,

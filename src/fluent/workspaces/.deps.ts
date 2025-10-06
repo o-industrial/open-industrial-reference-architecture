@@ -9,4 +9,4 @@ export {
   LocalDFSFileHandler,
   type LocalDFSFileHandlerDetails,
 } from 'jsr:@fathym/common@0.2.274/dfs';
-export { IoCContainer } from 'jsr:@fathym/ioc@0.0.14';
+export { IoCContainer } from 'jsr:@fathym/ioc@0.0.15';

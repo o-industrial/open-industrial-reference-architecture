@@ -1,4 +1,4 @@
-export { IoCContainer } from 'jsr:@fathym/ioc@0.0.14';
+export { IoCContainer } from 'jsr:@fathym/ioc@0.0.15';
 
 export { loadJwtConfig } from 'jsr:@fathym/common@0.2.274/jwt';
 export { getPackageLogger } from 'jsr:@fathym/common@0.2.274/log';
