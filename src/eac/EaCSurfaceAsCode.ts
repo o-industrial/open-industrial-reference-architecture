@@ -12,6 +12,7 @@ export type SurfaceInterfaceSettings = {
   SchemaLookups?: string[];
   WarmQueryLookups?: string[];
   DataConnectionLookups?: string[];
+  ChildInterfaceLookups?: string[];
   Theme?: string;
   RefreshMs?: number;
 } & EaCFlowSettings;
@@ -119,6 +120,7 @@ export const EaCSurfaceAsCodeSchema: z.ZodType<EaCSurfaceAsCode> = EaCDetailsSch
         SchemaLookups: z.array(z.string()).optional(),
         WarmQueryLookups: z.array(z.string()).optional(),
         DataConnectionLookups: z.array(z.string()).optional(),
+        ChildInterfaceLookups: z.array(z.string()).optional(),
         Theme: z.string().optional(),
         RefreshMs: z.number().optional(),
       }).catchall(z.unknown()),
