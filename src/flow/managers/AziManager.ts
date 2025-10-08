@@ -274,6 +274,12 @@ export class AziManager {
     return this.sending;
   }
 
+  // Expose the thread id for callers that need to correlate
+  // API actions (e.g., reset) with the current conversation.
+  public GetThreadId(): string {
+    return this.threadId;
+  }
+
   public OnStateChanged(cb: () => void): () => void {
     this.listeners.add(cb);
     return () => this.listeners.delete(cb);
