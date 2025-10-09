@@ -211,6 +211,29 @@ export class WorkspaceManager {
     });
   }
 
+  // Build Authorization headers for direct fetch calls from UI components
+  public GetAuthHeaders(extra?: HeadersInit): HeadersInit {
+    const base: Record<string, string> = {};
+    if (this.Jwt) {
+      base['Authorization'] = `Bearer ${this.Jwt}`;
+    }
+    if (!extra) return base;
+
+    const out: Record<string, string> = { ...base };
+    const append = (h: HeadersInit | undefined) => {
+      if (!h) return;
+      if (Array.isArray(h)) {
+        for (const [k, v] of h) out[String(k)] = String(v);
+      } else if ((globalThis as any).Headers && h instanceof Headers) {
+        (h as Headers).forEach((v, k) => (out[k] = v));
+      } else {
+        Object.assign(out, h as Record<string, string>);
+      }
+    };
+    append(extra);
+    return out;
+  }
+
   // === Hooks ===
   public CreateWarmQueryAziIfNotExist(warmQueryLookup: string) {
     const threadId = `workspace-${this.EnterpriseLookup}-warmquery-${warmQueryLookup}`;
