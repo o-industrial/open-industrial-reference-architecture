@@ -91,7 +91,7 @@ export class OpenIndustrialWorkspaceRuntimePlugin implements EaCRuntimePlugin {
     const interfaceEntries = Object.entries(eac.Interfaces ?? {})
       .map(([lookup, iface]) => {
         const details = iface?.Details;
-        return details?.Spec ? [lookup, { Details: details }] : undefined;
+        return details ? [lookup, { Details: details }] : undefined;
       })
       .filter((entry): entry is [string, { Details: EaCInterfaceDetails }] => Array.isArray(entry));
 

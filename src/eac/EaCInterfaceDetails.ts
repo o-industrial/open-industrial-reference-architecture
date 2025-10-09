@@ -1,105 +1,90 @@
-import { z } from './.deps.ts';
-import { InterfaceSpec, InterfaceSpecSchema } from './InterfaceSpec.ts';
+import { EaCVertexDetails, EaCVertexDetailsSchema, z } from './.deps.ts';
 
-export type InterfaceDraftState = {
-  SpecPath?: string;
-  AssetPaths?: Record<string, string>;
-  UpdatedAt?: string;
-  Notes?: string;
-};
-
-export type EaCInterfaceAssets = {
-  Code?: {
-    Index?: string;
-    Data?: string;
-    Actions?: string;
-  };
-  Media?: Record<string, string>;
-};
-
-export type EaCInterfaceEmbedOptions = {
-  Defer?: boolean;
-  Attributes?: Record<string, string>;
+/**
+ * Group of authoring instructions associated with an interface code block.
+ * Groups help AI co-authors understand intent for specific portions of the page.
+ */
+export type EaCInterfaceMessageGroup = {
+  Title?: string;
+  Messages: string[];
 };
 
 /**
- * Details describing a workspace interface definition.
+ * Represents a discrete block of interface code (page or handler) alongside
+ * contextual authoring guidance for AI-assisted workflows.
  */
-export type EaCInterfaceDetails = {
-  Name: string;
+export type EaCInterfaceCodeBlock = {
+  Code?: string;
   Description?: string;
-  Version: number;
-  WebPath?: string;
-  Spec: InterfaceSpec;
-  ComponentTag?: string;
-  EmbedOptions?: EaCInterfaceEmbedOptions;
-  Assets?: EaCInterfaceAssets;
-  DraftState?: InterfaceDraftState;
-  Thumbnails?: { Path: string; Timestamp: string }[];
+  Messages?: string[];
+  MessageGroups?: EaCInterfaceMessageGroup[];
 };
 
-const InterfaceDraftStateSchema: z.ZodType<InterfaceDraftState> = z
+/**
+ * Workspace interface details describing how a page is constructed.
+ *
+ * Interfaces are authored as composable code blocks instead of serialized specs,
+ * enabling collaborative editing between humans and AI.
+ */
+export type EaCInterfaceDetails = EaCVertexDetails & {
+  /** Optional list of import statements that customize this interface's module scope. */
+  Imports?: string[];
+
+  /** Optional TypeScript snippet describing the server supplied page data shape. */
+  PageDataType?: string;
+
+  /** Optional server-side handler definition and associated authoring guidance. */
+  PageHandler?: EaCInterfaceCodeBlock;
+
+  /** Optional client page component implementation and supporting guidance. */
+  Page?: EaCInterfaceCodeBlock;
+};
+
+const EaCInterfaceMessageGroupSchema: z.ZodType<EaCInterfaceMessageGroup> = z
   .object({
-    SpecPath: z.string().optional(),
-    AssetPaths: z.record(z.string()).optional(),
-    UpdatedAt: z.string().optional(),
-    Notes: z.string().optional(),
+    Title: z.string().optional(),
+    Messages: z.array(z.string().min(1)).min(1),
   })
   .strict()
-  .describe('Transient draft pointers for interface authoring.');
+  .describe('Named grouping of authoring instructions for a code block.');
 
-const EaCInterfaceAssetsSchema: z.ZodType<EaCInterfaceAssets> = z
+const EaCInterfaceCodeBlockSchema: z.ZodType<EaCInterfaceCodeBlock> = z
   .object({
-    Code: z
-      .object({
-        Index: z.string().optional(),
-        Data: z.string().optional(),
-        Actions: z.string().optional(),
-      })
-      .strict()
-      .optional(),
-    Media: z.record(z.string()).optional(),
-  })
-  .strict()
-  .describe('References to generated code and media assets for the interface.');
-
-const EaCInterfaceEmbedOptionsSchema: z.ZodType<EaCInterfaceEmbedOptions> = z
-  .object({
-    Defer: z.boolean().optional(),
-    Attributes: z.record(z.string()).optional(),
-  })
-  .strict()
-  .describe('Embed configuration for the interface custom element.');
-
-export const EaCInterfaceDetailsSchema: z.ZodType<EaCInterfaceDetails> = z
-  .object({
-    Name: z.string().min(1, 'Interface name is required.'),
+    Code: z.string().optional(),
     Description: z.string().optional(),
-    Version: z.number().int().nonnegative(),
-    WebPath: z.string().optional(),
-    Spec: InterfaceSpecSchema,
-    ComponentTag: z.string().optional(),
-    EmbedOptions: EaCInterfaceEmbedOptionsSchema.optional(),
-    Assets: EaCInterfaceAssetsSchema.optional(),
-    DraftState: InterfaceDraftStateSchema.optional(),
-    Thumbnails: z
-      .array(
-        z
-          .object({
-            Path: z.string().min(1),
-            Timestamp: z.string().min(1),
-          })
-          .strict(),
-      )
-      .optional(),
+    Messages: z.array(z.string().min(1)).optional(),
+    MessageGroups: z.array(EaCInterfaceMessageGroupSchema).optional(),
   })
   .strict()
-  .describe('Workspace-level interface definition details.');
+  .describe('Code block definition paired with authoring instructions.');
 
-export function isEaCInterfaceDetails(value: unknown): value is EaCInterfaceDetails {
+export const EaCInterfaceDetailsSchema: z.ZodType<EaCInterfaceDetails> = EaCVertexDetailsSchema
+  .extend({
+    Imports: z
+      .array(z.string().min(1))
+      .optional()
+      .describe('Standalone import statements to prepend to the generated module.'),
+    PageDataType: z
+      .string()
+      .optional()
+      .describe('TypeScript type definition representing data passed into the page.'),
+    PageHandler: EaCInterfaceCodeBlockSchema
+      .optional()
+      .describe('Server-side handler implementation and related guidance.'),
+    Page: EaCInterfaceCodeBlockSchema
+      .optional()
+      .describe('Client page implementation and related guidance.'),
+  })
+  .describe('Workspace-level interface definition expressed as composable code blocks.');
+
+export function isEaCInterfaceDetails(
+  value: unknown,
+): value is EaCInterfaceDetails {
   return EaCInterfaceDetailsSchema.safeParse(value).success;
 }
 
-export function parseEaCInterfaceDetails(value: unknown): EaCInterfaceDetails {
+export function parseEaCInterfaceDetails(
+  value: unknown,
+): EaCInterfaceDetails {
   return EaCInterfaceDetailsSchema.parse(value);
 }

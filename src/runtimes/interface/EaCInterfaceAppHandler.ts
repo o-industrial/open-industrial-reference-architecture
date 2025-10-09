@@ -12,8 +12,7 @@ import {
   preactOptions,
   PreactRenderHandler,
 } from './.deps.ts';
-import { EaCInterfaceDetails } from '../../eac/EaCInterfaceDetails.ts';
-import { InterfaceSpec } from '../../eac/InterfaceSpec.ts';
+import { EaCInterfaceCodeBlock, EaCInterfaceDetails } from '../../eac/EaCInterfaceDetails.ts';
 import { EaCInterfaceAppProcessor } from '../processors/EaCInterfaceAppProcessor.ts';
 
 const renderHandler = new PreactRenderHandler(preactOptions);
@@ -86,7 +85,7 @@ export class EaCInterfaceAppHandler extends EaCPreactAppHandler {
 
     const details: EaCDistributedFileSystemDetails = {
       Name: `Virtual Interface DFS (${processor.AppDFSLookup})`,
-      Description: 'Synthetic DFS generated from InterfaceSpecs for runtime delivery.',
+      Description: 'Synthetic DFS generated from interface code definitions.',
       Type: 'Virtual',
       Metadata: { Revision: revision },
     } as EaCDistributedFileSystemDetails;
@@ -132,25 +131,33 @@ export class EaCInterfaceAppHandler extends EaCPreactAppHandler {
 
     for (const [lookup, definition] of Object.entries(interfaces)) {
       const details = definition.Details ?? {};
-      const spec = definition.Spec ?? details.Spec;
       const safeId = toSafeIdentifier(lookup);
-      const name = details.Name ?? lookup;
+      const displayName = details.Name?.trim()?.length ? details.Name : lookup;
 
-      files[`interfaces/${lookup}/index.tsx`] = buildComponentFile(
+      files[`interfaces/${lookup}/index.tsx`] = buildPageModule(
         lookup,
         safeId,
-        name,
-        spec,
+        displayName ?? lookup,
+        details,
       );
 
-      files[`interfaces/${lookup}/data.ts`] = buildDataFile(safeId);
-      files[`interfaces/${lookup}/actions.ts`] = buildActionsFile(safeId);
+      files[`interfaces/${lookup}/handler.ts`] = buildHandlerModule(
+        lookup,
+        safeId,
+        details,
+      );
+
+      files[`interfaces/${lookup}/types.ts`] = buildTypesModule(
+        lookup,
+        safeId,
+        details,
+      );
 
       registry.push({ lookup, safeId });
     }
 
     files['interfaces/registry.ts'] = buildRegistryFile(registry);
-    files[buildRoutePath(processor)] = buildRouteFile(processor, registry);
+    files[buildRoutePath(processor)] = buildRouteFile(processor);
 
     return files;
   }
@@ -158,7 +165,6 @@ export class EaCInterfaceAppHandler extends EaCPreactAppHandler {
 
 type InterfaceDefinition = {
   Details?: Partial<EaCInterfaceDetails>;
-  Spec?: InterfaceSpec;
 };
 
 type RegistryEntry = {
@@ -237,7 +243,6 @@ class VirtualInterfaceDFSHandler extends DFSFileHandler {
     const absolutePath = path.join(this.Root, relativePath);
     await Deno.mkdir(path.dirname(absolutePath), { recursive: true });
     await Deno.writeTextFile(absolutePath, code);
-
     this.persisted.set(relativePath, absolutePath);
 
     return absolutePath;
@@ -267,95 +272,273 @@ function escapeTemplate(value: string): string {
     .replace(/\$\{/g, '\\${');
 }
 
-function buildComponentFile(
+function sanitizeCommentLine(line: string): string {
+  return line.replace(/\*\//g, '*\\/').trim();
+}
+
+function appendBulletLines(
+  target: string[],
+  indent: string,
+  message: string,
+): void {
+  const lines = message.split(/\r?\n/);
+  const bulletPrefix = `${indent}* - `;
+  const continuationPrefix = `${indent}*   `;
+
+  for (const [index, raw] of lines.entries()) {
+    const content = sanitizeCommentLine(raw);
+    if (!content.length) continue;
+    target.push(`${index === 0 ? bulletPrefix : continuationPrefix}${content}`);
+  }
+}
+
+function buildGuidanceComment(
+  label: string,
+  block?: EaCInterfaceCodeBlock,
+): string {
+  if (!block) return '';
+
+  const lines: string[] = ['/**', ` * ${label} guidance derived from EaC metadata.`];
+
+  if (block.Description?.trim()) {
+    const descriptionLines = block.Description.split(/\r?\n/);
+    for (const desc of descriptionLines) {
+      const content = sanitizeCommentLine(desc);
+      if (content.length) {
+        lines.push(` * ${content}`);
+      }
+    }
+  }
+
+  if (block.Messages?.length) {
+    lines.push(' *');
+    lines.push(' * Messages:');
+    for (const message of block.Messages) {
+      appendBulletLines(lines, ' ', message);
+    }
+  }
+
+  if (block.MessageGroups?.length) {
+    for (const [index, group] of block.MessageGroups.entries()) {
+      lines.push(' *');
+      const title = sanitizeCommentLine(group.Title ?? `Guidance Group ${index + 1}`);
+      lines.push(` * ${title}:`);
+      for (const message of group.Messages) {
+        appendBulletLines(lines, '  ', message);
+      }
+    }
+  }
+
+  lines.push(' */');
+  return lines.join('\n');
+}
+
+function buildPageModule(
   lookup: string,
   safeId: string,
-  name: string,
-  spec: InterfaceSpec | undefined,
+  displayName: string,
+  details: Partial<EaCInterfaceDetails>,
 ): string {
-  const specLiteral = JSON.stringify(spec ?? {}, null, 2) ?? '{}';
+  const imports = details.Imports?.map((line) => line.trim()).filter(Boolean) ?? [];
+  const importCandidates = [
+    'import { h } from "preact";',
+    `import type { Interface${safeId}PageData } from "./types.ts";`,
+    ...imports,
+  ];
+  const uniqueImports = importCandidates.filter((line, index, arr) =>
+    line && arr.indexOf(line) === index
+  );
+  const importSection = uniqueImports.join('\n');
 
-  return `import { h } from "preact";
-export const interfaceSpec = ${specLiteral} as const;
+  const pageComment = buildGuidanceComment('Page component', details.Page);
+  const pageCode = details.Page?.Code?.trim()?.length
+    ? details.Page.Code.trimEnd()
+    : buildDefaultPageCode(lookup, safeId, displayName);
 
-type Interface${safeId}Props = {
-  spec?: typeof interfaceSpec;
-};
+  const segments = [
+    '// deno-lint-ignore-file no-explicit-any no-unused-vars',
+    importSection,
+    pageComment,
+    pageCode,
+    `export type { Interface${safeId}PageData } from "./types.ts";`,
+  ].filter((segment) => segment && segment.trim().length > 0);
 
-export default function Interface${safeId}({ spec = interfaceSpec }: Interface${safeId}Props) {
-  const meta = spec?.Meta as Record<string, unknown> | undefined;
+  return `${segments.join('\n\n')}\n`;
+}
 
+function buildDefaultPageCode(
+  lookup: string,
+  safeId: string,
+  displayName: string,
+): string {
+  return `export default function Interface${safeId}({ data }: { data?: Interface${safeId}PageData }) {
   return (
     <section class="oi-interface-placeholder">
       <header class="oi-interface-placeholder__header">
-        <h1 class="oi-interface-placeholder__title">
-          {(meta?.Name as string) ?? "${escapeTemplate(name)}"}
-        </h1>
+        <h1 class="oi-interface-placeholder__title">${escapeTemplate(displayName)}</h1>
         <p class="oi-interface-placeholder__lookup">Lookup: ${escapeTemplate(lookup)}</p>
       </header>
-      <pre class="oi-interface-placeholder__spec">{JSON.stringify(spec, null, 2)}</pre>
+      <pre class="oi-interface-placeholder__spec">{JSON.stringify(data ?? {}, null, 2)}</pre>
     </section>
   );
-}
-`;
+}`;
 }
 
-function buildDataFile(safeId: string): string {
-  return `import { interfaceSpec } from "./index.tsx";
+function buildHandlerModule(
+  lookup: string,
+  safeId: string,
+  details: Partial<EaCInterfaceDetails>,
+): string {
+  const handlerComment = buildGuidanceComment('Page handler', details.PageHandler);
+  const handlerCode = details.PageHandler?.Code?.trim()?.length
+    ? details.PageHandler.Code.trimEnd()
+    : buildDefaultHandlerCode(lookup, safeId);
 
-export async function loadInterface${safeId}Data() {
+  const segments = [
+    '// deno-lint-ignore-file no-explicit-any',
+    `import type { Interface${safeId}PageData } from "./types.ts";`,
+    handlerComment,
+    handlerCode,
+  ].filter((segment) => segment && segment.trim().length > 0);
+
+  return `${segments.join('\n\n')}\n`;
+}
+
+function buildDefaultHandlerCode(
+  lookup: string,
+  safeId: string,
+): string {
+  return `export async function loadPageData(
+  _req: Request,
+  _ctx: Record<string, unknown>,
+): Promise<Interface${safeId}PageData> {
   return {
-    spec: interfaceSpec,
+    message: "Implement loadPageData for the ${escapeTemplate(lookup)} interface.",
   };
-}
-`;
+}`;
 }
 
-function buildActionsFile(safeId: string): string {
-  return `export async function execute${safeId}Action(actionId: string, payload: unknown) {
-  console.warn(
-    \`[interface-actions] Action "${safeId}:\${actionId}" invoked with payload:\`,
-    payload,
-  );
+function buildTypesModule(
+  lookup: string,
+  safeId: string,
+  details: Partial<EaCInterfaceDetails>,
+): string {
+  const header = `// Page data contract for the "${escapeTemplate(lookup)}" interface.`;
+  const pageDataSnippet = details.PageDataType?.trim();
+  const expression = pageDataSnippet?.length
+    ? pageDataSnippet.replace(/;+$/, '')
+    : 'Record<string, unknown>';
 
-  return { status: "noop" };
-}
-`;
+  const typeDefinition = `export type Interface${safeId}PageData = ${expression};`;
+
+  return `${header}\n${typeDefinition}\n`;
 }
 
 function buildRegistryFile(entries: RegistryEntry[]): string {
-  if (!entries.length) {
-    return `import type { JSX } from "preact";
-
-export const interfaceRegistry: Record<string, { Component: (props: { spec?: unknown }) => JSX.Element; Spec: unknown }> = {};
-`;
-  }
-
   const importLines = [
+    'import { h } from "preact";',
     'import type { JSX } from "preact";',
-    ...entries.map(({ lookup, safeId }) =>
-      `import Interface${safeId}, { interfaceSpec as spec${safeId} } from "./${lookup}/index.tsx";`
-    ),
+    'import render from "preact-render-to-string";',
   ];
 
-  const registryLines = entries
+  const moduleImports = entries
+    .map(({ lookup, safeId }) => [
+      `import Interface${safeId} from "./${lookup}/index.tsx";`,
+      `import * as Interface${safeId}Handlers from "./${lookup}/handler.ts";`,
+    ])
+    .flat();
+
+  const createEntryFunction =
+    `type InterfaceHandlerFn = (req: Request, ctx: InterfaceRequestContext) => Promise<Response> | Response;
+
+export type InterfaceRequestContext = {
+  Params?: Record<string, string>;
+  [key: string]: unknown;
+};
+
+export type InterfaceHandlers = {
+  default?: InterfaceHandlerFn;
+  DELETE?: InterfaceHandlerFn;
+  GET?: InterfaceHandlerFn;
+  HEAD?: InterfaceHandlerFn;
+  OPTIONS?: InterfaceHandlerFn;
+  PATCH?: InterfaceHandlerFn;
+  POST?: InterfaceHandlerFn;
+  PUT?: InterfaceHandlerFn;
+  loadPageData?: (
+    req: Request,
+    ctx: InterfaceRequestContext,
+  ) => Promise<unknown> | unknown;
+};
+
+export type InterfacePageComponent = (props: { data?: unknown }) => JSX.Element;
+
+export type InterfaceRegistryEntry = {
+  lookup: string;
+  Component: InterfacePageComponent;
+  handlers: InterfaceHandlers;
+  render: (req: Request, ctx: InterfaceRequestContext) => Promise<Response>;
+};
+
+function createEntry(
+  component: InterfacePageComponent,
+  handlers: InterfaceHandlers,
+  lookup: string,
+): InterfaceRegistryEntry {
+  return {
+    lookup,
+    Component: component,
+    handlers,
+    render: async (req: Request, ctx: InterfaceRequestContext) => {
+      const data = handlers.loadPageData
+        ? await handlers.loadPageData(req, ctx)
+        : undefined;
+
+      const html = render(h(component, { data }));
+
+      return new Response(html, {
+        status: 200,
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "X-Interface-Lookup": lookup,
+        },
+      });
+    },
+  };
+}`;
+
+  const registryEntries = entries
     .map(({ lookup, safeId }) =>
-      `  "${escapeTemplate(lookup)}": { Component: Interface${safeId}, Spec: spec${safeId} },`
+      `  "${
+        escapeTemplate(lookup)
+      }": createEntry(Interface${safeId}, Interface${safeId}Handlers, "${escapeTemplate(lookup)}"),`
     )
     .join('\n');
 
-  return `${importLines.join('\n')}
+  const registryObject = `export const interfaceRegistry: Record<string, InterfaceRegistryEntry> = {
+${registryEntries}
+};`;
 
-export type InterfaceRegistryEntry = {
-  Component: (props: { spec?: unknown }) => JSX.Element;
-  Spec: unknown;
-};
+  const segments = [
+    '// deno-lint-ignore-file no-explicit-any',
+    importLines.join('\n'),
+    moduleImports.join('\n'),
+    createEntryFunction,
+    registryObject,
+  ].filter((segment) => segment && segment.trim().length > 0);
 
-export const interfaceRegistry: Record<string, InterfaceRegistryEntry> = {
-${registryLines}
-};
-`;
+  if (!entries.length) {
+    segments.splice(
+      segments.length - 1,
+      1,
+      'export const interfaceRegistry: Record<string, InterfaceRegistryEntry> = {};',
+    );
+  }
+
+  return `${segments.join('\n\n')}\n`;
 }
+
+const HTTP_METHODS = ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT'] as const;
 
 function buildRoutePath(processor: EaCInterfaceAppProcessor): string {
   const baseSegments = (processor.RoutesBase ?? 'w/:workspace/ui')
@@ -367,30 +550,42 @@ function buildRoutePath(processor: EaCInterfaceAppProcessor): string {
   return ['routes', ...baseSegments, '[interfaceLookup]', 'index.tsx'].join('/');
 }
 
-function buildRouteFile(
-  processor: EaCInterfaceAppProcessor,
-  entries: RegistryEntry[],
-): string {
+function buildRouteFile(processor: EaCInterfaceAppProcessor): string {
   const depth = (processor.RoutesBase?.split('/')
     .filter((segment) => segment.trim().length).length ?? 0) + 2;
   const prefix = '../'.repeat(depth);
   const registryImportPath = `${prefix}interfaces/registry.ts`;
 
-  if (!entries.length) {
-    return `export default async function handler() {
-  return new Response("No interfaces have been published for this workspace.", {
-    status: 404,
-    headers: { "Content-Type": "text/plain; charset=utf-8" },
-  });
+  const methodExports = HTTP_METHODS.map((method) =>
+    `export async function ${method}(
+  req: Request,
+  ctx: InterfaceRequestContext,
+): Promise<Response> {
+  return await resolveInterface("${method}", req, ctx);
+}`
+  ).join('\n\n');
+
+  return `import { interfaceRegistry } from "${registryImportPath}";
+import type { InterfaceRequestContext } from "${registryImportPath}";
+
+type HandlerFn = (req: Request, ctx: InterfaceRequestContext) => Promise<Response> | Response;
+
+const SUPPORTED_METHODS = ${JSON.stringify(HTTP_METHODS)} as const;
+
+type SupportedMethod = (typeof SUPPORTED_METHODS)[number];
+
+function normalizeMethod(method: string | undefined): SupportedMethod {
+  const candidate = (method ?? "GET").toUpperCase();
+  return (SUPPORTED_METHODS as readonly string[]).includes(candidate)
+    ? candidate as SupportedMethod
+    : "GET";
 }
-`;
-  }
 
-  return `import { h } from "preact";
-import render from "preact-render-to-string";
-import { interfaceRegistry } from "${registryImportPath}";
-
-export default async function handler(_req: Request, ctx: { Params?: Record<string, string> }) {
+async function resolveInterface(
+  method: SupportedMethod | string,
+  req: Request,
+  ctx: InterfaceRequestContext,
+): Promise<Response> {
   const lookup = ctx?.Params?.interfaceLookup ?? "";
   const entry = interfaceRegistry[lookup as keyof typeof interfaceRegistry];
 
@@ -401,15 +596,44 @@ export default async function handler(_req: Request, ctx: { Params?: Record<stri
     });
   }
 
-  const html = render(h(entry.Component, { spec: entry.Spec }));
+  const normalized = normalizeMethod(
+    typeof method === "string" ? method : method,
+  );
 
-  return new Response(html, {
-    status: 200,
-    headers: {
-      "Content-Type": "text/html; charset=utf-8",
-      "X-Interface-Lookup": lookup,
-    },
-  });
+  const handlers = entry.handlers as Record<string, unknown> & {
+    default?: HandlerFn;
+    GET?: HandlerFn;
+  };
+
+  const direct = handlers[normalized] as HandlerFn | undefined;
+
+  if (typeof direct === "function") {
+    return await direct(req, ctx);
+  }
+
+  if (normalized === "HEAD" && typeof handlers.GET === "function") {
+    const response = await handlers.GET(req, ctx);
+    return new Response(null, {
+      status: response.status,
+      headers: response.headers,
+    });
+  }
+
+  if (typeof handlers.default === "function") {
+    return await handlers.default(req, ctx);
+  }
+
+  return await entry.render(req, ctx);
 }
+
+export default async function handler(
+  req: Request,
+  ctx: InterfaceRequestContext,
+): Promise<Response> {
+  const method = normalizeMethod(req?.method);
+  return await resolveInterface(method, req, ctx);
+}
+
+${methodExports}
 `;
 }
