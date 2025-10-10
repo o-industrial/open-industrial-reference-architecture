@@ -23,8 +23,14 @@ export class OpenIndustrialWorkspaceExplorerAPI {
   public async RunNamedQuery(
     queryLookup: string,
   ): Promise<AzureDataExplorerOutput> {
+    const trimmed = queryLookup.trim().replace(/^\/+/, '');
+    const encodedPath = trimmed
+      .split('/')
+      .map((segment) => encodeURIComponent(segment))
+      .join('/');
+
     const res = await fetch(
-      this.bridge.url(`/api/workspaces/explorer/${queryLookup}`),
+      this.bridge.url(`/api/workspaces/explorer/${encodedPath}`),
       {
         method: 'GET',
         headers: this.bridge.headers(),
@@ -32,7 +38,9 @@ export class OpenIndustrialWorkspaceExplorerAPI {
     );
 
     if (!res.ok) {
-      throw new Error(`Explorer query '${queryLookup}' failed: ${res.status}`);
+      throw new Error(
+        `Explorer query '${queryLookup}' failed: ${res.status}`,
+      );
     }
 
     return await this.bridge.json(res);
@@ -61,4 +69,5 @@ export class OpenIndustrialWorkspaceExplorerAPI {
 
     return await this.bridge.json(res);
   }
+
 }
