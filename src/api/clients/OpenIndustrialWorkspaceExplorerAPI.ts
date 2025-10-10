@@ -69,5 +69,4 @@ export class OpenIndustrialWorkspaceExplorerAPI {
 
     return await this.bridge.json(res);
   }
-
 }
