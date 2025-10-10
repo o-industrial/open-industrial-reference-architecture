@@ -61,10 +61,11 @@ export class EaCManager {
       NodeScopeTypes,
       EaCNodeCapabilityManager[]
     >,
+    scopeLookup?: string,
   ) {
     this.diff = new EaCDiffManager(history, this.emitEaCChanged.bind(this));
     this.proposals = new EaCProposalManager(oiSvc, this);
-    this.SwitchTo(scope);
+    this.SwitchTo(scope, scopeLookup);
   }
 
   /**

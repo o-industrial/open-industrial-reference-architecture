@@ -27,6 +27,9 @@ export type EaCInterfaceCodeBlock = {
  * enabling collaborative editing between humans and AI.
  */
 export type EaCInterfaceDetails = EaCVertexDetails & {
+  /** Optional path where this interface is served within the runtime. */
+  WebPath?: string;
+
   /** Optional list of import statements that customize this interface's module scope. */
   Imports?: string[];
 
@@ -60,6 +63,12 @@ const EaCInterfaceCodeBlockSchema: z.ZodType<EaCInterfaceCodeBlock> = z
 
 export const EaCInterfaceDetailsSchema: z.ZodType<EaCInterfaceDetails> = EaCVertexDetailsSchema
   .extend({
+    WebPath: z
+      .string()
+      .trim()
+      .min(1)
+      .optional()
+      .describe('Relative route path (e.g. /docs/overview) where this interface is served.'),
     Imports: z
       .array(z.string().min(1))
       .optional()

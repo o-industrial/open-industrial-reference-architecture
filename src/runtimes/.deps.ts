@@ -48,8 +48,8 @@ export type { EaCStripeProcessor } from 'jsr:@fathym/eac-applications@0.0.205/pr
 export { loadEaCLicensingSvc } from 'jsr:@fathym/eac-licensing@0.0.58/clients';
 export { createOAuthHelpers } from 'jsr:@fathym/common@0.2.274/oauth';
 export { loadOAuth2ClientConfig } from 'jsr:@fathym/eac-applications@0.0.205/runtime/modules';
-export { MSALPlugin } from 'jsr:@fathym/msal@0.0.58';
-export type { EaCMSALProcessor } from 'jsr:@fathym/msal@0.0.58';
+export { MSALPlugin } from 'jsr:@fathym/msal@0.0.59';
+export type { EaCMSALProcessor } from 'jsr:@fathym/msal@0.0.59';
 export type { EverythingAsCodeDenoKV } from 'jsr:@fathym/eac-deno-kv@0.0.25';
 export type { EverythingAsCodeIdentity } from 'jsr:@fathym/eac-identity@0.0.28';
 export type {

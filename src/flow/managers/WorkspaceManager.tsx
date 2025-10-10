@@ -50,6 +50,76 @@ import { EverythingAsCodeIdentity, EverythingAsCodeLicensing } from '../../eac/.
 import { AccountProfile } from '../../types/AccountProfile.ts';
 import { EaCUserRecord } from '../../api/.client.deps.ts';
 
+const WORKSPACE_SCOPE_STORAGE_PREFIX = 'oi.workspace.scope';
+
+type PersistedScopePayload = {
+  scope: NodeScopeTypes;
+  lookup?: string;
+};
+
+function getLocalStorage(): Storage | null {
+  try {
+    if (typeof globalThis === 'undefined') return null;
+    const candidate = (globalThis as { localStorage?: Storage }).localStorage;
+    return candidate ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function buildScopeStorageKey(workspaceLookup: string, username?: string): string {
+  const workspacePart = encodeURIComponent(workspaceLookup);
+  if (username && username.length > 0) {
+    const userPart = encodeURIComponent(username);
+    return `${WORKSPACE_SCOPE_STORAGE_PREFIX}:${workspacePart}:${userPart}`;
+  }
+
+  return `${WORKSPACE_SCOPE_STORAGE_PREFIX}:${workspacePart}`;
+}
+
+function readPersistedScope(
+  workspaceLookup: string,
+  username?: string,
+): PersistedScopePayload | null {
+  const storage = getLocalStorage();
+  if (!storage) return null;
+
+  const raw = storage.getItem(buildScopeStorageKey(workspaceLookup, username));
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed.scope !== 'string') return null;
+
+    const scope = parsed.scope as NodeScopeTypes;
+    const lookup = typeof parsed.lookup === 'string' ? parsed.lookup : undefined;
+
+    return { scope, lookup };
+  } catch (err) {
+    console.warn('[WorkspaceManager] Failed to parse persisted scope', err);
+    storage.removeItem(buildScopeStorageKey(workspaceLookup, username));
+    return null;
+  }
+}
+
+function writePersistedScope(
+  workspaceLookup: string,
+  payload: PersistedScopePayload,
+  username?: string,
+): void {
+  const storage = getLocalStorage();
+  if (!storage) return;
+
+  try {
+    storage.setItem(
+      buildScopeStorageKey(workspaceLookup, username),
+      JSON.stringify(payload),
+    );
+  } catch (err) {
+    console.warn('[WorkspaceManager] Failed to persist scope', err);
+  }
+}
+
 export type CommitBadgeState = 'error' | 'processing' | 'success';
 
 export type CommitStoreSnapshot = {
@@ -157,13 +227,17 @@ export class WorkspaceManager {
     protected oiSvc: OpenIndustrialAPIClient,
     capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>,
     scope: NodeScopeTypes = 'workspace',
+    scopeLookup: string | undefined = undefined,
     aziCircuitUrl: string,
     aziWarmQueryCircuitUrl: string,
     aziInterfaceCircuitUrl?: string,
     protected accessRights?: string[],
     jwt?: string,
   ) {
-    this.currentScope = { Scope: scope };
+    this.currentScope = {
+      Scope: scope,
+      Lookup: scope === 'surface' ? scopeLookup : undefined,
+    };
     this.AziWarmQueryCircuitUrl = aziWarmQueryCircuitUrl;
     this.AziInterfaceCircuitUrl = aziInterfaceCircuitUrl ?? aziWarmQueryCircuitUrl;
     this.Azi = new AziManager({
@@ -196,6 +270,7 @@ export class WorkspaceManager {
       this.Graph,
       this.History,
       capabilitiesByScope,
+      this.currentScope.Lookup,
     );
 
     this.Team = new TeamManager(this.oiSvc, this.EaC);
@@ -209,6 +284,35 @@ export class WorkspaceManager {
       nodes: this.Graph.GetNodes().length,
       edges: this.Graph.GetEdges().length,
     });
+
+    this.persistScope(this.currentScope.Scope, this.currentScope.Lookup);
+  }
+
+  public static ResolvePersistedScope(
+    workspace: EverythingAsCodeOIWorkspace,
+    username?: string,
+  ): { Scope: NodeScopeTypes; Lookup?: string } | null {
+    const workspaceLookup = workspace.EnterpriseLookup;
+    if (!workspaceLookup) return null;
+
+    const persisted = readPersistedScope(workspaceLookup as string, username);
+    if (!persisted) return null;
+
+    if (persisted.scope === 'workspace') {
+      return { Scope: 'workspace' };
+    }
+
+    if (persisted.scope === 'surface') {
+      const lookup = persisted.lookup;
+      if (!lookup) return null;
+
+      const surfaces = workspace.Surfaces ?? {};
+      if (!surfaces || !surfaces[lookup]) return null;
+
+      return { Scope: 'surface', Lookup: lookup };
+    }
+
+    return null;
   }
 
   // Build Authorization headers for direct fetch calls from UI components
@@ -1572,6 +1676,7 @@ export class WorkspaceManager {
 
     // Update internal scope reference
     this.currentScope = { Scope: scope, Lookup: lookup };
+    this.persistScope(scope, lookup);
 
     // Clear selection before switching
     this.Selection.ClearSelection();
@@ -1583,5 +1688,18 @@ export class WorkspaceManager {
     // e.g., this.Stats.Reset(); this.Runtime.Rebind();
 
     // Optionally, you could emit a custom hook event or callback here
+  }
+
+  protected persistScope(scope: NodeScopeTypes, lookup?: string): void {
+    if (!this.EnterpriseLookup) return;
+
+    if (scope === 'surface' && !lookup) return;
+
+    const payload: PersistedScopePayload = {
+      scope,
+      lookup: scope === 'surface' ? lookup : undefined,
+    };
+
+    writePersistedScope(this.EnterpriseLookup as string, payload, this.username);
   }
 }
