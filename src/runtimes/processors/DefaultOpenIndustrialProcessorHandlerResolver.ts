@@ -3,13 +3,13 @@ import {
   EaCRuntimeHandler,
   EverythingAsCode,
   IoCContainer,
+  isEaCModelContextProtocolProcessor,
   ProcessorHandlerResolver,
 } from '../.deps.ts';
 import { isEaCGlobalDataIngestProcessor } from './EaCGlobalDataIngestProcessor.ts';
 import { isEaCInterfaceAppProcessor } from './EaCInterfaceAppProcessor.ts';
 import { isEaCOIDataConnectionProcessor } from './EaCOIDataConnectionProcessor.ts';
 import { isEaCOIImpulseStreamProcessor } from './EaCOIImpulseStreamProcessor.ts';
-import { isEaCModelContextProtocolProcessor } from '@fathym/eac-applications/processors';
 
 export class DefaultOpenIndustrialProcessorHandlerResolver implements ProcessorHandlerResolver {
   public async Resolve(

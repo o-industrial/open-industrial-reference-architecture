@@ -8,7 +8,9 @@ export {
   type EverythingAsCode,
 } from 'jsr:@fathym/eac@0.2.131';
 
-export type { EverythingAsCodeApplications } from 'jsr:@fathym/eac-applications@0.0.205';
+export type { EverythingAsCodeApplications } from 'jsr:@fathym/eac-applications@0.0.208';
+
+export type { MCPHandshakeMetadata } from 'jsr:@fathym/eac-applications@0.0.208/runtime/mcp';
 
 export {
   type EaCWarmQueryAsCode,

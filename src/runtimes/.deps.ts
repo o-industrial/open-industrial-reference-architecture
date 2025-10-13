@@ -15,16 +15,21 @@ export {
   EaCRuntimeHandlerPipeline,
 } from 'jsr:@fathym/eac@0.2.131/runtime/pipelines';
 
-export type { EverythingAsCodeApplications } from 'jsr:@fathym/eac-applications@0.0.205';
+export type { EverythingAsCodeApplications } from 'jsr:@fathym/eac-applications@0.0.208';
 export {
   type EaCApplicationProcessorConfig,
+  type EaCModelContextProtocolProcessor,
   type EaCPreactAppProcessor,
   type EaCProcessor,
+  isEaCModelContextProtocolProcessor,
   isEaCProcessor,
-} from 'jsr:@fathym/eac-applications@0.0.205/processors';
-export { establishJwtValidationMiddleware } from 'jsr:@fathym/eac-applications@0.0.205/runtime/modules';
-export { EaCApplicationsLoggingProvider } from 'jsr:@fathym/eac-applications@0.0.205/runtime/logging';
-export type { ProcessorHandlerResolver } from 'jsr:@fathym/eac-applications@0.0.205/runtime/processors';
+} from 'jsr:@fathym/eac-applications@0.0.208/processors';
+export { establishJwtValidationMiddleware } from 'jsr:@fathym/eac-applications@0.0.208/runtime/modules';
+export { EaCApplicationsLoggingProvider } from 'jsr:@fathym/eac-applications@0.0.208/runtime/logging';
+export {
+  EaCModelContextProtocolProcessorHandlerResolver,
+  type ProcessorHandlerResolver,
+} from 'jsr:@fathym/eac-applications@0.0.208/runtime/processors';
 
 export { Logger } from 'jsr:@std/log@0.224.14/logger';
 
@@ -44,10 +49,10 @@ export {
 export { EventHubConsumerClient } from 'npm:@azure/event-hubs@6.0.0';
 
 export { Registry as IoTRegistry, Twin } from 'npm:azure-iothub@1.16.5';
-export type { EaCStripeProcessor } from 'jsr:@fathym/eac-applications@0.0.205/processors';
+export type { EaCStripeProcessor } from 'jsr:@fathym/eac-applications@0.0.208/processors';
 export { loadEaCLicensingSvc } from 'jsr:@fathym/eac-licensing@0.0.58/clients';
 export { createOAuthHelpers } from 'jsr:@fathym/common@0.2.274/oauth';
-export { loadOAuth2ClientConfig } from 'jsr:@fathym/eac-applications@0.0.205/runtime/modules';
+export { loadOAuth2ClientConfig } from 'jsr:@fathym/eac-applications@0.0.208/runtime/modules';
 export { MSALPlugin } from 'jsr:@fathym/msal@0.0.59';
 export type { EaCMSALProcessor } from 'jsr:@fathym/msal@0.0.59';
 export type { EverythingAsCodeDenoKV } from 'jsr:@fathym/eac-deno-kv@0.0.25';
@@ -57,6 +62,6 @@ export type {
   EaCUserLicense,
   EverythingAsCodeLicensing,
 } from 'jsr:@fathym/eac-licensing@0.0.58';
-export type { EaCApplicationsRuntimeContext } from 'jsr:@fathym/eac-applications@0.0.205/runtime';
-export { EaCRefreshController } from 'jsr:@fathym/eac-applications@0.0.205/runtime/refresh';
+export type { EaCApplicationsRuntimeContext } from 'jsr:@fathym/eac-applications@0.0.208/runtime';
+export { EaCRefreshController } from 'jsr:@fathym/eac-applications@0.0.208/runtime/refresh';
 export type { EaCUserRecord } from 'jsr:@fathym/eac@0.2.131';

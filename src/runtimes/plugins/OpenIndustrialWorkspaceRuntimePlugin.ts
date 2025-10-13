@@ -1,4 +1,6 @@
 import {
+  EaCModelContextProtocolProcessor,
+  EaCModelContextProtocolProcessorHandlerResolver,
   EaCRuntimeConfig,
   EaCRuntimePlugin,
   EaCRuntimePluginConfig,
@@ -15,8 +17,6 @@ import { EaCInterfaceAppProcessorHandlerResolver } from '../processors/EaCInterf
 import { EaCOIDataConnectionProcessor } from '../processors/EaCOIDataConnectionProcessor.ts';
 import { EaCInterfaceAppProcessor } from '../processors/EaCInterfaceAppProcessor.ts';
 import { EaCMCPProcessorDetails } from '../../eac/EaCMCPProcessorDetails.ts';
-import { EaCModelContextProtocolProcessor } from '@fathym/eac-applications/processors';
-import { EaCModelContextProtocolProcessorHandlerResolver } from '@fathym/eac-applications/runtime/processors';
 
 export class OpenIndustrialWorkspaceRuntimePlugin implements EaCRuntimePlugin {
   constructor(

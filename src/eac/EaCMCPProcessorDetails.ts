@@ -1,5 +1,4 @@
-import { z } from './.deps.ts';
-import type { MCPHandshakeMetadata } from '@fathym/eac-applications/runtime/mcp';
+import { MCPHandshakeMetadata, z } from './.deps.ts';
 
 /**
  * Declarative configuration for wiring an MCP processor into an Everything-as-Code workspace.
