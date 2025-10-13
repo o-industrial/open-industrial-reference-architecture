@@ -37,6 +37,8 @@
     "version": "deno run -A jsr:@fathym/common@0/build/version"
   },
   "imports": {
+    "jsr:@fathym/eac-applications@0.0.205/runtime/processors": "../eac-applications/src/runtime/processors/.exports.ts"
+    
     // "jsr:@fathym/eac-identity@0.0.28": "../../fathym-deno/eac-identity/src/identity/.exports.ts"
     // "@o-industrial/azure-iot-pack": "../azure-iot-pack/src/.pack.ts"
   },

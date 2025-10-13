@@ -14,6 +14,7 @@ import {
   EaCDataConnectionAsCodeSchema,
 } from './EaCDataConnectionAsCode.ts';
 import { EaCInterfaceAsCode, EaCInterfaceAsCodeSchema } from './EaCInterfaceAsCode.ts';
+import { EaCMCPProcessorDetails, EaCMCPProcessorDetailsSchema } from './EaCMCPProcessorDetails.ts';
 import { EaCSchemaAsCode, EaCSchemaAsCodeSchema } from './EaCSchemaAsCode.ts';
 import { EaCSurfaceAsCode, EaCSurfaceAsCodeSchema } from './EaCSurfaceAsCode.ts';
 import { EaCSimulatorAsCode, EaCSimulatorAsCodeSchema } from './EaCSimulatorAsCode.ts';
@@ -90,6 +91,9 @@ export type EverythingAsCodeOIWorkspace =
 
     /** Interfaces delivered as HMI routes/pages. */
     Interfaces?: Record<string, EaCInterfaceAsCode>;
+
+    /** Declarative MCP processor bindings available to runtimes. */
+    MCPProcessors?: Record<string, EaCMCPProcessorDetails>;
   }
   & EverythingAsCode
   & EverythingAsCodeClouds
@@ -238,6 +242,10 @@ export const EverythingAsCodeOIWorkspaceSchema: EverythingAsCodeOIWorkspaceSchem
       .record(EaCInterfaceAsCodeSchema)
       .optional()
       .describe('Interface nodes representing HMI routes and editors.'),
+    MCPProcessors: z
+      .record(EaCMCPProcessorDetailsSchema)
+      .optional()
+      .describe('Declarative mappings of MCP processors to DFS lookups and resolver metadata.'),
   })
     .strip()
     .describe(

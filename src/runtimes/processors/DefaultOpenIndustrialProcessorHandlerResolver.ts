@@ -9,6 +9,7 @@ import { isEaCGlobalDataIngestProcessor } from './EaCGlobalDataIngestProcessor.t
 import { isEaCInterfaceAppProcessor } from './EaCInterfaceAppProcessor.ts';
 import { isEaCOIDataConnectionProcessor } from './EaCOIDataConnectionProcessor.ts';
 import { isEaCOIImpulseStreamProcessor } from './EaCOIImpulseStreamProcessor.ts';
+import { isEaCModelContextProtocolProcessor } from '@fathym/eac-applications/processors';
 
 export class DefaultOpenIndustrialProcessorHandlerResolver implements ProcessorHandlerResolver {
   public async Resolve(
@@ -32,6 +33,10 @@ export class DefaultOpenIndustrialProcessorHandlerResolver implements ProcessorH
       isEaCInterfaceAppProcessor(appProcCfg.Application.Processor)
     ) {
       toResolveName = 'EaCInterfaceAppProcessor';
+    } else if (
+      isEaCModelContextProtocolProcessor(appProcCfg.Application.Processor)
+    ) {
+      toResolveName = 'EaCModelContextProtocolProcessor';
     }
 
     if (!toResolveName) {

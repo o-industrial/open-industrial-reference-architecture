@@ -14,6 +14,9 @@ import { EaCOIDataConnectionProcessorHandlerResolver } from '../processors/EaCOI
 import { EaCInterfaceAppProcessorHandlerResolver } from '../processors/EaCInterfaceAppProcessorHandlerResolver.ts';
 import { EaCOIDataConnectionProcessor } from '../processors/EaCOIDataConnectionProcessor.ts';
 import { EaCInterfaceAppProcessor } from '../processors/EaCInterfaceAppProcessor.ts';
+import { EaCMCPProcessorDetails } from '../../eac/EaCMCPProcessorDetails.ts';
+import { EaCModelContextProtocolProcessor } from '@fathym/eac-applications/processors';
+import { EaCModelContextProtocolProcessorHandlerResolver } from '@fathym/eac-applications/runtime/processors';
 
 export class OpenIndustrialWorkspaceRuntimePlugin implements EaCRuntimePlugin {
   constructor(
@@ -30,6 +33,7 @@ export class OpenIndustrialWorkspaceRuntimePlugin implements EaCRuntimePlugin {
     this.ensureProjectScaffolding(eac);
 
     await this.buildWorkspaceInterfaceApp(eac);
+    await this.buildMCPProcessors(eac, eac.MCPProcessors || {});
     await this.buildAppsForSurfaces(eac, eac.Surfaces || {});
   }
 
@@ -62,6 +66,14 @@ export class OpenIndustrialWorkspaceRuntimePlugin implements EaCRuntimePlugin {
       () => EaCInterfaceAppProcessorHandlerResolver,
       {
         Name: 'EaCInterfaceAppProcessor',
+        Type: pluginConfig.IoC!.Symbol('ProcessorHandlerResolver'),
+      },
+    );
+
+    pluginConfig.IoC!.Register(
+      () => EaCModelContextProtocolProcessorHandlerResolver,
+      {
+        Name: 'EaCModelContextProtocolProcessor',
         Type: pluginConfig.IoC!.Symbol('ProcessorHandlerResolver'),
       },
     );
@@ -118,6 +130,96 @@ export class OpenIndustrialWorkspaceRuntimePlugin implements EaCRuntimePlugin {
         RoutesBase: 'w/:workspace/ui',
       } as EaCInterfaceAppProcessor,
     };
+
+    return Promise.resolve();
+  }
+
+  protected buildMCPProcessors(
+    eac: EverythingAsCodeOIWorkspace,
+    processors: Record<string, EaCMCPProcessorDetails>,
+  ): Promise<void> {
+    if (!processors || !Object.keys(processors).length) {
+      return Promise.resolve();
+    }
+
+    const project = eac.Projects![this.projectLookup]!;
+
+    project.ApplicationResolvers ??= {};
+
+    for (const [lookup, config] of Object.entries(processors)) {
+      const existingResolver = project.ApplicationResolvers![lookup] ?? {};
+
+      project.ApplicationResolvers![lookup] = {
+        PathPattern: config.PathPattern ?? existingResolver.PathPattern ?? '*',
+        Priority: config.Priority ?? existingResolver.Priority ?? 700,
+      };
+
+      const existingApp = eac.Applications![lookup] ?? {};
+      const existingProcessor = existingApp.Processor as
+        | EaCModelContextProtocolProcessor
+        | undefined;
+
+      const nextProcessor: EaCModelContextProtocolProcessor = {
+        ...(existingProcessor ?? {}),
+        Type: 'MCP',
+        DFSLookup: config.DFSLookup,
+        ProfileLookup: config.ProfileLookup ??
+          existingProcessor?.ProfileLookup,
+      };
+
+      const existingOptions = isRecord(existingProcessor?.Options)
+        ? { ...(existingProcessor!.Options as Record<string, unknown>) }
+        : undefined;
+
+      if (config.Handshake) {
+        const existingHandshake = isRecord(existingOptions?.['handshake'])
+          ? existingOptions?.['handshake'] as Record<string, unknown>
+          : undefined;
+
+        const handshakeOption = existingHandshake
+          ? {
+            ...existingHandshake,
+          }
+          : {};
+
+        Object.assign(handshakeOption, config.Handshake);
+
+        const mergedOptions = existingOptions ?? {};
+        mergedOptions['handshake'] = handshakeOption;
+        nextProcessor.Options = mergedOptions;
+      } else if (existingOptions) {
+        nextProcessor.Options = existingOptions;
+      }
+
+      const nextApplication = {
+        ...existingApp,
+        Processor: nextProcessor,
+      };
+
+      const needsDetails = config.Handshake?.Name !== undefined ||
+        config.Handshake?.Description !== undefined ||
+        !nextApplication.Details;
+
+      if (needsDetails) {
+        const details = {
+          ...(nextApplication.Details ?? {}),
+        } as MutableApplicationDetails;
+
+        if (config.Handshake?.Name) {
+          details.Name = config.Handshake.Name;
+        } else if (typeof details.Name !== 'string') {
+          details.Name = `MCP Processor (${lookup})`;
+        }
+
+        if (config.Handshake?.Description) {
+          details.Description = config.Handshake.Description;
+        }
+
+        nextApplication.Details = details as typeof nextApplication.Details;
+      }
+
+      eac.Applications![lookup] = nextApplication;
+    }
 
     return Promise.resolve();
   }
@@ -226,4 +328,14 @@ export class OpenIndustrialWorkspaceRuntimePlugin implements EaCRuntimePlugin {
       await this.buildAppsForSurface(eac, surfLookup, surface);
     }
   }
+}
+
+type MutableApplicationDetails = {
+  Name?: string;
+  Description?: string;
+  [key: string]: unknown;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }

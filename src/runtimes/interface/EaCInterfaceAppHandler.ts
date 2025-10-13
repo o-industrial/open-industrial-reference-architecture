@@ -14,6 +14,10 @@ import {
 } from './.deps.ts';
 import { EaCInterfaceCodeBlock, EaCInterfaceDetails } from '../../eac/EaCInterfaceDetails.ts';
 import { EaCInterfaceAppProcessor } from '../processors/EaCInterfaceAppProcessor.ts';
+import {
+  interfacePageDataToSchema,
+  jsonSchemaToTypeExpression,
+} from '../../utils/jsonSchemaToType.ts';
 
 const renderHandler = new PreactRenderHandler(preactOptions);
 
@@ -424,11 +428,8 @@ function buildTypesModule(
   details: Partial<EaCInterfaceDetails>,
 ): string {
   const header = `// Page data contract for the "${escapeTemplate(lookup)}" interface.`;
-  const pageDataSnippet = details.PageDataType?.trim();
-  const expression = pageDataSnippet?.length
-    ? pageDataSnippet.replace(/;+$/, '')
-    : 'Record<string, unknown>';
-
+  const schema = interfacePageDataToSchema(details.PageDataType);
+  const expression = jsonSchemaToTypeExpression(schema);
   const typeDefinition = `export type Interface${safeId}PageData = ${expression};`;
 
   return `${header}\n${typeDefinition}\n`;

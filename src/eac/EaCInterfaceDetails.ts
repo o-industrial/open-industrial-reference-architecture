@@ -1,4 +1,4 @@
-import { EaCVertexDetails, EaCVertexDetailsSchema, z } from './.deps.ts';
+import { EaCVertexDetails, EaCVertexDetailsSchema, JSONSchema7, z } from './.deps.ts';
 
 /**
  * Group of authoring instructions associated with an interface code block.
@@ -26,6 +26,54 @@ export type EaCInterfaceCodeBlock = {
  * Interfaces are authored as composable code blocks instead of serialized specs,
  * enabling collaborative editing between humans and AI.
  */
+export type EaCInterfacePageDataHydration = {
+  Server?: boolean;
+  Client?: boolean;
+  ClientRefreshMs?: number;
+};
+
+/**
+ * Indicates which capability an interface action should invoke when triggered.
+ * `mcpTool`/`mcpResource` allow interfaces to call MCP capabilities directly.
+ */
+export type EaCInterfacePageDataActionInvocationType =
+  | 'warmQuery'
+  | 'dataConnection'
+  | 'interface'
+  | 'mcpTool'
+  | 'mcpResource'
+  | 'custom';
+
+export type EaCInterfacePageDataActionInvocation = {
+  Type?: EaCInterfacePageDataActionInvocationType;
+  Lookup?: string;
+  Mode?: 'server' | 'client';
+};
+
+export type EaCInterfacePageDataAction = {
+  Key: string;
+  Label?: string;
+  Description?: string;
+  Input?: JSONSchema7;
+  Output?: JSONSchema7;
+  Invocation?: EaCInterfacePageDataActionInvocation;
+};
+
+export type EaCInterfaceGeneratedDataSlice = {
+  Label?: string;
+  Description?: string;
+  SourceCapability?: string;
+  Schema: JSONSchema7;
+  Hydration?: EaCInterfacePageDataHydration;
+  Actions?: EaCInterfacePageDataAction[];
+  Enabled?: boolean;
+};
+
+export type EaCInterfacePageDataType = {
+  Generated: Record<string, EaCInterfaceGeneratedDataSlice>;
+  Custom?: JSONSchema7;
+};
+
 export type EaCInterfaceDetails = EaCVertexDetails & {
   /** Optional path where this interface is served within the runtime. */
   WebPath?: string;
@@ -33,8 +81,8 @@ export type EaCInterfaceDetails = EaCVertexDetails & {
   /** Optional list of import statements that customize this interface's module scope. */
   Imports?: string[];
 
-  /** Optional TypeScript snippet describing the server supplied page data shape. */
-  PageDataType?: string;
+  /** Optional JSON Schema structure describing generated and custom page data segments. */
+  PageDataType?: EaCInterfacePageDataType;
 
   /** Optional server-side handler definition and associated authoring guidance. */
   PageHandler?: EaCInterfaceCodeBlock;
@@ -61,6 +109,62 @@ const EaCInterfaceCodeBlockSchema: z.ZodType<EaCInterfaceCodeBlock> = z
   .strict()
   .describe('Code block definition paired with authoring instructions.');
 
+const JSONSchema7Schema: z.ZodType<JSONSchema7> = z.custom<JSONSchema7>(
+  (value) =>
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value),
+  'JSON schema must be an object.',
+);
+
+const PageDataHydrationSchema: z.ZodType<EaCInterfacePageDataHydration> = z
+  .object({
+    Server: z.boolean().optional(),
+    Client: z.boolean().optional(),
+    ClientRefreshMs: z.number().int().positive().optional(),
+  })
+  .strict();
+
+const PageDataActionInvocationSchema: z.ZodType<EaCInterfacePageDataActionInvocation> = z
+  .object({
+    Type: z
+      .enum(['warmQuery', 'dataConnection', 'interface', 'mcpTool', 'mcpResource', 'custom'])
+      .optional(),
+    Lookup: z.string().optional(),
+    Mode: z.enum(['server', 'client']).optional(),
+  })
+  .strict();
+
+const PageDataActionSchema: z.ZodType<EaCInterfacePageDataAction> = z
+  .object({
+    Key: z.string(),
+    Label: z.string().optional(),
+    Description: z.string().optional(),
+    Input: JSONSchema7Schema.optional(),
+    Output: JSONSchema7Schema.optional(),
+    Invocation: PageDataActionInvocationSchema.optional(),
+  })
+  .strict();
+
+const GeneratedDataSliceSchema: z.ZodType<EaCInterfaceGeneratedDataSlice> = z
+  .object({
+    Label: z.string().optional(),
+    Description: z.string().optional(),
+    SourceCapability: z.string().optional(),
+    Schema: JSONSchema7Schema,
+    Hydration: PageDataHydrationSchema.optional(),
+    Actions: z.array(PageDataActionSchema).optional(),
+    Enabled: z.boolean().optional(),
+  })
+  .strict();
+
+const PageDataTypeSchema: z.ZodType<EaCInterfacePageDataType> = z
+  .object({
+    Generated: z.record(GeneratedDataSliceSchema),
+    Custom: JSONSchema7Schema.optional(),
+  })
+  .strict();
+
 export const EaCInterfaceDetailsSchema: z.ZodType<EaCInterfaceDetails> = EaCVertexDetailsSchema
   .extend({
     WebPath: z
@@ -73,10 +177,9 @@ export const EaCInterfaceDetailsSchema: z.ZodType<EaCInterfaceDetails> = EaCVert
       .array(z.string().min(1))
       .optional()
       .describe('Standalone import statements to prepend to the generated module.'),
-    PageDataType: z
-      .string()
+    PageDataType: PageDataTypeSchema
       .optional()
-      .describe('TypeScript type definition representing data passed into the page.'),
+      .describe('Structured JSON schema definition representing page data segments.'),
     PageHandler: EaCInterfaceCodeBlockSchema
       .optional()
       .describe('Server-side handler implementation and related guidance.'),
