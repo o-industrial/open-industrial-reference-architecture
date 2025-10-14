@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any no-explicit-any
-import type { JSONSchema7 } from '../eac/.deps.ts';
+import type { JSONSchema7 } from './.deps.ts';
 import type { EaCInterfacePageDataType } from '../eac/EaCInterfaceDetails.ts';
 
 type ConversionOptions = {
