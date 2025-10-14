@@ -5,6 +5,7 @@
 
     "./api": "./src/api/.exports.ts",
     "./eac": "./src/eac/.exports.ts",
+    "./nats": "./src/nats/.exports.ts",
     "./secrets": "./src/secrets/.exports.ts",
     "./sop": "./src/sop/.exports.ts",
     "./types": "./src/types/.exports.ts",

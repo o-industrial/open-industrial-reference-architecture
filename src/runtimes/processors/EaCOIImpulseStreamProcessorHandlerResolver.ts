@@ -18,10 +18,10 @@ import { connectNATSMiddleware, NATSContext } from '../../api/middlewares/connec
 import { OpenIndustrialJWTPayload } from '../../types/OpenIndustrialJWTPayload.ts';
 import { RuntimeImpulse } from '../../types/RuntimeImpulse.ts';
 import { buildNATSSubject } from '../../utils/buildNATSSubject.ts';
-import { createEphemeralConsumer } from '../../utils/createEphemeralConsumer.ts';
+import { createEphemeralConsumer } from '../../nats/createEphemeralConsumer.ts';
 import { isEaCOIImpulseStreamProcessor } from './EaCOIImpulseStreamProcessor.ts';
-import { ensureWorkspaceSurfaceJetStream } from '../../utils/ensureWorkspaceSurfaceJetStream.ts';
-import { ensureWorkspaceJetStreamBuilder } from '../../utils/ensureWorkspaceJetStream.ts';
+import { ensureWorkspaceSurfaceJetStream } from '../../nats/ensureWorkspaceSurfaceJetStream.ts';
+import { ensureWorkspaceJetStreamBuilder } from '../../nats/ensureWorkspaceJetStream.ts';
 import { MaybeAsync } from '../../fluent/types/MaybeAsync.ts';
 import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
 import { OpenIndustrialAPIClient } from '../../api/clients/OpenIndustrialAPIClient.ts';

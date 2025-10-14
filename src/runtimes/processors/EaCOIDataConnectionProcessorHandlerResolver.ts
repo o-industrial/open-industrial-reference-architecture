@@ -14,7 +14,7 @@ import {
 
 import { isEaCOIDataConnectionProcessor } from './EaCOIDataConnectionProcessor.ts';
 import type { RuntimeImpulse } from '../../types/RuntimeImpulse.ts';
-import { ensureWorkspaceSurfaceJetStream } from '../../utils/ensureWorkspaceSurfaceJetStream.ts';
+import { ensureWorkspaceSurfaceJetStream } from '../../nats/ensureWorkspaceSurfaceJetStream.ts';
 
 /**
  * Surface-level processor that scopes workspace data connection telemetry

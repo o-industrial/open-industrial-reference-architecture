@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { buildRuntimeImpulseForSubject } from '../../utils/buildRuntimeImpulseForSubject.ts';
-import { ensureWorkspaceJetStreamBuilder } from '../../utils/ensureWorkspaceJetStream.ts';
+import { ensureWorkspaceJetStreamBuilder } from '../../nats/ensureWorkspaceJetStream.ts';
 import {
   connect,
   EaCApplicationProcessorConfig,
