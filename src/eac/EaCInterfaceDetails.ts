@@ -32,6 +32,44 @@ export type EaCInterfacePageDataHydration = {
   ClientRefreshMs?: number;
 };
 
+export type EaCInterfacePageDataAccessMode = 'server' | 'client' | 'both';
+
+export type EaCInterfaceHistoricSliceFormat = 'json' | 'csv';
+
+export type EaCInterfaceHistoricWindowMode = 'relative' | 'absolute';
+
+export type EaCInterfaceRelativeTimeUnit = 'minutes' | 'hours' | 'days';
+
+export type EaCInterfaceRelativeTimeOffset = {
+  Amount: number;
+  Unit: EaCInterfaceRelativeTimeUnit;
+};
+
+export type EaCInterfaceHistoricRange = {
+  Amount: number;
+  Unit: EaCInterfaceRelativeTimeUnit;
+  Offset?: EaCInterfaceRelativeTimeOffset;
+};
+
+export type EaCInterfaceHistoricAbsoluteRange = {
+  Start: string;
+  End?: string;
+};
+
+export type EaCInterfaceDataConnectionHistoricSlice = {
+  Enabled?: boolean;
+  Format?: EaCInterfaceHistoricSliceFormat;
+  Range?: EaCInterfaceHistoricRange;
+  Mode?: EaCInterfaceHistoricWindowMode;
+  AbsoluteRange?: EaCInterfaceHistoricAbsoluteRange;
+};
+
+export type EaCInterfaceDataConnectionFeatures = {
+  AllowHistoricDownload?: boolean;
+  HistoricDownloadFormats?: EaCInterfaceHistoricSliceFormat[];
+  PrefetchHistoricSlice?: EaCInterfaceDataConnectionHistoricSlice;
+};
+
 /**
  * Indicates which capability an interface action should invoke when triggered.
  * `mcpTool`/`mcpResource` allow interfaces to call MCP capabilities directly.
@@ -67,11 +105,12 @@ export type EaCInterfaceGeneratedDataSlice = {
   Hydration?: EaCInterfacePageDataHydration;
   Actions?: EaCInterfacePageDataAction[];
   Enabled?: boolean;
+  AccessMode?: EaCInterfacePageDataAccessMode;
+  DataConnection?: EaCInterfaceDataConnectionFeatures;
 };
 
 export type EaCInterfacePageDataType = {
   Generated: Record<string, EaCInterfaceGeneratedDataSlice>;
-  Custom?: JSONSchema7;
 };
 
 export type EaCInterfaceDetails = EaCVertexDetails & {
@@ -125,6 +164,68 @@ const PageDataHydrationSchema: z.ZodType<EaCInterfacePageDataHydration> = z
   })
   .strict();
 
+const PageDataAccessModeSchema: z.ZodType<EaCInterfacePageDataAccessMode> = z.enum([
+  'server',
+  'client',
+  'both',
+]);
+
+const HistoricSliceFormatSchema: z.ZodType<EaCInterfaceHistoricSliceFormat> = z.enum([
+  'json',
+  'csv',
+]);
+
+const HistoricWindowModeSchema: z.ZodType<EaCInterfaceHistoricWindowMode> = z.enum([
+  'relative',
+  'absolute',
+]);
+
+const RelativeTimeUnitSchema: z.ZodType<EaCInterfaceRelativeTimeUnit> = z.enum([
+  'minutes',
+  'hours',
+  'days',
+]);
+
+const RelativeTimeOffsetSchema: z.ZodType<EaCInterfaceRelativeTimeOffset> = z
+  .object({
+    Amount: z.number().int().positive(),
+    Unit: RelativeTimeUnitSchema,
+  })
+  .strict();
+
+const HistoricRangeSchema: z.ZodType<EaCInterfaceHistoricRange> = z
+  .object({
+    Amount: z.number().int().positive(),
+    Unit: RelativeTimeUnitSchema,
+    Offset: RelativeTimeOffsetSchema.optional(),
+  })
+  .strict();
+
+const HistoricAbsoluteRangeSchema: z.ZodType<EaCInterfaceHistoricAbsoluteRange> = z
+  .object({
+    Start: z.string(),
+    End: z.string().optional(),
+  })
+  .strict();
+
+const DataConnectionHistoricSliceSchema: z.ZodType<EaCInterfaceDataConnectionHistoricSlice> = z
+  .object({
+    Enabled: z.boolean().optional(),
+    Format: HistoricSliceFormatSchema.optional(),
+    Range: HistoricRangeSchema.optional(),
+    Mode: HistoricWindowModeSchema.optional(),
+    AbsoluteRange: HistoricAbsoluteRangeSchema.optional(),
+  })
+  .strict();
+
+const DataConnectionFeaturesSchema: z.ZodType<EaCInterfaceDataConnectionFeatures> = z
+  .object({
+    AllowHistoricDownload: z.boolean().optional(),
+    HistoricDownloadFormats: z.array(HistoricSliceFormatSchema).optional(),
+    PrefetchHistoricSlice: DataConnectionHistoricSliceSchema.optional(),
+  })
+  .strict();
+
 const PageDataActionInvocationSchema: z.ZodType<EaCInterfacePageDataActionInvocation> = z
   .object({
     Type: z
@@ -155,13 +256,14 @@ const GeneratedDataSliceSchema: z.ZodType<EaCInterfaceGeneratedDataSlice> = z
     Hydration: PageDataHydrationSchema.optional(),
     Actions: z.array(PageDataActionSchema).optional(),
     Enabled: z.boolean().optional(),
+    AccessMode: PageDataAccessModeSchema.optional(),
+    DataConnection: DataConnectionFeaturesSchema.optional(),
   })
   .strict();
 
 const PageDataTypeSchema: z.ZodType<EaCInterfacePageDataType> = z
   .object({
     Generated: z.record(GeneratedDataSliceSchema),
-    Custom: JSONSchema7Schema.optional(),
   })
   .strict();
 

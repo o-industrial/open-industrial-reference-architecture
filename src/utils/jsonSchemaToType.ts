@@ -244,10 +244,6 @@ export function interfacePageDataToSchema(
       if (!slice || slice.Enabled === false) continue;
       segments.push(cloneJsonSchema(slice.Schema));
     }
-
-    if (pageData.Custom) {
-      segments.push(cloneJsonSchema(pageData.Custom));
-    }
   }
 
   if (segments.length === 0) {

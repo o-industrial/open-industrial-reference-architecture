@@ -46,9 +46,13 @@ export class OpenIndustrialWorkspaceAPI {
     snapshot: EaCHistorySnapshot,
     forceActuators?: boolean,
   ): Promise<EaCStatus> {
+    const forceActuatorsQuery = typeof forceActuators === 'boolean'
+      ? `?forceActuators=${forceActuators}`
+      : '';
+
     const res = await fetch(
       this.bridge.url(
-        `/api/workspaces/commit?forceActuators=${forceActuators}`,
+        `/api/workspaces/commit${forceActuatorsQuery}`,
       ),
       {
         method: 'POST',
