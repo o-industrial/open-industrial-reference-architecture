@@ -428,7 +428,7 @@ export class WorkspaceManager {
       console.log('Signing out...');
 
       location.assign(
-        `/oauth/signout?success_url=https://auth.fathym.com/fathymcloudprd.onmicrosoft.com/b2c_1_sign_up_sign_in/oauth2/v2.0/logout?post_logout_redirect_uri=${location.origin}`,
+        `/oauth/signout?success_url=https://auth.openindustrial.co/fathymcloudprd.onmicrosoft.com/b2c_1_sign_up_sign_in/oauth2/v2.0/logout?post_logout_redirect_uri=${location.origin}`,
       );
       return Promise.resolve();
     };
