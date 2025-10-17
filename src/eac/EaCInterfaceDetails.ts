@@ -70,6 +70,8 @@ export type EaCInterfaceDataConnectionFeatures = {
   PrefetchHistoricSlice?: EaCInterfaceDataConnectionHistoricSlice;
 };
 
+export type EaCInterfacePageDataActionInvocationMode = 'server' | 'client' | 'both';
+
 /**
  * Indicates which capability an interface action should invoke when triggered.
  * `mcpTool`/`mcpResource` allow interfaces to call MCP capabilities directly.
@@ -85,7 +87,7 @@ export type EaCInterfacePageDataActionInvocationType =
 export type EaCInterfacePageDataActionInvocation = {
   Type?: EaCInterfacePageDataActionInvocationType;
   Lookup?: string;
-  Mode?: 'server' | 'client';
+  Mode?: EaCInterfacePageDataActionInvocationMode;
 };
 
 export type EaCInterfacePageDataAction = {
@@ -226,13 +228,16 @@ const DataConnectionFeaturesSchema: z.ZodType<EaCInterfaceDataConnectionFeatures
   })
   .strict();
 
+const PageDataActionInvocationModeSchema: z.ZodType<EaCInterfacePageDataActionInvocationMode> = z
+  .enum(['server', 'client', 'both']);
+
 const PageDataActionInvocationSchema: z.ZodType<EaCInterfacePageDataActionInvocation> = z
   .object({
     Type: z
       .enum(['warmQuery', 'dataConnection', 'interface', 'mcpTool', 'mcpResource', 'custom'])
       .optional(),
     Lookup: z.string().optional(),
-    Mode: z.enum(['server', 'client']).optional(),
+    Mode: PageDataActionInvocationModeSchema.optional(),
   })
   .strict();
 

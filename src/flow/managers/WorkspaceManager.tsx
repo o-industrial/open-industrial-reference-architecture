@@ -49,6 +49,7 @@ import { RuntimeImpulse } from '../../types/RuntimeImpulse.ts';
 import { EverythingAsCodeIdentity, EverythingAsCodeLicensing } from '../../eac/.deps.ts';
 import { AccountProfile } from '../../types/AccountProfile.ts';
 import { EaCUserRecord } from '../../api/.client.deps.ts';
+import { PackModule } from '../../types/PackModule.ts';
 
 const WORKSPACE_SCOPE_STORAGE_PREFIX = 'oi.workspace.scope';
 
@@ -67,7 +68,10 @@ function getLocalStorage(): Storage | null {
   }
 }
 
-function buildScopeStorageKey(workspaceLookup: string, username?: string): string {
+function buildScopeStorageKey(
+  workspaceLookup: string,
+  username?: string,
+): string {
   const workspacePart = encodeURIComponent(workspaceLookup);
   if (username && username.length > 0) {
     const userPart = encodeURIComponent(username);
@@ -135,9 +139,7 @@ export class CommitStatusStore {
   };
   protected isLoading = false;
 
-  constructor(
-    protected readonly loader: () => Promise<EaCStatus[]>,
-  ) {}
+  constructor(protected readonly loader: () => Promise<EaCStatus[]>) {}
 
   public subscribe(listener: () => void): () => void {
     this.listeners.add(listener);
@@ -176,14 +178,15 @@ export class CommitStatusStore {
   }
 
   protected resolveBadgeState(statuses: EaCStatus[]): CommitBadgeState {
-    const hasError = statuses.some((status) =>
-      status.Processing === EaCStatusProcessingTypes.ERROR
+    const hasError = statuses.some(
+      (status) => status.Processing === EaCStatusProcessingTypes.ERROR,
     );
     if (hasError) return 'error';
 
-    const isProcessing = statuses.some((status) =>
-      status.Processing !== EaCStatusProcessingTypes.COMPLETE &&
-      status.Processing !== EaCStatusProcessingTypes.ERROR
+    const isProcessing = statuses.some(
+      (status) =>
+        status.Processing !== EaCStatusProcessingTypes.COMPLETE &&
+        status.Processing !== EaCStatusProcessingTypes.ERROR,
     );
     if (isProcessing) return 'processing';
 
@@ -225,7 +228,7 @@ export class WorkspaceManager {
     protected username: string,
     protected userLicense: EaCUserLicense | undefined,
     protected oiSvc: OpenIndustrialAPIClient,
-    capabilitiesByScope: Record<NodeScopeTypes, EaCNodeCapabilityManager[]>,
+    pack: PackModule,
     scope: NodeScopeTypes = 'workspace',
     scopeLookup: string | undefined = undefined,
     aziCircuitUrl: string,
@@ -234,6 +237,8 @@ export class WorkspaceManager {
     protected accessRights?: string[],
     jwt?: string,
   ) {
+    const capabilitiesByScope = pack.Capabilities!;
+
     this.currentScope = {
       Scope: scope,
       Lookup: scope === 'surface' ? scopeLookup : undefined,
@@ -277,7 +282,9 @@ export class WorkspaceManager {
 
     this.Interaction.BindEaCManager(this.EaC);
 
-    this.commitsStore = new CommitStatusStore(async () => await this.ListCommits());
+    this.commitsStore = new CommitStatusStore(
+      async () => await this.ListCommits(),
+    );
 
     console.log('🚀 FlowManager initialized:', {
       scope: this.currentScope,
@@ -1700,6 +1707,10 @@ export class WorkspaceManager {
       lookup: scope === 'surface' ? lookup : undefined,
     };
 
-    writePersistedScope(this.EnterpriseLookup as string, payload, this.username);
+    writePersistedScope(
+      this.EnterpriseLookup as string,
+      payload,
+      this.username,
+    );
   }
 }

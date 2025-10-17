@@ -5,9 +5,11 @@ import type { MaybeAsync } from '../types/MaybeAsync.ts';
 
 type CapabilitiesResolver = (
   ioc: IoCContainer,
+  accessRights: string[],
 ) => MaybeAsync<PackModule['Capabilities']>;
 type StepsResolver = (
   ioc: IoCContainer,
+  accessRights: string[],
 ) => MaybeAsync<Record<string, StepModule>>;
 
 export class PackModuleBuilder {
@@ -33,12 +35,12 @@ export class PackModuleBuilder {
   /**
    * Finalize and return the PackModule with injected dependencies.
    */
-  public async Build(ioc: IoCContainer): Promise<PackModule> {
+  public async Build(ioc: IoCContainer, accessRights: string[]): Promise<PackModule> {
     const capabilities = this.capabilitiesResolver
-      ? await this.capabilitiesResolver(ioc)
+      ? await this.capabilitiesResolver(ioc, accessRights)
       : { surface: [], workspace: [] };
 
-    const steps = this.stepsResolver ? await this.stepsResolver(ioc) : {};
+    const steps = this.stepsResolver ? await this.stepsResolver(ioc, accessRights) : {};
 
     return {
       Capabilities: capabilities,
