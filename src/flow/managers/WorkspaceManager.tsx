@@ -1463,17 +1463,35 @@ export class WorkspaceManager {
       const trimmedName = (name || '').trim();
       if (!trimmedName) return;
 
-      const eac: EverythingAsCodeOIWorkspace = {
-        Details: { Name: trimmedName, Description: description ?? '' },
-      } as unknown as EverythingAsCodeOIWorkspace;
+      try {
+        const res = await fetch('/workspace/api/workspaces/create', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            Name: trimmedName,
+            Description: description ?? '',
+          }),
+        });
 
-      const result = await this.oiSvc.Workspaces.Create(eac);
-      // After creating, switch to the new workspace (triggers reload)
-      if (result?.EnterpriseLookup) {
-        switchToWorkspace(result.EnterpriseLookup);
-      } else {
-        // Fallback: refresh list if no lookup returned
-        listWorkspaces();
+        if (!res.ok) {
+          const errMsg = await res.text();
+          throw new Error(
+            errMsg || `Failed to create workspace (${res.status})`,
+          );
+        }
+
+        const result = await res.json() as {
+          EnterpriseLookup?: string;
+        };
+
+        if (result?.EnterpriseLookup) {
+          switchToWorkspace(result.EnterpriseLookup);
+        } else {
+          listWorkspaces();
+        }
+      } catch (err) {
+        console.error('Workspace creation failed', err);
+        alert('Failed to create workspace. Please try again.');
       }
     };
 
