@@ -14,6 +14,7 @@ export class AziManager {
   protected listeners: Set<() => void> = new Set();
   protected circuit: RemoteRunnable<AziInputs, AziState, any>;
   protected sending = false;
+  protected currentAbort: AbortController | null = null;
   protected threadId: string;
 
   constructor(opts: { url: string; jwt?: string; threadId?: string }) {
@@ -61,6 +62,8 @@ export class AziManager {
     this.emit();
 
     console.info('[AziManager] Send initiated', { input, extraInputs });
+    const abort = new AbortController();
+    this.currentAbort = abort;
 
     try {
       // Reset error state for a fresh run
@@ -81,6 +84,7 @@ export class AziManager {
             checkpoint_ns: 'current',
           },
           recursionLimit: 100,
+          signal: abort.signal,
         },
       );
 
@@ -255,9 +259,18 @@ export class AziManager {
         console.log(err);
       }
     } catch (err) {
-      console.error('[AziManager] Send error', err);
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        console.info('[AziManager] Send aborted by user');
+      } else if ((err as { name?: string })?.name === 'AbortError') {
+        console.info('[AziManager] Send aborted', err);
+      } else {
+        console.error('[AziManager] Send error', err);
+      }
     } finally {
       this.sending = false;
+      if (this.currentAbort === abort) {
+        this.currentAbort = null;
+      }
       this.emit();
     }
   }
@@ -278,6 +291,14 @@ export class AziManager {
   // API actions (e.g., reset) with the current conversation.
   public GetThreadId(): string {
     return this.threadId;
+  }
+
+  public Stop(): void {
+    if (!this.sending) return;
+    if (!this.currentAbort) return;
+
+    console.info('[AziManager] Stop requested - aborting current send');
+    this.currentAbort.abort();
   }
 
   public OnStateChanged(cb: () => void): () => void {
