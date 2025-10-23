@@ -515,6 +515,7 @@ export class WorkspaceManager {
     scrollRef: RefObject<HTMLDivElement>;
     registerStreamAnchor: (el: HTMLElement | null) => void;
     isAutoScrolling: boolean;
+    stop: () => void;
   } {
     const [state, setState] = useState(aziMgr.GetState());
     const [isSending, setIsSending] = useState(aziMgr.IsSending());
@@ -570,6 +571,11 @@ export class WorkspaceManager {
       streamAnchorRef.current = el;
     };
 
+    const stop = () => {
+      aziMgr.Stop();
+      setIsSending(aziMgr.IsSending());
+    };
+
     const send = async (
       text: string,
       extraInputs?: Record<string, unknown>,
@@ -592,6 +598,7 @@ export class WorkspaceManager {
       scrollRef,
       registerStreamAnchor,
       isAutoScrolling: true,
+      stop,
     };
   }
 
