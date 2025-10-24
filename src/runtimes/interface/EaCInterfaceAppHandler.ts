@@ -398,7 +398,7 @@ function resolveInterfaceComponent(
     return details.Page.Code.trimEnd();
   }
 
-  return `export default function Interface${safeId}({
+  return `export default function InterfacePage({
   data,
   services,
   status,
@@ -410,6 +410,7 @@ function resolveInterfaceComponent(
         <h1>${escapeTemplate(displayName)}</h1>
         <p>Lookup: ${escapeTemplate(lookup)}</p>
       </header>
+      <p>{data.message ?? "Replace this placeholder once the page view is authored."}</p>
       <button type="button" onClick={() => refresh()} disabled={status.isLoading}>
         Refresh data
       </button>
