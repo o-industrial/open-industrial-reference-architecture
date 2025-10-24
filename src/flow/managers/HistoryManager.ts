@@ -12,20 +12,42 @@ export class HistoryManager {
 
   protected listeners: Set<() => void> = new Set<() => void>();
 
-  constructor() {
-    const empty: EaCHistorySnapshot = {
+  constructor() {}
+
+  protected isInitialized(): boolean {
+    return this.pointer >= 0 && this.history.length > 0 && this.committed !== null;
+  }
+
+  protected createEmptySnapshot(): EaCHistorySnapshot {
+    return {
       eac: jsonMapSetClone({}),
       deletes: jsonMapSetClone({}),
     };
+  }
 
-    this.history.push(empty);
+  public Initialize(
+    eac: EverythingAsCodeOIWorkspace,
+    deletes: NullableArrayOrObject<EverythingAsCodeOIWorkspace> = {},
+  ): void {
+    const snapshot: EaCHistorySnapshot = {
+      eac: jsonMapSetClone(eac),
+      deletes: jsonMapSetClone(deletes),
+    };
+
+    this.history = [snapshot];
     this.pointer = 0;
-    this.committed = empty;
+    this.committed = jsonMapSetClone(snapshot);
+    this.dirty = false;
+    this.lastLoggedDirtyPointer = -1;
+    this.emit();
   }
 
   // === Public API ===
 
   public GetCurrent(): EaCHistorySnapshot {
+    if (!this.isInitialized()) {
+      return this.createEmptySnapshot();
+    }
     return jsonMapSetClone(this.history[this.pointer]);
   }
 
@@ -34,7 +56,8 @@ export class HistoryManager {
   }
 
   public HasUnsavedChanges(): boolean {
-    if (!this.committed || this.dirty) return true;
+    if (!this.isInitialized()) return false;
+    if (this.dirty) return true;
 
     const current = this.GetCurrent();
 
@@ -83,6 +106,11 @@ export class HistoryManager {
       deletes: jsonMapSetClone(deletes),
     };
 
+    if (!this.isInitialized()) {
+      this.Initialize(eac, deletes);
+      return;
+    }
+
     // Truncate forward history if needed
     if (this.pointer < this.history.length - 1) {
       this.history = this.history.slice(0, this.pointer + 1);
@@ -116,6 +144,7 @@ export class HistoryManager {
   }
 
   public Commit(): void {
+    if (!this.isInitialized()) return;
     this.committed = jsonMapSetClone(this.history[this.pointer]);
     this.dirty = false;
     this.emit();

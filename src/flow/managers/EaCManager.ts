@@ -119,9 +119,8 @@ export class EaCManager {
     // Establish a baseline snapshot the first time we switch scope so that
     // dirty state compares current vs committed (original) rather than vs last.
     try {
-      if (this.history.GetVersion() === 0) {
-        this.history.Push(this.eac, this.deleteEaC);
-        this.history.Commit();
+      if (this.history.GetVersion() <= 0) {
+        this.history.Initialize(this.eac, this.deleteEaC);
       }
     } catch {
       // best-effort; ignore if history is not ready
