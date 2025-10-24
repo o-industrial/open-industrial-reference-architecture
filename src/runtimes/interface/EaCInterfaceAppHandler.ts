@@ -138,24 +138,16 @@ export class EaCInterfaceAppHandler extends EaCPreactAppHandler {
       const safeId = toSafeIdentifier(lookup);
       const displayName = details.Name?.trim()?.length ? details.Name : lookup;
 
-      files[`interfaces/${lookup}/index.tsx`] = buildPageModule(
+      files[`interfaces/${lookup}/types.ts`] = buildTypesFile(lookup, safeId, details);
+      files[`interfaces/${lookup}/services.ts`] = buildServicesFile(lookup, safeId, details);
+      files[`interfaces/${lookup}/module.tsx`] = buildUserModuleFile(
         lookup,
         safeId,
         displayName ?? lookup,
         details,
       );
-
-      files[`interfaces/${lookup}/handler.ts`] = buildHandlerModule(
-        lookup,
-        safeId,
-        details,
-      );
-
-      files[`interfaces/${lookup}/types.ts`] = buildTypesModule(
-        lookup,
-        safeId,
-        details,
-      );
+      files[`interfaces/${lookup}/index.tsx`] = buildWrapperFile(lookup);
+      files[`interfaces/${lookup}/handler.ts`] = buildHandlerFile(lookup, safeId, details);
 
       registry.push({ lookup, safeId });
     }
@@ -337,102 +329,358 @@ function buildGuidanceComment(
   return lines.join('\n');
 }
 
-function buildPageModule(
+function buildUserModuleFile(
   lookup: string,
   safeId: string,
   displayName: string,
   details: Partial<EaCInterfaceDetails>,
 ): string {
   const imports = details.Imports?.map((line) => line.trim()).filter(Boolean) ?? [];
-  const importCandidates = [
-    'import { h } from "preact";',
-    `import type { Interface${safeId}PageData } from "./types.ts";`,
-    ...imports,
+  const importLines = [
+    'import type { InterfaceClientContext, InterfaceServerContext, InterfaceServices } from "./services.ts";',
+    'import { defaultInterfacePageData, type InterfacePageData } from "./types.ts";',
+    ...new Set(imports),
   ];
-  const uniqueImports = importCandidates.filter((line, index, arr) =>
-    line && arr.indexOf(line) === index
-  );
-  const importSection = uniqueImports.join('\n');
 
-  const pageComment = buildGuidanceComment('Page component', details.Page);
-  const pageCode = details.Page?.Code?.trim()?.length
-    ? details.Page.Code.trimEnd()
-    : buildDefaultPageCode(lookup, safeId, displayName);
+  const guidance = buildGuidanceComment('Interface module guidance', details.Page);
+  const serverLoader = buildServerLoaderStub(safeId);
+  const clientLoader = buildClientLoaderStub();
+  const component = resolveInterfaceComponent(lookup, safeId, displayName, details);
 
-  const segments = [
-    '// deno-lint-ignore-file no-explicit-any no-unused-vars',
-    importSection,
-    pageComment,
-    pageCode,
-    `export type { Interface${safeId}PageData } from "./types.ts";`,
+  const sections = [
+    '// deno-lint-ignore-file no-explicit-any',
+    importLines.join('\n'),
+    guidance,
+    serverLoader,
+    clientLoader,
+    component,
+    'export type InterfacePageProps = {',
+    '  data: InterfacePageData;',
+    '  services: InterfaceServices;',
+    '  status: {',
+    '    isLoading: boolean;',
+    '    error?: string;',
+    '  };',
+    '  refresh: () => Promise<void>;',
+    '};',
   ].filter((segment) => segment && segment.trim().length > 0);
 
-  return `${segments.join('\n\n')}\n`;
+  return `${sections.join('\n\n')}\n`;
 }
 
-function buildDefaultPageCode(
+function buildServerLoaderStub(safeId: string): string {
+  return `export async function loadServerData(
+  ctx: InterfaceServerContext,
+): Promise<InterfacePageData> {
+  return {
+    ...defaultInterfacePageData,
+    status: ctx.previous?.status ?? "ready",
+    message: ctx.previous?.message ?? "Author loadServerData for ${escapeTemplate(safeId)}.",
+  };
+}`;
+}
+
+function buildClientLoaderStub(): string {
+  return `export async function loadClientData(
+  _ctx: InterfaceClientContext,
+): Promise<Partial<InterfacePageData>> {
+  return {};
+}`;
+}
+
+function resolveInterfaceComponent(
   lookup: string,
   safeId: string,
   displayName: string,
+  details: Partial<EaCInterfaceDetails>,
 ): string {
-  return `export default function Interface${safeId}({ data }: { data?: Interface${safeId}PageData }) {
+  if (details.Page?.Code?.trim()) {
+    return details.Page.Code.trimEnd();
+  }
+
+  return `export default function Interface${safeId}({
+  data,
+  services,
+  status,
+  refresh,
+}: InterfacePageProps) {
   return (
-    <section class="oi-interface-placeholder">
-      <header class="oi-interface-placeholder__header">
-        <h1 class="oi-interface-placeholder__title">${escapeTemplate(displayName)}</h1>
-        <p class="oi-interface-placeholder__lookup">Lookup: ${escapeTemplate(lookup)}</p>
+    <section class="oi-interface-splash">
+      <header>
+        <h1>${escapeTemplate(displayName)}</h1>
+        <p>Lookup: ${escapeTemplate(lookup)}</p>
       </header>
-      <pre class="oi-interface-placeholder__spec">{JSON.stringify(data ?? {}, null, 2)}</pre>
+      <button type="button" onClick={() => refresh()} disabled={status.isLoading}>
+        Refresh data
+      </button>
+      {status.error && <p class="oi-interface-splash__error">{status.error}</p>}
+      <pre>{JSON.stringify(data ?? {}, null, 2)}</pre>
     </section>
   );
 }`;
 }
 
-function buildHandlerModule(
-  lookup: string,
-  safeId: string,
-  details: Partial<EaCInterfaceDetails>,
-): string {
-  const handlerComment = buildGuidanceComment('Page handler', details.PageHandler);
-  const handlerCode = details.PageHandler?.Code?.trim()?.length
-    ? details.PageHandler.Code.trimEnd()
-    : buildDefaultHandlerCode(lookup, safeId);
+function buildWrapperFile(lookup: string): string {
+  return `import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "preact/hooks";
+import InterfaceModule, { loadClientData } from "./module.tsx";
+import {
+  createInterfaceServices,
+  type InterfaceClientContext,
+  type InterfaceServiceDescriptor,
+} from "./services.ts";
+import {
+  defaultInterfacePageData,
+  type InterfacePageData,
+} from "./types.ts";
 
-  const segments = [
-    '// deno-lint-ignore-file no-explicit-any',
-    `import type { Interface${safeId}PageData } from "./types.ts";`,
-    handlerComment,
-    handlerCode,
-  ].filter((segment) => segment && segment.trim().length > 0);
+type InterfaceWrapperProps = {
+  data?: InterfacePageData;
+  lookup: string;
+};
 
-  return `${segments.join('\n\n')}\n`;
+export default function InterfaceWrapper({
+  data,
+  lookup,
+}: InterfaceWrapperProps) {
+  const [pageData, setPageData] = useState<InterfacePageData>(
+    data ?? defaultInterfacePageData,
+  );
+  const [status, setStatus] = useState<{ isLoading: boolean; error?: string }>({
+    isLoading: false,
+    error: undefined,
+  });
+
+  const services = useMemo(
+    () =>
+      createInterfaceServices(
+        createClientInvoker(lookup),
+      ),
+    [lookup],
+  );
+
+  const refresh = useCallback(async () => {
+    if (typeof loadClientData !== "function") return;
+
+    const controller = new AbortController();
+    setStatus({ isLoading: true, error: undefined });
+
+    try {
+      const next = await loadClientData({
+        previous: pageData,
+        services,
+        signal: controller.signal,
+      } satisfies InterfaceClientContext);
+
+      if (next && typeof next === "object") {
+        setPageData((prev) => ({ ...prev, ...next }));
+      }
+
+      setStatus((prev) => ({ ...prev, isLoading: false }));
+    } catch (error) {
+      setStatus({
+        isLoading: false,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }, [pageData, services]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  return (
+    <InterfaceModule
+      data={pageData}
+      services={services}
+      status={status}
+      refresh={refresh}
+    />
+  );
 }
 
-function buildDefaultHandlerCode(
+function createClientInvoker(
   lookup: string,
-  safeId: string,
-): string {
-  return `export async function loadPageData(
-  _req: Request,
-  _ctx: Record<string, unknown>,
-): Promise<Interface${safeId}PageData> {
-  return {
-    message: "Implement loadPageData for the ${escapeTemplate(lookup)} interface.",
+): InterfaceServiceInvokeShim {
+  return async function invoke<TResult, TInput>(
+    descriptor: InterfaceServiceDescriptor<TResult, TInput>,
+    _input: TInput,
+  ): Promise<TResult> {
+    console.warn(
+      "Client service invocation not yet wired for",
+      lookup,
+      descriptor,
+    );
+    throw new Error(
+      \`Client invocation not implemented for \${descriptor.sliceKey}/\${descriptor.actionKey}.\`,
+    );
   };
-}`;
 }
 
-function buildTypesModule(
+type InterfaceServiceInvokeShim = <TResult, TInput>(
+  descriptor: InterfaceServiceDescriptor<TResult, TInput>,
+  input: TInput,
+) => Promise<TResult>;
+`;
+}
+
+function buildHandlerFile(
   lookup: string,
   safeId: string,
   details: Partial<EaCInterfaceDetails>,
 ): string {
-  const header = `// Page data contract for the "${escapeTemplate(lookup)}" interface.`;
+  const handlerComment = buildGuidanceComment('Server handler guidance', details.PageHandler);
+  const customCode = details.PageHandler?.Code?.trim();
+  if (customCode) return customCode.trimEnd();
+
+  return `import type { InterfaceRequestContext } from "../registry.ts";
+import type { InterfacePageData } from "./types.ts";
+import {
+  defaultInterfacePageData,
+} from "./types.ts";
+import {
+  createInterfaceServices,
+  type InterfaceServerContext,
+  type InterfaceServiceDescriptor,
+} from "./services.ts";
+import * as Module from "./module.tsx";
+
+${handlerComment.length ? `${handlerComment}\n\n` : ''}export async function loadPageData(
+  req: Request,
+  ctx: InterfaceRequestContext,
+): Promise<InterfacePageData> {
+  const invoke = createServerInvoker(ctx);
+  const services = createInterfaceServices(invoke);
+
+  if (typeof Module.loadServerData === "function") {
+    const result = await Module.loadServerData({
+      request: req,
+      params: ctx?.Params ?? {},
+      headers: req.headers,
+      previous: undefined,
+      services,
+    } satisfies InterfaceServerContext);
+
+    return { ...defaultInterfacePageData, ...result };
+  }
+
+  return { ...defaultInterfacePageData };
+}
+
+function createServerInvoker(
+  ctx: InterfaceRequestContext,
+): InterfaceServiceInvokeShim {
+  return async function invoke<TResult, TInput>(
+    descriptor: InterfaceServiceDescriptor<TResult, TInput>,
+    _input: TInput,
+  ): Promise<TResult> {
+    console.warn(
+      "Server service invocation not yet wired for",
+      ${JSON.stringify(lookup)},
+      descriptor,
+      ctx,
+    );
+    throw new Error(
+      \`Server invocation not implemented for \${descriptor.sliceKey}/\${descriptor.actionKey}.\`,
+    );
+  };
+}
+
+type InterfaceServiceInvokeShim = <TResult, TInput>(
+  descriptor: InterfaceServiceDescriptor<TResult, TInput>,
+  input: TInput,
+) => Promise<TResult>;
+`;
+}
+
+function buildTypesFile(
+  lookup: string,
+  safeId: string,
+  details: Partial<EaCInterfaceDetails>,
+): string {
   const schema = interfacePageDataToSchema(details.PageDataType);
   const expression = jsonSchemaToTypeExpression(schema);
-  const typeDefinition = `export type Interface${safeId}PageData = ${expression};`;
 
-  return `${header}\n${typeDefinition}\n`;
+  const defaults = buildDefaultInterfaceData(schema);
+
+  return `/** Generated page data type for the "${escapeTemplate(lookup)}" interface. */
+export type InterfacePageData = ${expression};
+
+export const defaultInterfacePageData: InterfacePageData = ${defaults};
+`;
+}
+
+function buildServicesFile(
+  lookup: string,
+  safeId: string,
+  _details: Partial<EaCInterfaceDetails>,
+): string {
+  return `import type { InterfacePageData } from "./types.ts";
+
+export type InterfaceServiceDescriptor<TResult, TInput = void> = {
+  sliceKey: string;
+  actionKey: string;
+  resultName: string;
+  autoExecute: boolean;
+  includeInResponse: boolean;
+};
+
+export type InterfaceServiceInvoke = <TResult, TInput = void>(
+  descriptor: InterfaceServiceDescriptor<TResult, TInput>,
+  input: TInput,
+) => Promise<TResult>;
+
+export type InterfaceServices = {
+  ping(): Promise<string>;
+};
+
+export function createInterfaceServices(invoke: InterfaceServiceInvoke): InterfaceServices {
+  return {
+    async ping(): Promise<string> {
+      return await invoke<string, void>(
+        {
+          sliceKey: "sample",
+          actionKey: "ping",
+          resultName: "status",
+          autoExecute: false,
+          includeInResponse: false,
+        },
+        undefined as void,
+      );
+    },
+  };
+}
+
+export type InterfaceServerContext = {
+  request: Request;
+  params: Record<string, string>;
+  headers: Headers;
+  previous?: Partial<InterfacePageData>;
+  services: InterfaceServices;
+};
+
+export type InterfaceClientContext = {
+  previous?: InterfacePageData;
+  services: InterfaceServices;
+  signal?: AbortSignal;
+};
+
+// TODO: Replace placeholder service generation for interface "${escapeTemplate(lookup)}".
+`;
+}
+
+function buildDefaultInterfaceData(schema: unknown): string {
+  if (schema && typeof schema === 'object' && 'default' in (schema as Record<string, unknown>)) {
+    const defaultValue = (schema as Record<string, unknown>).default;
+    if (defaultValue !== undefined) {
+      return JSON.stringify(defaultValue, null, 2);
+    }
+  }
+  return '{} as InterfacePageData';
 }
 
 function buildRegistryFile(entries: RegistryEntry[]): string {

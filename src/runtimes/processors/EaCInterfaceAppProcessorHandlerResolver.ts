@@ -14,7 +14,7 @@ export const EaCInterfaceAppProcessorHandlerResolver: ProcessorHandlerResolver =
     ioc: IoCContainer,
     appProcCfg: EaCApplicationProcessorConfig,
     eac,
-  ): Promise<EaCRuntimeHandler> {
+): Promise<EaCRuntimeHandler> {
     const processor = appProcCfg.Application.Processor;
     if (!isEaCInterfaceAppProcessor(processor)) {
       throw new Deno.errors.NotSupported(
