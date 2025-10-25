@@ -544,60 +544,36 @@ import {
   defaultInterfacePageData,
 } from "./types.ts";
 import {
-  createInterfaceServices,
   type InterfaceServerContext,
-  type InterfaceServiceDescriptor,
+  type InterfaceServices,
 } from "./services.ts";
 import * as Module from "./module.tsx";
 
 ${handlerComment.length ? `${handlerComment}\n\n` : ''}export async function loadPageData(
   req: Request,
   ctx: InterfaceRequestContext,
+  services: InterfaceServices,
+  seed: InterfacePageData,
 ): Promise<InterfacePageData> {
-  const invoke = createServerInvoker(ctx);
-  const services = createInterfaceServices(invoke);
+  const data = { ...seed };
+  void services;
 
   if (typeof Module.loadServerData === "function") {
     const result = await Module.loadServerData({
       request: req,
       params: ctx?.Params ?? {},
       headers: req.headers,
-      previous: undefined,
+      previous: data,
       services,
     } satisfies InterfaceServerContext);
 
-    return { ...defaultInterfacePageData, ...result };
+    return { ...data, ...result };
   }
 
-  return { ...defaultInterfacePageData };
+  return data;
 }
-
-function createServerInvoker(
-  ctx: InterfaceRequestContext,
-): InterfaceServiceInvokeShim {
-  return async function invoke<TResult, TInput>(
-    descriptor: InterfaceServiceDescriptor<TResult, TInput>,
-    _input: TInput,
-  ): Promise<TResult> {
-    console.warn(
-      "Server service invocation not yet wired for",
-      ${JSON.stringify(lookup)},
-      descriptor,
-      ctx,
-    );
-    throw new Error(
-      \`Server invocation not implemented for \${descriptor.sliceKey}/\${descriptor.actionKey}.\`,
-    );
-  };
-}
-
-type InterfaceServiceInvokeShim = <TResult, TInput>(
-  descriptor: InterfaceServiceDescriptor<TResult, TInput>,
-  input: TInput,
-) => Promise<TResult>;
 `;
 }
-
 function buildTypesFile(
   lookup: string,
   safeId: string,
@@ -695,6 +671,8 @@ function buildRegistryFile(entries: RegistryEntry[]): string {
     .map(({ lookup, safeId }) => [
       `import Interface${safeId} from "./${lookup}/index.tsx";`,
       `import * as Interface${safeId}Handlers from "./${lookup}/handler.ts";`,
+      `import { createInterfaceServices as createInterface${safeId}Services } from "./${lookup}/services.ts";`,
+      `import { defaultInterfacePageData as defaultInterface${safeId}PageData } from "./${lookup}/types.ts";`,
     ])
     .flat();
 
@@ -718,6 +696,8 @@ export type InterfaceHandlers = {
   loadPageData?: (
     req: Request,
     ctx: InterfaceRequestContext,
+    services: unknown,
+    seed: unknown,
   ) => Promise<unknown> | unknown;
 };
 
@@ -730,19 +710,69 @@ export type InterfaceRegistryEntry = {
   render: (req: Request, ctx: InterfaceRequestContext) => Promise<Response>;
 };
 
+type RegistryServiceDescriptor = {
+  sliceKey: string;
+  actionKey: string;
+  resultName: string;
+  autoExecute: boolean;
+  includeInResponse: boolean;
+};
+
+type RegistryServiceInvoke = <TResult, TInput>(
+  descriptor: RegistryServiceDescriptor,
+  input: TInput,
+) => Promise<TResult>;
+
+function createServerInvoker(
+  lookup: string,
+  req: Request,
+  ctx: InterfaceRequestContext,
+): RegistryServiceInvoke {
+  return async <TResult, TInput>(
+    descriptor: RegistryServiceDescriptor,
+    input: TInput,
+  ): Promise<TResult> => {
+    const containers = (ctx as Record<string, unknown>)?.actions ??
+      (ctx as Record<string, unknown>)?.Actions ?? {};
+    const handler = (containers as Record<string, Record<string, unknown>>)[descriptor.sliceKey]?.[descriptor.actionKey];
+    if (typeof handler === "function") {
+      return await (handler as (
+        options: { req: Request; ctx: InterfaceRequestContext; input?: unknown },
+      ) => Promise<unknown> | unknown)({
+        req,
+        ctx,
+        input,
+      }) as TResult;
+    }
+
+    console.warn(
+      "No server handler registered for",
+      lookup,
+      descriptor.sliceKey,
+      descriptor.actionKey,
+    );
+    return undefined as TResult;
+  };
+}
+
 function createEntry(
   component: InterfacePageComponent,
   handlers: InterfaceHandlers,
   lookup: string,
+  buildServices: (req: Request, ctx: InterfaceRequestContext) => unknown,
+  buildSeed: () => unknown,
 ): InterfaceRegistryEntry {
   return {
     lookup,
     Component: component,
     handlers,
     render: async (req: Request, ctx: InterfaceRequestContext) => {
-      const data = handlers.loadPageData
-        ? await handlers.loadPageData(req, ctx)
-        : undefined;
+      const seed = buildSeed();
+      const services = buildServices(req, ctx);
+      const resolved = handlers.loadPageData
+        ? await handlers.loadPageData(req, ctx, services, seed)
+        : seed;
+      const data = resolved ?? seed;
 
       const html = render(h(component, { data }));
 
@@ -759,9 +789,16 @@ function createEntry(
 
   const registryEntries = entries
     .map(({ lookup, safeId }) =>
-      `  "${
-        escapeTemplate(lookup)
-      }": createEntry(Interface${safeId}, Interface${safeId}Handlers, "${escapeTemplate(lookup)}"),`
+      `  "${escapeTemplate(lookup)}": createEntry(
+    Interface${safeId},
+    Interface${safeId}Handlers,
+    "${escapeTemplate(lookup)}",
+    (req, ctx) =>
+      createInterface${safeId}Services(
+        createServerInvoker("${escapeTemplate(lookup)}", req, ctx),
+      ),
+    () => ({ ...defaultInterface${safeId}PageData }),
+  ),`
     )
     .join('\n');
 
@@ -787,7 +824,6 @@ ${registryEntries}
 
   return `${segments.join('\n\n')}\n`;
 }
-
 const HTTP_METHODS = ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT'] as const;
 
 function buildRoutePath(processor: EaCInterfaceAppProcessor): string {
@@ -887,3 +923,5 @@ export default async function handler(
 ${methodExports}
 `;
 }
+
+
