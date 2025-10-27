@@ -7,6 +7,8 @@ export * from './EaCAzureIoTHubDataConnectionDetails.ts';
 export * from './EaCCompositeSchemaDetails.ts';
 export * from './EaCDataConnectionAsCode.ts';
 export * from './EaCDataConnectionDetails.ts';
+export * from './EaCFoundationAsCode.ts';
+export * from './EaCFoundationDetails.ts';
 export * from './EaCFlowNodeMetadata.ts';
 export * from './EaCFlowSettings.ts';
 export * from './EaCHTTPDataConnectionDetails.ts';

@@ -13,6 +13,10 @@ import {
   EaCDataConnectionAsCode,
   EaCDataConnectionAsCodeSchema,
 } from './EaCDataConnectionAsCode.ts';
+import {
+  EaCFoundationAsCode,
+  EaCFoundationAsCodeSchema,
+} from './EaCFoundationAsCode.ts';
 import { EaCInterfaceAsCode, EaCInterfaceAsCodeSchema } from './EaCInterfaceAsCode.ts';
 import { EaCMCPProcessorDetails, EaCMCPProcessorDetailsSchema } from './EaCMCPProcessorDetails.ts';
 import { EaCSchemaAsCode, EaCSchemaAsCodeSchema } from './EaCSchemaAsCode.ts';
@@ -94,6 +98,9 @@ export type EverythingAsCodeOIWorkspace =
 
     /** Declarative MCP processor bindings available to runtimes. */
     MCPProcessors?: Record<string, EaCMCPProcessorDetails>;
+
+    /** Workspace foundation definitions (landing zones, guardrails, etc.). */
+    Foundations?: Record<string, EaCFoundationAsCode>;
   }
   & EverythingAsCode
   & EverythingAsCodeClouds
@@ -246,6 +253,10 @@ export const EverythingAsCodeOIWorkspaceSchema: EverythingAsCodeOIWorkspaceSchem
       .record(EaCMCPProcessorDetailsSchema)
       .optional()
       .describe('Declarative mappings of MCP processors to DFS lookups and resolver metadata.'),
+    Foundations: z
+      .record(EaCFoundationAsCodeSchema)
+      .optional()
+      .describe('Workspace foundation definitions bound to specific clouds.'),
   })
     .strip()
     .describe(
