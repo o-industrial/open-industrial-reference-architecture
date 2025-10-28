@@ -35,6 +35,10 @@ import { Proposal } from '../../types/Proposal.ts';
 import { RecordKind } from '../../types/RecordKind.ts';
 import { EverythingAsCodeOIWorkspace } from '../../eac/EverythingAsCodeOIWorkspace.ts';
 import { OpenIndustrialAPIClient } from '../../api/clients/OpenIndustrialAPIClient.ts';
+import {
+  type WorkspaceCommitOptions,
+  type WorkspaceCommitResponse,
+} from '../../api/clients/OpenIndustrialWorkspaceAPI.ts';
 import { Position } from '../../eac/types/Position.ts';
 
 /**
@@ -211,15 +215,18 @@ export class EaCManager {
     await this.oiSvc.Workspaces.Archive();
   }
 
-  public async Commit(history: EaCHistorySnapshot): Promise<EaCStatus> {
-    const status = await this.oiSvc.Workspaces.Commit(history);
-    console.log(`✅ Runtime committed: CommitID ${status.ID}`);
+  public async Commit(
+    history: EaCHistorySnapshot,
+    options?: WorkspaceCommitOptions,
+  ): Promise<WorkspaceCommitResponse> {
+    const status = await this.oiSvc.Workspaces.Commit(history, options);
+    console.log('Runtime committed: CommitID ' + status.ID);
     return status;
   }
 
   public async Deploy(): Promise<EaCStatus> {
     const status = await this.oiSvc.Workspaces.Deploy();
-    console.log(`✅ Runtime deployed: CommitID ${status.ID}`);
+    console.log('Runtime deployed: CommitID ' + status.ID);
     return status;
   }
 
@@ -339,3 +346,4 @@ export class EaCManager {
     for (const cb of this.changeListeners) cb();
   }
 }
+

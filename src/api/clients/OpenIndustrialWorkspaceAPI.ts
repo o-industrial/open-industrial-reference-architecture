@@ -16,6 +16,21 @@ type ImpulseStreamHandlers = {
  * Subclient for managing OpenIndustrial workspace lifecycle and memory commits.
  */
 
+export type WorkspaceCommitOptions = {
+  awaitStatus?: boolean;
+  forceActuators?: boolean;
+};
+
+export type WorkspaceCommitQueuedResponse = Pick<EaCStatus, 'Processing'> & {
+  CommitID: string;
+  DeleteCommitID?: string;
+  ID: string;
+};
+
+export type WorkspaceCommitResponse =
+  | EaCStatus
+  | WorkspaceCommitQueuedResponse;
+
 export class OpenIndustrialWorkspaceAPI {
   public readonly Explorer: OpenIndustrialWorkspaceExplorerAPI;
 
@@ -44,15 +59,35 @@ export class OpenIndustrialWorkspaceAPI {
    */
   public async Commit(
     snapshot: EaCHistorySnapshot,
-    forceActuators?: boolean,
-  ): Promise<EaCStatus> {
-    const forceActuatorsQuery = typeof forceActuators === 'boolean'
-      ? `?forceActuators=${forceActuators}`
-      : '';
+    forceActuatorsOrOptions?: boolean | WorkspaceCommitOptions,
+    maybeOptions?: WorkspaceCommitOptions,
+  ): Promise<WorkspaceCommitResponse> {
+    const options: WorkspaceCommitOptions = {
+      ...(typeof forceActuatorsOrOptions === 'object'
+        ? forceActuatorsOrOptions
+        : {}),
+      ...(maybeOptions ?? {}),
+    };
+
+    if (typeof forceActuatorsOrOptions === 'boolean') {
+      options.forceActuators = forceActuatorsOrOptions;
+    }
+
+    const query = new URLSearchParams();
+
+    if (typeof options.forceActuators === 'boolean') {
+      query.set('forceActuators', String(options.forceActuators));
+    }
+
+    if (typeof options.awaitStatus === 'boolean') {
+      query.set('awaitStatus', String(options.awaitStatus));
+    }
+
+    const querySuffix = query.size > 0 ? `?${query.toString()}` : '';
 
     const res = await fetch(
       this.bridge.url(
-        `/api/workspaces/commit${forceActuatorsQuery}`,
+        `/api/workspaces/commit${querySuffix}`,
       ),
       {
         method: 'POST',
@@ -65,7 +100,7 @@ export class OpenIndustrialWorkspaceAPI {
       throw new Error(`Failed to commit workspace snapshot: ${res.status}`);
     }
 
-    return await this.bridge.json(res);
+    return await this.bridge.json<WorkspaceCommitResponse>(res);
   }
 
   /**
