@@ -224,8 +224,8 @@ export class EaCManager {
     return status;
   }
 
-  public async List(): Promise<WorkspaceSummary[]> {
-    const workspaces = await this.oiSvc.Workspaces.ListForUser();
+  public async List(includeArchived = false): Promise<WorkspaceSummary[]> {
+    const workspaces = await this.oiSvc.Workspaces.ListForUser(includeArchived);
     return workspaces.map((wkspc) => ({
       Lookup: wkspc.EnterpriseLookup,
       Details: { Name: wkspc.EnterpriseName },

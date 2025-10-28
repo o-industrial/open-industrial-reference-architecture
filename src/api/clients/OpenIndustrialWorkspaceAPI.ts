@@ -244,8 +244,13 @@ export class OpenIndustrialWorkspaceAPI {
   /**
    * List all workspaces available to the current user.
    */
-  public async ListForUser(): Promise<EaCUserRecord[]> {
-    const res = await fetch(this.bridge.url('/api/workspaces/list'), {
+  public async ListForUser(includeArchived = false): Promise<EaCUserRecord[]> {
+    const endpoint = this.bridge.url('/api/workspaces/list');
+    const url = includeArchived
+      ? `${endpoint}${endpoint.toString().includes('?') ? '&' : '?'}includeArchived=true`
+      : endpoint;
+
+    const res = await fetch(url, {
       method: 'GET',
       headers: this.bridge.headers(),
     });

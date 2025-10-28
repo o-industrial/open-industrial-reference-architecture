@@ -1457,7 +1457,7 @@ export class WorkspaceManager {
     const [workspaces, setWorkspaces] = useState<WorkspaceSummary[]>([]);
 
     const listWorkspaces = (): void => {
-      this.EaC.List?.().then((results) => {
+      this.EaC.List?.(true).then((results) => {
         setWorkspaces(results ?? []);
       });
     };
