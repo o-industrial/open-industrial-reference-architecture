@@ -13,11 +13,9 @@ import {
   EaCDataConnectionAsCode,
   EaCDataConnectionAsCodeSchema,
 } from './EaCDataConnectionAsCode.ts';
-import {
-  EaCFoundationAsCode,
-  EaCFoundationAsCodeSchema,
-} from './EaCFoundationAsCode.ts';
+import { EaCFoundationAsCode, EaCFoundationAsCodeSchema } from './EaCFoundationAsCode.ts';
 import { EaCInterfaceAsCode, EaCInterfaceAsCodeSchema } from './EaCInterfaceAsCode.ts';
+import { EaCIntegrationAsCode, EaCIntegrationAsCodeSchema } from './EaCIntegrationAsCode.ts';
 import { EaCMCPProcessorDetails, EaCMCPProcessorDetailsSchema } from './EaCMCPProcessorDetails.ts';
 import { EaCSchemaAsCode, EaCSchemaAsCodeSchema } from './EaCSchemaAsCode.ts';
 import { EaCSurfaceAsCode, EaCSurfaceAsCodeSchema } from './EaCSurfaceAsCode.ts';
@@ -77,6 +75,9 @@ export type EverythingAsCodeOIWorkspace =
 
     /** External or streaming connections (MQTT, HTTP, etc.). */
     DataConnections?: Record<string, EaCDataConnectionAsCode>;
+
+    /** OEM integrations (Node-RED, Grafana, etc.). */
+    Integrations?: Record<string, EaCIntegrationAsCode>;
 
     /** Declared runtime capability packs (modbus, test-utils, etc.). */
     Packs?: Record<string, EaCPackAsCode>;
@@ -249,6 +250,10 @@ export const EverythingAsCodeOIWorkspaceSchema: EverythingAsCodeOIWorkspaceSchem
       .record(EaCInterfaceAsCodeSchema)
       .optional()
       .describe('Interface nodes representing HMI routes and editors.'),
+    Integrations: z
+      .record(EaCIntegrationAsCodeSchema)
+      .optional()
+      .describe('OEM integrations (Node-RED, Grafana, etc.) deployed alongside the workspace.'),
     MCPProcessors: z
       .record(EaCMCPProcessorDetailsSchema)
       .optional()
