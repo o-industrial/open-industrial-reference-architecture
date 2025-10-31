@@ -394,8 +394,11 @@ function resolveInterfaceComponent(
   displayName: string,
   details: Partial<EaCInterfaceDetails>,
 ): string {
-  if (details.Page?.Code?.trim()) {
-    return details.Page.Code.trimEnd();
+  const customPage = details.Page?.Code ?? '';
+  if (customPage.trim().length > 0) {
+    return isFullPageImplementation(customPage)
+      ? customPage.trimEnd()
+      : composeCustomPage(customPage);
   }
 
   return `export default function InterfacePage({
@@ -529,14 +532,61 @@ type InterfaceServiceInvokeShim = <TResult, TInput>(
 `;
 }
 
+const CUSTOM_HANDLER_PREFIX = `export async function loadPageData(
+  req: Request,
+  ctx: InterfaceRequestContext,
+  services: InterfaceServices,
+  seed: InterfacePageData,
+): Promise<InterfacePageData> {
+`;
+
+const CUSTOM_HANDLER_SUFFIX = `}
+`;
+
+function isFullHandlerImplementation(code: string): boolean {
+  return /export\s+async\s+function\s+loadPageData\b/.test(code);
+}
+
+function composeCustomHandler(body: string): string {
+  if (!body.trim().length) return '';
+  const normalized = body.endsWith('\n') ? body : `${body}\n`;
+  return `${CUSTOM_HANDLER_PREFIX}${normalized}${CUSTOM_HANDLER_SUFFIX}`.trimEnd();
+}
+
+const CUSTOM_PAGE_PREFIX = `export default function InterfacePage({
+  data,
+  services,
+  status,
+  refresh,
+}: InterfacePageProps) {
+`;
+
+const CUSTOM_PAGE_SUFFIX = `}
+`;
+
+function isFullPageImplementation(code: string): boolean {
+  return /export\s+default\s+function\s+InterfacePage\s*\(/.test(code);
+}
+
+function composeCustomPage(body: string): string {
+  if (!body.trim().length) return '';
+  const normalized = body.endsWith('\n') ? body : `${body}\n`;
+  return `${CUSTOM_PAGE_PREFIX}${normalized}${CUSTOM_PAGE_SUFFIX}`.trimEnd();
+}
+
 function buildHandlerFile(
   lookup: string,
   safeId: string,
   details: Partial<EaCInterfaceDetails>,
 ): string {
   const handlerComment = buildGuidanceComment('Server handler guidance', details.PageHandler);
-  const customCode = details.PageHandler?.Code?.trim();
-  if (customCode) return customCode.trimEnd();
+  const customSource = details.PageHandler?.Code ?? '';
+  if (customSource.trim().length > 0) {
+    if (isFullHandlerImplementation(customSource)) {
+      return customSource.trimEnd();
+    }
+    return composeCustomHandler(customSource);
+  }
 
   return `import type { InterfaceRequestContext } from "../registry.ts";
 import type { InterfacePageData } from "./types.ts";
@@ -923,5 +973,3 @@ export default async function handler(
 ${methodExports}
 `;
 }
-
-
