@@ -634,7 +634,7 @@ function buildTypesFile(
 
   const defaults = buildDefaultInterfaceData(schema);
 
-  return `/** Generated page data type for the "${escapeTemplate(lookup)}" interface. */
+  return `/** Generated interface data type for the "${escapeTemplate(lookup)}" interface. */
 export type InterfacePageData = ${expression};
 
 export const defaultInterfacePageData: InterfacePageData = ${defaults};

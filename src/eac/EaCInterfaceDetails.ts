@@ -342,7 +342,7 @@ export type EaCInterfaceDetails = EaCVertexDetails & {
   /** Optional list of import statements that customize this interface's module scope. */
   Imports?: string[];
 
-  /** Optional JSON Schema structure describing generated and custom page data segments. */
+  /** Optional JSON Schema structure describing generated and custom interface data segments. */
   PageDataType?: EaCInterfacePageDataType;
 
   /** Optional server-side handler definition and associated authoring guidance. */
@@ -799,7 +799,7 @@ export const EaCInterfaceDetailsSchema: z.ZodType<EaCInterfaceDetails> = EaCVert
       .describe('Standalone import statements to prepend to the generated module.'),
     PageDataType: PageDataTypeSchema
       .optional()
-      .describe('Structured JSON schema definition representing page data segments.'),
+      .describe('Structured JSON schema definition representing interface data segments.'),
     PageHandler: EaCInterfaceCodeBlockSchema
       .optional()
       .describe('Server-side handler implementation and related guidance.'),
